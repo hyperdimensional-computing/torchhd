@@ -1,2 +1,1 @@
-# hdc-lib
-Hyperdimensional Computing Library
+# Hyperdimensional Computing Library
