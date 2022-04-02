@@ -1,9 +1,9 @@
 from setuptools import setup
 
-setup(name="hdc_lib",
+setup(name="hdcLib",
       version="0.1",
       description='A python library for hyperdimensional computing', 
       url='https://github.com/mikeheddes/hdc-lib', 
       license='MIT', 
-      packages=['hdc_lib'], 
+      packages=['hdcLib'], 
       zip_safe=False)
