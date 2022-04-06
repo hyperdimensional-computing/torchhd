@@ -3,3 +3,4 @@ matplotlib
 scikit-learn
 pandas
 numpy
+black

@@ -3,6 +3,7 @@ import torch
 from . import functional
 from . import utils
 
+
 def query(class_hvs, graph_hv):
     similarities = functional.similarity(graph_hv, class_hvs)
     return similarities, similarities.argmax()
