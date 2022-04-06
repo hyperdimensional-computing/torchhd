@@ -1,5 +1,10 @@
 # Hyperdimensional Computing Library
 
-  The hdc_lib library is a comprehensive package for all hyperdimensional computing related tasks.
+The `hdc` library is a comprehensive package for all hyperdimensional computing related tasks.
   
-  PyPi: https://pypi.org/project/hdcLib/0.1/
+## Installation
+
+```bash
+# Note: torch is a prerequisite of hdc, see: https://pytorch.org/get-started/locally/ for an installation guide.
+pip install hdc
+```
