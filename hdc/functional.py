@@ -6,25 +6,38 @@ from collections import deque
 
 
 def identity_hv(
-    *size: list[int], out=None, dtype=None, device=None, requires_grad=False
-):
+    num_embeddings: int,
+    embedding_dim: int,
+    *,
+    out=None,
+    dtype=None,
+    device=None,
+    requires_grad=False,
+) -> torch.Tensor:
     """
     Creates a hypervector of all ones that when bound with x will result in x.
     Uses the bipolar system.
     """
     return torch.ones(
-        *size, out=out, dtype=dtype, device=device, requires_grad=requires_grad
+        num_embeddings,
+        embedding_dim,
+        out=out,
+        dtype=dtype,
+        device=device,
+        requires_grad=requires_grad,
     )
 
 
 def random_hv(
-    *size: list[int],
+    num_embeddings: int,
+    embedding_dim: int,
+    *,
     generator=None,
     out=None,
     dtype=None,
     device=None,
-    requires_grad=False
-):
+    requires_grad=False,
+) -> torch.Tensor:
     """
     Creates num random hypervectors of dim dimensions in the bipolar system.
     When dim is None, creates one hypervector of num dimensions.
@@ -32,50 +45,67 @@ def random_hv(
     selection = torch.randint(
         0,
         2,
-        size=size,
+        size=(num_embeddings * embedding_dim,),
         generator=generator,
         dtype=torch.long,
         requires_grad=requires_grad,
     )
+    
+    if out is not None:
+        out = out.view(num_embeddings * embedding_dim)
+
     options = torch.tensor([1.0, -1.0], dtype=dtype, device=device)
     hv = torch.index_select(options, 0, selection, out=out)
-    return hv
+    return hv.view(num_embeddings, embedding_dim)
 
 
 def level_hv(
-    num: int,
-    dim: int,
+    num_embeddings: int,
+    embedding_dim: int,
     *,
-    r=0.0,
+    randomness=0.0,
     generator=None,
     out=None,
     dtype=None,
     device=None,
-    requires_grad=False
-):
+    requires_grad=False,
+) -> torch.Tensor:
     """
     Creates num random level correlated hypervectors of dim-dimensions in the bipolar system.
     Span denotes the number of approximate orthogonalities in the set (only 1 is an exact guarantee)
     """
     hv = torch.zeros(
-        num, dim, out=out, dtype=dtype, device=device, requires_grad=requires_grad
+        num_embeddings,
+        embedding_dim,
+        out=out,
+        dtype=dtype,
+        device=device,
+        requires_grad=requires_grad,
     )
 
     # convert from normilzed "randomness" variable r to number of orthogonal vectors sets "span"
-    levels_per_span = (1 - r) * (num - 1) + r * 1
-    span = (num - 1) / levels_per_span
+    levels_per_span = (1 - randomness) * (num_embeddings - 1) + randomness * 1
+    span = (num_embeddings - 1) / levels_per_span
     # generate the set of orthogonal vectors within the level vector set
     span_hv = random_hv(
-        int(math.ceil(span + 1)), dim, generator=generator, dtype=dtype, device=device
+        int(math.ceil(span + 1)),
+        embedding_dim,
+        generator=generator,
+        dtype=dtype,
+        device=device,
     )
     # for each span within the set create a treshold vector
     # the treshold vector is used to interpolate between the
     # two random vector bounds of each span.
     treshold_v = torch.rand(
-        int(math.ceil(span)), dim, generator=generator, dtype=dtype, device=device
+        int(math.ceil(span)),
+        embedding_dim,
+        generator=generator,
+        dtype=dtype,
+        device=device,
     )
 
-    for i in range(num):
+    for i in range(num_embeddings):
         span_idx = int(i // levels_per_span)
 
         # special case: if we are on a span border (e.g. on the first or last levels)
@@ -97,38 +127,52 @@ def level_hv(
 
 
 def circular_hv(
-    num: int,
-    dim: int,
-    r=0.0,
+    num_embeddings: int,
+    embedding_dim: int,
+    *,
+    randomness=0.0,
     generator=None,
     out=None,
     dtype=None,
     device=None,
     requires_grad=False,
-):
+) -> torch.Tensor:
     """
     Creates num random circular level correlated hypervectors
     of dim dimensions in the bipolar system.
     When dim is None, creates one hypervector of num dimensions.
     """
     hv = torch.zeros(
-        num, dim, out=out, dtype=dtype, device=device, requires_grad=requires_grad
+        num_embeddings,
+        embedding_dim,
+        out=out,
+        dtype=dtype,
+        device=device,
+        requires_grad=requires_grad,
     )
 
     # convert from normilzed "randomness" variable r to
     # number of levels between orthogonal pairs or "span"
-    levels_per_span = ((1 - r) * (num / 2) + r * 1) * 2
-    span = num / levels_per_span
+    levels_per_span = ((1 - randomness) * (num_embeddings / 2) + randomness * 1) * 2
+    span = num_embeddings / levels_per_span
 
     # generate the set of orthogonal vectors within the level vector set
     span_hv = random_hv(
-        int(math.ceil(span + 1)), dim, generator=generator, dtype=dtype, device=device
+        int(math.ceil(span + 1)),
+        embedding_dim,
+        generator=generator,
+        dtype=dtype,
+        device=device,
     )
     # for each span within the set create a treshold vector
     # the treshold vector is used to interpolate between the
     # two random vector bounds of each span.
     treshold_v = torch.rand(
-        int(math.ceil(span)), dim, generator=generator, dtype=dtype, device=device
+        int(math.ceil(span)),
+        embedding_dim,
+        generator=generator,
+        dtype=dtype,
+        device=device,
     )
 
     mutation_history = deque()
@@ -138,7 +182,7 @@ def circular_hv(
     # mutation hypervector is the last generated vector while walking through the circle
     mutation_hv = span_hv[0]
 
-    for i in range(1, num + 1):
+    for i in range(1, num_embeddings + 1):
         span_idx = int(i // levels_per_span)
 
         # special case: if we are on a span border (e.g. on the first or last levels)
@@ -164,7 +208,7 @@ def circular_hv(
         if i % 2 == 0:
             hv[i // 2] = mutation_hv
 
-    for i in range(num + 1, num * 2 - 1):
+    for i in range(num_embeddings + 1, num_embeddings * 2 - 1):
         mut = mutation_history.popleft()
         mutation_hv *= mut
 
@@ -174,7 +218,7 @@ def circular_hv(
     return hv
 
 
-def bind(input: torch.Tensor, other: torch.Tensor, *, out=None):
+def bind(input: torch.Tensor, other: torch.Tensor, *, out=None) -> torch.Tensor:
     """
     Combines two hypervectors a and b into a new hypervector in the
     same space, represents the vectors a and b as a pair
@@ -182,18 +226,18 @@ def bind(input: torch.Tensor, other: torch.Tensor, *, out=None):
     return torch.mul(input, other, out=out)
 
 
-def bundle(input: torch.Tensor, other: torch.Tensor, *, out=None):
+def bundle(input: torch.Tensor, other: torch.Tensor, *, out=None) -> torch.Tensor:
     """
     Returns majority vote/element-wise sum of hypervectors hv
     """
     return torch.add(input, other, out=out)
 
 
-def permute(input: torch.Tensor, *, shifts=1, dims=-1):
+def permute(input: torch.Tensor, *, shifts=1, dims=-1) -> torch.Tensor:
     return torch.roll(input, shifts=shifts, dims=dims)
 
 
-def similarity(a: torch.Tensor, b: torch.Tensor):
+def similarity(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
     """
     Returns the similarity between two hypervectors
     """
