@@ -67,8 +67,7 @@ class LevelEmbedding(nn.Embedding):
         # normalized between 0 and 1
         normalized = (input - self.low_value) / (self.high_value - self.low_value)
 
-        indices = normalized.mul_(self.num_embeddings).floor_()
-        indices = indices.clamp_(0, self.num_embeddings - 1).long()
+        indices = torch.round(normalized * (self.num_embeddings - 1)).long()
 
         return super(LevelEmbedding, self).forward(indices)
 
@@ -101,10 +100,9 @@ class CircularEmbedding(nn.Embedding):
         # make first variable a copy of the input, then we can reuse the buffer.
         # normalized between 0 and 1
         normalized = (input - self.low_value) / (self.high_value - self.low_value)
-        normalized.remainder_(1.0)
 
-        indices = normalized.mul_(self.num_embeddings).floor_()
-        indices = indices.clamp_(0, self.num_embeddings - 1).long()
+        indices = torch.round(normalized * self.num_embeddings).long()
+        indices.remainder_(self.num_embeddings)
 
         return super(CircularEmbedding, self).forward(indices)
 

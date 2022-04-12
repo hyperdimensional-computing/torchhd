@@ -49,6 +49,7 @@ def random_hv(
         generator=generator,
         dtype=torch.long,
         requires_grad=requires_grad,
+        device=device,
     )
     
     if out is not None:
