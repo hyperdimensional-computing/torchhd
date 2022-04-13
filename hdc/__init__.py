@@ -68,6 +68,7 @@ class LevelEmbedding(nn.Embedding):
         normalized = (input - self.low_value) / (self.high_value - self.low_value)
 
         indices = torch.round(normalized * (self.num_embeddings - 1)).long()
+        indices.clamp_(0, self.num_embeddings - 1)
 
         return super(LevelEmbedding, self).forward(indices)
 
