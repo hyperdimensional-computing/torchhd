@@ -4,8 +4,8 @@ from typing import Callable, Optional, NamedTuple, Tuple
 import torch
 import pandas as pd
 from torch.utils import data
-import zipfile
-import requests
+
+from hdc.datasets.utils import download_file, unzip_file
 
 
 class BeijingAirQualityDataSample(NamedTuple):
@@ -155,20 +155,13 @@ class BeijingAirQuality(data.Dataset):
             print("Files already downloaded and verified")
             return
 
-        r = requests.get(
+        zip_file_path = os.path.join(self.root, "data.zip")
+        download_file(
             "https://archive.ics.uci.edu/ml/machine-learning-databases/00501/PRSA2017_Data_20130301-20170228.zip",
-            allow_redirects=True,
-            stream=True,
+            zip_file_path,
         )
 
-        zip_file_path = os.path.join(self.root, "data.zip")
-        with open(zip_file_path, "wb") as zip_file:
-            for chunk in r.iter_content(chunk_size=128):
-                zip_file.write(chunk)
-
-        with zipfile.ZipFile(zip_file_path, "r") as zip_file:
-            zip_file.extractall(self.root)
-
+        unzip_file(zip_file_path, self.root)
         os.remove(zip_file_path)
 
         source_dir = os.path.join(self.root, "PRSA_Data_20130301-20170228")
