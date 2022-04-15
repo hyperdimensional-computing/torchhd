@@ -4,7 +4,7 @@ import torch.nn as nn
 from . import functional
 
 
-class IdentityEmbedding(nn.Embedding):
+class Identity(nn.Embedding):
     def reset_parameters(self):
         factory_kwargs = {
             "device": self.weight.data.device,
@@ -20,7 +20,7 @@ class IdentityEmbedding(nn.Embedding):
         self._fill_padding_idx_with_zero()
 
 
-class RandomEmbedding(nn.Embedding):
+class Random(nn.Embedding):
     def reset_parameters(self):
         factory_kwargs = {
             "device": self.weight.data.device,
@@ -36,7 +36,7 @@ class RandomEmbedding(nn.Embedding):
         self._fill_padding_idx_with_zero()
 
 
-class LevelEmbedding(nn.Embedding):
+class Level(nn.Embedding):
     def __init__(
         self, num_embeddings, embedding_dim, low=0.0, high=1.0, randomness=0.0, **kwargs
     ):
@@ -44,7 +44,7 @@ class LevelEmbedding(nn.Embedding):
         self.high_value = high
         self.randomness = randomness
 
-        super(LevelEmbedding, self).__init__(num_embeddings, embedding_dim, **kwargs)
+        super(Level, self).__init__(num_embeddings, embedding_dim, **kwargs)
 
     def reset_parameters(self):
         factory_kwargs = {
@@ -70,10 +70,10 @@ class LevelEmbedding(nn.Embedding):
         indices = normalized.mul_(self.num_embeddings).floor_()
         indices = indices.clamp_(0, self.num_embeddings - 1).long()
 
-        return super(LevelEmbedding, self).forward(indices)
+        return super(Level, self).forward(indices)
 
 
-class CircularEmbedding(nn.Embedding):
+class Circular(nn.Embedding):
     def __init__(
         self,
         num_embeddings,
@@ -87,7 +87,7 @@ class CircularEmbedding(nn.Embedding):
         self.high_value = high
         self.randomness = randomness
 
-        super(CircularEmbedding, self).__init__(num_embeddings, embedding_dim, **kwargs)
+        super(Circular, self).__init__(num_embeddings, embedding_dim, **kwargs)
 
     def reset_parameters(self):
         factory_kwargs = {
@@ -114,4 +114,4 @@ class CircularEmbedding(nn.Embedding):
         indices = normalized.mul_(self.num_embeddings).floor_()
         indices = indices.clamp_(0, self.num_embeddings - 1).long()
 
-        return super(CircularEmbedding, self).forward(indices)
+        return super(Circular, self).forward(indices)

@@ -7,7 +7,7 @@ Embeddings for hdc
     :toctree: generated/
     :template: classs.rst
 
-    IdentityEmbedding
-    RandomEmbedding
-    LevelEmbedding
-    CircularEmbedding
+    Identity
+    Random
+    Level
+    Circular
