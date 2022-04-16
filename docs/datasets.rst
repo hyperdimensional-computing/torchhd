@@ -11,3 +11,4 @@ The hdc library provides many popular built-in datasets to work with.
 
     BeijingAirQuality
     Isolet
+    LanguageRecognition
