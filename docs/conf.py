@@ -30,6 +30,7 @@ author = "Mike Heddes, Igor De Oliveira Nunes, Dheyay Desai"
 # ones.
 
 extensions = [
+    "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",

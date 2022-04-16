@@ -4,3 +4,4 @@ scikit-learn
 pandas
 numpy
 black
+sphinx-rtd-theme
