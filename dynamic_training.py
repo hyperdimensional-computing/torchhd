@@ -140,8 +140,6 @@ def experiment(settings, device=None):
             pred_labels.append(predictions)
             true_labels.append(labels)
 
-            counter += 1
-
     end_time = time.time()
     test_duration = end_time - start_time
     print(f"Testing took {test_duration:.2f}s for {len(test_ds)} items")
