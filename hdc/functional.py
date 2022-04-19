@@ -365,11 +365,16 @@ def hard_quantize(input: torch.Tensor, *, out=None):
     Returns:
         torch.Tensor: clamped input vector
     """
+    # Make sure that the output tensor has the same dtype and device
+    # as the input tensor.
+    positive = torch.tensor(1.0, dtype=input.dtype, device=input.device)
+    negative = torch.tensor(-1.0, dtype=input.dtype, device=input.device)
+
     if out != None:
-        out[:] = torch.where(input > 0, 1, -1)
+        out[:] = torch.where(input > 0, positive, negative)
         result = out
     else:
-        result = torch.where(input > 0, 1, -1)
+        result = torch.where(input > 0, positive, negative)
 
     return result
 

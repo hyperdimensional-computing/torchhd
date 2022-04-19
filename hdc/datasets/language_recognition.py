@@ -1,5 +1,5 @@
 import os
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple, List
 import torch
 import torch.utils.data as data
 
@@ -28,7 +28,7 @@ class LanguageRecognition(data.Dataset):
             target and transforms it.
     """
 
-    classes: list[str] = [
+    classes: List[str] = [
         "Bulgarian",
         "Czech",
         "Danish",
@@ -52,7 +52,7 @@ class LanguageRecognition(data.Dataset):
         "Swedish",
     ]
 
-    files: list[str] = [
+    files: List[str] = [
         "bul.txt",
         "ces.txt",
         "dan.txt",

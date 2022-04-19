@@ -9,7 +9,7 @@ class Accuracy:
 
     def step(self, true_label: torch.LongTensor, predicted_label: torch.LongTensor):
         self.true_labels.append(true_label)
-        self.predicted_label.append(predicted_label)
+        self.predicted_labels.append(predicted_label)
 
     def value(self) -> torch.FloatTensor:
         true_labels = torch.cat(self.true_labels)

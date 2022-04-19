@@ -6,47 +6,32 @@ sys.path.insert(1, os.path.realpath(os.path.pardir))
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision
-from torchvision.datasets import MNIST
 from tqdm import tqdm
-
 from hdc import functional
 from hdc import embeddings
 from hdc import metrics
+from hdc.datasets.isolet import Isolet
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
 
-DIMENSIONS = 10000
-IMG_SIZE = 28
-NUM_LEVELS = 1000
+DIMENSIONS = 10000  # number of hypervector dimensions
+NUM_LEVELS = 100
 BATCH_SIZE = 1  # for GPUs with enough memory we can process multiple images at ones
-
-transform = torchvision.transforms.ToTensor()
-
-train_ds = MNIST("../data", train=True, transform=transform, download=True)
-train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
-
-test_ds = MNIST("../data", train=False, transform=transform, download=True)
-test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
 
 class Model(nn.Module):
     def __init__(self, num_classes, size):
         super(Model, self).__init__()
 
-        self.flatten = torch.nn.Flatten()
-
-        self.position = embeddings.Random(size * size, DIMENSIONS)
+        self.id = embeddings.Random(size, DIMENSIONS)
         self.value = embeddings.Level(NUM_LEVELS, DIMENSIONS)
 
         self.classify = nn.Linear(DIMENSIONS, num_classes, bias=False)
         self.classify.weight.data.fill_(0.0)
 
     def encode(self, x):
-        x = self.flatten(x)
-
-        sample_hv = functional.bind(self.position.weight, self.value(x))
+        sample_hv = functional.bind(self.id.weight, self.value(x))
         sample_hv = functional.batch_bundle(sample_hv)
         return functional.hard_quantize(sample_hv)
 
@@ -56,7 +41,13 @@ class Model(nn.Module):
         return logit
 
 
-model = Model(len(train_ds.classes), IMG_SIZE)
+train_ds = Isolet("../data", train=True, download=True)
+train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
+
+test_ds = Isolet("../data", train=False, download=True)
+test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
+
+model = Model(len(train_ds.classes), train_ds[0][0].size(-1))
 model = model.to(device)
 
 with torch.no_grad():

@@ -5,6 +5,10 @@ from . import functional
 
 
 class Identity(nn.Embedding):
+    def __init__(self, num_embeddings, embedding_dim, requires_grad=False, **kwargs):
+        super(Identity, self).__init__(num_embeddings, embedding_dim, **kwargs)
+        self.weight.requires_grad = requires_grad
+
     def reset_parameters(self):
         factory_kwargs = {
             "device": self.weight.data.device,
@@ -21,6 +25,23 @@ class Identity(nn.Embedding):
 
 
 class Random(nn.Embedding):
+    def __init__(
+        self,
+        num_embeddings,
+        embedding_dim,
+        low=0.0,
+        high=1.0,
+        randomness=0.0,
+        requires_grad=False,
+        **kwargs
+    ):
+        self.low_value = low
+        self.high_value = high
+        self.randomness = randomness
+
+        super(Random, self).__init__(num_embeddings, embedding_dim, **kwargs)
+        self.weight.requires_grad = requires_grad
+
     def reset_parameters(self):
         factory_kwargs = {
             "device": self.weight.data.device,
@@ -38,13 +59,21 @@ class Random(nn.Embedding):
 
 class Level(nn.Embedding):
     def __init__(
-        self, num_embeddings, embedding_dim, low=0.0, high=1.0, randomness=0.0, **kwargs
+        self,
+        num_embeddings,
+        embedding_dim,
+        low=0.0,
+        high=1.0,
+        randomness=0.0,
+        requires_grad=False,
+        **kwargs
     ):
         self.low_value = low
         self.high_value = high
         self.randomness = randomness
 
         super(Level, self).__init__(num_embeddings, embedding_dim, **kwargs)
+        self.weight.requires_grad = requires_grad
 
     def reset_parameters(self):
         factory_kwargs = {
@@ -81,6 +110,7 @@ class Circular(nn.Embedding):
         low=0.0,
         high=2 * math.pi,
         randomness=0.0,
+        requires_grad=False,
         **kwargs
     ):
         self.low_value = low
@@ -88,6 +118,7 @@ class Circular(nn.Embedding):
         self.randomness = randomness
 
         super(Circular, self).__init__(num_embeddings, embedding_dim, **kwargs)
+        self.weight.requires_grad = requires_grad
 
     def reset_parameters(self):
         factory_kwargs = {

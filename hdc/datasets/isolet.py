@@ -1,6 +1,6 @@
 import os
 import os.path
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple, List
 import torch
 import pandas as pd
 from torch.utils import data
@@ -25,7 +25,7 @@ class Isolet(data.Dataset):
             target and transforms it.
     """
 
-    classes: list[str] = [
+    classes: List[str] = [
         "A",
         "B",
         "C",
