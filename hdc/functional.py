@@ -290,7 +290,7 @@ def bind(input: torch.Tensor, other: torch.Tensor, *, out=None) -> torch.Tensor:
 
 
 def bundle(input: torch.Tensor, other: torch.Tensor, *, out=None) -> torch.Tensor:
-    """Returns majority vote/element-wise sum of hypervectors hv
+    """Returns element-wise sum of hypervectors input and other
 
     Args:
         input (torch.Tensor): input hypervector tensor
@@ -303,6 +303,29 @@ def bundle(input: torch.Tensor, other: torch.Tensor, *, out=None) -> torch.Tenso
     """
 
     return torch.add(input, other, out=out)
+
+
+def batch_bundle(
+    input: torch.Tensor,
+    *,
+    dim=-2,
+    keepdim=False,
+    dtype=None,
+) -> torch.Tensor:
+    """Returns element-wise sum of hypervectors hv
+
+    Args:
+        input (torch.Tensor): input hypervector tensor
+        dim (int, optional): dimension over which to bundle the hypervectors. Defaults to -2.
+        keepdim (bool, optional): whether to keep the bundled dimension. Defaults to False.
+        dtype (torch.dtype, optional): if specified determins the type of the returned tensor, otherwise same as input.
+
+    Returns:
+        torch.Tensor: bundled hypervector
+
+    """
+
+    return torch.sum(input, dim=dim, keepdim=keepdim, dtype=dtype)
 
 
 def permute(input: torch.Tensor, *, shifts=1, dims=-1) -> torch.Tensor:

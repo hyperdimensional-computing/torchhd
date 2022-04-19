@@ -1,11 +1,11 @@
-Functional hdc operations
+Functional
 =========================
 
 .. currentmodule:: hdc.functional 
 
-This module consists of the basic hypevector generation functions and operations used on hypervectors.
+This module consists of the basic hypervector generation functions and operations used on hypervectors.
 
-HD vector generation
+Basis-hypervector sets
 ----------------------------------
 
 .. autosummary:: 
@@ -18,7 +18,7 @@ HD vector generation
     circular_hv
     
 
-HD vector operations
+Operations
 --------------------
 
 .. autosummary::
@@ -32,7 +32,7 @@ HD vector operations
     hard_quantize
 
 
-HD similarity operations
+Similarities
 ------------------------
 
 .. autosummary::
