@@ -85,6 +85,13 @@ class Isolet(data.Dataset):
         return self.data.size(0)
 
     def __getitem__(self, index: int) -> Tuple[torch.FloatTensor, torch.LongTensor]:
+        """
+        Args:
+            index (int): Index
+
+        Returns:
+            Tuple[torch.FloatTensor, torch.LongTensor]: (sample, target) where target is the index of the target class
+        """
         sample = self.data[index]
         label = self.targets[index]
 

@@ -107,6 +107,13 @@ class LanguageRecognition(data.Dataset):
         return self.targets.size(0)
 
     def __getitem__(self, index) -> Tuple[str, torch.LongTensor]:
+        """
+        Args:
+            index (int): Index
+
+        Returns:
+            Tuple[str, torch.LongTensor]: (sample, target) where target is the index of the target class
+        """
         sample = self.data[index]
         target = self.targets[index]
 

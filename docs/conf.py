@@ -19,8 +19,8 @@ sys.path.insert(0, os.path.abspath("../"))
 # -- Project information -----------------------------------------------------
 
 project = "hdc"
-copyright = "2022, Mike Heddes, Igor De Oliveira Nunes, Dheyay Desai"
-author = "Mike Heddes, Igor De Oliveira Nunes, Dheyay Desai"
+copyright = "2022, Mike Heddes, Igor De Oliveira Nunes, Dheyay Desai, Pere Verges Boncompte"
+author = "Mike Heddes, Igor De Oliveira Nunes, Dheyay Desai, Pere Verges Boncompte"
 
 
 # -- General configuration ---------------------------------------------------

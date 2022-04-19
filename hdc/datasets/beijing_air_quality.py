@@ -80,6 +80,13 @@ class BeijingAirQuality(data.Dataset):
         return self.categorical_data.size(0)
 
     def __getitem__(self, index: int) -> BeijingAirQualityDataSample:
+        """
+        Args:
+            index (int): Index
+
+        Returns:
+            BeijingAirQualityDataSample: Indexed Sample
+        """
         sample = BeijingAirQualityDataSample(
             self.categorical_data[index], self.continuous_data[index]
         )
