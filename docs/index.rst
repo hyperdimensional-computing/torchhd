@@ -1,7 +1,7 @@
 Welcome to hdc's documentation!
 ===============================
 
-*hdc* is a python module dedicated to hyperdimensional computing and the operations related to it.
+*hdc* is a Python library dedicated to Hyperdimensional Computing and the operations related to it.
 
 .. toctree::
    :maxdepth: 2
@@ -10,12 +10,6 @@ Welcome to hdc's documentation!
    functional
    embeddings
    datasets
+   metrics
 
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

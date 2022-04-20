@@ -1,0 +1,9 @@
+torch
+torchvision
+pandas
+numpy
+sphinx
+sphinx-rtd-theme
+flake8
+pytest
+black

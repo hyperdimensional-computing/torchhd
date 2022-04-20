@@ -1,11 +1,11 @@
-Embeddings for hdc
+Embeddings
 ==================
 
 .. currentmodule:: hdc.embeddings
 
 .. autosummary::
     :toctree: generated/
-    :template: classs.rst
+    :template: class.rst
 
     Identity
     Random

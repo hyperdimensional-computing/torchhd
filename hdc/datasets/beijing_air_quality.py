@@ -1,6 +1,6 @@
 import os
 import os.path
-from typing import Callable, Optional, NamedTuple, Tuple
+from typing import Callable, Optional, NamedTuple, Tuple, List
 import torch
 import pandas as pd
 from torch.utils import data
@@ -29,9 +29,9 @@ class BeijingAirQuality(data.Dataset):
             downloaded again.
     """
 
-    wind_directions: list[str]
-    stations: list[str]
-    categorical_columns: list[str] = [
+    wind_directions: List[str]
+    stations: List[str]
+    categorical_columns: List[str] = [
         "year",
         "month",
         "day",
@@ -39,7 +39,7 @@ class BeijingAirQuality(data.Dataset):
         "wind_direction",
         "station",
     ]
-    continuous_columns: list[str] = [
+    continuous_columns: List[str] = [
         "PM2.5",
         "PM10",
         "SO2",
@@ -80,6 +80,13 @@ class BeijingAirQuality(data.Dataset):
         return self.categorical_data.size(0)
 
     def __getitem__(self, index: int) -> BeijingAirQualityDataSample:
+        """
+        Args:
+            index (int): Index
+
+        Returns:
+            BeijingAirQualityDataSample: Indexed Sample
+        """
         sample = BeijingAirQualityDataSample(
             self.categorical_data[index], self.continuous_data[index]
         )
