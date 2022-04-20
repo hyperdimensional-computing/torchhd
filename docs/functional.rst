@@ -41,6 +41,6 @@ Similarities
 
     
     cosine_similarity
-    dot_product
-    hamming_distance
+    dot_similarity
+    hamming_similarity
 
