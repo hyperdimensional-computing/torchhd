@@ -4,50 +4,42 @@ import time
 import random
 import pandas as pd
 import torch
-import torch.nn as nn
 import torch.optim as optim
+import torch.nn as nn
 import torch.nn.functional as F
-import torchvision.transforms.functional as TF
 import torchvision
-import sklearn.metrics
+from torchvision.datasets import MNIST
 from tqdm import tqdm
 
-import hdc
-import hdc.functional as HDF
+from hdc import functional
+from hdc import embeddings
+from hdc import metrics
 
 DIMENSIONS = 10000
 IMG_SIZE = 28
 NUM_LEVELS = 1000
-BATCH_SIZE = 1  # To recreate an online learning setting
+BATCH_SIZE = 1  # for GPUs with enough memory we can process multiple images at ones
 LEARNING_RATE = 0.005
 
 
 class Model(nn.Module):
-    def __init__(self, num_classes, size, train_embedding=False):
+    def __init__(self, num_classes, size):
         super(Model, self).__init__()
 
-        self.size = size
+        self.flatten = torch.nn.Flatten()
 
-        self.pos_embed = hdc.embeddings.Random(size * size, DIMENSIONS)
-        self.pos_embed.weight.requires_grad = train_embedding
+        self.position = embeddings.Random(size * size, DIMENSIONS)
+        self.value = embeddings.Level(NUM_LEVELS, DIMENSIONS)
 
-        self.lum_embed = hdc.embeddings.Level(NUM_LEVELS, DIMENSIONS)
-        self.lum_embed.weight.requires_grad = train_embedding
-
-        self.classify = nn.Linear(DIMENSIONS, num_classes)
+        self.classify = nn.Linear(DIMENSIONS, num_classes, bias=False)
         self.classify.weight.data.fill_(0.0)
-        self.classify.bias.data.fill_(0.0)
 
     def encode(self, x):
-        batch_size = x.size(0)
-        x = x.reshape(batch_size, self.size * self.size)
+        x = self.flatten(x)
 
-        luminosities = self.lum_embed(x)
-
-        sample_hv = HDF.bind(self.pos_embed.weight, luminosities)
-        sample_hv = torch.sum(sample_hv, dim=-2)
-
-        return HDF.soft_quantize(sample_hv)  # cap between -1 and +1
+        sample_hv = functional.bind(self.position.weight, self.value(x))
+        sample_hv = functional.batch_bundle(sample_hv)
+        return functional.hard_quantize(sample_hv)
 
     def forward(self, x):
         enc = self.encode(x)
@@ -56,22 +48,12 @@ class Model(nn.Module):
 
 
 def experiment(settings, device=None):
+    transform = torchvision.transforms.ToTensor()
 
-    transform = torchvision.transforms.Compose(
-        [
-            torchvision.transforms.ToTensor(),
-        ]
-    )
+    train_ds = MNIST("../data", train=True, transform=transform, download=True)
+    train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
 
-    train_ds = torchvision.datasets.MNIST(
-        "data", train=True, transform=transform, download=True
-    )
-    train_ld = torch.utils.data.DataLoader(
-        train_ds, batch_size=BATCH_SIZE, shuffle=True
-    )
-    test_ds = torchvision.datasets.MNIST(
-        "data", train=False, transform=transform, download=True
-    )
+    test_ds = MNIST("../data", train=False, transform=transform, download=True)
     test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
     num_classes = len(train_ds.classes)
@@ -94,7 +76,7 @@ def experiment(settings, device=None):
             optimizer.zero_grad()
 
             enc = model.encode(samples)
-            enc = HDF.bundle(enc, cache[labels])
+            enc = functional.bundle(enc, cache[labels])
             cache[labels] = 0
             dirty_bit[labels] = False
 
@@ -126,32 +108,24 @@ def experiment(settings, device=None):
     train_duration = end_time - start_time
     print(f"Training took {train_duration:.3f}s for {len(train_ds)} items")
 
-    pred_labels = []
-    true_labels = []
+    accuracy = metrics.Accuracy()
 
-    start_time = time.time()
     with torch.no_grad():
-        for samples, labels in tqdm(test_ld, desc="Test"):
+        for samples, labels in tqdm(test_ld, desc="Testing"):
             samples = samples.to(device)
 
             outputs = model(samples)
             predictions = torch.argmax(outputs, dim=-1)
 
-            pred_labels.append(predictions)
-            true_labels.append(labels)
+            accuracy.step(labels, predictions)
 
     end_time = time.time()
     test_duration = end_time - start_time
     print(f"Testing took {test_duration:.2f}s for {len(test_ds)} items")
-
-    pred_labels = torch.cat(pred_labels).cpu()
-    true_labels = torch.cat(true_labels).cpu()
-
-    accuracy = sklearn.metrics.accuracy_score(pred_labels, true_labels)
-    print(f"Testing accuracy of {(accuracy * 100):.3f}%")
+    print(f"Testing accuracy of {(accuracy.value().item() * 100):.3f}%")
 
     metrics = dict(
-        accuracy=accuracy,
+        accuracy=accuracy.value().item(),
         resources=settings["resources"],
         train_duration=train_duration,
         train_set_size=len(train_ds),
@@ -193,6 +167,7 @@ if __name__ == "__main__":
 
             metrics = pd.DataFrame(metrics, index=[0])
             metrics["dataset"] = "MNIST"
+            metrics["has_buffer"] = True
 
             mode = "w" if is_first_result_write else "a"
             metrics.to_csv(
