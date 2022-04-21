@@ -10,7 +10,7 @@ from tqdm import tqdm
 from hdc import functional
 from hdc import embeddings
 from hdc import metrics
-from hdc.datasets.isolet import Isolet
+from hdc.datasets.isolet import ISOLET
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
@@ -41,10 +41,10 @@ class Model(nn.Module):
         return logit
 
 
-train_ds = Isolet("../data", train=True, download=True)
+train_ds = ISOLET("../data", train=True, download=True)
 train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
 
-test_ds = Isolet("../data", train=False, download=True)
+test_ds = ISOLET("../data", train=False, download=True)
 test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
 model = Model(len(train_ds.classes), train_ds[0][0].size(-1))
