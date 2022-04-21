@@ -10,6 +10,6 @@ The hdc library provides many popular built-in datasets to work with.
     :template: class_dataset.rst
 
     BeijingAirQuality
-    Isolet
+    ISOLET
     LanguageRecognition
-    Ucihar
+    UCIHAR
