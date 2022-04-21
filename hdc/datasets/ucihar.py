@@ -8,7 +8,8 @@ from torch.utils import data
 
 from .utils import download_file, unzip_file
 
-class Ucihar(data.Dataset):
+
+class UCIHAR(data.Dataset):
     """Uci Human Activity Recognition <https://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones> _ Dataset.
     As found in the paper `"Human Activity Recognition Using Smartphones"<https://ieeexplore.ieee.org/document/8567275>`_.
 
@@ -24,6 +25,7 @@ class Ucihar(data.Dataset):
         target_transform (callable, optional): A function/transform that takes in the
             target and transforms it.
     """
+
     classes: List[str] = [
         "WALKING",
         "WALKING_UPSTAIRS",
@@ -39,7 +41,7 @@ class Ucihar(data.Dataset):
         train: bool = True,
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
-        download: bool = False
+        download: bool = False,
     ):
         root = path.join(root, "ucihar")
         root = os.path.expanduser(root)
@@ -85,7 +87,7 @@ class Ucihar(data.Dataset):
     def _check_integrity(self) -> bool:
         if not os.path.isdir(self.root):
             return False
-        
+
         train_dir = os.path.join(self.root, "train")
         has_train_dir = os.path.isdir(train_dir)
         test_dir = os.path.join(self.root, "test")
@@ -94,14 +96,14 @@ class Ucihar(data.Dataset):
         if not has_train_dir and not has_test_dir:
             return False
 
-        has_train_x = os.path.isfile(os.path.join(train_dir, "X_train.txt")) 
+        has_train_x = os.path.isfile(os.path.join(train_dir, "X_train.txt"))
         has_train_y = os.path.isfile(os.path.join(train_dir, "y_train.txt"))
 
         if not has_train_x and not has_train_y:
             return False
 
-        has_test_x = os.path.isfile(os.path.join(test_dir, "X_test.txt")) 
-        has_test_y =  os.path.isfile(os.path.join(train_dir, "y_test.txt"))
+        has_test_x = os.path.isfile(os.path.join(test_dir, "X_test.txt"))
+        has_test_y = os.path.isfile(os.path.join(train_dir, "y_test.txt"))
 
         if not has_test_x or not has_test_y:
             return False
@@ -113,8 +115,12 @@ class Ucihar(data.Dataset):
         data_file = "X_train.txt" if self.train else "X_test.txt"
         target_file = "y_train.txt" if self.train else "y_test.txt"
 
-        data = pd.read_csv(os.path.join(data_dir, data_file), delim_whitespace=True, header=None)
-        targets = np.loadtxt(path.join(data_dir, target_file), delimiter="\n", dtype='int64').tolist()
+        data = pd.read_csv(
+            os.path.join(data_dir, data_file), delim_whitespace=True, header=None
+        )
+        targets = np.loadtxt(
+            path.join(data_dir, target_file), delimiter="\n", dtype="int64"
+        ).tolist()
 
         self.data = torch.tensor(data.values, dtype=torch.float)
         self.targets = torch.tensor(targets, dtype=torch.long) - 1
@@ -143,12 +149,3 @@ class Ucihar(data.Dataset):
             )
 
         os.rmdir(source_dir)
-
-
-
-
-
-    
-
-
-

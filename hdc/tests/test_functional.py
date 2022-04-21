@@ -174,7 +174,7 @@ class TestLevel_hv:
         hv = functional.level_hv(50, 10000, generator=generator)
 
         assert ((hv == -1) | (hv == 1)).min().item(), "values are either -1 or +1"
-        
+
         sim = functional.cosine_similarity(hv[0], hv[49].unsqueeze(0))
         assert sim.abs().item() < 0.015
         sim = functional.cosine_similarity(hv[0], hv[1].unsqueeze(0))
@@ -269,7 +269,7 @@ class TestCircular_hv:
         hv = functional.circular_hv(50, 10000, generator=generator)
 
         assert ((hv == -1) | (hv == 1)).min().item(), "values are either -1 or +1"
-        
+
         sim = functional.cosine_similarity(hv[0], hv[25].unsqueeze(0))
         assert sim.abs().item() < 0.015
         sim = functional.cosine_similarity(hv[0], hv[1].unsqueeze(0))
@@ -455,7 +455,9 @@ class TestPermute:
         assert res.dim() == 1
         assert res.size(0) == 100
         assert ((hv == -1) | (hv == 1)).min().item(), "values are either -1 or +1"
-        assert torch.sum(res == hv[0]) != res.size(0), "all element must not be the same"
+        assert torch.sum(res == hv[0]) != res.size(
+            0
+        ), "all element must not be the same"
 
         one_shift = functional.permute(hv[0])
         two_shift = functional.permute(hv[0], shifts=2)
