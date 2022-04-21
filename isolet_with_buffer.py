@@ -9,9 +9,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
 
+import hdc
 from hdc import functional
 from hdc import embeddings
-from hdc import metrics
 from hdc.datasets.isolet import Isolet
 
 DIMENSIONS = 10000
@@ -43,10 +43,10 @@ class Model(nn.Module):
 
 
 def experiment(settings, device=None):
-    train_ds = Isolet("../data", train=True, download=True)
+    train_ds = Isolet("data", train=True, download=True)
     train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
 
-    test_ds = Isolet("../data", train=False, download=True)
+    test_ds = Isolet("data", train=False, download=True)
     test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
     num_classes = len(train_ds.classes)
@@ -102,7 +102,7 @@ def experiment(settings, device=None):
     train_duration = end_time - start_time
     print(f"Training took {train_duration:.3f}s for {len(train_ds)} items")
 
-    accuracy = metrics.Accuracy()
+    accuracy = hdc.metrics.Accuracy()
 
     with torch.no_grad():
         for samples, labels in tqdm(test_ld, desc="Testing"):
