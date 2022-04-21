@@ -8,7 +8,7 @@ from torch.utils import data
 from .utils import download_file_from_google_drive, unzip_file
 
 
-class Isolet(data.Dataset):
+class ISOLET(data.Dataset):
     """`ISOLET <https://archive.ics.uci.edu/ml/datasets/isolet>`_ Dataset.
 
     Args:

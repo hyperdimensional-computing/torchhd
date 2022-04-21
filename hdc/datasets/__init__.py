@@ -1,5 +1,6 @@
 from .beijing_air_quality import BeijingAirQuality
-from .isolet import Isolet
-from .language_recognition import LanguageRecognition
+from .isolet import ISOLET
+from .european_languages import EuropeanLanguages
+from .ucihar import UCIHAR
 
-__all__ = ["BeijingAirQuality", "Isolet", "LanguageRecognition"]
+__all__ = ["BeijingAirQuality", "ISOLET", "EuropeanLanguages", "UCIHAR"]

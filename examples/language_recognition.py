@@ -12,7 +12,7 @@ from tqdm import tqdm
 from hdc import functional
 from hdc import embeddings
 from hdc import metrics
-from hdc.datasets.language_recognition import LanguageRecognition as Languages
+from hdc.datasets import EuropeanLanguages as Languages
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))

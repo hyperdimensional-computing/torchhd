@@ -6,8 +6,8 @@ import torch.utils.data as data
 from .utils import download_file_from_google_drive, unzip_file
 
 
-class LanguageRecognition(data.Dataset):
-    """Language Recognition Dataset.
+class EuropeanLanguages(data.Dataset):
+    """European Languages Dataset.
 
     As used in the paper `"A Robust and Energy-Efficient Classifier Using
     Brain-Inspired Hyperdimensional Computing" <https://iis-people.ee.ethz.ch/~arahimi/papers/ISLPED16.pdf>`_.
