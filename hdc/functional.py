@@ -5,6 +5,23 @@ import torch.nn.functional as F
 from collections import deque
 
 
+__all__ = [
+    "identity_hv",
+    "random_hv",
+    "level_hv",
+    "circular_hv",
+    "bind",
+    "bundle",
+    "batch_bundle",
+    "permute",
+    "hard_quantize",
+    "soft_quantize",
+    "hamming_similarity",
+    "cosine_similarity",
+    "dot_similarity",
+]
+
+
 def identity_hv(
     num_embeddings: int,
     embedding_dim: int,
@@ -14,10 +31,24 @@ def identity_hv(
     device=None,
     requires_grad=False,
 ) -> torch.Tensor:
-    """
-    Creates a hypervector of all ones that when bound with x will result in x.
+    """Creates a hypervector of all ones that when bound with x will result in x.
     Uses the bipolar system.
+
+    Args:
+        num_embeddings (int): size of the dictionary of embeddings.
+        embedding_dim (int): size of the embedded vector.
+        out (torch.Tensor, optional): specifies the output vector. (Optional) Defaults to None.
+        dtype (torch.dtype, optional): specifies data type. Defaults to None.
+        device (torch.device, optional): Defaults to None.
+        requires_grad (bool, optional): Defaults to False.
+
+    Returns:
+        torch.Tensor: Identity hypervector
+
     """
+    if dtype is None:
+        dtype = torch.get_default_dtype()
+
     return torch.ones(
         num_embeddings,
         embedding_dim,
@@ -38,25 +69,40 @@ def random_hv(
     device=None,
     requires_grad=False,
 ) -> torch.Tensor:
-    """
-    Creates num random hypervectors of dim dimensions in the bipolar system.
+    """Creates num random hypervectors of dim dimensions in the bipolar system.
     When dim is None, creates one hypervector of num dimensions.
+
+    Args:
+        num_embeddings (int): size of the dictionary of embeddings.
+        embedding_dim (int): size of the embedded vector.
+        generator (torch.Generator, optional): specifies random number generator. Defaults to None.
+        out (torch.Tensor, optional): specifies the output vector. (Optional) Defaults to None.
+        dtype (torch.dtype, optional): specifies data type. Defaults to None.
+        device (torch.device, optional): Defaults to None.
+        requires_grad (bool, optional): Defaults to False.
+
+    Returns:
+        torch.Tensor: Random Hypervector
+
     """
+    if dtype is None:
+        dtype = torch.get_default_dtype()
+
     selection = torch.randint(
         0,
         2,
         size=(num_embeddings * embedding_dim,),
         generator=generator,
         dtype=torch.long,
-        requires_grad=requires_grad,
         device=device,
     )
-    
+
     if out is not None:
         out = out.view(num_embeddings * embedding_dim)
 
-    options = torch.tensor([1.0, -1.0], dtype=dtype, device=device)
+    options = torch.tensor([1, -1], dtype=dtype, device=device)
     hv = torch.index_select(options, 0, selection, out=out)
+    hv.requires_grad = requires_grad
     return hv.view(num_embeddings, embedding_dim)
 
 
@@ -71,17 +117,32 @@ def level_hv(
     device=None,
     requires_grad=False,
 ) -> torch.Tensor:
-    """
-    Creates num random level correlated hypervectors of dim-dimensions in the bipolar system.
+    """Creates num random level correlated hypervectors of dim-dimensions in the bipolar system.
     Span denotes the number of approximate orthogonalities in the set (only 1 is an exact guarantee)
+
+    Args:
+        num_embeddings (int): size of the dictionary of embeddings.
+        embedding_dim (int): size of the embedded vector.
+        randomness (float, optional): r-value to interpolate between level and random hypervectors. Defaults to 0.0.
+        generator (torch.Generator, optional): specifies random number generator. Defaults to None.
+        out (torch.Tensor, optional): specifies the output vector. (Optional) Defaults to None.
+        dtype (torch.dtype, optional): specifies data type. Defaults to None.
+        device (torch.device, optional): Defaults to None.
+        requires_grad (bool, optional): Defaults to False.
+
+    Returns:
+        torch.Tensor: Level hypervector
+
     """
+    if dtype is None:
+        dtype = torch.get_default_dtype()
+
     hv = torch.zeros(
         num_embeddings,
         embedding_dim,
         out=out,
         dtype=dtype,
         device=device,
-        requires_grad=requires_grad,
     )
 
     # convert from normilzed "randomness" variable r to number of orthogonal vectors sets "span"
@@ -102,7 +163,7 @@ def level_hv(
         int(math.ceil(span)),
         embedding_dim,
         generator=generator,
-        dtype=dtype,
+        dtype=torch.float,
         device=device,
     )
 
@@ -124,6 +185,7 @@ def level_hv(
             span_end_hv = span_hv[span_idx + 1]
             hv[i] = torch.where(treshold_v[span_idx] < t, span_start_hv, span_end_hv)
 
+    hv.requires_grad = requires_grad
     return hv
 
 
@@ -138,18 +200,33 @@ def circular_hv(
     device=None,
     requires_grad=False,
 ) -> torch.Tensor:
-    """
-    Creates num random circular level correlated hypervectors
+    """Creates num random circular level correlated hypervectors
     of dim dimensions in the bipolar system.
     When dim is None, creates one hypervector of num dimensions.
+
+    Args:
+        num_embeddings (int): size of the dictionary of embeddings
+        embedding_dim (int): size of the embedded vector
+        randomness (float, optional): r-value. Defaults to 0.0.
+        generator (torch.Generator, optional): specifies random number generator. Defaults to None.
+        out (torch.Tensor, optional): specifies the output vector. (Optional) Defaults to None.
+        dtype (torch.dtype, optional): specifies data type. Defaults to None.
+        device (torch.device, optional): Defaults to None.
+        requires_grad (bool, optional): Defaults to False.
+
+    Returns:
+        torch.Tensor: circular hypervector
+
     """
+    if dtype is None:
+        dtype = torch.get_default_dtype()
+
     hv = torch.zeros(
         num_embeddings,
         embedding_dim,
         out=out,
         dtype=dtype,
         device=device,
-        requires_grad=requires_grad,
     )
 
     # convert from normilzed "randomness" variable r to
@@ -172,7 +249,7 @@ def circular_hv(
         int(math.ceil(span)),
         embedding_dim,
         generator=generator,
-        dtype=dtype,
+        dtype=torch.float,
         device=device,
     )
 
@@ -216,36 +293,154 @@ def circular_hv(
         if i % 2 == 0:
             hv[i // 2] = mutation_hv
 
+    hv.requires_grad = requires_grad
     return hv
 
 
 def bind(input: torch.Tensor, other: torch.Tensor, *, out=None) -> torch.Tensor:
-    """
-    Combines two hypervectors a and b into a new hypervector in the
+    """Combines two hypervectors a and b into a new hypervector in the
     same space, represents the vectors a and b as a pair
+
+    Args:
+        input (torch.Tensor): input hypervector tensor
+        other (torch.Tensor): input hypervector tensor
+        out (torch.Tensor, optional): output tensor. Defaults to None.
+
+    Returns:
+        torch.Tensor: binded hypervector
+
     """
+
     return torch.mul(input, other, out=out)
 
 
 def bundle(input: torch.Tensor, other: torch.Tensor, *, out=None) -> torch.Tensor:
+    """Returns element-wise sum of hypervectors input and other
+
+    Args:
+        input (torch.Tensor): input hypervector tensor
+        other (torch.Tensor): input hypervector tensor
+        out (torch.Tensor, optional): output tensor. Defaults to None.
+
+    Returns:
+        torch.Tensor: bundled hypervector
+
     """
-    Returns majority vote/element-wise sum of hypervectors hv
-    """
+
     return torch.add(input, other, out=out)
 
 
+def batch_bundle(
+    input: torch.Tensor,
+    *,
+    dim=-2,
+    keepdim=False,
+    dtype=None,
+) -> torch.Tensor:
+    """Returns element-wise sum of hypervectors hv
+
+    Args:
+        input (torch.Tensor): input hypervector tensor
+        dim (int, optional): dimension over which to bundle the hypervectors. Defaults to -2.
+        keepdim (bool, optional): whether to keep the bundled dimension. Defaults to False.
+        dtype (torch.dtype, optional): if specified determins the type of the returned tensor, otherwise same as input.
+
+    Returns:
+        torch.Tensor: bundled hypervector
+
+    """
+
+    return torch.sum(input, dim=dim, keepdim=keepdim, dtype=dtype)
+
+
 def permute(input: torch.Tensor, *, shifts=1, dims=-1) -> torch.Tensor:
+    """Permutes input hypervector by specified number of shifts
+
+    Args:
+        input (torch.Tensor): input tensor.
+        shifts (int, optional): Number of places the elements of the hypervector are shifted. Defaults to 1.
+        dims (int, optional): axis along which to permute the hypervector. Defaults to -1.
+
+    Returns:
+        torch.Tensor: permuted hypervector
+
+    """
+
     return torch.roll(input, shifts=shifts, dims=dims)
 
 
-def similarity(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
+def soft_quantize(input: torch.Tensor, *, out=None):
+    """Applies the hyperbolic tanh function to all elements of the input tensor
+
+    Args:
+        input (torch.Tensor): input tensor.
+        out (torch.Tensor, optional): output tensor. Defaults to None.
+
     """
-    Returns the similarity between two hypervectors
+    return torch.tanh(input, out=out)
+
+
+def hard_quantize(input: torch.Tensor, *, out=None):
+    """Clamps all elements in the input tensor into the range [-1, 1]
+
+    Args:
+        input (torch.Tensor): input tensor
+        out (torch.Tensor, optional): output tensor. Defaults to None.
+
+    Returns:
+        torch.Tensor: clamped input vector
     """
-    is_a_multi = len(a.shape) > 1
-    is_b_multi = len(b.shape) > 1
-    a = a if is_a_multi else a.unsqueeze(0)
-    b = b if is_b_multi else b.unsqueeze(0)
-    sim = F.cosine_similarity(a, b)
-    sim = sim if is_a_multi or is_b_multi else sim[0]
-    return sim
+    # Make sure that the output tensor has the same dtype and device
+    # as the input tensor.
+    positive = torch.tensor(1.0, dtype=input.dtype, device=input.device)
+    negative = torch.tensor(-1.0, dtype=input.dtype, device=input.device)
+
+    if out != None:
+        out[:] = torch.where(input > 0, positive, negative)
+        result = out
+    else:
+        result = torch.where(input > 0, positive, negative)
+
+    return result
+
+
+def cosine_similarity(input: torch.Tensor, others: torch.Tensor) -> torch.Tensor:
+    """Returns the cosine similarity between the input vector and each vector in others
+
+    Args:
+        input (torch.Tensor): one-dimensional tensor (dim,)
+        others (torch.Tensor): two-dimensional tensor (num_vectors, dim)
+
+    Returns:
+        torch.Tensor: output tensor of shape (num_vectors,)
+
+    """
+    return F.cosine_similarity(input, others)
+
+
+def dot_similarity(input: torch.Tensor, others: torch.Tensor) -> torch.Tensor:
+    """Returns the dot product between the input vector and each vector in others
+
+    Args:
+        input (torch.Tensor): one-dimensional tensor (dim,)
+        others (torch.Tensor): two-dimensional tensor (num_vectors, dim)
+
+    Returns:
+        torch.Tensor: output tensor of shape (num_vectors,)
+
+    """
+    return F.linear(input, others)
+
+
+def hamming_similarity(input: torch.Tensor, others: torch.Tensor) -> torch.Tensor:
+    """Returns the number of equal elements between the input vector and each vector in others
+
+    Args:
+        input (torch.Tensor): one-dimensional tensor (dim,)
+        others (torch.Tensor): two-dimensional tensor (num_vectors, dim)
+
+    Returns:
+        torch.Tensor: output tensor (num_vectors,)
+
+    """
+    return torch.sum(input == others, dim=-1, dtype=input.dtype)
