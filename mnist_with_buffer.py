@@ -186,7 +186,7 @@ if __name__ == "__main__":
             settings = dict(resources=resources)
             metrics = experiment(settings, device=device)
 
-            metrics = pd.DataFrame(metrics, index=[0])
+            metrics = pd.DataFrame(metrics)
             metrics["dataset"] = "MNIST"
 
             mode = "w" if is_first_result_write else "a"
