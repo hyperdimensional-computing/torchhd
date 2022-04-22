@@ -114,7 +114,7 @@ def experiment(settings, device=None):
         for samples, labels in tqdm(test_ld, desc="Testing"):
             samples = samples.to(device)
             labels = labels.to(device)
-            
+
             outputs = model(samples)
             predictions = torch.argmax(outputs, dim=-1)
 
@@ -162,7 +162,7 @@ if __name__ == "__main__":
     is_first_result_write = not args.append
 
     for _ in range(args.repeats):
-        for resources in torch.linspace(0, 1, 11).tolist():
+        for resources in torch.linspace(1, 0, 11).tolist():
             settings = dict(resources=resources)
             metrics = experiment(settings, device=device)
 

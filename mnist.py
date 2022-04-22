@@ -139,7 +139,7 @@ if __name__ == "__main__":
     is_first_result_write = not args.append
 
     for _ in range(args.repeats):
-        for resources in torch.linspace(0, 1, 11).tolist():
+        for resources in torch.linspace(1, 0, 11).tolist():
             settings = dict(resources=resources)
             metrics = experiment(settings, device=device)
 
