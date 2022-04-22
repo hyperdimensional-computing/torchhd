@@ -127,8 +127,8 @@ def experiment(settings, device=None):
         optimizer.zero_grad()
 
         dirty_bit = cache_count != 0        
-        enc = cache[dirty_bit] / cache_count[dirty_bit]
-        outputs = model.classify()
+        enc = cache[dirty_bit] / cache_count[dirty_bit].unsqueeze(-1)
+        outputs = model.classify(enc)
         labels = torch.arange(0, num_classes, device=device, dtype=torch.long)
         labels = labels[dirty_bit]
 
