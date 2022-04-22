@@ -1,5 +1,6 @@
 import os
 import argparse
+from this import d
 import time
 import random
 import pandas as pd
@@ -87,7 +88,7 @@ def experiment(settings, device=None):
     for epoch in range(1, 11):
 
         cache = torch.zeros(num_classes, DIMENSIONS, device=device, dtype=torch.float)
-        cache_count = [0] * num_classes
+        cache_count = torch.zeros(num_classes, device=device, dtype=torch.float)
 
         start_time = time.time()
         for samples, labels in tqdm(train_ld, desc="Train"):
@@ -120,8 +121,7 @@ def experiment(settings, device=None):
         # zero the parameter gradients
         optimizer.zero_grad()
 
-        dirty_bit = [count != 0 for count in cache_count]
-        dirty_bit = torch.tensor(dirty_bit, dtype=torch.bool, device=device)
+        dirty_bit = cache_count != 0
         enc = cache[dirty_bit] / cache_count[dirty_bit]
         outputs = model.classify()
         labels = torch.arange(0, num_classes, device=device, dtype=torch.long)
