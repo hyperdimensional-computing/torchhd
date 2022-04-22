@@ -12,7 +12,7 @@ from tqdm import tqdm
 import hdc
 from hdc import functional
 from hdc import embeddings
-from hdc.datasets.isolet import Isolet
+from hdc.datasets.isolet import ISOLET
 
 DIMENSIONS = 10000
 IMG_SIZE = 28
@@ -43,10 +43,10 @@ class Model(nn.Module):
 
 
 def experiment(settings, device=None):
-    train_ds = Isolet("data", train=True, download=True)
+    train_ds = ISOLET("data", train=True, download=True)
     train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
 
-    test_ds = Isolet("data", train=False, download=True)
+    test_ds = ISOLET("data", train=False, download=True)
     test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
     num_classes = len(train_ds.classes)
