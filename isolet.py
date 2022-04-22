@@ -72,7 +72,7 @@ def experiment(settings, device=None):
         else:
             with torch.no_grad():
                 samples_hv = model.encode(samples)
-                model.classify.weight[labels] += samples_hv
+                model.classify.weight[labels] += LEARNING_RATE * samples_hv
 
     end_time = time.time()
     train_duration = end_time - start_time

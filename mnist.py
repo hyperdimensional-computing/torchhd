@@ -79,7 +79,7 @@ def experiment(settings, device=None):
         else:
             with torch.no_grad():
                 samples_hv = model.encode(samples)
-                model.classify.weight[labels] += samples_hv
+                model.classify.weight[labels] += LEARNING_RATE * samples_hv
 
     end_time = time.time()
     train_duration = end_time - start_time
@@ -91,7 +91,7 @@ def experiment(settings, device=None):
         for samples, labels in tqdm(test_ld, desc="Testing"):
             samples = samples.to(device)
             labels = labels.to(device)
-            
+
             outputs = model(samples)
             predictions = torch.argmax(outputs, dim=-1)
 
