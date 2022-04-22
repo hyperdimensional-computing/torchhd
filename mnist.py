@@ -1,10 +1,8 @@
 import os
 import argparse
 import time
-import random
 import pandas as pd
 import torch
-import torch.optim as optim
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
@@ -18,8 +16,6 @@ from hdc import embeddings
 DIMENSIONS = 10000
 IMG_SIZE = 28
 NUM_LEVELS = 1000
-BATCH_SIZE = 1  # for GPUs with enough memory we can process multiple images at ones
-LEARNING_RATE = 0.005
 
 
 class Model(nn.Module):
@@ -51,35 +47,26 @@ def experiment(settings, device=None):
     transform = torchvision.transforms.ToTensor()
 
     train_ds = MNIST("data", train=True, transform=transform, download=True)
-    train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
+    train_ld = torch.utils.data.DataLoader(train_ds, batch_size=1, shuffle=True)
 
     test_ds = MNIST("data", train=False, transform=transform, download=True)
-    test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
+    test_ld = torch.utils.data.DataLoader(test_ds, batch_size=24, shuffle=False)
 
     num_classes = len(train_ds.classes)
 
     model = Model(num_classes, IMG_SIZE)
     model = model.to(device)
-    loss_fn = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE)
 
     start_time = time.time()
-    for samples, labels in tqdm(train_ld, desc="Train"):
-        samples = samples.to(device)
-        labels = labels.to(device)
+    with torch.no_grad():
+        for samples, labels in tqdm(train_ld, desc="Train"):
+            samples = samples.to(device)
+            labels = labels.to(device)
 
-        if random.random() < settings["resources"]:
-            optimizer.zero_grad()
-            outputs = model(samples)
+            samples_hv = model.encode(samples)
+            model.classify.weight[labels] += samples_hv
 
-            loss = loss_fn(outputs, labels)
-            loss.backward()
-            optimizer.step()
-
-        else:
-            with torch.no_grad():
-                samples_hv = model.encode(samples)
-                model.classify.weight[labels] += LEARNING_RATE * samples_hv
+        model.classify.weight[:] = F.normalize(model.classify.weight)
 
     end_time = time.time()
     train_duration = end_time - start_time
@@ -87,6 +74,7 @@ def experiment(settings, device=None):
 
     accuracy = hdc.metrics.Accuracy()
 
+    start_time = time.time()
     with torch.no_grad():
         for samples, labels in tqdm(test_ld, desc="Testing"):
             samples = samples.to(device)
@@ -145,7 +133,6 @@ if __name__ == "__main__":
 
             metrics = pd.DataFrame(metrics, index=[0])
             metrics["dataset"] = "MNIST"
-            metrics["has_buffer"] = False
 
             mode = "w" if is_first_result_write else "a"
             metrics.to_csv(

@@ -42,9 +42,34 @@ class Model(nn.Module):
         return logit
 
 
+def testing(model, data):
+    accuracy = hdc.metrics.Accuracy()
+
+    start_time = time.time()
+    with torch.no_grad():
+        for samples, labels in tqdm(data, desc="Testing"):
+            samples = samples.to(device)
+            labels = labels.to(device)
+
+            outputs = model(samples)
+            predictions = torch.argmax(outputs, dim=-1)
+
+            accuracy.step(labels, predictions)
+
+    end_time = time.time()
+    test_duration = end_time - start_time
+    print(f"Testing took {test_duration:.2f}s")
+    accuracy_value = accuracy.value().item()
+    print(f"Testing accuracy of {(accuracy_value * 100):.3f}%")
+
+    return dict(accuracy=accuracy_value, duration=test_duration)
+
+
 def experiment(settings, device=None):
     train_ds = ISOLET("data", train=True, download=True)
-    train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
+    train_ld = torch.utils.data.DataLoader(
+        train_ds, batch_size=BATCH_SIZE, shuffle=True
+    )
 
     test_ds = ISOLET("data", train=False, download=True)
     test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
@@ -57,78 +82,74 @@ def experiment(settings, device=None):
     loss_fn = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE)
 
-    cache = torch.zeros(num_classes, DIMENSIONS, device=device, dtype=torch.float)
-    dirty_bit = torch.tensor([False] * num_classes, dtype=torch.bool, device=device)
+    metrics = []
 
-    start_time = time.time()
-    for samples, labels in tqdm(train_ld, desc="Train"):
-        samples = samples.to(device)
-        labels = labels.to(device)
+    for epoch in range(1, 11):
 
-        if random.random() < settings["resources"]:
-            # zero the parameter gradients
-            optimizer.zero_grad()
+        cache = torch.zeros(num_classes, DIMENSIONS, device=device, dtype=torch.float)
+        cache_count = [0] * num_classes
 
-            enc = model.encode(samples)
-            enc = functional.bundle(enc, cache[labels])
-            cache[labels] = 0
-            dirty_bit[labels] = False
-
-            outputs = model.classify(enc)
-
-            loss = loss_fn(outputs, labels)
-            loss.backward()
-            optimizer.step()
-
-        else:
-            with torch.no_grad():
-                samples_hv = model.encode(samples)
-                cache[labels] += samples_hv
-                dirty_bit[labels] = True
-
-    # Apply all accumulated samples
-    # zero the parameter gradients
-    optimizer.zero_grad()
-
-    outputs = model.classify(cache[dirty_bit])
-    labels = torch.arange(0, num_classes, device=device, dtype=torch.long)
-    labels = labels[dirty_bit]
-
-    loss = loss_fn(outputs, labels)
-    loss.backward()
-    optimizer.step()
-
-    end_time = time.time()
-    train_duration = end_time - start_time
-    print(f"Training took {train_duration:.3f}s for {len(train_ds)} items")
-
-    accuracy = hdc.metrics.Accuracy()
-
-    with torch.no_grad():
-        for samples, labels in tqdm(test_ld, desc="Testing"):
+        start_time = time.time()
+        for samples, labels in tqdm(train_ld, desc="Train"):
             samples = samples.to(device)
             labels = labels.to(device)
 
-            outputs = model(samples)
-            predictions = torch.argmax(outputs, dim=-1)
+            if random.random() < settings["resources"]:
+                # zero the parameter gradients
+                optimizer.zero_grad()
 
-            accuracy.step(labels, predictions)
+                enc = model.encode(samples)
+                enc = functional.bundle(enc, cache[labels])
+                enc /= cache_count[labels] + 1
+                cache[labels] = 0
+                cache_count[labels] = 0
 
-    end_time = time.time()
-    test_duration = end_time - start_time
-    print(f"Testing took {test_duration:.2f}s for {len(test_ds)} items")
-    print(f"Testing accuracy of {(accuracy.value().item() * 100):.3f}%")
+                outputs = model.classify(enc)
 
-    metrics = dict(
-        accuracy=accuracy.value().item(),
-        resources=settings["resources"],
-        train_duration=train_duration,
-        train_set_size=len(train_ds),
-        test_duration=test_duration,
-        test_set_size=len(test_ds),
-        dimensions=DIMENSIONS,
-        device=str(device),
-    )
+                loss = loss_fn(outputs, labels)
+                loss.backward()
+                optimizer.step()
+
+            else:
+                with torch.no_grad():
+                    samples_hv = model.encode(samples)
+                    cache[labels] += samples_hv
+                    cache_count[labels] += 1
+
+        # Apply all accumulated samples
+        # zero the parameter gradients
+        optimizer.zero_grad()
+
+        dirty_bit = [count != 0 for count in cache_count]
+        dirty_bit = torch.tensor(dirty_bit, dtype=torch.bool, device=device)
+        enc = cache[dirty_bit] / cache_count[dirty_bit]
+        outputs = model.classify()
+        labels = torch.arange(0, num_classes, device=device, dtype=torch.long)
+        labels = labels[dirty_bit]
+
+        loss = loss_fn(outputs, labels)
+        loss.backward()
+        optimizer.step()
+
+        end_time = time.time()
+        train_duration = end_time - start_time
+        print(f"Training took {train_duration:.3f}s for {len(train_ds)} items")
+
+        test_metrics = testing(model, test_ld)
+
+        metrics.append(
+            dict(
+                epoch=epoch,
+                accuracy=test_metrics["accuracy"],
+                resources=settings["resources"],
+                train_duration=train_duration,
+                train_set_size=len(train_ds),
+                test_duration=test_metrics["duration"],
+                test_set_size=len(test_ds),
+                dimensions=DIMENSIONS,
+                device=str(device),
+            )
+        )
 
     return metrics
 
@@ -162,7 +183,6 @@ if __name__ == "__main__":
 
             metrics = pd.DataFrame(metrics, index=[0])
             metrics["dataset"] = "ISOLET"
-            metrics["has_buffer"] = True
 
             mode = "w" if is_first_result_write else "a"
             metrics.to_csv(
