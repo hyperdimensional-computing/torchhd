@@ -7,11 +7,12 @@ sys.path.insert(1, os.path.realpath(os.path.pardir))
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+# Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
+import torchmetrics
 from tqdm import tqdm
 
 from hdc import functional
 from hdc import embeddings
-from hdc import metrics
 from hdc.datasets import EuropeanLanguages as Languages
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -97,7 +98,7 @@ with torch.no_grad():
 
     model.classify.weight[:] = F.normalize(model.classify.weight)
 
-accuracy = metrics.Accuracy()
+accuracy = torchmetrics.Accuracy()
 
 with torch.no_grad():
     for samples, labels in tqdm(test_ld, desc="Testing"):
@@ -107,6 +108,6 @@ with torch.no_grad():
         outputs = model(samples)
         predictions = torch.argmax(outputs, dim=-1)
 
-        accuracy.step(labels, predictions)
+        accuracy.update(predictions, labels)
 
-print(f"Testing accuracy of {(accuracy.value().item() * 100):.3f}%")
+print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")

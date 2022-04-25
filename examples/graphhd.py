@@ -10,10 +10,11 @@ from tqdm import tqdm
 
 # Note: this example requires the torch_geometric library: https://pytorch-geometric.readthedocs.io
 import torch_geometric
+# Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
+import torchmetrics
 
 from hdc import functional
 from hdc import embeddings
-from hdc import metrics
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
@@ -128,7 +129,7 @@ with torch.no_grad():
 
     model.classify.weight[:] = F.normalize(model.classify.weight)
 
-accuracy = metrics.Accuracy()
+accuracy = torchmetrics.Accuracy()
 
 with torch.no_grad():
     for samples in tqdm(test_ld, desc="Testing"):
@@ -138,6 +139,6 @@ with torch.no_grad():
         outputs = model(samples)
         predictions = torch.argmax(outputs, dim=-1).unsqueeze(0)
 
-        accuracy.step(samples.y, predictions)
+        accuracy.update(predictions, samples.y)
 
-print(f"Testing accuracy of {(accuracy.value().item() * 100):.3f}%")
+print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")

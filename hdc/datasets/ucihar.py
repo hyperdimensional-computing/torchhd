@@ -10,7 +10,7 @@ from .utils import download_file, unzip_file
 
 
 class UCIHAR(data.Dataset):
-    """Uci Human Activity Recognition <https://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones> _ Dataset.
+    """`UCI Human Activity Recognition <https://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones>`_ Dataset.
     As found in the paper `"Human Activity Recognition Using Smartphones"<https://ieeexplore.ieee.org/document/8567275>`_.
 
     Args:
