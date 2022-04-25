@@ -9,6 +9,7 @@ Welcome to hdc's documentation!
 
    functional
    embeddings
+   structures
    datasets
    metrics
 
