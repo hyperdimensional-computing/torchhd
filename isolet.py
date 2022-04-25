@@ -37,7 +37,7 @@ class Model(nn.Module):
         return logit
 
 
-def experiment(settings, device=None):
+def experiment(device=None):
     train_ds = ISOLET("data", train=True, download=True)
     train_ld = torch.utils.data.DataLoader(train_ds, batch_size=1, shuffle=True)
 
@@ -85,7 +85,6 @@ def experiment(settings, device=None):
 
     metrics = dict(
         accuracy=accuracy.value().item(),
-        resources=settings["resources"],
         train_duration=train_duration,
         train_set_size=len(train_ds),
         test_duration=test_duration,
@@ -120,20 +119,18 @@ if __name__ == "__main__":
     is_first_result_write = not args.append
 
     for _ in range(args.repeats):
-        for resources in torch.linspace(1, 0, 11).tolist():
-            settings = dict(resources=resources)
-            metrics = experiment(settings, device=device)
+        metrics = experiment(device=device)
 
-            metrics = pd.DataFrame(metrics, index=[0])
-            metrics["dataset"] = "ISOLET"
+        metrics = pd.DataFrame(metrics, index=[0])
+        metrics["dataset"] = "ISOLET"
 
-            mode = "w" if is_first_result_write else "a"
-            metrics.to_csv(
-                args.result_file,
-                mode=mode,
-                header=is_first_result_write,
-                index=False,
-            )
+        mode = "w" if is_first_result_write else "a"
+        metrics.to_csv(
+            args.result_file,
+            mode=mode,
+            header=is_first_result_write,
+            index=False,
+        )
 
-            # make sure that the next results are appended to the same file
-            is_first_result_write = False
+        # make sure that the next results are appended to the same file
+        is_first_result_write = False
