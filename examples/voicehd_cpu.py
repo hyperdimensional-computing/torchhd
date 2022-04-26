@@ -1,3 +1,6 @@
+import time
+start_time = time.time()
+
 # The following two lines are only needed because of this repository organization
 import sys, os
 
@@ -14,7 +17,7 @@ from hdc import functional
 from hdc import embeddings
 from hdc.datasets.isolet import ISOLET
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 print("Using {} device".format(device))
 
 DIMENSIONS = 10000  # number of hypervector dimensions
@@ -75,3 +78,4 @@ with torch.no_grad():
         accuracy.update(predictions, labels)
 
 print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
+print("Duration", time.time() - start_time)

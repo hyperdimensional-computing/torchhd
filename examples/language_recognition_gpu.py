@@ -1,3 +1,7 @@
+import time
+
+start_time = time.time()
+
 # The following two lines are only needed because of this repository organization
 from random import sample
 import sys, os
@@ -15,7 +19,7 @@ from hdc import functional
 from hdc import embeddings
 from hdc.datasets import EuropeanLanguages as Languages
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:2")
 print("Using {} device".format(device))
 
 DIMENSIONS = 10000
@@ -111,3 +115,4 @@ with torch.no_grad():
         accuracy.update(predictions, labels)
 
 print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
+print("Duration", time.time() - start_time)
