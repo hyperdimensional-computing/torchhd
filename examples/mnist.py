@@ -8,6 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
 from torchvision.datasets import MNIST
+
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
 from tqdm import tqdm

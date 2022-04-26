@@ -10,6 +10,7 @@ from tqdm import tqdm
 
 # Note: this example requires the torch_geometric library: https://pytorch-geometric.readthedocs.io
 import torch_geometric
+
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
 
@@ -22,12 +23,13 @@ print("Using {} device".format(device))
 DIMENSIONS = 10000  # hypervectors dimension
 
 # for other available datasets see: https://pytorch-geometric.readthedocs.io/en/latest/notes/data_cheatsheet.html?highlight=tudatasets
-dataset = 'MUTAG'
+dataset = "MUTAG"
 
-graphs = torch_geometric.datasets.TUDataset('data', dataset)
+graphs = torch_geometric.datasets.TUDataset("data", dataset)
 train_size = int(0.7 * len(graphs))
 test_size = len(graphs) - train_size
 train_ld, test_ld = torch.utils.data.random_split(graphs, [train_size, test_size])
+
 
 def sparse_stochastic_graph(G):
     """
@@ -41,6 +43,7 @@ def sparse_stochastic_graph(G):
     values_per_node = values_per_column[columns]
     size = (G.num_nodes, G.num_nodes)
     return torch.sparse_coo_tensor(G.edge_index, values_per_node, size)
+
 
 def pagerank(G, alpha=0.85, max_iter=100, tol=1e-06):
     N = G.num_nodes
@@ -56,6 +59,7 @@ def pagerank(G, alpha=0.85, max_iter=100, tol=1e-06):
             return v
     return v
 
+
 def to_undirected(edge_index):
     """
     Returns the undirected edge_index
@@ -65,21 +69,13 @@ def to_undirected(edge_index):
     edge_index = torch.unique(edge_index, dim=1)
     return edge_index
 
-def graphs_per_class(graph_dataset):
-    items_per_class = [0] * graph_dataset.num_classes
-
-    for G in graph_dataset:
-        y = G.y.item()
-        items_per_class[y] += 1
-
-    return tuple(items_per_class)
 
 def min_max_graph_size(graph_dataset):
     if len(graph_dataset) == 0:
         return None, None
 
-    max_num_nodes = float('-inf')
-    min_num_nodes = float('inf')
+    max_num_nodes = float("-inf")
+    min_num_nodes = float("inf")
 
     for G in graph_dataset:
         num_nodes = G.num_nodes
@@ -87,6 +83,7 @@ def min_max_graph_size(graph_dataset):
         min_num_nodes = min(min_num_nodes, num_nodes)
 
     return min_num_nodes, max_num_nodes
+
 
 class Model(nn.Module):
     def __init__(self, num_classes, size):
@@ -101,9 +98,8 @@ class Model(nn.Module):
         pr = pagerank(x)
         pr_sort, pr_argsort = pr.sort()
 
-        node_id_hvs = torch.zeros(
-            (x.num_nodes, DIMENSIONS), device=device)
-        node_id_hvs[pr_argsort] = self.node_ids.weight[:x.num_nodes]
+        node_id_hvs = torch.zeros((x.num_nodes, DIMENSIONS), device=device)
+        node_id_hvs[pr_argsort] = self.node_ids.weight[: x.num_nodes]
 
         row, col = to_undirected(x.edge_index)
 
@@ -114,9 +110,10 @@ class Model(nn.Module):
         enc = self.encode(x)
         logit = self.classify(enc)
         return logit
-    
+
+
 min_graph_size, max_graph_size = min_max_graph_size(graphs)
-model = Model(len(graphs_per_class(graphs)), max_graph_size)
+model = Model(graphs.num_classes, max_graph_size)
 model = model.to(device)
 
 with torch.no_grad():

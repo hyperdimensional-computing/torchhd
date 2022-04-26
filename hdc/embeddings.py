@@ -167,16 +167,10 @@ class Projection(nn.Module):
             torch.empty((out_features, in_features), **factory_kwargs),
             requires_grad=requires_grad,
         )
-        self.bias = nn.parameter.Parameter(
-            torch.empty(out_features, **factory_kwargs), requires_grad=requires_grad
-        )
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
         nn.init.normal_(self.weight, 0, 1)
-        nn.init.uniform_(self.bias, 0, math.pi * 2)
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
-        cos = torch.cos(F.linear(input, self.weight, self.bias))
-        sin = torch.sin(F.linear(input, self.weight))
-        return cos * sin
+        return F.linear(input, self.weight)
