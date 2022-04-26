@@ -1,4 +1,9 @@
+import time
+
+start_time = time.time()
+
 # The following two lines are only needed because of this repository organization
+from random import sample
 import sys, os
 
 sys.path.insert(1, os.path.realpath(os.path.pardir))
@@ -6,17 +11,15 @@ sys.path.insert(1, os.path.realpath(os.path.pardir))
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.utils.data as data
-
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
 from tqdm import tqdm
 
-from torchhd import functional
-from torchhd import embeddings
-from torchhd.datasets import EuropeanLanguages as Languages
+from hdc import functional
+from hdc import embeddings
+from hdc.datasets import EuropeanLanguages as Languages
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:2")
 print("Using {} device".format(device))
 
 DIMENSIONS = 10000
@@ -44,7 +47,7 @@ def char2int(char: str) -> int:
 
 def transform(x: str) -> torch.Tensor:
     char_ids = x[:MAX_INPUT_SIZE]
-    char_ids = [char2int(char) + 1 for char in char_ids.lower()]
+    char_ids = [char2int(char) + 1 for char in x.lower()]
 
     if len(char_ids) < MAX_INPUT_SIZE:
         char_ids += [PADDING_IDX] * (MAX_INPUT_SIZE - len(char_ids))
@@ -53,10 +56,10 @@ def transform(x: str) -> torch.Tensor:
 
 
 train_ds = Languages("../data", train=True, transform=transform, download=True)
-train_ld = data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
+train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
 
 test_ds = Languages("../data", train=False, transform=transform, download=True)
-test_ld = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
+test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
 
 class Model(nn.Module):
@@ -108,6 +111,8 @@ with torch.no_grad():
 
         outputs = model(samples)
         predictions = torch.argmax(outputs, dim=-1)
-        accuracy.update(predictions.cpu(), labels)
+
+        accuracy.update(predictions, labels)
 
 print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
+print("Duration", time.time() - start_time)

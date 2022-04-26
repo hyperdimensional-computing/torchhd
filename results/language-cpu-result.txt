@@ -1,0 +1,25 @@
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 97.552%
+Duration 539.7999873161316
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 97.443%
+Duration 543.500890493393
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 97.648%
+Duration 537.3259844779968
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 97.529%
+Duration 549.193972826004
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 97.510%
+Duration 544.3281972408295
