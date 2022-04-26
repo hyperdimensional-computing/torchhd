@@ -9,6 +9,7 @@ sys.path.insert(1, os.path.realpath(os.path.pardir))
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
 from tqdm import tqdm
@@ -50,6 +51,7 @@ train_ds = ISOLET("../data", train=True, download=True)
 train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
 
 test_ds = ISOLET("../data", train=False, download=True)
+
 test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
 model = Model(len(train_ds.classes), train_ds[0][0].size(-1))
@@ -74,8 +76,8 @@ with torch.no_grad():
 
         outputs = model(samples)
         predictions = torch.argmax(outputs, dim=-1)
-
         accuracy.update(predictions, labels)
 
 print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
 print("Duration", time.time() - start_time)
+

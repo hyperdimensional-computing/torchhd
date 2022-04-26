@@ -3,7 +3,6 @@ import time
 start_time = time.time()
 
 # The following two lines are only needed because of this repository organization
-from random import sample
 import sys, os
 
 sys.path.insert(1, os.path.realpath(os.path.pardir))
@@ -11,6 +10,7 @@ sys.path.insert(1, os.path.realpath(os.path.pardir))
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
 from tqdm import tqdm
