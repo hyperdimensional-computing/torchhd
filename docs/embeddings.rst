@@ -11,3 +11,4 @@ Embeddings
     Random
     Level
     Circular
+    Projection
