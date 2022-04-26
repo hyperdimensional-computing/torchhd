@@ -15,6 +15,7 @@ from tqdm import tqdm
 from hdc import functional
 from hdc import embeddings
 
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
 
@@ -71,6 +72,7 @@ with torch.no_grad():
     model.classify.weight[:] = F.normalize(model.classify.weight)
 
 accuracy = torchmetrics.Accuracy()
+
 
 with torch.no_grad():
     for samples, labels in tqdm(test_ld, desc="Testing"):
