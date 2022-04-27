@@ -1,85 +1,85 @@
 Using cuda:2 device
 List of subjects [0]
 Files already downloaded and verified
-Testing accuracy of 97.452%
+Testing accuracy of 94.937%
 List of subjects [1]
 Files already downloaded and verified
-Testing accuracy of 98.639%
+Testing accuracy of 87.838%
 List of subjects [2]
 Files already downloaded and verified
-Testing accuracy of 95.139%
+Testing accuracy of 84.138%
 List of subjects [3]
 Files already downloaded and verified
-Testing accuracy of 97.183%
+Testing accuracy of 90.210%
 List of subjects [4]
 Files already downloaded and verified
-Testing accuracy of 94.000%
-Duration 43.01388168334961
+Testing accuracy of 79.208%
+Duration 35.38209772109985
 Using cuda:2 device
 List of subjects [0]
 Files already downloaded and verified
-Testing accuracy of 97.452%
+Testing accuracy of 96.835%
 List of subjects [1]
 Files already downloaded and verified
-Testing accuracy of 98.639%
+Testing accuracy of 95.270%
 List of subjects [2]
 Files already downloaded and verified
-Testing accuracy of 95.139%
+Testing accuracy of 86.897%
 List of subjects [3]
 Files already downloaded and verified
-Testing accuracy of 96.479%
+Testing accuracy of 91.608%
 List of subjects [4]
 Files already downloaded and verified
-Testing accuracy of 95.000%
-Duration 43.875603675842285
+Testing accuracy of 84.158%
+Duration 33.37624454498291
 Using cuda:2 device
 List of subjects [0]
 Files already downloaded and verified
-Testing accuracy of 97.452%
+Testing accuracy of 95.570%
 List of subjects [1]
 Files already downloaded and verified
-Testing accuracy of 98.639%
+Testing accuracy of 89.189%
 List of subjects [2]
 Files already downloaded and verified
-Testing accuracy of 95.833%
+Testing accuracy of 86.897%
 List of subjects [3]
 Files already downloaded and verified
-Testing accuracy of 93.662%
+Testing accuracy of 93.007%
 List of subjects [4]
 Files already downloaded and verified
-Testing accuracy of 93.000%
-Duration 48.219651222229004
+Testing accuracy of 75.248%
+Duration 36.001452684402466
 Using cuda:2 device
 List of subjects [0]
 Files already downloaded and verified
-Testing accuracy of 97.452%
+Testing accuracy of 95.570%
 List of subjects [1]
 Files already downloaded and verified
-Testing accuracy of 98.639%
+Testing accuracy of 91.216%
 List of subjects [2]
 Files already downloaded and verified
-Testing accuracy of 95.139%
+Testing accuracy of 85.517%
 List of subjects [3]
 Files already downloaded and verified
-Testing accuracy of 95.070%
+Testing accuracy of 90.210%
 List of subjects [4]
 Files already downloaded and verified
-Testing accuracy of 94.000%
-Duration 44.514522552490234
+Testing accuracy of 83.168%
+Duration 32.64135813713074
 Using cuda:2 device
 List of subjects [0]
 Files already downloaded and verified
-Testing accuracy of 97.452%
+Testing accuracy of 94.937%
 List of subjects [1]
 Files already downloaded and verified
-Testing accuracy of 98.639%
+Testing accuracy of 89.189%
 List of subjects [2]
 Files already downloaded and verified
-Testing accuracy of 95.833%
+Testing accuracy of 88.966%
 List of subjects [3]
 Files already downloaded and verified
-Testing accuracy of 96.479%
+Testing accuracy of 88.811%
 List of subjects [4]
 Files already downloaded and verified
-Testing accuracy of 94.000%
-Duration 42.42163062095642
+Testing accuracy of 74.257%
+Duration 33.89114212989807

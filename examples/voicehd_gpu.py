@@ -71,12 +71,10 @@ accuracy = torchmetrics.Accuracy()
 with torch.no_grad():
     for samples, labels in tqdm(test_ld, desc="Testing"):
         samples = samples.to(device)
-        labels = labels.to(device)
 
         outputs = model(samples)
         predictions = torch.argmax(outputs, dim=-1)
-
-        accuracy.update(predictions, labels)
+        accuracy.update(predictions.cpu(), labels)
 
 print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
 print("Duration", time.time() - start_time)

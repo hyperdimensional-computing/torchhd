@@ -1,85 +1,85 @@
 Using cpu device
 List of subjects [0]
 Files already downloaded and verified
-Testing accuracy of 97.452%
+Testing accuracy of 94.304%
 List of subjects [1]
 Files already downloaded and verified
-Testing accuracy of 98.639%
+Testing accuracy of 93.919%
 List of subjects [2]
 Files already downloaded and verified
-Testing accuracy of 95.139%
+Testing accuracy of 83.448%
 List of subjects [3]
 Files already downloaded and verified
-Testing accuracy of 97.887%
+Testing accuracy of 89.510%
 List of subjects [4]
 Files already downloaded and verified
-Testing accuracy of 94.000%
-Duration 37.71637511253357
+Testing accuracy of 89.109%
+Duration 28.666845321655273
 Using cpu device
 List of subjects [0]
 Files already downloaded and verified
-Testing accuracy of 97.452%
+Testing accuracy of 94.937%
 List of subjects [1]
 Files already downloaded and verified
-Testing accuracy of 98.639%
+Testing accuracy of 92.568%
 List of subjects [2]
 Files already downloaded and verified
-Testing accuracy of 94.444%
+Testing accuracy of 83.448%
 List of subjects [3]
 Files already downloaded and verified
-Testing accuracy of 96.479%
+Testing accuracy of 93.706%
 List of subjects [4]
 Files already downloaded and verified
-Testing accuracy of 94.000%
-Duration 36.63832950592041
+Testing accuracy of 80.198%
+Duration 28.08893370628357
 Using cpu device
 List of subjects [0]
 Files already downloaded and verified
-Testing accuracy of 97.452%
+Testing accuracy of 94.304%
 List of subjects [1]
 Files already downloaded and verified
-Testing accuracy of 98.639%
+Testing accuracy of 89.865%
 List of subjects [2]
 Files already downloaded and verified
-Testing accuracy of 95.139%
+Testing accuracy of 84.138%
 List of subjects [3]
 Files already downloaded and verified
-Testing accuracy of 94.366%
+Testing accuracy of 90.210%
 List of subjects [4]
 Files already downloaded and verified
-Testing accuracy of 95.000%
-Duration 37.56775236129761
+Testing accuracy of 74.257%
+Duration 28.054216384887695
 Using cpu device
 List of subjects [0]
 Files already downloaded and verified
-Testing accuracy of 97.452%
+Testing accuracy of 97.468%
 List of subjects [1]
 Files already downloaded and verified
-Testing accuracy of 98.639%
+Testing accuracy of 93.243%
 List of subjects [2]
 Files already downloaded and verified
-Testing accuracy of 95.139%
+Testing accuracy of 82.759%
 List of subjects [3]
 Files already downloaded and verified
-Testing accuracy of 97.887%
+Testing accuracy of 91.608%
 List of subjects [4]
 Files already downloaded and verified
-Testing accuracy of 93.000%
-Duration 36.391305685043335
+Testing accuracy of 83.168%
+Duration 28.474148273468018
 Using cpu device
 List of subjects [0]
 Files already downloaded and verified
-Testing accuracy of 97.452%
+Testing accuracy of 94.304%
 List of subjects [1]
 Files already downloaded and verified
-Testing accuracy of 98.639%
+Testing accuracy of 91.216%
 List of subjects [2]
 Files already downloaded and verified
-Testing accuracy of 95.139%
+Testing accuracy of 84.828%
 List of subjects [3]
 Files already downloaded and verified
-Testing accuracy of 96.479%
+Testing accuracy of 89.510%
 List of subjects [4]
 Files already downloaded and verified
-Testing accuracy of 94.000%
-Duration 38.32503819465637
+Testing accuracy of 77.228%
+Duration 28.90163516998291
