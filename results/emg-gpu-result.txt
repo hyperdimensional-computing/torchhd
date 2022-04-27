@@ -1,0 +1,85 @@
+Using cuda:2 device
+List of subjects [0]
+Files already downloaded and verified
+Testing accuracy of 97.452%
+List of subjects [1]
+Files already downloaded and verified
+Testing accuracy of 98.639%
+List of subjects [2]
+Files already downloaded and verified
+Testing accuracy of 95.139%
+List of subjects [3]
+Files already downloaded and verified
+Testing accuracy of 97.183%
+List of subjects [4]
+Files already downloaded and verified
+Testing accuracy of 94.000%
+Duration 43.01388168334961
+Using cuda:2 device
+List of subjects [0]
+Files already downloaded and verified
+Testing accuracy of 97.452%
+List of subjects [1]
+Files already downloaded and verified
+Testing accuracy of 98.639%
+List of subjects [2]
+Files already downloaded and verified
+Testing accuracy of 95.139%
+List of subjects [3]
+Files already downloaded and verified
+Testing accuracy of 96.479%
+List of subjects [4]
+Files already downloaded and verified
+Testing accuracy of 95.000%
+Duration 43.875603675842285
+Using cuda:2 device
+List of subjects [0]
+Files already downloaded and verified
+Testing accuracy of 97.452%
+List of subjects [1]
+Files already downloaded and verified
+Testing accuracy of 98.639%
+List of subjects [2]
+Files already downloaded and verified
+Testing accuracy of 95.833%
+List of subjects [3]
+Files already downloaded and verified
+Testing accuracy of 93.662%
+List of subjects [4]
+Files already downloaded and verified
+Testing accuracy of 93.000%
+Duration 48.219651222229004
+Using cuda:2 device
+List of subjects [0]
+Files already downloaded and verified
+Testing accuracy of 97.452%
+List of subjects [1]
+Files already downloaded and verified
+Testing accuracy of 98.639%
+List of subjects [2]
+Files already downloaded and verified
+Testing accuracy of 95.139%
+List of subjects [3]
+Files already downloaded and verified
+Testing accuracy of 95.070%
+List of subjects [4]
+Files already downloaded and verified
+Testing accuracy of 94.000%
+Duration 44.514522552490234
+Using cuda:2 device
+List of subjects [0]
+Files already downloaded and verified
+Testing accuracy of 97.452%
+List of subjects [1]
+Files already downloaded and verified
+Testing accuracy of 98.639%
+List of subjects [2]
+Files already downloaded and verified
+Testing accuracy of 95.833%
+List of subjects [3]
+Files already downloaded and verified
+Testing accuracy of 96.479%
+List of subjects [4]
+Files already downloaded and verified
+Testing accuracy of 94.000%
+Duration 42.42163062095642
