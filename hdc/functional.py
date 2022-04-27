@@ -456,16 +456,57 @@ def map_range(
     out_min: float,
     out_max: float,
 ) -> torch.Tensor:
+    """Maps the input real value range to an output real value range.
+    Input values outside the min, max range are not clamped.
+
+    Args:
+        input (torch.LongTensor): The values to map
+        in_min (float): the minimum value of the input range
+        in_max (float): the maximum value of the input range
+        out_min (float): the minimum value of the output range
+        out_max (float): the maximum value of the output range
+
+    Returns:
+        torch.Tensor: output tensor
+
+    """
     return out_min + (out_max - out_min) * (input - in_min) / (in_max - in_min)
 
 
 def value_to_index(
-    input: torch.Tensor, in_min: float, in_max: float, max_index: int
+    input: torch.Tensor, in_min: float, in_max: float, index_length: int
 ) -> torch.LongTensor:
-    return map_range(input, in_min, in_max, 0, max_index).round().long()
+    """Maps the input real value range to an index range.
+    Input values outside the min, max range are clamped.
+
+    Args:
+        input (torch.LongTensor): The values to map
+        in_min (float): the minimum value of the input range
+        in_max (float): the maximum value of the input range
+        index_length (int): The length of the output index, i.e., one more than the maximum output
+
+    Returns:
+        torch.Tensor: output tensor
+
+    """
+    mapped = map_range(input, in_min, in_max, 0, index_length - 1)
+    return mapped.round().long().clamp(0, index_length - 1)
 
 
 def index_to_value(
-    input: torch.LongTensor, max_index: int, out_min: float, out_max: float
+    input: torch.LongTensor, index_length: int, out_min: float, out_max: float
 ) -> torch.FloatTensor:
-    return map_range(input.float(), 0, max_index, out_min, out_max)
+    """Maps the input index range to a real value range.
+    Input values greater or equal to index_length are not clamped.
+
+    Args:
+        input (torch.LongTensor): The values to map
+        index_length (int): The length of the input index, i.e., one more than the maximum index
+        out_min (float): the minimum value of the output range
+        out_max (float): the maximum value of the output range
+
+    Returns:
+        torch.Tensor: output tensor
+
+    """
+    return map_range(input.float(), 0, index_length - 1, out_min, out_max)

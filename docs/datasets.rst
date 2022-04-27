@@ -13,5 +13,5 @@ The hdc library provides many popular built-in datasets to work with.
     ISOLET
     EuropeanLanguages
     UCIHAR
-    EMGHandGuesters
+    EMGHandGestures
     PAMAP

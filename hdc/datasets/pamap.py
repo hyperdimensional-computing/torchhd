@@ -26,24 +26,24 @@ class PAMAP(data.Dataset):
     """
 
     classes: List[str] = [
-        "lying"
-        "sitting"
-        "standing"
-        "walking"
-        "running"
-        "cycling"
-        "nordic walking"
-        "watching TV"
-        "computer work"
-        "car driving"
-        "ascending stairs"
-        "descending stairs"
-        "vacuum cleaning"
-        "ironing"
-        "folding laundry"
-        "house cleaning"
-        "playing soccer"
-        "rope jumping"
+        "lying",
+        "sitting",
+        "standing",
+        "walking",
+        "running",
+        "cycling",
+        "nordic walking",
+        "watching TV",
+        "computer work",
+        "car driving",
+        "ascending stairs",
+        "descending stairs",
+        "vacuum cleaning",
+        "ironing",
+        "folding laundry",
+        "house cleaning",
+        "playing soccer",
+        "rope jumping",
     ]
 
     columns: List[str] = [
@@ -230,10 +230,9 @@ class PAMAP(data.Dataset):
             features = torch.tensor(data.values, dtype=torch.long)
             clean_labels = torch.cat((clean_labels, labels))
             clean_features = torch.cat((clean_features, features))
+        
         self.data = clean_features
         self.targets = clean_labels
-        print(clean_features.shape)
-        print(clean_labels.shape)
 
     def download(self):
         """Download the data if it doesn't exist already."""
