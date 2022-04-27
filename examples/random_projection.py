@@ -77,14 +77,14 @@ class Model(nn.Module):
 
     def forward(self, x):
         enc = self.encode(x)
-        
+
         # Get the approximate target hv from the model
         target_hv = functional.bind(self.regression.weight, enc)
-        
+
         # Get the index of the most similar target vector
         sim = functional.dot_similarity(target_hv, self.target.weight)
         index = torch.argmax(sim, dim=-1)
-        
+
         # Convert the index of the hypervector back to the value it represents
         slope = MAX_TEMPERATURE - MIN_TEMPERATURE
         pred = index / 499 * slope + MIN_TEMPERATURE
@@ -110,9 +110,8 @@ mse = torchmetrics.MeanSquaredError()
 with torch.no_grad():
     for samples, labels in tqdm(test_ld, desc="Testing"):
         samples = samples.to(device)
-        labels = labels.to(device)
 
         predictions = model(samples)
-        mse.update(predictions, labels)
+        mse.update(predictions.cpu(), labels)
 
 print(f"Testing mean squared error of {(mse.compute().item()):.3f}")
