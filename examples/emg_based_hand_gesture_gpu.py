@@ -1,6 +1,8 @@
+import time
+start_time = time.time()
+
 # The following two lines are only needed because of this repository organization
 import sys, os
-import time
 sys.path.insert(1, os.path.realpath(os.path.pardir))
 
 import random
@@ -15,7 +17,7 @@ import torchmetrics
 from torch.utils.data import RandomSampler, Subset
 from hdc.datasets.EMG_based_hand_gesture import EMG_based_hand_gesture
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:2")
 print("Using {} device".format(device))
 
 DIMENSIONS = 10000  # number of hypervector dimensions
@@ -90,6 +92,7 @@ def experiment(subjects=[0]):
         for samples, labels in tqdm(train_ld, desc="Training"):
             samples = samples.to(device)
             labels = labels.to(device)
+
             samples_hv = model.encode(samples)
             model.classify.weight[labels] += samples_hv
 
@@ -100,15 +103,14 @@ def experiment(subjects=[0]):
     with torch.no_grad():
         for samples, labels in tqdm(test_ld, desc="Testing"):
             samples = samples.to(device)
-            labels = labels.to(device)
 
             outputs = model(samples)
             predictions = torch.argmax(outputs, dim=0, keepdim=True)
-            accuracy.update(labels, predictions)
+            accuracy.update(labels, predictions.cpu())
 
     print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
 
-init = time.time()
 for i in range(5):
     experiment([i])
-print(time.time()-init)
+
+print("Duration", time.time() - start_time)
