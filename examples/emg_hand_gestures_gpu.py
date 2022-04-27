@@ -1,3 +1,6 @@
+import time
+start_time = time.time()
+
 # The following two lines are only needed because of this repository organization
 import sys, os
 
@@ -16,7 +19,7 @@ from hdc import functional
 from hdc import embeddings
 from hdc.datasets import EMGHandGestures
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:2")
 print("Using {} device".format(device))
 
 DIMENSIONS = 10000  # number of hypervector dimensions
@@ -118,3 +121,5 @@ def experiment(subjects=[0]):
 # Make a model for each subject
 for i in range(5):
     experiment([i])
+
+print("Duration", time.time() - start_time)
