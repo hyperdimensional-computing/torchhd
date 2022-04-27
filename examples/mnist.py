@@ -8,11 +8,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
 from torchvision.datasets import MNIST
+
+# Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
+import torchmetrics
 from tqdm import tqdm
 
 from hdc import functional
 from hdc import embeddings
-from hdc import metrics
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
@@ -69,7 +72,8 @@ with torch.no_grad():
 
     model.classify.weight[:] = F.normalize(model.classify.weight)
 
-accuracy = metrics.Accuracy()
+accuracy = torchmetrics.Accuracy()
+
 
 with torch.no_grad():
     for samples, labels in tqdm(test_ld, desc="Testing"):
@@ -78,7 +82,6 @@ with torch.no_grad():
         
         outputs = model(samples)
         predictions = torch.argmax(outputs, dim=-1)
+        accuracy.update(predictions.cpu(), labels)
 
-        accuracy.step(labels, predictions)
-
-print(f"Testing accuracy of {(accuracy.value().item() * 100):.3f}%")
+print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")

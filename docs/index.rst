@@ -10,6 +10,5 @@ Welcome to hdc's documentation!
    functional
    embeddings
    datasets
-   metrics
 
 

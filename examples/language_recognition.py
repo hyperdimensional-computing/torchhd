@@ -1,5 +1,4 @@
 # The following two lines are only needed because of this repository organization
-from random import sample
 import sys, os
 
 sys.path.insert(1, os.path.realpath(os.path.pardir))
@@ -7,11 +6,14 @@ sys.path.insert(1, os.path.realpath(os.path.pardir))
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.utils.data as data
+
+# Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
+import torchmetrics
 from tqdm import tqdm
 
 from hdc import functional
 from hdc import embeddings
-from hdc import metrics
 from hdc.datasets import EuropeanLanguages as Languages
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -51,10 +53,10 @@ def transform(x: str) -> torch.Tensor:
 
 
 train_ds = Languages("../data", train=True, transform=transform, download=True)
-train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
+train_ld = data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
 
 test_ds = Languages("../data", train=False, transform=transform, download=True)
-test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
+test_ld = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
 
 class Model(nn.Module):
@@ -97,7 +99,7 @@ with torch.no_grad():
 
     model.classify.weight[:] = F.normalize(model.classify.weight)
 
-accuracy = metrics.Accuracy()
+accuracy = torchmetrics.Accuracy()
 
 with torch.no_grad():
     for samples, labels in tqdm(test_ld, desc="Testing"):
@@ -106,7 +108,6 @@ with torch.no_grad():
 
         outputs = model(samples)
         predictions = torch.argmax(outputs, dim=-1)
+        accuracy.update(predictions.cpu(), labels)
 
-        accuracy.step(labels, predictions)
-
-print(f"Testing accuracy of {(accuracy.value().item() * 100):.3f}%")
+print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
