@@ -19,6 +19,9 @@ __all__ = [
     "hamming_similarity",
     "cosine_similarity",
     "dot_similarity",
+    "map_range",
+    "value_to_index",
+    "index_to_value",
 ]
 
 
@@ -444,3 +447,25 @@ def hamming_similarity(input: torch.Tensor, others: torch.Tensor) -> torch.Tenso
 
     """
     return torch.sum(input == others, dim=-1, dtype=input.dtype)
+
+
+def map_range(
+    input: torch.Tensor,
+    in_min: float,
+    in_max: float,
+    out_min: float,
+    out_max: float,
+) -> torch.Tensor:
+    return out_min + (out_max - out_min) * (input - in_min) / (in_max - in_min)
+
+
+def value_to_index(
+    input: torch.Tensor, in_min: float, in_max: float, max_index: int
+) -> torch.LongTensor:
+    return map_range(input, in_min, in_max, 0, max_index).round().long()
+
+
+def index_to_value(
+    input: torch.LongTensor, max_index: int, out_min: float, out_max: float
+) -> torch.FloatTensor:
+    return map_range(input.float(), 0, max_index, out_min, out_max)

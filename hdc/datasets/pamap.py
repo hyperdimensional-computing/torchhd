@@ -47,34 +47,63 @@ class PAMAP(data.Dataset):
     ]
 
     columns: List[str] = [
-        "timestamp", "activity", "heartRate",
+        "timestamp",
+        "activity",
+        "heartRate",
         "handTemp",
-        "handAcc11", "handAcc12", "handAcc13",
-        "handAcc21", "handAcc22", "handAcc23",
-        "handGyro1", "handGyro2", "handGyro3",
-        "handMagnetometer1", "handMagnetometer2", "handMagnetometer3",
-        "handOrientation1", "handOrientation2", "handOrientation3", "handOrientation4",
+        "handAcc11",
+        "handAcc12",
+        "handAcc13",
+        "handAcc21",
+        "handAcc22",
+        "handAcc23",
+        "handGyro1",
+        "handGyro2",
+        "handGyro3",
+        "handMagnetometer1",
+        "handMagnetometer2",
+        "handMagnetometer3",
+        "handOrientation1",
+        "handOrientation2",
+        "handOrientation3",
+        "handOrientation4",
         "chestTemp",
-        "chestAcc11", "chestAcc12", "chestAcc13",
-        "chestAcc21", "chestAcc22", "chestAcc23",
-        "chestGyro1", "chestGyro2", "chestGyro3",
-        "chestMagnetometer1", "chestMagnetometer2", "chestMagnetometer3",
-        "chestOrientation1", "chestOrientation2", "chestOrientation3", "chestOrientation4",
+        "chestAcc11",
+        "chestAcc12",
+        "chestAcc13",
+        "chestAcc21",
+        "chestAcc22",
+        "chestAcc23",
+        "chestGyro1",
+        "chestGyro2",
+        "chestGyro3",
+        "chestMagnetometer1",
+        "chestMagnetometer2",
+        "chestMagnetometer3",
+        "chestOrientation1",
+        "chestOrientation2",
+        "chestOrientation3",
+        "chestOrientation4",
         "ankleTemp",
-        "ankleAcc11", "ankleAcc12", "ankleAcc13",
-        "ankleAcc21", "ankleAcc22", "ankleAcc23",
-        "ankleGyro1", "ankleGyro2", "ankleGyro3",
-        "ankleMagnetometer1", "ankleMagnetometer2", "ankleMagnetometer3",
-        "ankleOrientation1", "ankleOrientation2", "ankleOrientation3", "ankleOrientation4"
+        "ankleAcc11",
+        "ankleAcc12",
+        "ankleAcc13",
+        "ankleAcc21",
+        "ankleAcc22",
+        "ankleAcc23",
+        "ankleGyro1",
+        "ankleGyro2",
+        "ankleGyro3",
+        "ankleMagnetometer1",
+        "ankleMagnetometer2",
+        "ankleMagnetometer3",
+        "ankleOrientation1",
+        "ankleOrientation2",
+        "ankleOrientation3",
+        "ankleOrientation4",
     ]
 
-    optional_data: List[int] = [
-        0,
-        4,
-        5,
-        7,
-        8
-    ]
+    subjects_with_optional_data: List[int] = [0, 4, 5, 7, 8]
 
     def __init__(
         self,
@@ -122,8 +151,8 @@ class PAMAP(data.Dataset):
         if self.transform:
             sample = self.transform(sample)
 
-        if self.transform:
-            label = self.transform(label)
+        if self.target_transform:
+            label = self.target_transform(label)
 
         return sample, label
 
@@ -132,10 +161,22 @@ class PAMAP(data.Dataset):
             return False
         # Check if the root directory contains the required files
         has_all_files = []
-        for i in [1,5,6,8,9]:
-            has_all_files.append(os.path.isfile(os.path.join(self.root, "PAMAP2_Dataset/Optional/subject10" + str(i) + ".dat")))
-        for i in range(1,10):
-            has_all_files.append(os.path.isfile(os.path.join(self.root, "PAMAP2_Dataset/Protocol/subject10" + str(i) + ".dat")))
+        for i in [1, 5, 6, 8, 9]:
+            has_all_files.append(
+                os.path.isfile(
+                    os.path.join(
+                        self.root, "PAMAP2_Dataset/Optional/subject10" + str(i) + ".dat"
+                    )
+                )
+            )
+        for i in range(1, 10):
+            has_all_files.append(
+                os.path.isfile(
+                    os.path.join(
+                        self.root, "PAMAP2_Dataset/Protocol/subject10" + str(i) + ".dat"
+                    )
+                )
+            )
 
         if all(has_all_files):
             return True
@@ -148,27 +189,44 @@ class PAMAP(data.Dataset):
         clean_labels = torch.empty(0, dtype=torch.long)
         clean_features = torch.empty(0, dtype=torch.long)
         for i in self.subjects:
-            data = pd.read_csv(os.path.join(self.root, "PAMAP2_Dataset/Protocol/subject10" + str(i+1) + ".dat"), delimiter=' ', header=None)
+            data = pd.read_csv(
+                os.path.join(
+                    self.root, "PAMAP2_Dataset/Protocol/subject10" + str(i + 1) + ".dat"
+                ),
+                delimiter=" ",
+                header=None,
+            )
             # Adding optional data if requested and exists
-            if self.optional and i in self.optional_data:
-                optional_data = pd.read_csv(os.path.join(self.root, "PAMAP2_Dataset/Optional/subject10" + str(i+1) + ".dat"), delimiter=' ', header=None)
+            if self.optional and i in self.subjects_with_optional_data:
+                optional_data = pd.read_csv(
+                    os.path.join(
+                        self.root,
+                        "PAMAP2_Dataset/Optional/subject10" + str(i + 1) + ".dat",
+                    ),
+                    delimiter=" ",
+                    header=None,
+                )
                 data = pd.concat([data, optional_data])
             # Activity with value 0 should be discarded in any kind of analysis
             data = data[data[1] != 0]
             cols = copy.copy(self.columns)
             data.columns = cols
-            cols.remove('heartRate')
+            cols.remove("heartRate")
             # Drop Nan values that are not heartRate
             data = data.dropna(subset=cols)
             # Replace Nan values of heart rate for value before
             data.ffill(inplace=True)
             data = data.dropna()
             data = data.reset_index(drop=True)
-            activities = data['activity']
+            activities = data["activity"]
             # Replace data activity lables
-            activities.replace([9,10,11,12,13,16,17,18,19,20,24],[8,9,10,11,12,13,14,15,16,17,18], inplace=True)
+            activities.replace(
+                [9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 24],
+                [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+                inplace=True,
+            )
             labels = torch.tensor(activities.values, dtype=torch.long)
-            del data['activity']
+            del data["activity"]
             features = torch.tensor(data.values, dtype=torch.long)
             clean_labels = torch.cat((clean_labels, labels))
             clean_features = torch.cat((clean_features, features))

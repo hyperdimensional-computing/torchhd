@@ -7,18 +7,31 @@ from torch.utils import data
 import math
 from .utils import download_file_from_google_drive, unzip_file
 
-features_list = ["COMPLETE_1.csv", "COMPLETE_2.csv", "COMPLETE_3.csv", "COMPLETE_4.csv", "COMPLETE_5.csv"]
-label_list = ["LABEL_1.csv", "LABEL_2.csv", "LABEL_3.csv", "LABEL_4.csv", "LABEL_5.csv"]
 
-
-class EMG_based_hand_gesture(data.Dataset):
+class EMGHandGestures(data.Dataset):
 
     classes: List[str] = [
         "Closed hand",
         "Open hand",
         "Two-finger pinch",
         "Point index",
-        "Rest position"
+        "Rest position",
+    ]
+
+    features_files = [
+        "COMPLETE_1.csv",
+        "COMPLETE_2.csv",
+        "COMPLETE_3.csv",
+        "COMPLETE_4.csv",
+        "COMPLETE_5.csv",
+    ]
+
+    labels_files = [
+        "LABEL_1.csv",
+        "LABEL_2.csv",
+        "LABEL_3.csv",
+        "LABEL_4.csv",
+        "LABEL_5.csv",
     ]
 
     def __init__(
@@ -28,7 +41,7 @@ class EMG_based_hand_gesture(data.Dataset):
         target_transform: Optional[Callable] = None,
         download: bool = False,
         subjects: list = [0, 1, 2, 3, 4],
-        window: int = 256
+        window: int = 256,
     ):
         root = os.path.join(root, "EMG_based_hand_gesture")
         root = os.path.expanduser(root)
@@ -66,8 +79,8 @@ class EMG_based_hand_gesture(data.Dataset):
         if self.transform:
             sample = self.transform(sample)
 
-        if self.transform:
-            label = self.transform(label)
+        if self.target_transform:
+            label = self.target_transform(label)
 
         return sample, label
 
@@ -75,8 +88,22 @@ class EMG_based_hand_gesture(data.Dataset):
         if not os.path.isdir(self.root):
             return False
 
-        has_not_feature_files = sum(list(map(lambda x: not os.path.isfile(os.path.join(self.root, x)), features_list)))
-        has_not_label_files = sum(list(map(lambda x: not os.path.isfile(os.path.join(self.root, x)), label_list)))
+        has_not_feature_files = sum(
+            list(
+                map(
+                    lambda x: not os.path.isfile(os.path.join(self.root, x)),
+                    self.features_files,
+                )
+            )
+        )
+        has_not_label_files = sum(
+            list(
+                map(
+                    lambda x: not os.path.isfile(os.path.join(self.root, x)),
+                    self.labels_files,
+                )
+            )
+        )
         # Check if the root directory contains the required files
         if not has_not_feature_files and not has_not_label_files:
             return True
@@ -86,10 +113,18 @@ class EMG_based_hand_gesture(data.Dataset):
         features = torch.empty(0, dtype=torch.long)
         labels = torch.empty(0, dtype=torch.long)
         for i in self.subjects:
-            complete = pd.read_csv(os.path.join(self.root, features_list[i]), header=None)
-            label = pd.read_csv(os.path.join(self.root, label_list[i]), header=None)
+            complete = pd.read_csv(
+                os.path.join(self.root, self.features_files[i]), header=None
+            )
+            label = pd.read_csv(
+                os.path.join(self.root, self.labels_files[i]), header=None
+            )
             # List of indices where the gesture changes
-            indexes = [index for index, _ in enumerate(label.values) if label.values[index] != label.values[index - 1]]
+            indexes = [
+                index
+                for index, _ in enumerate(label.values)
+                if label.values[index] != label.values[index - 1]
+            ]
             prev = 0
             labels_clean = torch.empty(0, dtype=torch.long)
             features_clean = torch.empty(0, self.window, 4, dtype=torch.long)
@@ -98,11 +133,23 @@ class EMG_based_hand_gesture(data.Dataset):
                 span = j - prev
                 # If we have that the amount of data of the gesture fits in the window we have a new sample of the gesture of size window
                 if span > self.window:
-                    for k in range(math.floor(span/self.window)):
+                    for k in range(math.floor(span / self.window)):
                         # Clean the label data
-                        label_clean = torch.tensor(label.values[prev+(self.window*k)], dtype=torch.long)-1
+                        label_clean = (
+                            torch.tensor(
+                                label.values[prev + (self.window * k)], dtype=torch.long
+                            )
+                            - 1
+                        )
                         # Clean the feature data
-                        feature_clean = torch.tensor(complete.values[prev+(self.window*k):prev+(self.window*(k+1))], dtype=torch.long)[None, :, :]
+                        feature_clean = torch.tensor(
+                            complete.values[
+                                prev
+                                + (self.window * k) : prev
+                                + (self.window * (k + 1))
+                            ],
+                            dtype=torch.long,
+                        )[None, :, :]
                         labels_clean = torch.cat((labels_clean, label_clean))
                         features_clean = torch.cat((features_clean, feature_clean))
                 prev = j
@@ -126,4 +173,3 @@ class EMG_based_hand_gesture(data.Dataset):
 
         unzip_file(zip_file_path, self.root)
         os.remove(zip_file_path)
-

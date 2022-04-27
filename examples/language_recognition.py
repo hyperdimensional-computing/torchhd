@@ -6,6 +6,7 @@ sys.path.insert(1, os.path.realpath(os.path.pardir))
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.utils.data as data
 
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
@@ -52,10 +53,10 @@ def transform(x: str) -> torch.Tensor:
 
 
 train_ds = Languages("../data", train=True, transform=transform, download=True)
-train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
+train_ld = data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
 
 test_ds = Languages("../data", train=False, transform=transform, download=True)
-test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
+test_ld = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
 
 class Model(nn.Module):
@@ -107,7 +108,6 @@ with torch.no_grad():
 
         outputs = model(samples)
         predictions = torch.argmax(outputs, dim=-1)
-
-        accuracy.update(predictions, labels)
+        accuracy.update(predictions.cpu(), labels)
 
 print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
