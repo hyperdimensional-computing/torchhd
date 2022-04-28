@@ -5,9 +5,9 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torchmetrics
 from tqdm import tqdm
 
-import hdc
 from hdc import functional
 from hdc import embeddings
 from hdc.datasets.isolet import ISOLET
@@ -65,26 +65,25 @@ def experiment(device=None):
     train_duration = end_time - start_time
     print(f"Training took {train_duration:.3f}s for {len(train_ds)} items")
 
-    accuracy = hdc.metrics.Accuracy()
+    accuracy = torchmetrics.Accuracy()
 
     start_time = time.time()
     with torch.no_grad():
         for samples, labels in tqdm(test_ld, desc="Testing"):
             samples = samples.to(device)
-            labels = labels.to(device)
 
             outputs = model(samples)
             predictions = torch.argmax(outputs, dim=-1)
-
-            accuracy.step(labels, predictions)
+            accuracy.update(predictions.cpu(), labels)
 
     end_time = time.time()
     test_duration = end_time - start_time
     print(f"Testing took {test_duration:.2f}s for {len(test_ds)} items")
-    print(f"Testing accuracy of {(accuracy.value().item() * 100):.3f}%")
+    accuracy_value = accuracy.compute().item() 
+    print(f"Testing accuracy of {(accuracy_value * 100):.3f}%")
 
     metrics = dict(
-        accuracy=accuracy.value().item(),
+        accuracy=accuracy_value,
         train_duration=train_duration,
         train_set_size=len(train_ds),
         test_duration=test_duration,

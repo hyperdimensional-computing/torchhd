@@ -113,10 +113,11 @@ def experiment(device=None):
     end_time = time.time()
     test_duration = end_time - start_time
     print(f"Testing took {test_duration:.2f}s for {len(test_ds)} items")
-    print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
+    accuracy_value = accuracy.compute().item()
+    print(f"Testing accuracy of {(accuracy_value * 100):.3f}%")
 
     metrics = dict(
-        accuracy=accuracy.value().item(),
+        accuracy=accuracy_value,
         train_duration=train_duration,
         train_set_size=len(train_ds),
         test_duration=test_duration,

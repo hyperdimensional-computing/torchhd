@@ -6,9 +6,9 @@ import pandas as pd
 import torch
 import torch.optim as optim
 import torch.nn as nn
+import torchmetrics
 from tqdm import tqdm
 
-import hdc
 from hdc import functional
 from hdc import embeddings
 from hdc.datasets.isolet import ISOLET
@@ -42,23 +42,21 @@ class Model(nn.Module):
 
 
 def testing(model, data):
-    accuracy = hdc.metrics.Accuracy()
+    accuracy = torchmetrics.Accuracy()
 
     start_time = time.time()
     with torch.no_grad():
         for samples, labels in tqdm(data, desc="Testing"):
             samples = samples.to(device)
-            labels = labels.to(device)
 
             outputs = model(samples)
             predictions = torch.argmax(outputs, dim=-1)
-
-            accuracy.step(labels, predictions)
+            accuracy.update(predictions.cpu(), labels)
 
     end_time = time.time()
     test_duration = end_time - start_time
     print(f"Testing took {test_duration:.2f}s")
-    accuracy_value = accuracy.value().item()
+    accuracy_value = accuracy.compute().item()
     print(f"Testing accuracy of {(accuracy_value * 100):.3f}%")
 
     return dict(accuracy=accuracy_value, duration=test_duration)
