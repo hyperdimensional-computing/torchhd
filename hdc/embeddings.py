@@ -170,7 +170,8 @@ class Projection(nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
-        nn.init.normal_(self.weight, 0, 1)
+        nn.init.uniform_(self.weight, -1, 1)
+        self.weight.data[:] = F.normalize(self.weight.data)
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         return F.linear(input, self.weight)
