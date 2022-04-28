@@ -36,7 +36,7 @@ def char2int(char: str) -> int:
 
 def transform(x: str) -> torch.Tensor:
     char_ids = x[:MAX_INPUT_SIZE]
-    char_ids = [char2int(char) + 1 for char in x.lower()]
+    char_ids = [char2int(char) + 1 for char in char_ids.lower()]
 
     if len(char_ids) < MAX_INPUT_SIZE:
         char_ids += [PADDING_IDX] * (MAX_INPUT_SIZE - len(char_ids))
