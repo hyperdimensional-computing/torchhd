@@ -98,8 +98,8 @@ class ISOLET(data.Dataset):
         if self.transform:
             sample = self.transform(sample)
 
-        if self.transform:
-            label = self.transform(label)
+        if self.target_transform:
+            label = self.target_transform(label)
 
         return sample, label
 

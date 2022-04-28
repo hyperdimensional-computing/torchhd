@@ -48,6 +48,9 @@ class AirfoilSelfNoise(data.Dataset):
 
         self._load_data()
 
+    def __len__(self) -> int:
+        return self.data.size(0)
+
     def __getitem__(self, index: int) -> Tuple[torch.FloatTensor, torch.FloatTensor]:
         """
         Args:
@@ -62,8 +65,8 @@ class AirfoilSelfNoise(data.Dataset):
         if self.transform:
             sample = self.transform(sample)
 
-        if self.transform:
-            label = self.transform(label)
+        if self.target_transform:
+            label = self.target_transform(label)
 
         return sample, label
     
