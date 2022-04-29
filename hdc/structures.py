@@ -1,6 +1,6 @@
 from typing import Any, List, Optional, Tuple
 import torch
-from . import functional
+import functional
 
 
 class Memory:
@@ -76,6 +76,26 @@ class Set:
         return self.cardinality
 
 
+class Histogram:
+    def __init__(self, dimensions, threshold=0.5, device=None, dtype=None):
+        self.threshold = threshold
+        dtype = dtype if dtype is not None else torch.get_default_dtype()
+        self.value = torch.zeros(dimensions, dtype=dtype, device=device)
+
+    def add(self, input: torch.Tensor) -> None:
+        self.value = functional.bundle(self.value, input)
+
+    def remove(self, input: torch.Tensor) -> None:
+        if input not in self:
+            return
+
+        self.value = functional.bundle(self.value, -input)
+
+    def __contains__(self, input: torch.Tensor):
+        sim = functional.cosine_similarity(input, self.values.unsqueeze(0))
+        return sim.item() > self.threshold
+
+
 class Sequence:
     def __init__(self, dimensions, threshold=0.5, device=None, dtype=None):
         self.length = 0
@@ -96,3 +116,72 @@ class Sequence:
 
     def __len__(self) -> int:
         return self.length
+
+
+class Ngram:
+    def __init__(self, dimensions, threshold=0.5, device=None, dtype=None):
+        self.threshold = threshold
+        self.dimensions = dimensions
+        self.device = device
+        dtype = dtype if dtype is not None else torch.get_default_dtype()
+        self.value = torch.zeros(dimensions, dtype=dtype, device=device)
+
+    def get_ngram(self, data, n_size, alphabet_size, n_gram=True):
+        samples = torch.index_select(functional.random_hv(alphabet_size, self.dimensions, device=self.device), 0, data)
+
+        for i in range(0, n_size):
+
+            if i == (n_size - 1):
+                last_sample = None
+            else:
+                last_sample = -(n_size - i - 1)
+
+            sample = functional.permute(
+                samples[:, i:last_sample], shifts=n_size - i - 1
+            )
+
+            if n_gram is None:
+                n_gram = sample
+            else:
+                n_gram = functional.bind(n_gram, sample)
+
+        sample_hv = functional.batch_bundle(n_gram)
+        self.value = functional.hard_quantize(sample_hv)
+
+
+class Graph:
+    def __init__(self, dimensions, embeddings, threshold=0.5, directed=False, device=None, dtype=None):
+        self.length = 0
+        self.threshold = threshold
+        self.dtype = dtype if dtype is not None else torch.get_default_dtype()
+        self.value = torch.zeros(dimensions, dtype=dtype, device=device)
+        self.nodes = functional.random_hv(embeddings, dimensions)
+        self.dimensions = dimensions
+        self.embeddings = embeddings
+        self.directed = directed
+
+    def __len__(self):
+        return len(self.nodes)
+
+    def add_edge(self, node1, node2):
+        if self.directed:
+            edge = functional.bind(self.nodes[node1], self.nodes[node2])
+        else:
+            edge = functional.bind(self.nodes[node1], functional.permute(self.nodes[node2]))
+
+        if edge not in self:
+            self.value = functional.bundle(self.value, edge)
+
+    def __getitem__(self, item):
+        return self.nodes[item]
+
+    def get_graph(self):
+        return self.value
+
+    def get_nodes(self):
+        return self.nodes
+
+    def __contains__(self, input: torch.Tensor):
+        sim = functional.cosine_similarity(input, self.value.unsqueeze(0))
+        return sim.item() > self.threshold
+
