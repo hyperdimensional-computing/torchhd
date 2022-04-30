@@ -444,3 +444,19 @@ def hamming_similarity(input: torch.Tensor, others: torch.Tensor) -> torch.Tenso
 
     """
     return torch.sum(input == others, dim=-1, dtype=input.dtype)
+
+
+def ngram(input: torch.Tensor, n=3):
+    for i in range(0, n):
+        if i == (n - 1):
+            last_sample = None
+        else:
+            last_sample = -(n - i - 1)
+        sample = permute(
+            input[:, i:last_sample], shifts=n - i - 1
+        )
+        if n is None:
+            n = sample
+        else:
+            n = bind(n, sample)
+    return batch_bundle(n)

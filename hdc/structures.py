@@ -88,12 +88,14 @@ class Histogram:
     def remove(self, input: torch.Tensor) -> None:
         if input not in self:
             return
-
         self.value = functional.bundle(self.value, -input)
 
     def __contains__(self, input: torch.Tensor):
         sim = functional.cosine_similarity(input, self.values.unsqueeze(0))
         return sim.item() > self.threshold
+
+    def from_ngrams(self, x, n=3):
+        self.value = functional.ngram(x, n)
 
 
 class Sequence:
@@ -104,11 +106,22 @@ class Sequence:
         self.value = torch.zeros(dimensions, dtype=dtype, device=device)
 
     def append(self, input: torch.Tensor) -> None:
-        rotated_input = functional.permute(input, shifts=self.len)
+        rotated_input = functional.permute(input, shifts=len(self))
         self.value = functional.bundle(self.value, rotated_input)
 
-    def pop(self, index: Optional[int] = None) -> Optional[torch.Tensor]:
-        raise NotImplementedError()
+    def appendleft(self, input: torch.Tensor) -> None:
+        rotated_value = functional.permute(self.value, shifts=1)
+        self.value = functional.bundle(input, rotated_value)
+
+    def pop(self) -> Optional[torch.Tensor]:
+        popped_value = functional.permute(self.value, shifts=-len(self))
+        self.value = functional.bundle(self.value, -popped_value)
+        return popped_value
+
+    def popleft(self) -> Optional[torch.Tensor]:
+        popped_value = functional.permute(self.value, shifts=-1)
+        self.value = functional.permute(functional.bundle(self.value, -popped_value), shifts=-1)
+        return popped_value
 
     def __getitem__(self, index: int) -> torch.Tensor:
         rotated_value = functional.permute(self.value, shifts=-index)
@@ -126,28 +139,6 @@ class Ngram:
         dtype = dtype if dtype is not None else torch.get_default_dtype()
         self.value = torch.zeros(dimensions, dtype=dtype, device=device)
 
-    def get_ngram(self, data, n_size, alphabet_size, n_gram=True):
-        samples = torch.index_select(functional.random_hv(alphabet_size, self.dimensions, device=self.device), 0, data)
-
-        for i in range(0, n_size):
-
-            if i == (n_size - 1):
-                last_sample = None
-            else:
-                last_sample = -(n_size - i - 1)
-
-            sample = functional.permute(
-                samples[:, i:last_sample], shifts=n_size - i - 1
-            )
-
-            if n_gram is None:
-                n_gram = sample
-            else:
-                n_gram = functional.bind(n_gram, sample)
-
-        sample_hv = functional.batch_bundle(n_gram)
-        self.value = functional.hard_quantize(sample_hv)
-
 
 class Graph:
     def __init__(self, dimensions, embeddings, threshold=0.5, directed=False, device=None, dtype=None):
@@ -155,31 +146,21 @@ class Graph:
         self.threshold = threshold
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
         self.value = torch.zeros(dimensions, dtype=dtype, device=device)
-        self.nodes = functional.random_hv(embeddings, dimensions)
         self.dimensions = dimensions
         self.embeddings = embeddings
         self.directed = directed
 
-    def __len__(self):
-        return len(self.nodes)
-
     def add_edge(self, node1, node2):
         if self.directed:
-            edge = functional.bind(self.nodes[node1], self.nodes[node2])
+            edge = functional.bind(node1, node2)
         else:
-            edge = functional.bind(self.nodes[node1], functional.permute(self.nodes[node2]))
+            edge = functional.bind(node1, functional.permute(node2))
 
         if edge not in self:
             self.value = functional.bundle(self.value, edge)
 
-    def __getitem__(self, item):
-        return self.nodes[item]
-
-    def get_graph(self):
-        return self.value
-
-    def get_nodes(self):
-        return self.nodes
+    def node_neighbours(self, input: torch.Tensor):
+        return functional.bind(self.value, input)
 
     def __contains__(self, input: torch.Tensor):
         sim = functional.cosine_similarity(input, self.value.unsqueeze(0))
