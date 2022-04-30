@@ -7,6 +7,7 @@ from torch.utils import data
 import math
 from .utils import download_file, unzip_file
 
+
 class AirfoilSelfNoise(data.Dataset):
     """NASA data set <https://archive.ics.uci.edu/ml/datasets/airfoil+self-noise>`_, obtained from a series of aerodynamic and acoustic tests of two and three-dimensional airfoil blade sections conducted in an anechoic wind tunnel.
 
@@ -21,6 +22,7 @@ class AirfoilSelfNoise(data.Dataset):
         target_transform (callable, optional): A function/transform that takes in the
             target and transforms it.
     """
+
     def __init__(
         self,
         root: str,
@@ -69,22 +71,25 @@ class AirfoilSelfNoise(data.Dataset):
             label = self.target_transform(label)
 
         return sample, label
-    
+
     def _check_integrity(self) -> bool:
         if not os.path.isdir(self.root):
             return False
-        
+
         # Check if root directory contains the required data file
-        has_data_file = os.path.isfile(os.path.join(self.root, "airfoil_self_noise.dat"))
+        has_data_file = os.path.isfile(
+            os.path.join(self.root, "airfoil_self_noise.dat")
+        )
         if has_data_file:
             return True
-        
+
         return False
 
     def _load_data(self):
         file_name = "airfoil_self_noise.dat"
-        data = pd.read_csv(os.path.join(self.root, file_name), 
-                    delim_whitespace=True, header=None)
+        data = pd.read_csv(
+            os.path.join(self.root, file_name), delim_whitespace=True, header=None
+        )
         self.data = torch.tensor(data.values[:, :-1], dtype=torch.float)
         self.targets = torch.tensor(data.values[:, -1], dtype=torch.float)
 
@@ -94,13 +99,10 @@ class AirfoilSelfNoise(data.Dataset):
         if self._check_integrity():
             print("Files already downloaded and verified")
             return
-        
+
         zip_file_path = os.path.join(self.root, "airfoil_self_noise.dat")
 
         download_file(
             "https://archive.ics.uci.edu/ml/machine-learning-databases/00291/airfoil_self_noise.dat",
-             zip_file_path)
-
-        
-
-
+            zip_file_path,
+        )

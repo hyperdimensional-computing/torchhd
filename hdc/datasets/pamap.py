@@ -230,7 +230,7 @@ class PAMAP(data.Dataset):
             features = torch.tensor(data.values, dtype=torch.long)
             clean_labels = torch.cat((clean_labels, labels))
             clean_features = torch.cat((clean_features, features))
-        
+
         self.data = clean_features
         self.targets = clean_labels
 
