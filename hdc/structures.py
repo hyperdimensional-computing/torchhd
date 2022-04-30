@@ -131,23 +131,12 @@ class Sequence:
         return self.length
 
 
-class Ngram:
-    def __init__(self, dimensions, threshold=0.5, device=None, dtype=None):
-        self.threshold = threshold
-        self.dimensions = dimensions
-        self.device = device
-        dtype = dtype if dtype is not None else torch.get_default_dtype()
-        self.value = torch.zeros(dimensions, dtype=dtype, device=device)
-
-
 class Graph:
-    def __init__(self, dimensions, embeddings, threshold=0.5, directed=False, device=None, dtype=None):
+    def __init__(self, dimensions, threshold=0.5, directed=False, device=None, dtype=None):
         self.length = 0
         self.threshold = threshold
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
         self.value = torch.zeros(dimensions, dtype=dtype, device=device)
-        self.dimensions = dimensions
-        self.embeddings = embeddings
         self.directed = directed
 
     def add_edge(self, node1, node2):
@@ -166,3 +155,25 @@ class Graph:
         sim = functional.cosine_similarity(input, self.value.unsqueeze(0))
         return sim.item() > self.threshold
 
+
+class Tree:
+    def __init__(self, dimensions, directed=False, device=None, dtype=None):
+        self.length = 0
+        self.dtype = dtype if dtype is not None else torch.get_default_dtype()
+        self.value = torch.zeros(dimensions, dtype=dtype, device=device)
+        self.directed = directed
+        self.l_r = functional.random_hv(2, dimensions)
+
+    def add_leaf(self, value, path):
+        for i in path:
+            if i == 'l':
+                value = functional.bind(value, self.left())
+            else:
+                value = functional.bind(value, self.right())
+        self.value = functional.bundle(self.value, value)
+
+    def left(self):
+        return self.l_r[0]
+
+    def right(self):
+        return self.l_r[1]
