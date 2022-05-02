@@ -12,10 +12,9 @@ build:
   script: python setup.py install --single-version-externally-managed --record=record.txt
 
 requirements:
-  build:
+  host:
+    - pip
     - python>=3.6
-    - pytorch
-    - pandas
 
   run:
     - python>=3.6
@@ -25,6 +24,7 @@ requirements:
 test:
   imports:
     - hdc
+    - hdc.datasets
 
 about:
   home: {{ data['url'] }}
