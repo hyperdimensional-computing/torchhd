@@ -47,26 +47,22 @@ class Memory:
         del self.values[index]
 
 
-class Set:
+class Multiset:
     def __init__(self, dimensions, threshold=0.5, device=None, dtype=None):
-        self.cardinality = 0
         self.threshold = threshold
+        self.cardinality = 0
         dtype = dtype if dtype is not None else torch.get_default_dtype()
         self.value = torch.zeros(dimensions, dtype=dtype, device=device)
 
     def add(self, input: torch.Tensor) -> None:
-        if input in self:
-            return
-
         self.value = functional.bundle(self.value, input)
-        self.cardinality -= 1
+        self.cardinality += 1
 
     def remove(self, input: torch.Tensor) -> None:
         if input not in self:
             return
-
         self.value = functional.bundle(self.value, -input)
-        self.cardinality += 1
+        self.cardinality -= 1
 
     def __contains__(self, input: torch.Tensor):
         sim = functional.cosine_similarity(input, self.values.unsqueeze(0))
@@ -75,25 +71,7 @@ class Set:
     def __len__(self) -> int:
         return self.cardinality
 
-
-class Histogram:
-    def __init__(self, dimensions, threshold=0.5, device=None, dtype=None):
-        self.threshold = threshold
-        dtype = dtype if dtype is not None else torch.get_default_dtype()
-        self.value = torch.zeros(dimensions, dtype=dtype, device=device)
-
-    def add(self, input: torch.Tensor) -> None:
-        self.value = functional.bundle(self.value, input)
-
-    def remove(self, input: torch.Tensor) -> None:
-        if input not in self:
-            return
-        self.value = functional.bundle(self.value, -input)
-
-    def __contains__(self, input: torch.Tensor):
-        sim = functional.cosine_similarity(input, self.values.unsqueeze(0))
-        return sim.item() > self.threshold
-
+    @classmethod
     def from_ngrams(self, x, n=3):
         self.value = functional.ngram(x, n)
 
@@ -106,22 +84,22 @@ class Sequence:
         self.value = torch.zeros(dimensions, dtype=dtype, device=device)
 
     def append(self, input: torch.Tensor) -> None:
-        rotated_input = functional.permute(input, shifts=len(self))
-        self.value = functional.bundle(self.value, rotated_input)
-
-    def appendleft(self, input: torch.Tensor) -> None:
         rotated_value = functional.permute(self.value, shifts=1)
         self.value = functional.bundle(input, rotated_value)
 
-    def pop(self) -> Optional[torch.Tensor]:
-        popped_value = functional.permute(self.value, shifts=-len(self))
-        self.value = functional.bundle(self.value, -popped_value)
-        return popped_value
+    def appendleft(self, input: torch.Tensor) -> None:
+        rotated_input = functional.permute(input, shifts=len(self))
+        self.value = functional.bundle(self.value, rotated_input)
 
-    def popleft(self) -> Optional[torch.Tensor]:
-        popped_value = functional.permute(self.value, shifts=-1)
-        self.value = functional.permute(functional.bundle(self.value, -popped_value), shifts=-1)
-        return popped_value
+    def pop(self, input: torch.Tensor) -> Optional[torch.Tensor]:
+        self.value = functional.bundle(self.value, -input)
+        self.value = functional.permute(self.value, shifts=-1)
+        self.length -= 1
+
+    def popleft(self, input: torch.Tensor) -> None:
+        rotated_input = functional.permute(input, shifts=len(self) + 1)
+        self.value = functional.bundle(self.value, -rotated_input)
+        self.length -= 1
 
     def __getitem__(self, index: int) -> torch.Tensor:
         rotated_value = functional.permute(self.value, shifts=-index)
@@ -139,14 +117,19 @@ class Graph:
         self.value = torch.zeros(dimensions, dtype=dtype, device=device)
         self.directed = directed
 
-    def add_edge(self, node1, node2):
+    def add_edge(self, node1: torch.Tensor, node2: torch.Tensor):
         if self.directed:
             edge = functional.bind(node1, node2)
         else:
             edge = functional.bind(node1, functional.permute(node2))
+        self.value = functional.bundle(self.value, edge)
 
-        if edge not in self:
-            self.value = functional.bundle(self.value, edge)
+    def edge_exists(self, node1: torch.Tensor, node2: torch.Tensor):
+        if self.directed:
+            edge = functional.bind(node1, node2)
+        else:
+            edge = functional.bind(node1, functional.permute(node2))
+        return edge in self
 
     def node_neighbours(self, input: torch.Tensor):
         return functional.bind(self.value, input)
@@ -157,11 +140,9 @@ class Graph:
 
 
 class Tree:
-    def __init__(self, dimensions, directed=False, device=None, dtype=None):
-        self.length = 0
+    def __init__(self, dimensions, device=None, dtype=None):
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
         self.value = torch.zeros(dimensions, dtype=dtype, device=device)
-        self.directed = directed
         self.l_r = functional.random_hv(2, dimensions)
 
     def add_leaf(self, value, path):
