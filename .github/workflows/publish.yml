@@ -53,6 +53,18 @@ jobs:
       run: |
         conda install -y anaconda-client conda-build conda-verify
     - name: Publish distribution to Anaconda
+      env:
+        ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
       run: |
-        export ANACONDA_API_TOKEN = ${{ secrets.ANACONDA_TOKEN }}
-        ./scripts/conda_publish.sh
+        cd ./conda  # go to build dir
+
+        # Build for Linux
+        conda build -c conda-forge -c pytorch --output-folder . .
+
+        # Convert to other platforms: OSX, WIN
+        conda convert -p osx-64 linux-64/*.tar.bz2
+        conda convert -p win-64 linux-64/*.tar.bz2
+
+        anaconda upload --label main osx-64/*.tar.bz2
+        anaconda upload --label main linux-64/*.tar.bz2
+        anaconda upload --label main win-64/*.tar.bz2
