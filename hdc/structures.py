@@ -72,8 +72,12 @@ class Multiset:
         return self.cardinality
 
     @classmethod
-    def from_ngrams(self, x, n=3):
-        self.value = functional.ngram(x, n)
+    def from_ngrams(self, input: torch.Tensor, n=3):
+        self.value = functional.ngram(input, n)
+
+    @staticmethod
+    def from_tensors(self, input: torch.Tensor, dim=-2):
+        self.value = functional.multiset(input=input, dim=dim)
 
 
 class Sequence:

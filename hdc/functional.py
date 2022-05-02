@@ -330,7 +330,7 @@ def bundle(input: torch.Tensor, other: torch.Tensor, *, out=None) -> torch.Tenso
     return torch.add(input, other, out=out)
 
 
-def batch_bundle(
+def multiset(
     input: torch.Tensor,
     *,
     dim=-2,
