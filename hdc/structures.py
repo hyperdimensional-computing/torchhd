@@ -162,3 +162,20 @@ class Tree:
 
     def right(self):
         return self.l_r[1]
+
+
+class FSA:
+    def __init__(self, dimensions, device=None, dtype=None):
+        self.dtype = dtype if dtype is not None else torch.get_default_dtype()
+        self.value = torch.zeros(dimensions, dtype=dtype, device=device)
+
+    def add_transition(self, token: torch.Tensor, initial_state: torch.Tensor, final_state: torch.Tensor):
+        transition_edge = functional.bind(initial_state, functional.permute(final_state))
+        transition = functional.bind(token, transition_edge)
+        self.value = functional.bundle(self.value, transition)
+
+    def change_state(self, token: torch.Tensor, current_state: torch.Tensor):
+        # Returns the next state + some noise
+        next_state = functional.bind(self.value, current_state)
+        next_state = functional.bind(next_state, token)
+        return functional.permute(next_state, shifts=-1)
