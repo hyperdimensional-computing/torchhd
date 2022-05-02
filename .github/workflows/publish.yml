@@ -53,9 +53,6 @@ jobs:
       run: |
         conda install -y anaconda-client conda-build conda-verify
     - name: Publish distribution to Anaconda
-      with:
-        subdir: 'conda'
-        anacondatoken: ${{ secrets.ANACONDA_TOKEN }}
-        platforms: 'win osx linux'
-      run: >-
+      run: |
+        export ANACONDA_API_TOKEN = ${{ secrets.ANACONDA_TOKEN }}
         ./scripts/conda_publish.sh
