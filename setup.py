@@ -7,7 +7,7 @@ from setuptools import setup
 
 setup(
     name="hdc",
-    version="0.5.0",
+    version="0.5.1",
     description="Python library for Hyperdimensional Computing",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
