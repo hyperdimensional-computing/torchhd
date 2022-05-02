@@ -14,7 +14,7 @@ setup(
     url="https://github.com/mikeheddes/hdc-lib",
     license="MIT",
     install_requires=open("requirements.txt").readlines(),
-    packages=find_packages(exclude=['docs', 'hdc.tests', 'examples']),
+    packages=find_packages(exclude=["docs", "hdc.tests", "examples"]),
     python_requires=">=3.6, <4",
     project_urls={
         "Source": "https://github.com/mikeheddes/hdc-lib/",
