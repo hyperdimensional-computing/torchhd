@@ -14,12 +14,12 @@ build:
 requirements:
   build:
     - python>=3.6
-    - torch
+    - pytorch
     - pandas
 
   run:
     - python>=3.6
-    - torch
+    - pytorch
     - pandas
 
 test:
