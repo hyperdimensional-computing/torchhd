@@ -22,7 +22,8 @@ jobs:
         run: pip install black
       - name: If needed, commit black changes to the pull request
         run: |
-          if black --check . ; then
+          if black --check .
+          then
             black .
             git config --global user.name 'formatting'
             git config --global user.email 'mikeheddes@users.noreply.github.com'
@@ -31,5 +32,5 @@ jobs:
             git commit -am "Format Python code"
             git push
           else
-            exit 0
+            echo "nothing to do"
           fi
