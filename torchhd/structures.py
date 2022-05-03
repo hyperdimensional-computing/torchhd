@@ -3,6 +3,7 @@ import torch
 
 import torchhd.functional as functional
 
+
 class Memory:
     """Associative memory"""
 
