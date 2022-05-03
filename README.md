@@ -3,11 +3,11 @@
 
 </h1>
 <p align="center">
-    <a href="https://github.com/mikeheddes/hdc-lib/blob/main/LICENSE">
-    <img alt="GitHub license" src="https://img.shields.io/badge/license-MIT-orange.svg?style=flat" /></a>
+    <a href="https://github.com/mikeheddes/hdc-lib/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/badge/license-MIT-orange.svg?style=flat" /></a>
     <a href="https://pypi.org/project/hdc/"><img alt="pypi version" src="https://img.shields.io/pypi/v/hdc.svg?style=flat&color=orange" /></a>
-    <a href="https://github.com/mikeheddes/hdc-lib/actions/workflows/test.yml?query=branch%3Amain"><img alt="tests status" src="https://img.shields.io/github/workflow/status/mikeheddes/hdc-lib/Testing/main?label=tests&style=flat" /></a>
-    <img alt="PRs Welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" />
+    <a href="https://anaconda.org/mikeheddes/hdc"><img alt="conda version" src="https://img.shields.io/conda/v/mikeheddes/hdc?label=conda&style=flat&color=orange" /></a>
+    <a href="https://github.com/mikeheddes/hdc-lib/actions/workflows/test.yml?query=branch%3Amain"><img alt="tests status" src="https://img.shields.io/github/workflow/status/mikeheddes/hdc-lib/Testing/main?label=tests&style=flat" />
+    </a><img alt="PRs Welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" />
 </p>
 
 This is a Python library for Hyperdimensional Computing.
@@ -17,14 +17,14 @@ This is a Python library for Hyperdimensional Computing.
 
 ## Installation
 
-The library is hosted on PyPi and Conda, use one of the following commands to install:
+The library is hosted on PyPi and Anaconda, use one of the following commands to install:
 
 ```bash
 pip install hdc
 ```
 
 ```bash
-conda install -c conda-forge hdc
+conda install -c mikeheddes hdc
 ```
 
 ## Documentation
