@@ -74,7 +74,7 @@ class Multiset:
     @classmethod
     def from_ngrams(cls, input: torch.Tensor, n=3, threshold=0.5):
         instance = cls(input.size(-1), threshold, input.device, input.dtype)
-        instance.value = functional.ngram(input, n)
+        instance.value = functional.ngrams(input, n)
         return instance
 
     @classmethod
@@ -156,19 +156,21 @@ class Tree:
     def add_leaf(self, value, path):
         for i in path:
             if i == 'l':
-                value = functional.bind(value, self.left())
+                value = functional.bind(value, self.left)
             else:
-                value = functional.bind(value, self.right())
+                value = functional.bind(value, self.right)
         self.value = functional.bundle(self.value, value)
 
+    @property
     def left(self):
         return self.l_r[0]
 
+    @property
     def right(self):
         return self.l_r[1]
 
 
-class FSA:
+class FiniteStateAutomata:
     def __init__(self, dimensions, device=None, dtype=None):
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
         self.value = torch.zeros(dimensions, dtype=dtype, device=device)

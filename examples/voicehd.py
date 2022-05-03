@@ -6,11 +6,14 @@ sys.path.insert(1, os.path.realpath(os.path.pardir))
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+# Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
+import torchmetrics
 from tqdm import tqdm
-from hdc import functional
-from hdc import embeddings
-from hdc import metrics
-from hdc.datasets.isolet import ISOLET
+
+from torchhd import functional
+from torchhd import embeddings
+from torchhd.datasets.isolet import ISOLET
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
@@ -45,6 +48,7 @@ train_ds = ISOLET("../data", train=True, download=True)
 train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
 
 test_ds = ISOLET("../data", train=False, download=True)
+
 test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
 model = Model(len(train_ds.classes), train_ds[0][0].size(-1))
@@ -60,7 +64,7 @@ with torch.no_grad():
 
     model.classify.weight[:] = F.normalize(model.classify.weight)
 
-accuracy = metrics.Accuracy()
+accuracy = torchmetrics.Accuracy()
 
 with torch.no_grad():
     for samples, labels in tqdm(test_ld, desc="Testing"):
@@ -68,7 +72,6 @@ with torch.no_grad():
 
         outputs = model(samples)
         predictions = torch.argmax(outputs, dim=-1)
+        accuracy.update(predictions.cpu(), labels)
 
-        accuracy.step(labels, predictions)
-
-print(f"Testing accuracy of {(accuracy.value().item() * 100):.3f}%")
+print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")

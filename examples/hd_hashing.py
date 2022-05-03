@@ -8,7 +8,7 @@ import torch
 # Note: this example requires the mmh3 library: https://github.com/hajimes/mmh3
 import mmh3
 
-from hdc import functional
+from torchhd import functional
 
 
 class HDHashing:

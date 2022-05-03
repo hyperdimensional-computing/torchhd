@@ -1,6 +1,7 @@
 torch
 torchvision
 pandas
+requests
 numpy
 sphinx
 sphinx-rtd-theme
