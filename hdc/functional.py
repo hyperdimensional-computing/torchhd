@@ -12,7 +12,7 @@ __all__ = [
     "circular_hv",
     "bind",
     "bundle",
-    "batch_bundle",
+    "multiset",
     "permute",
     "hard_quantize",
     "soft_quantize",
@@ -456,7 +456,7 @@ def ngram(input: torch.Tensor, n=3):
             input[:, i:last_sample], shifts=n - i - 1
         )
         if n is None:
-            n = sample
+            n_gram = sample
         else:
-            n = bind(n, sample)
-    return batch_bundle(n)
+            n_gram = bind(n, sample)
+    return multiset(n_gram)
