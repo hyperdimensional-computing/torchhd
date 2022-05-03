@@ -22,10 +22,15 @@ jobs:
         run: pip install black
       - name: If needed, commit black changes to the pull request
         run: |
-          black .
-          git config --global user.name 'formatting'
-          git config --global user.email 'mikeheddes@users.noreply.github.com'
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
-          git checkout $GITHUB_HEAD_REF
-          git commit -am "Format Python code"
-          git push
+          if black --check .
+          then
+            echo "nothing to do"
+          else
+            black .
+            git config --global user.name 'formatting'
+            git config --global user.email 'mikeheddes@users.noreply.github.com'
+            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+            git checkout $GITHUB_HEAD_REF
+            git commit -am "Format Python code"
+            git push
+          fi
