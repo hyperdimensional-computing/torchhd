@@ -8,6 +8,7 @@ from torch.utils import data
 
 from .utils import download_file, unzip_file
 
+
 class CyclePowerPlant(data.Dataset):
     """Combined cycle power planet dataset <https://archive.ics.uci.edu/ml/datasets/combined+cycle+power+plant>`_,
         Features consist of hourly average ambient variables Temperature (T), Ambient Pressure (AP), Relative Humidity (RH) and Exhaust Vacuum (V) to predict the net hourly electrical energy output (EP) of the plant.
@@ -22,9 +23,10 @@ class CyclePowerPlant(data.Dataset):
         target_transform (callable, optional): A function/transform that takes in the
             target and transforms it.
     """
+
     def __init__(
-        self, 
-        root:str,
+        self,
+        root: str,
         download: bool = False,
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
@@ -72,12 +74,12 @@ class CyclePowerPlant(data.Dataset):
     def _check_integrity(self) -> bool:
         if not os.path.isdir(self.root):
             return False
-        
+
         # Check if root directory contains the required data file
         has_data_file = os.path.isfile(os.path.join(self.root, "Folds5x2_pp.xlsx"))
         if has_data_file:
             return True
-        
+
         return False
 
     def _load_data(self):
@@ -85,18 +87,18 @@ class CyclePowerPlant(data.Dataset):
         data = pd.read_excel(os.path.join(self.root, file_name))
         self.data = torch.tensor(data.values[:, :-1], dtype=torch.float)
         self.targets = torch.tensor(data.values[:, -1], dtype=torch.float)
-    
+
     def download(self):
         """Downloads the dataset if not already present"""
 
         if self._check_integrity():
             print("Files already downloaded and verified")
             return
-        
+
         zip_file_path = os.path.join(self.root, "data.zip")
         download_file(
-            "https://archive.ics.uci.edu/ml/machine-learning-databases/00294/CCPP.zip", 
-            zip_file_path
+            "https://archive.ics.uci.edu/ml/machine-learning-databases/00294/CCPP.zip",
+            zip_file_path,
         )
 
         unzip_file(zip_file_path, self.root)
