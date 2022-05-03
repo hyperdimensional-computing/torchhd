@@ -455,9 +455,7 @@ def ngrams(input: torch.Tensor, n=3):
             last_sample = None
         else:
             last_sample = -(n - i - 1)
-        sample = permute(
-            input[:, i:last_sample], shifts=n - i - 1
-        )
+        sample = permute(input[:, i:last_sample], shifts=n - i - 1)
         if n is None:
             n_gram = sample
         else:
