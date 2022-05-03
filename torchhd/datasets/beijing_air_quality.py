@@ -1,11 +1,11 @@
 import os
 import os.path
-from typing import Callable, Optional, NamedTuple, Tuple, List
+from typing import Callable, Optional, NamedTuple, List
 import torch
-import pandas as pd
 from torch.utils import data
+import pandas as pd
 
-from hdc.datasets.utils import download_file, unzip_file
+from .utils import download_file, unzip_file
 
 
 class BeijingAirQualityDataSample(NamedTuple):

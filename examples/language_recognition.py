@@ -12,9 +12,9 @@ import torch.utils.data as data
 import torchmetrics
 from tqdm import tqdm
 
-from hdc import functional
-from hdc import embeddings
-from hdc.datasets import EuropeanLanguages as Languages
+from torchhd import functional
+from torchhd import embeddings
+from torchhd.datasets import EuropeanLanguages as Languages
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))

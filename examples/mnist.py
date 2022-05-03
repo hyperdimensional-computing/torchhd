@@ -13,8 +13,8 @@ from torchvision.datasets import MNIST
 import torchmetrics
 from tqdm import tqdm
 
-from hdc import functional
-from hdc import embeddings
+from torchhd import functional
+from torchhd import embeddings
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

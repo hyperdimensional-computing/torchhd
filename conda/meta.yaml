@@ -1,0 +1,33 @@
+{% set data = load_setup_py_data() %}
+
+package:
+  name: torchhd
+  version: {{ data['version'] }}
+
+source:
+  path: ..
+
+build:
+  number: 0
+  script: python setup.py install --single-version-externally-managed --record=record.txt
+
+requirements:
+  host:
+    - pip
+    - python>=3.6
+
+  run:
+    - python>=3.6
+    - pytorch
+    - pandas
+    - requests
+
+test:
+  imports:
+    - torchhd
+    - torchhd.datasets
+
+about:
+  home: {{ data['url'] }}
+  license: {{ data['license'] }}
+summary: {{ data['description'] }}

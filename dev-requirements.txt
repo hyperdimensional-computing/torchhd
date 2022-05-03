@@ -1,9 +1,9 @@
 torch
 torchvision
 pandas
+requests
 numpy
 sphinx
 sphinx-rtd-theme
 flake8
 pytest
-black

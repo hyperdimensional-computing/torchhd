@@ -1,10 +1,10 @@
 import os
 import os.path
+import copy
 from typing import Callable, Optional, Tuple, List
 import torch
-import pandas as pd
-import copy
 from torch.utils import data
+import pandas as pd
 
 from .utils import download_file, unzip_file
 
@@ -230,7 +230,7 @@ class PAMAP(data.Dataset):
             features = torch.tensor(data.values, dtype=torch.long)
             clean_labels = torch.cat((clean_labels, labels))
             clean_features = torch.cat((clean_features, features))
-        
+
         self.data = clean_features
         self.targets = clean_labels
 
