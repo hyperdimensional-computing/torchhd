@@ -7,4 +7,3 @@ sphinx
 sphinx-rtd-theme
 flake8
 pytest
-black

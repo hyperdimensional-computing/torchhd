@@ -5,6 +5,7 @@ from hdc.datasets.ucihar import UCIHAR
 from hdc.datasets.airfoil_self_noise import AirfoilSelfNoise
 from hdc.datasets.emg_hand_gestures import EMGHandGestures
 from hdc.datasets.pamap import PAMAP
+from hdc.datasets.ccpp import CyclePowerPlant
 
 __all__ = [
     "BeijingAirQuality",
@@ -14,4 +15,5 @@ __all__ = [
     "AirfoilSelfNoise",
     "EMGHandGestures",
     "PAMAP",
+    "CyclePowerPlant",
 ]

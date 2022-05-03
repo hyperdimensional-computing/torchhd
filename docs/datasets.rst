@@ -16,3 +16,4 @@ The hdc library provides many popular built-in datasets to work with.
     AirfoilSelfNoise
     EMGHandGestures
     PAMAP
+    CyclePowerPlant
