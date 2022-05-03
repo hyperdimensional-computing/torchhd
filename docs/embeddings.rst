@@ -1,7 +1,7 @@
 Embeddings
 ==================
 
-.. currentmodule:: hdc.embeddings
+.. currentmodule:: torchhd.embeddings
 
 .. autosummary::
     :toctree: generated/
@@ -11,3 +11,4 @@ Embeddings
     Random
     Level
     Circular
+    Projection

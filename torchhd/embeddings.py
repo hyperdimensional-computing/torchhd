@@ -1,7 +1,9 @@
 import math
 import torch
 import torch.nn as nn
-from . import functional
+import torch.nn.functional as F
+
+import torchhd.functional as functional
 
 
 class Identity(nn.Embedding):
@@ -146,3 +148,31 @@ class Circular(nn.Embedding):
         indices = indices.clamp_(0, self.num_embeddings - 1).long()
 
         return super(Circular, self).forward(indices)
+
+
+class Projection(nn.Module):
+    __constants__ = ["in_features", "out_features"]
+    in_features: int
+    out_features: int
+    weight: torch.Tensor
+
+    def __init__(
+        self, in_features, out_features, requires_grad=False, device=None, dtype=None
+    ):
+        factory_kwargs = {"device": device, "dtype": dtype}
+        super(Projection, self).__init__()
+        self.in_features = in_features
+        self.out_features = out_features
+
+        self.weight = nn.parameter.Parameter(
+            torch.empty((out_features, in_features), **factory_kwargs),
+            requires_grad=requires_grad,
+        )
+        self.reset_parameters()
+
+    def reset_parameters(self) -> None:
+        nn.init.uniform_(self.weight, -1, 1)
+        self.weight.data[:] = F.normalize(self.weight.data)
+
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
+        return F.linear(input, self.weight)

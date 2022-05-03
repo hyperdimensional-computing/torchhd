@@ -1,11 +1,23 @@
-from setuptools import setup
+"""A setuptools based setup module.
+See:
+https://packaging.python.org/guides/distributing-packages-using-setuptools/
+https://github.com/pypa/sampleproject
+"""
+from setuptools import setup, find_packages
 
 setup(
-    name="hdc",
-    version="0.4",
-    description="A python library for hyperdimensional computing",
-    url="https://github.com/mikeheddes/hdc-lib",
+    name="torchhd",
+    version="0.6.0",
+    description="Torchhd is a Python library for Hyperdimensional Computing",
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
+    url="https://github.com/hyperdimensional-computing/torchhd",
     license="MIT",
-    packages=["hdc"],
-    zip_safe=False,
+    install_requires=open("requirements.txt").readlines(),
+    packages=find_packages(exclude=["docs", "torchhd.tests", "examples"]),
+    python_requires=">=3.6, <4",
+    project_urls={
+        "Source": "https://github.com/hyperdimensional-computing/torchhd",
+        "Documentation": "https://hyperdimensional-computing.github.io/torchhd/",
+    },
 )

@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath("../"))
 
 # -- Project information -----------------------------------------------------
 
-project = "hdc"
+project = "Torchhd"
 copyright = (
     "2022, Mike Heddes, Igor De Oliveira Nunes, Dheyay Desai, Pere Verges Boncompte"
 )
