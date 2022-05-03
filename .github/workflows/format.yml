@@ -33,6 +33,7 @@ jobs:
             git config --global user.name 'formatting'
             git config --global user.email 'mikeheddes@users.noreply.github.com'
             git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+            git fetch
             git checkout $GITHUB_HEAD_REF
             git commit -am "Format Python code"
             git push
