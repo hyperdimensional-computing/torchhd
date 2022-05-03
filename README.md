@@ -1,7 +1,3 @@
-<h1 align="center">
-    <a href="https://mikeheddes.github.io/hdc-lib">Hyperdimensional Computing Library</a><br/>
-
-</h1>
 <p align="center">
     <a href="https://github.com/mikeheddes/hdc-lib/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/badge/license-MIT-orange.svg?style=flat" /></a>
     <a href="https://pypi.org/project/hdc/"><img alt="pypi version" src="https://img.shields.io/pypi/v/hdc.svg?style=flat&color=orange" /></a>
@@ -10,14 +6,22 @@
     </a><img alt="PRs Welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" />
 </p>
 
-This is a Python library for Hyperdimensional Computing.
+<div align="center">
+    <a href="https://mikeheddes.github.io/hdc-lib">
+        <img width="380px"  alt="Torchhd logo" src="./resources/torchhd-logo.svg" />
+    </a>
+</div>
 
-* **Easy-to-use:** This library makes it painless to develop a wide range of Hyperdimensional Computing (HDC) applications and algorithms. For someone new to the field we provide Pythonic abstractions and examples to get you started fast. For the experienced researchers we made the library modular by design, giving you endless flexibility to prototype new ideas in no-time.
+# [Torchhd](https://mikeheddes.github.io/hdc-lib)
+
+Torchhd is a Python library for Hyperdimensional Computing.
+
+* **Easy-to-use:** Torchhd makes it painless to develop a wide range of Hyperdimensional Computing (HDC) applications and algorithms. For someone new to the field we provide Pythonic abstractions and examples to get you started fast. For the experienced researchers we made the library modular by design, giving you endless flexibility to prototype new ideas in no-time.
 * **Performant:** The library is build on top of the high-performance PyTorch library, giving you optimized tensor execution without the headaches. Moreover, PyTorch makes it effortless to accelerate your code on a GPU.
 
 ## Installation
 
-The library is hosted on PyPi and Anaconda, use one of the following commands to install:
+Torchhd is hosted on PyPi and Anaconda, use one of the following commands to install:
 
 ```bash
 pip install hdc
@@ -29,31 +33,31 @@ conda install -c mikeheddes hdc
 
 ## Documentation
 
-You can find the library's documentation [on the website](https://mikeheddes.github.io/hdc-lib).
+You can find documentation for Torchhd [on the website](https://mikeheddes.github.io/hdc-lib).
 
 ## Examples
 
 We have several examples [in the repository](/examples/). Here is a simple one to get you started:
 
 ```python
-import hdc
 import torch
+import torchhd
 
 d = 10000  # number of dimensions
 
 ### create a hypervector for each symbol
 # keys for each field of the dictionary: fruit, weight, and season
-keys = hdc.functional.random_hv(3, d)
+keys = torchhd.functional.random_hv(3, d)
 # fruits are: apple, lemon, mango
-fruits = hdc.functional.random_hv(3, d)
+fruits = torchhd.functional.random_hv(3, d)
 # there are 10 weight levels
-weights = hdc.functional.level_hv(10, d)
+weights = torchhd.functional.level_hv(10, d)
 # the for seasons: winter, spring, summer, fall
-seasons = hdc.functional.circular_hv(4, d)
+seasons = torchhd.functional.circular_hv(4, d)
 
 # map a float between min, max to an index of size 10
 # we map the 10 weight levels between 0 to 200 grams
-weight_index = hdc.functional.value_to_index(149.0, 0, 200, 10)
+weight_index = torchhd.functional.value_to_index(149.0, 0, 200, 10)
 
 values = torch.stack([
     fruits[0],
@@ -62,7 +66,7 @@ values = torch.stack([
 ])
 # creates a dictionary: 
 # record = key[0] * value[0] + key[1] * value[1] + key[2] * value[2]
-record = hdc.functional.struct(keys, values)
+record = torchhd.functional.struct(keys, values)
 
 #### Similar Python code
 # 
