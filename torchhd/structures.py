@@ -1,7 +1,7 @@
 from typing import Any, List, Optional, Tuple
 import torch
-import functional
 
+import torchhd.functional as functional
 
 class Memory:
     """Associative memory"""
