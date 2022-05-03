@@ -1,7 +1,7 @@
 Functional
 =========================
 
-.. currentmodule:: hdc.functional 
+.. currentmodule:: torchhd.functional 
 
 This module consists of the basic hypervector generation functions and operations used on hypervectors.
 

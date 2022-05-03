@@ -1,7 +1,7 @@
 Embeddings
 ==================
 
-.. currentmodule:: hdc.embeddings
+.. currentmodule:: torchhd.embeddings
 
 .. autosummary::
     :toctree: generated/
