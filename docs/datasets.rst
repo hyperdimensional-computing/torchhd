@@ -1,9 +1,9 @@
 Datasets
 ========
 
-The hdc library provides many popular built-in datasets to work with.
+The Torchhd library provides many popular built-in datasets to work with.
 
-.. currentmodule:: hdc.datasets
+.. currentmodule:: torchhd.datasets
 
 .. autosummary:: 
     :toctree: generated/
@@ -13,5 +13,7 @@ The hdc library provides many popular built-in datasets to work with.
     ISOLET
     EuropeanLanguages
     UCIHAR
-    EMGHandGuesters
+    AirfoilSelfNoise
+    EMGHandGestures
     PAMAP
+    CyclePowerPlant

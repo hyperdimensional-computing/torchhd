@@ -14,9 +14,9 @@ import torch.nn.functional as F
 import torchmetrics
 from tqdm import tqdm
 
-from hdc import functional
-from hdc import embeddings
-from hdc.datasets.isolet import ISOLET
+from torchhd import functional
+from torchhd import embeddings
+from torchhd.datasets.isolet import ISOLET
 
 device = torch.device("cpu")
 print("Using {} device".format(device))

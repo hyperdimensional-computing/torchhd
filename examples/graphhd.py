@@ -14,8 +14,8 @@ import torch_geometric
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
 
-from hdc import functional
-from hdc import embeddings
+from torchhd import functional
+from torchhd import embeddings
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))

@@ -16,9 +16,9 @@ import torch.utils.data as data
 import torchmetrics
 from tqdm import tqdm
 
-from hdc import functional
-from hdc import embeddings
-from hdc.datasets import EuropeanLanguages as Languages
+from torchhd import functional
+from torchhd import embeddings
+from torchhd.datasets import EuropeanLanguages as Languages
 
 device = torch.device("cpu")
 print("Using {} device".format(device))
@@ -48,7 +48,7 @@ def char2int(char: str) -> int:
 
 def transform(x: str) -> torch.Tensor:
     char_ids = x[:MAX_INPUT_SIZE]
-    char_ids = [char2int(char) + 1 for char in x.lower()]
+    char_ids = [char2int(char) + 1 for char in char_ids.lower()]
 
     if len(char_ids) < MAX_INPUT_SIZE:
         char_ids += [PADDING_IDX] * (MAX_INPUT_SIZE - len(char_ids))

@@ -15,9 +15,9 @@ import torch.utils.data as data
 import torchmetrics
 from tqdm import tqdm
 
-from hdc import functional
-from hdc import embeddings
-from hdc.datasets import EMGHandGestures
+from torchhd import functional
+from torchhd import embeddings
+from torchhd.datasets import EMGHandGestures
 
 device = torch.device("cpu")
 print("Using {} device".format(device))

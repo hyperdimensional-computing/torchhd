@@ -1,7 +1,7 @@
 Functional
 =========================
 
-.. currentmodule:: hdc.functional 
+.. currentmodule:: torchhd.functional 
 
 This module consists of the basic hypervector generation functions and operations used on hypervectors.
 
@@ -44,3 +44,15 @@ Similarities
     dot_similarity
     hamming_similarity
 
+
+Utilities
+------------------------
+
+.. autosummary::
+    :toctree: generated/
+    :template: function.rst
+
+    
+    map_range
+    value_to_index
+    index_to_value

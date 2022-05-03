@@ -1,10 +1,10 @@
 import os
 import os.path as path
-from typing import Callable, Optional, Tuple, List
+from typing import Callable, Optional, List
 import torch
-import pandas as pd
-import numpy as np
 from torch.utils import data
+import numpy as np
+import pandas as pd
 
 from .utils import download_file, unzip_file
 
