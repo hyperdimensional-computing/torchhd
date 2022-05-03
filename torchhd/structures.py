@@ -118,7 +118,9 @@ class Sequence:
 
 
 class Graph:
-    def __init__(self, dimensions, threshold=0.5, directed=False, device=None, dtype=None):
+    def __init__(
+        self, dimensions, threshold=0.5, directed=False, device=None, dtype=None
+    ):
         self.length = 0
         self.threshold = threshold
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
@@ -155,7 +157,7 @@ class Tree:
 
     def add_leaf(self, value, path):
         for i in path:
-            if i == 'l':
+            if i == "l":
                 value = functional.bind(value, self.left)
             else:
                 value = functional.bind(value, self.right)
@@ -175,8 +177,15 @@ class FiniteStateAutomata:
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
         self.value = torch.zeros(dimensions, dtype=dtype, device=device)
 
-    def add_transition(self, token: torch.Tensor, initial_state: torch.Tensor, final_state: torch.Tensor):
-        transition_edge = functional.bind(initial_state, functional.permute(final_state))
+    def add_transition(
+        self,
+        token: torch.Tensor,
+        initial_state: torch.Tensor,
+        final_state: torch.Tensor,
+    ):
+        transition_edge = functional.bind(
+            initial_state, functional.permute(final_state)
+        )
         transition = functional.bind(token, transition_edge)
         self.value = functional.bundle(self.value, transition)
 
