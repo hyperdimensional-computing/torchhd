@@ -1,12 +1,15 @@
 Structures
 ==================
 
-.. currentmodule:: hdc.structures
+.. currentmodule:: torchhd.structures
 
 .. autosummary::
     :toctree: generated/
     :template: class.rst
 
     Memory
-    Set
+    Multiset
     Sequence
+    Graph
+    Tree
+    FiniteStateAutomata
