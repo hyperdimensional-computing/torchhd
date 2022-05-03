@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/hyperdimensional-computing/torchhd/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/badge/license-MIT-orange.svg?style=flat" /></a>
-    <a href="https://pypi.org/project/torchhd/"><img alt="pypi version" src="https://img.shields.io/pypi/v/torchhd.svg?style=flat&color=orange" /></a>
+    <a href="https://pypi.org/project/torch-hd/"><img alt="pypi version" src="https://img.shields.io/pypi/v/torch-hd.svg?style=flat&color=orange" /></a>
     <a href="https://anaconda.org/torchhd/torchhd"><img alt="conda version" src="https://img.shields.io/conda/v/torchhd/torchhd?label=conda&style=flat&color=orange" /></a>
     <a href="https://github.com/hyperdimensional-computing/torchhd/actions/workflows/test.yml?query=branch%3Amain"><img alt="tests status" src="https://img.shields.io/github/workflow/status/hyperdimensional-computing/torchhd/Test/main?label=tests&style=flat" />
     </a><img alt="PRs Welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" />
@@ -24,7 +24,7 @@ Torchhd is a Python library for Hyperdimensional Computing.
 Torchhd is hosted on PyPi and Anaconda, use one of the following commands to install:
 
 ```bash
-pip install torchhd
+pip install torch-hd
 ```
 
 ```bash
