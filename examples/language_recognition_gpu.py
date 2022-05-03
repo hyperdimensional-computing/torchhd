@@ -3,7 +3,6 @@ import time
 start_time = time.time()
 
 # The following two lines are only needed because of this repository organization
-from random import sample
 import sys, os
 
 sys.path.insert(1, os.path.realpath(os.path.pardir))
@@ -15,9 +14,9 @@ import torch.nn.functional as F
 import torchmetrics
 from tqdm import tqdm
 
-from hdc import functional
-from hdc import embeddings
-from hdc.datasets import EuropeanLanguages as Languages
+from torchhd import functional
+from torchhd import embeddings
+from torchhd.datasets import EuropeanLanguages as Languages
 
 device = torch.device("cuda:2")
 print("Using {} device".format(device))
