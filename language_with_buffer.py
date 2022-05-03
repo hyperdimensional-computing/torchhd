@@ -103,7 +103,7 @@ def experiment(settings, device=None):
     )
 
     test_ds = Languages("data", train=False, transform=transform, download=True)
-    test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
+    test_ld = torch.utils.data.DataLoader(test_ds, batch_size=64, shuffle=False)
 
     num_classes = len(train_ds.classes)
 
