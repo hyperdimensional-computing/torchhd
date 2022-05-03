@@ -30,4 +30,6 @@ jobs:
             git checkout $GITHUB_HEAD_REF
             git commit -am "Format Python code"
             git push
+          else
+            exit 0
           fi
