@@ -1,18 +1,18 @@
 <p align="center">
-    <a href="https://github.com/mikeheddes/hdc-lib/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/badge/license-MIT-orange.svg?style=flat" /></a>
-    <a href="https://pypi.org/project/hdc/"><img alt="pypi version" src="https://img.shields.io/pypi/v/hdc.svg?style=flat&color=orange" /></a>
-    <a href="https://anaconda.org/mikeheddes/hdc"><img alt="conda version" src="https://img.shields.io/conda/v/mikeheddes/hdc?label=conda&style=flat&color=orange" /></a>
-    <a href="https://github.com/mikeheddes/hdc-lib/actions/workflows/test.yml?query=branch%3Amain"><img alt="tests status" src="https://img.shields.io/github/workflow/status/mikeheddes/hdc-lib/Testing/main?label=tests&style=flat" />
+    <a href="https://github.com/hyperdimensional-computing/torchhd/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/badge/license-MIT-orange.svg?style=flat" /></a>
+    <a href="https://pypi.org/project/torchhd/"><img alt="pypi version" src="https://img.shields.io/pypi/v/torchhd.svg?style=flat&color=orange" /></a>
+    <a href="https://anaconda.org/torchhd/torchhd"><img alt="conda version" src="https://img.shields.io/conda/v/torchhd/torchhd?label=conda&style=flat&color=orange" /></a>
+    <a href="https://github.com/hyperdimensional-computing/torchhd/actions/workflows/test.yml?query=branch%3Amain"><img alt="tests status" src="https://img.shields.io/github/workflow/status/hyperdimensional-computing/torchhd/Test/main?label=tests&style=flat" />
     </a><img alt="PRs Welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" />
 </p>
 
 <div align="center">
-    <a href="https://mikeheddes.github.io/hdc-lib">
-        <img width="380px"  alt="Torchhd logo" src="./resources/torchhd-logo.svg" />
+    <a href="https://github.com/hyperdimensional-computing/torchhd">
+        <img width="380px"  alt="Torchhd logo" src="https://raw.githubusercontent.com/hyperdimensional-computing/torchhd/main/resources/torchhd-logo.svg" />
     </a>
 </div>
 
-# [Torchhd](https://mikeheddes.github.io/hdc-lib)
+# Torchhd
 
 Torchhd is a Python library for Hyperdimensional Computing.
 
@@ -28,16 +28,16 @@ pip install hdc
 ```
 
 ```bash
-conda install -c mikeheddes hdc
+conda install -c torchhd torchhd
 ```
 
 ## Documentation
 
-You can find documentation for Torchhd [on the website](https://mikeheddes.github.io/hdc-lib).
+You can find documentation for Torchhd [on the website](https://hyperdimensional-computing.github.io/torchhd/).
 
 ## Examples
 
-We have several examples [in the repository](/examples/). Here is a simple one to get you started:
+We have several examples [in the repository](https://github.com/hyperdimensional-computing/torchhd/tree/main/examples). Here is a simple one to get you started:
 
 ```python
 import torch
@@ -87,9 +87,9 @@ You will notice that we first declare all the symbols which are used to represen
 ### Creating a New Release
 
 - A GitHub release triggers a GitHub action that builds the library and publishes it to PyPi and Conda in addition to the documentation website.
-- Before creating a new GitHub release, increment the version number in [setup.py](/setup.py) using [semantic versioning](https://semver.org).
+- Before creating a new GitHub release, increment the version number in [setup.py](https://github.com/hyperdimensional-computing/torchhd/blob/main/setup.py) using [semantic versioning](https://semver.org).
 - When creating a new GitHub release, set the tag to be "v{version number}", e.g., v1.5.2, and provide a clear description of the changes.
 
 ### License
 
-This library is [MIT licensed](./LICENSE).
+This library is [MIT licensed](https://github.com/hyperdimensional-computing/torchhd/blob/main/LICENSE).

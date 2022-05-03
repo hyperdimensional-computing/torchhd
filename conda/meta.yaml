@@ -1,7 +1,7 @@
 {% set data = load_setup_py_data() %}
 
 package:
-  name: hdc
+  name: torchhd
   version: {{ data['version'] }}
 
 source:
@@ -24,8 +24,8 @@ requirements:
 
 test:
   imports:
-    - hdc
-    - hdc.datasets
+    - torchhd
+    - torchhd.datasets
 
 about:
   home: {{ data['url'] }}

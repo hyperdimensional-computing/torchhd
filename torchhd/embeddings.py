@@ -2,7 +2,8 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from . import functional
+
+import torchhd.functional as functional
 
 
 class Identity(nn.Embedding):

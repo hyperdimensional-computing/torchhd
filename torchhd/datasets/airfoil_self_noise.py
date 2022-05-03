@@ -1,11 +1,11 @@
 import os
 import os.path
-from typing import Callable, Optional, Tuple, List
+from typing import Callable, Optional, Tuple
 import torch
-import pandas as pd
 from torch.utils import data
-import math
-from .utils import download_file, unzip_file
+import pandas as pd
+
+from .utils import download_file
 
 
 class AirfoilSelfNoise(data.Dataset):

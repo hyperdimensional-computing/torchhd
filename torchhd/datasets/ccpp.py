@@ -1,21 +1,19 @@
 import os
-import os.path
-from typing import Callable, Optional, Tuple, List
+import os.path as path
+from typing import Callable, Optional, Tuple
 import torch
-import pandas as pd
 from torch.utils import data
+import pandas as pd
 
-from .utils import download_file_from_google_drive, unzip_file
+from .utils import download_file, unzip_file
 
 
-class ISOLET(data.Dataset):
-    """`ISOLET <https://archive.ics.uci.edu/ml/datasets/isolet>`_ Dataset.
+class CyclePowerPlant(data.Dataset):
+    """Combined cycle power planet dataset <https://archive.ics.uci.edu/ml/datasets/combined+cycle+power+plant>`_,
+        Features consist of hourly average ambient variables Temperature (T), Ambient Pressure (AP), Relative Humidity (RH) and Exhaust Vacuum (V) to predict the net hourly electrical energy output (EP) of the plant.
 
     Args:
-        root (string): Root directory of dataset where ``isolet1+2+3+4.data``
-            and  ``isolet5.data`` exist.
-        train (bool, optional): If True, creates dataset from ``isolet1+2+3+4.data``,
-            otherwise from ``isolet5.data``.
+        root (string): Root directory of dataset where downloaded dataset exists
         download (bool, optional): If True, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
@@ -25,49 +23,18 @@ class ISOLET(data.Dataset):
             target and transforms it.
     """
 
-    classes: List[str] = [
-        "A",
-        "B",
-        "C",
-        "D",
-        "E",
-        "F",
-        "G",
-        "H",
-        "I",
-        "J",
-        "K",
-        "L",
-        "M",
-        "N",
-        "O",
-        "P",
-        "Q",
-        "R",
-        "S",
-        "T",
-        "U",
-        "V",
-        "W",
-        "X",
-        "Y",
-        "Z",
-    ]
-
     def __init__(
         self,
         root: str,
-        train: bool = True,
+        download: bool = False,
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
-        download: bool = False,
     ):
-        root = os.path.join(root, "isolet")
+        root = path.join(root, "ccpp")
         root = os.path.expanduser(root)
         self.root = root
         os.makedirs(self.root, exist_ok=True)
 
-        self.train = train
         self.transform = transform
         self.target_transform = target_transform
 
@@ -84,13 +51,13 @@ class ISOLET(data.Dataset):
     def __len__(self) -> int:
         return self.data.size(0)
 
-    def __getitem__(self, index: int) -> Tuple[torch.FloatTensor, torch.LongTensor]:
+    def __getitem__(self, index: int) -> Tuple[torch.FloatTensor, torch.FloatTensor]:
         """
         Args:
             index (int): Index
 
         Returns:
-            Tuple[torch.FloatTensor, torch.LongTensor]: (sample, target) where target is the index of the target class
+            Tuple[torch.FloatTensor, torch.FloatTensor]: (sample, target) where target is the index of the target class
         """
         sample = self.data[index]
         label = self.targets[index]
@@ -107,34 +74,40 @@ class ISOLET(data.Dataset):
         if not os.path.isdir(self.root):
             return False
 
-        # Check if the root directory contains the required files
-        has_train_file = os.path.isfile(os.path.join(self.root, "isolet1+2+3+4.data"))
-        has_test_file = os.path.isfile(os.path.join(self.root, "isolet5.data"))
-        if has_train_file and has_test_file:
+        # Check if root directory contains the required data file
+        has_data_file = os.path.isfile(os.path.join(self.root, "Folds5x2_pp.xlsx"))
+        if has_data_file:
             return True
-
-        # TODO: Add more specific checks like an MD5 checksum
 
         return False
 
     def _load_data(self):
-        data_file = "isolet1+2+3+4.data" if self.train else "isolet5.data"
-        data = pd.read_csv(os.path.join(self.root, data_file), header=None)
+        file_name = "Folds5x2_pp.xlsx"
+        data = pd.read_excel(os.path.join(self.root, file_name))
         self.data = torch.tensor(data.values[:, :-1], dtype=torch.float)
-        self.targets = torch.tensor(data.values[:, -1], dtype=torch.long) - 1
+        self.targets = torch.tensor(data.values[:, -1], dtype=torch.float)
 
     def download(self):
-        """Download the data if it doesn't exist already."""
+        """Downloads the dataset if not already present"""
 
         if self._check_integrity():
             print("Files already downloaded and verified")
             return
 
         zip_file_path = os.path.join(self.root, "data.zip")
-        download_file_from_google_drive(
-            "1IMC6xzs2kBnf5_kaiBUzSWiTMR_dFbIX",  # Google Drive shared file ID
+        download_file(
+            "https://archive.ics.uci.edu/ml/machine-learning-databases/00294/CCPP.zip",
             zip_file_path,
         )
 
         unzip_file(zip_file_path, self.root)
         os.remove(zip_file_path)
+
+        source_dir = os.path.join(self.root, "CCPP")
+        data_files = os.listdir(source_dir)
+        for filename in data_files:
+            os.rename(
+                os.path.join(source_dir, filename), os.path.join(self.root, filename)
+            )
+
+        os.rmdir(source_dir)
