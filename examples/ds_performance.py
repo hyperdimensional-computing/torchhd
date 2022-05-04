@@ -1,7 +1,5 @@
 import time
-
 import torch
-import matplotlib.pyplot as plt
 
 start_time = time.time()
 
@@ -26,15 +24,6 @@ hdSet = structures.Multiset(DIMENSIONS)
 list(map(lambda l: hdSet.add(letters_hv[letters.index(l)]), exampleSet))
 similarity = functional.cosine_similarity(hdSet.value, letters_hv)
 
-'''
-plt.rcParams.update({'font.size': 22})
-plt.figure(figsize=(20,10))
-plt.stem(similarity, use_line_collection=True)
-plt.xticks([i for i in range(len(letters))], letters)
-plt.grid()
-print("Simality of the set to the codebook:")
-plt.show()
-'''
 # SEQUENCE
 
 hdSequence = structures.Sequence(DIMENSIONS)
@@ -116,7 +105,7 @@ similarity = functional.cosine_similarity(Aneighbours, letters_hv)
 # DIRECTED GRAPH
 
 edges = [('a', 'b'), ('a', 'e'), ('c', 'b'), ('d', 'c'), ('e', 'd')]
-graph = structures.Graph(DIMENSIONS, directed=True)
+graph = structures.Graph(DIMENSIONS, directed=True, )
 list(map(lambda l: graph.add_edge(letters_hv[letters.index(l[0])], letters_hv[letters.index(l[1])]), edges))
 
 # Outgoing a
@@ -128,3 +117,90 @@ similarity = functional.cosine_similarity(Aneighbours, letters_hv)
 Bneighbours = graph.node_neighbours(letters_hv[letters.index('b')], outgoing=False)
 similarity = functional.cosine_similarity(Bneighbours, letters_hv)
 
+# BINARY TREE
+
+tree_list = [["a",["l","l","l"]], ["b",["l","r","l"]], ["c",["r","r","l"]], ["d",["r","r","r","l"]], ["e",["r","r","r","r"]], ["f",["l","r","r","l","l"]], ["g",["l","r","r","l","r"]]]
+
+tree = structures.Tree(DIMENSIONS)
+list(map(lambda l: tree.add_leaf(letters_hv[letters.index(l[0])], l[1]), tree_list))
+d_value = tree.get_leaf(tree_list[3][1])
+similarity = functional.cosine_similarity(d_value, letters_hv)
+
+# FREQUENCY
+
+exMul = ['a', 'a', 'a', 'b', 'b', 'c']
+hd_freq = structures.Multiset(DIMENSIONS)
+list(map(lambda l: hd_freq.add(letters_hv[letters.index(l)]), exMul))
+
+similarity = functional.dot_similarity(hd_freq.value, letters_hv)
+
+# NGRAM
+
+data = list("helloworld")
+n = 3
+hv_data = torch.stack(list(map(lambda l: letters_hv[letters.index(l)], data)))
+hd_gram1 = functional.ngrams(hv_data, n)
+
+data = list("felloworld")
+hv_data = torch.stack(list(map(lambda l: letters_hv[letters.index(l)], data)))
+hd_gram2 = functional.ngrams(hv_data, n)
+
+similarity = functional.cosine_similarity(hd_gram1, hd_gram2.unsqueeze(0))
+
+data = list("hejvarlden")
+hv_data = torch.stack(list(map(lambda l: letters_hv[letters.index(l)], data)))
+hd_gram3 = functional.ngrams(hv_data, n)
+
+similarity = functional.cosine_similarity(hd_gram1, hd_gram3.unsqueeze(0))
+
+data = list("ell")
+hv_data = torch.stack(list(map(lambda l: letters_hv[letters.index(l)], data)))
+hd_gram4 = functional.ngrams(hv_data, n)
+
+similarity = functional.cosine_similarity(hd_gram1, hd_gram4.unsqueeze(0))
+
+data = list("abc")
+hv_data = torch.stack(list(map(lambda l: letters_hv[letters.index(l)], data)))
+hd_gram5 = functional.ngrams(hv_data, n)
+
+similarity = functional.cosine_similarity(hd_gram1, hd_gram5.unsqueeze(0))
+
+# STACK
+
+exStack = ['b', 'c', 'd']
+hdStack = structures.Sequence(DIMENSIONS)
+list(map(lambda l: hdStack.append(letters_hv[letters.index(l)]), exStack))
+similarity = functional.cosine_similarity(hdStack.value, letters_hv)
+
+hdStack.appendleft(letters_hv[letters.index('a')])
+similarity = functional.cosine_similarity(hdStack.value, letters_hv)
+
+# Lookup
+first_element = torch.argmax(functional.cosine_similarity(hdStack[0], letters_hv))
+hdStack.popleft(letters_hv[first_element])
+
+exStack = ['b', 'c', 'd']
+hdStackTwo = structures.Sequence(DIMENSIONS)
+list(map(lambda l: hdStackTwo.append(letters_hv[letters.index(l)]), exStack))
+
+similarity = functional.cosine_similarity(hdStackTwo.value, hdStack.value.unsqueeze(0))
+
+# FSA
+
+states = ['L', 'U']
+tokens = ['P', 'T']
+states_hv = functional.random_hv(len(states), DIMENSIONS)
+tokens_hv = functional.random_hv(len(tokens), DIMENSIONS)
+
+transitions = [['L', 'L', 'P'], ['L', 'U', 'T'], ['U', 'U', 'T'], ['U', 'L', 'P']]
+
+fsa = structures.FiniteStateAutomata(DIMENSIONS)
+list(map(lambda l: fsa.add_transition(tokens_hv[tokens.index(l[2])], states_hv[states.index(l[0])], states_hv[states.index(l[1])]), transitions))
+
+hd_approx = fsa.change_state(tokens_hv[tokens.index('P')], states_hv[states.index('L')])
+next_state = torch.argmax(functional.cosine_similarity(hd_approx, states_hv))
+
+hd_approx = fsa.change_state(tokens_hv[tokens.index('T')], states_hv[states.index('L')])
+next_state = torch.argmax(functional.cosine_similarity(hd_approx, states_hv))
+
+print("Duration", time.time() - start_time)
