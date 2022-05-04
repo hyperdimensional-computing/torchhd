@@ -108,9 +108,9 @@ class Sequence:
         self.length -= 1
 
     def popleft(self, input: torch.Tensor) -> None:
-        rotated_input = functional.permute(input, shifts=len(self) + 1)
-        self.value = functional.bundle(self.value, -rotated_input)
         self.length -= 1
+        rotated_input = functional.permute(input, shifts=len(self))
+        self.value = functional.bundle(self.value, -rotated_input)
 
     def concat(self, seq: 'Sequence'):
         self.value = functional.permute(self.value, shifts=len(seq))
@@ -165,16 +165,17 @@ class Graph:
 
 class Tree:
     def __init__(self, dimensions, device=None, dtype=None):
+        self.dimensions = dimensions
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
         self.value = torch.zeros(dimensions, dtype=dtype, device=device)
         self.l_r = functional.random_hv(2, dimensions)
 
     def add_leaf(self, value, path):
-        for i in path:
-            if i == "l":
-                value = functional.bind(value, self.left)
+        for idx, i in enumerate(path):
+            if i == 'l':
+                value = functional.bind(value, functional.permute(self.left, shifts=idx))
             else:
-                value = functional.bind(value, self.right)
+                value = functional.bind(value, functional.permute(self.right, shifts=idx))
         self.value = functional.bundle(self.value, value)
 
     @property
@@ -184,6 +185,20 @@ class Tree:
     @property
     def right(self):
         return self.l_r[1]
+
+    def get_leaf(self, path):
+        for idx, i in enumerate(path):
+            if i == 'l':
+                if idx == 0:
+                    hv_path = self.left
+                else:
+                    hv_path = functional.bind(hv_path, functional.permute(self.left, shifts=idx))
+            else:
+                if idx == 0:
+                    hv_path = self.right
+                else:
+                    hv_path = functional.bind(hv_path, functional.permute(self.right, shifts=idx))
+        return functional.bind(hv_path, self.value)
 
 
 class FiniteStateAutomata:
