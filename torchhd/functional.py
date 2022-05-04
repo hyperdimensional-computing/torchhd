@@ -450,17 +450,17 @@ def hamming_similarity(input: torch.Tensor, others: torch.Tensor) -> torch.Tenso
 
 
 def ngrams(input: torch.Tensor, n=3):
+    n_gram = None
     for i in range(0, n):
         if i == (n - 1):
             last_sample = None
         else:
             last_sample = -(n - i - 1)
-        sample = permute(input[:, i:last_sample], shifts=n - i - 1)
-        if n is None:
+        sample = permute(input[..., i:last_sample, :], shifts=n - i - 1)
+        if n_gram is None:
             n_gram = sample
         else:
-            n_gram = bind(n, sample)
-
+            n_gram = bind(n_gram, sample)
     return multiset(n_gram)
 
 
