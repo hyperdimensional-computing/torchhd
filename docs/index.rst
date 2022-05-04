@@ -9,6 +9,7 @@ Welcome to the Torchhd documentation!
 
    functional
    embeddings
+   structures
    datasets
 
 
