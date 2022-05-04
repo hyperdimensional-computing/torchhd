@@ -95,10 +95,12 @@ class Sequence:
     def append(self, input: torch.Tensor) -> None:
         rotated_value = functional.permute(self.value, shifts=1)
         self.value = functional.bundle(input, rotated_value)
+        self.length += 1
 
     def appendleft(self, input: torch.Tensor) -> None:
         rotated_input = functional.permute(input, shifts=len(self))
         self.value = functional.bundle(self.value, rotated_input)
+        self.length += 1
 
     def pop(self, input: torch.Tensor) -> Optional[torch.Tensor]:
         self.value = functional.bundle(self.value, -input)
@@ -110,8 +112,13 @@ class Sequence:
         self.value = functional.bundle(self.value, -rotated_input)
         self.length -= 1
 
+    def concat(self, seq: 'Sequence'):
+        self.value = functional.permute(self.value, shifts=len(seq))
+        self.value = functional.bundle(self.value, seq.value)
+        self.length += len(seq)
+
     def __getitem__(self, index: int) -> torch.Tensor:
-        rotated_value = functional.permute(self.value, shifts=-index)
+        rotated_value = functional.permute(self.value, shifts=-self.length+index+1)
         return rotated_value
 
     def __len__(self) -> int:
@@ -130,9 +137,9 @@ class Graph:
 
     def add_edge(self, node1: torch.Tensor, node2: torch.Tensor):
         if self.directed:
-            edge = functional.bind(node1, node2)
-        else:
             edge = functional.bind(node1, functional.permute(node2))
+        else:
+            edge = functional.bind(node1, node2)
         self.value = functional.bundle(self.value, edge)
 
     def edge_exists(self, node1: torch.Tensor, node2: torch.Tensor):
@@ -142,8 +149,14 @@ class Graph:
             edge = functional.bind(node1, functional.permute(node2))
         return edge in self
 
-    def node_neighbours(self, input: torch.Tensor):
-        return functional.bind(self.value, input)
+    def node_neighbours(self, input: torch.Tensor, outgoing=True):
+        if self.directed:
+            if outgoing:
+                return functional.permute(functional.bind(self.value, input), shifts=-1)
+            else:
+                return functional.bind(self.value, functional.permute(input, shifts=1))
+        else:
+            return functional.bind(self.value, input)
 
     def __contains__(self, input: torch.Tensor):
         sim = functional.cosine_similarity(input, self.value.unsqueeze(0))
