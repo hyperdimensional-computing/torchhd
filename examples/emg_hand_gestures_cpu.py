@@ -1,4 +1,5 @@
 import time
+
 start_time = time.time()
 
 # The following two lines are only needed because of this repository organization

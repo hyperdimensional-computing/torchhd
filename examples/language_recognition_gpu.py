@@ -10,6 +10,7 @@ sys.path.insert(1, os.path.realpath(os.path.pardir))
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
 from tqdm import tqdm
@@ -106,7 +107,7 @@ accuracy = torchmetrics.Accuracy()
 with torch.no_grad():
     for samples, labels in tqdm(test_ld, desc="Testing"):
         samples = samples.to(device)
-        
+
         outputs = model(samples)
         predictions = torch.argmax(outputs, dim=-1)
         accuracy.update(predictions.cpu(), labels)
