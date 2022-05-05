@@ -215,7 +215,7 @@ class Tree:
         self.dimensions = dimensions
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
         self.value = torch.zeros(dimensions, dtype=dtype, device=device)
-        self.l_r = functional.random_hv(2, dimensions)
+        self.l_r = functional.random_hv(2, dimensions, dtype=dtype, device=device)
 
     def add_leaf(self, value, path):
         for idx, i in enumerate(path):
