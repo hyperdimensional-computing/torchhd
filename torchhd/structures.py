@@ -131,19 +131,19 @@ class Sequence:
         self.value = functional.bundle(self.value, -rotated_input)
 
     def replace(self, index: int, old: Tensor, new: Tensor) -> None:
-        rotated_old = functional.permute(old, shifts=-self.length+index+1)
+        rotated_old = functional.permute(old, shifts=-self.length + index + 1)
         self.value = functional.bundle(self.value, -rotated_old)
 
-        rotated_new = functional.permute(new, shifts=-self.length+index+1)
+        rotated_new = functional.permute(new, shifts=-self.length + index + 1)
         self.value = functional.bundle(self.value, rotated_new)
 
-    def concat(self, seq: 'Sequence') -> 'Sequence':
+    def concat(self, seq: "Sequence") -> "Sequence":
         value = functional.permute(self.value, shifts=len(seq))
         value = functional.bundle(value, seq.value)
         return Sequence(value, length=len(self) + len(seq))
 
     def __getitem__(self, index: int) -> Tensor:
-        return functional.permute(self.value, shifts=-self.length+index+1)
+        return functional.permute(self.value, shifts=-self.length + index + 1)
 
     def __len__(self) -> int:
         return self.length
@@ -188,10 +188,10 @@ class DistinctSequence:
         self.value = functional.bind(self.value, rotated_input)
 
     def replace(self, index: int, old: Tensor, new: Tensor) -> None:
-        rotated_old = functional.permute(old, shifts=-self.length+index+1)
+        rotated_old = functional.permute(old, shifts=-self.length + index + 1)
         self.value = functional.bind(self.value, rotated_old)
 
-        rotated_new = functional.permute(new, shifts=-self.length+index+1)
+        rotated_new = functional.permute(new, shifts=-self.length + index + 1)
         self.value = functional.bind(self.value, rotated_new)
 
     def __len__(self) -> int:
@@ -199,9 +199,7 @@ class DistinctSequence:
 
 
 class Graph:
-    def __init__(
-        self, dimensions, directed=False, device=None, dtype=None
-    ):
+    def __init__(self, dimensions, directed=False, device=None, dtype=None):
         self.length = 0
         self.directed = directed
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
@@ -239,10 +237,14 @@ class Tree:
 
     def add_leaf(self, value: Tensor, path: List[str]) -> None:
         for idx, i in enumerate(path):
-            if i == 'l':
-                value = functional.bind(value, functional.permute(self.left, shifts=idx))
+            if i == "l":
+                value = functional.bind(
+                    value, functional.permute(self.left, shifts=idx)
+                )
             else:
-                value = functional.bind(value, functional.permute(self.right, shifts=idx))
+                value = functional.bind(
+                    value, functional.permute(self.right, shifts=idx)
+                )
 
         self.value = functional.bundle(self.value, value)
 
@@ -256,17 +258,21 @@ class Tree:
 
     def get_leaf(self, path: List[str]) -> Tensor:
         for idx, i in enumerate(path):
-            if i == 'l':
+            if i == "l":
                 if idx == 0:
                     hv_path = self.left
                 else:
-                    hv_path = functional.bind(hv_path, functional.permute(self.left, shifts=idx))
+                    hv_path = functional.bind(
+                        hv_path, functional.permute(self.left, shifts=idx)
+                    )
             else:
                 if idx == 0:
                     hv_path = self.right
                 else:
-                    hv_path = functional.bind(hv_path, functional.permute(self.right, shifts=idx))
-       
+                    hv_path = functional.bind(
+                        hv_path, functional.permute(self.right, shifts=idx)
+                    )
+
         return functional.bind(hv_path, self.value)
 
 
