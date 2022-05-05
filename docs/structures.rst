@@ -10,6 +10,7 @@ Structures
     Memory
     Multiset
     Sequence
+    DistinctSequence
     Graph
     Tree
     FiniteStateAutomata
