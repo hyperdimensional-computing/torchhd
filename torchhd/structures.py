@@ -79,9 +79,9 @@ class Multiset:
         return instance
 
     @classmethod
-    def from_tensors(cls, input: torch.Tensor, dim=-2, threshold=0.5):
+    def from_tensor(cls, input: torch.Tensor, dim=-2, threshold=0.5):
         instance = cls(input.size(-1), threshold, input.device, input.dtype)
-        instance.value = functional.multiset(input=input, dim=dim)
+        instance.value = functional.multiset(input, dim=dim)
         return instance
 
 
@@ -103,23 +103,70 @@ class Sequence:
         self.length += 1
 
     def pop(self, input: torch.Tensor) -> Optional[torch.Tensor]:
+        self.length -= 1
         self.value = functional.bundle(self.value, -input)
         self.value = functional.permute(self.value, shifts=-1)
-        self.length -= 1
 
     def popleft(self, input: torch.Tensor) -> None:
         self.length -= 1
         rotated_input = functional.permute(input, shifts=len(self))
         self.value = functional.bundle(self.value, -rotated_input)
 
-    def concat(self, seq: 'Sequence'):
-        self.value = functional.permute(self.value, shifts=len(seq))
-        self.value = functional.bundle(self.value, seq.value)
-        self.length += len(seq)
+    def replace(self, index: int, old: torch.Tensor, new: torch.Tensor) -> None:
+        rotated_old = functional.permute(old, shifts=-self.length+index+1)
+        self.value = functional.bundle(self.value, -rotated_old)
+
+        rotated_new = functional.permute(new, shifts=-self.length+index+1)
+        self.value = functional.bundle(self.value, rotated_new)
+
+    def concat(self, seq: 'Sequence') -> 'Sequence':
+        new_sequence = Sequence(self.value.size(-1), self.threshold, self.value.device, self.value.dtype)
+        new_sequence.value = functional.permute(self.value, shifts=len(seq))
+        new_sequence.value = functional.bundle(self.value, seq.value)
+        new_sequence.length = len(self) + len(seq)
+        return new_sequence
 
     def __getitem__(self, index: int) -> torch.Tensor:
         rotated_value = functional.permute(self.value, shifts=-self.length+index+1)
         return rotated_value
+
+    def __len__(self) -> int:
+        return self.length
+
+
+class DistinctSequence:
+    def __init__(self, dimensions, threshold=0.5, device=None, dtype=None):
+        self.length = 0
+        self.threshold = threshold
+        dtype = dtype if dtype is not None else torch.get_default_dtype()
+        self.value = torch.zeros(dimensions, dtype=dtype, device=device)
+
+    def append(self, input: torch.Tensor) -> None:
+        rotated_value = functional.permute(self.value, shifts=1)
+        self.value = functional.bind(input, rotated_value)
+        self.length += 1
+
+    def appendleft(self, input: torch.Tensor) -> None:
+        rotated_input = functional.permute(input, shifts=len(self))
+        self.value = functional.bind(self.value, rotated_input)
+        self.length += 1
+
+    def pop(self, input: torch.Tensor) -> Optional[torch.Tensor]:
+        self.length -= 1
+        self.value = functional.bind(self.value, input)
+        self.value = functional.permute(self.value, shifts=-1)
+
+    def popleft(self, input: torch.Tensor) -> None:
+        self.length -= 1
+        rotated_input = functional.permute(input, shifts=len(self))
+        self.value = functional.bind(self.value, rotated_input)
+
+    def replace(self, index: int, old: torch.Tensor, new: torch.Tensor) -> None:
+        rotated_old = functional.permute(old, shifts=-self.length+index+1)
+        self.value = functional.bind(self.value, rotated_old)
+
+        rotated_new = functional.permute(new, shifts=-self.length+index+1)
+        self.value = functional.bind(self.value, rotated_new)
 
     def __len__(self) -> int:
         return self.length
@@ -149,7 +196,7 @@ class Graph:
             edge = functional.bind(node1, functional.permute(node2))
         return edge in self
 
-    def node_neighbours(self, input: torch.Tensor, outgoing=True):
+    def node_neighbors(self, input: torch.Tensor, outgoing=True):
         if self.directed:
             if outgoing:
                 return functional.permute(functional.bind(self.value, input), shifts=-1)
