@@ -82,13 +82,17 @@ This example creates a hypervector that represents the record of a fruit, storin
 
 You will notice that we first declare all the symbols which are used to represent information. Note the type of hypervector used for each type of information, the fruits and keys use random hypervectors as they represent unrelated information whereas the weights and seasons use level and circular-hypervectors because they have linear and circular-correlations, respectively.
 
+## About
+
+Initial development of Torchhd was performed by Mike Heddes and Igor De Oliveira Nunes as part of their research in Hyperdimensional Computing at the University of California, Irvine. The library was extended with significant contributions from Pere Verges Boncompte and Dheyay Desai. Torchhd later merged with a project by Rishikanth Chandrasekaran who worked on similar problems as part of his research at the University of California, San Diego.
+
 ## Contributing
 
 ### Creating a New Release
 
 - A GitHub release triggers a GitHub action that builds the library and publishes it to PyPi and Conda in addition to the documentation website.
 - Before creating a new GitHub release, increment the version number in [setup.py](https://github.com/hyperdimensional-computing/torchhd/blob/main/setup.py) using [semantic versioning](https://semver.org).
-- When creating a new GitHub release, set the tag to be "v{version number}", e.g., v1.5.2, and provide a clear description of the changes.
+- When creating a new GitHub release, set the tag to be "v{version number}", e.g., v1.5.2, and provide a clear description of the changes. You can use GitHub's "auto-generate release notes" button. Look at previous releases for examples.
 
 ### License
 
