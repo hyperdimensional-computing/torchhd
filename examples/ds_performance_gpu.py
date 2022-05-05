@@ -233,8 +233,8 @@ similarity = functional.cosine_similarity(hdStackTwo.value, hdStack.value.unsque
 
 states = ["L", "U"]
 tokens = ["P", "T"]
-states_hv = functional.random_hv(len(states), DIMENSIONS)
-tokens_hv = functional.random_hv(len(tokens), DIMENSIONS)
+states_hv = functional.random_hv(len(states), DIMENSIONS, device=device)
+tokens_hv = functional.random_hv(len(tokens), DIMENSIONS, device=device)
 
 transitions = [["L", "L", "P"], ["L", "U", "T"], ["U", "U", "T"], ["U", "L", "P"]]
 
