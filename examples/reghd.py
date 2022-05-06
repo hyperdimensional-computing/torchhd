@@ -20,8 +20,8 @@ from torchhd.datasets.airfoil_self_noise import AirfoilSelfNoise
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
 
-DIMENSIONS = 10000 # number of hypervector dimensions
-NUM_FEATURES = 5 # number of features in dataset
+DIMENSIONS = 10000  # number of hypervector dimensions
+NUM_FEATURES = 5  # number of features in dataset
 
 # Import dataset
 ds = AirfoilSelfNoise("../data", download=True)
@@ -33,15 +33,18 @@ MEANS = ds.data.mean(0)
 TARGET_STD = ds.targets.std(0)
 TARGET_MEAN = ds.targets.mean(0)
 
+
 def transform(x):
     x = x - MEANS
-    x = x/STD_DEVS
+    x = x / STD_DEVS
     return x
+
 
 def target_transform(x):
     x = x - TARGET_MEAN
-    x = x/TARGET_STD
+    x = x / TARGET_STD
     return x
+
 
 ds = AirfoilSelfNoise(os.getcwd(), transform=transform, download=False)
 
@@ -57,7 +60,7 @@ test_dl = data.DataLoader(test_ds, batch_size=1)
 class SingleModel(nn.Module):
     def __init__(self, num_classes, size):
         super(SingleModel, self).__init__()
-        
+
         self.lr = 0.00001
         self.M = torch.zeros(1, DIMENSIONS)
         self.project = embeddings.Projection(size, DIMENSIONS)
@@ -69,11 +72,11 @@ class SingleModel(nn.Module):
         enc = self.project(x)
         sample_hv = torch.cos(enc + self.bias) * torch.sin(enc)
         return functional.hard_quantize(sample_hv)
-    
+
     def model_update(self, x, y):
-        update = self.M + self.lr*(y - (F.linear(x, self.M)))*x
+        update = self.M + self.lr * (y - (F.linear(x, self.M))) * x
         update = update.mean(0)
-        
+
         self.M = update
 
     def forward(self, x):
@@ -81,13 +84,14 @@ class SingleModel(nn.Module):
         res = F.linear(enc, self.M)
         return res
 
+
 model = SingleModel(1, NUM_FEATURES)
 model = model.to(device)
 
 # Model training
 with torch.no_grad():
     for _ in range(10):
-        for samples, labels in tqdm(train_dl, desc="Iteration {}".format(_+1)):
+        for samples, labels in tqdm(train_dl, desc="Iteration {}".format(_ + 1)):
             samples = samples.to(device)
             labels = labels.to(device)
 
@@ -105,5 +109,3 @@ with torch.no_grad():
         mse.update(predictions, labels)
 
 print(f"Testing mean squared error of {(mse.compute().item()):.3f}")
-
-
