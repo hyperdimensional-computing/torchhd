@@ -10,28 +10,19 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data as data
 
+# Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
 from tqdm import tqdm
 
 from torchhd import functional
 from torchhd import embeddings
-from torchhd.datasets.airfoil_self_noise import AirfoilSelfNoise
+from torchhd.datasets import AirfoilSelfNoise
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
 
 DIMENSIONS = 10000 # number of hypervector dimensions
 NUM_FEATURES = 5 # number of features in dataset
-
-# Import dataset
-ds = AirfoilSelfNoise("../data", download=True)
-
-# Get statistics for normalization of input features
-STD_DEVS = ds.data.std(0)
-MEANS = ds.data.mean(0)
-
-TARGET_STD = ds.targets.std(0)
-TARGET_MEAN = ds.targets.mean(0)
 
 def transform(x):
     x = x - MEANS
@@ -43,9 +34,18 @@ def target_transform(x):
     x = x/TARGET_STD
     return x
 
-ds = AirfoilSelfNoise(os.getcwd(), transform=transform, download=False)
+ds = AirfoilSelfNoise(os.getcwd(),download=False)
 
-# Split data in 70% train and 30% test
+# Get necessary statistics for data and target transform
+STD_DEVS = ds.data.std(0)
+MEANS = ds.data.mean(0)
+TARGET_STD = ds.targets.std(0)
+TARGET_MEAN = ds.targets.mean(0)
+
+ds.transform = transform
+ds.target_transform = target_transform
+
+# Split the dataset into 70% training and 30% testing
 train_size = int(len(ds) * 0.7)
 test_size = len(ds) - train_size
 train_ds, test_ds = data.random_split(ds, [train_size, test_size])
@@ -102,6 +102,8 @@ with torch.no_grad():
         samples = samples.to(device)
 
         predictions = model(samples)
+        predictions = predictions*TARGET_STD + TARGET_MEAN
+        labels = labels*TARGET_STD + TARGET_MEAN
         mse.update(predictions, labels)
 
 print(f"Testing mean squared error of {(mse.compute().item()):.3f}")
