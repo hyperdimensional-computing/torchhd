@@ -24,6 +24,14 @@ print("Using {} device".format(device))
 DIMENSIONS = 10000  # number of hypervector dimensions
 NUM_FEATURES = 5  # number of features in dataset
 
+ds = AirfoilSelfNoise("../data",download=False)
+
+# Get necessary statistics for data and target transform
+STD_DEVS = ds.data.std(0)
+MEANS = ds.data.mean(0)
+TARGET_STD = ds.targets.std(0)
+TARGET_MEAN = ds.targets.mean(0)
+
 def transform(x):
     x = x - MEANS
     x = x / STD_DEVS
@@ -35,13 +43,6 @@ def target_transform(x):
     x = x / TARGET_STD
     return x
 
-ds = AirfoilSelfNoise("../data",download=False)
-
-# Get necessary statistics for data and target transform
-STD_DEVS = ds.data.std(0)
-MEANS = ds.data.mean(0)
-TARGET_STD = ds.targets.std(0)
-TARGET_MEAN = ds.targets.mean(0)
 
 ds.transform = transform
 ds.target_transform = target_transform
@@ -106,6 +107,6 @@ with torch.no_grad():
         predictions = model(samples)
         predictions = predictions*TARGET_STD + TARGET_MEAN
         labels = labels*TARGET_STD + TARGET_MEAN
-        mse.update(predictions, labels)
+        mse.update(predictions.cpu(), labels)
 
 print(f"Testing mean squared error of {(mse.compute().item()):.3f}")
