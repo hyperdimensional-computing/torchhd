@@ -19,16 +19,20 @@ r1 = functional.bundle(functional.bundle(f, w), s)
 # equivalent short-hand encoding of record r1:
 # r1 = V[0] * F[0] + V[1] * W[w_i] + V[2] * S[3]
 
+fruit = functional.bind(r1, V[0])
+weight = functional.bind(r1, V[1])
 season = functional.bind(r1, V[2])
 
 memory = torch.cat([F, W, S])
-similarity = functional.cosine_similarity(season, memory)
+fruit_similarity = functional.cosine_similarity(fruit, memory)
+weight_similarity = functional.cosine_similarity(weight, memory)
+season_similarity = functional.cosine_similarity(season, memory)
 
 import matplotlib.pyplot as plt
 
 plt.style.use(["science", "nature"])
 
-fig, ax = plt.subplots(1, 1, figsize=(3.7, 2.2))
+fig, ax = plt.subplots(1, 1, figsize=(3.3, 2.2))
 
 weights = functional.index_to_value(torch.arange(0, 10), 10, 0, 200).tolist()
 weights = [f"{w:.0f}" for w in weights]
@@ -38,18 +42,45 @@ concepts = (
 
 markerline, stemlines, baseline = ax.stem(
     concepts,
-    similarity.tolist(),
-    "midnightblue",
+    fruit_similarity.tolist(),
+    "#F7934C",
     use_line_collection=True,
     markerfmt="o",
+    label="Fruit",
 )
-plt.setp(markerline, "color", "midnightblue")
-plt.setp(stemlines, "color", "midnightblue")
-plt.setp(baseline, "color", "midnightblue", "alpha", 0.3)
+plt.setp(markerline, "color", "#F7934C")
+plt.setp(stemlines, "color", "#F7934C", "alpha", 0.7)
+plt.setp(baseline, "color", "#F7934C", "alpha", 0.3)
+
+markerline, stemlines, baseline = ax.stem(
+    concepts,
+    weight_similarity.tolist(),
+    "#04724D",
+    use_line_collection=True,
+    markerfmt="o",
+    label="Weight",
+)
+plt.setp(markerline, "color", "#04724D")
+plt.setp(stemlines, "color", "#04724D", "alpha", 0.7)
+plt.setp(baseline, "color", "#04724D", "alpha", 0.3)
+
+markerline, stemlines, baseline = ax.stem(
+    concepts,
+    season_similarity.tolist(),
+    "#2659A6",
+    use_line_collection=True,
+    markerfmt="o",
+    label="Season",
+)
+plt.setp(markerline, "color", "#2659A6")
+plt.setp(stemlines, "color", "#2659A6", "alpha", 0.7)
+plt.setp(baseline, "color", "#2659A6", "alpha", 0.3)
 
 ax.set_xticks([i for i in range(len(concepts))], concepts)
 ax.set_xticklabels(concepts, rotation=65)
 ax.set_xlabel("Hypervector", labelpad=-5)
 ax.set_ylabel("Cosine similarity")
-plt.savefig("similarity.pgf")
-plt.savefig("similarity.png", dpi=300)
+ax.margins(y=0.1)
+plt.legend(bbox_to_anchor=(1.02, 0.5), loc="center left", title="Variable")
+plt.savefig("record-similarity.pgf")
+plt.savefig("record-similarity.png", dpi=300)
