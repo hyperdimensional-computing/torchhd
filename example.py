@@ -37,7 +37,7 @@ fig, ax = plt.subplots(1, 1, figsize=(3.3, 2.2))
 weights = functional.index_to_value(torch.arange(0, 10), 10, 0, 200).tolist()
 weights = [f"{w:.0f}" for w in weights]
 concepts = (
-    ["Apple", "Lemon", "Mango"] + weights + ["Winter", "Summer", "Spring", "Fall"]
+    ["Apple", "Lemon", "Mango"] + weights + ["Winter", "Spring", "Summer", "Fall"]
 )
 
 markerline, stemlines, baseline = ax.stem(
