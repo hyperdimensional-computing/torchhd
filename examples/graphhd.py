@@ -104,7 +104,7 @@ class Model(nn.Module):
         row, col = to_undirected(x.edge_index)
 
         hvs = functional.bind(node_id_hvs[row], node_id_hvs[col])
-        return functional.batch_bundle(hvs)
+        return functional.multiset(hvs)
 
     def forward(self, x):
         enc = self.encode(x)

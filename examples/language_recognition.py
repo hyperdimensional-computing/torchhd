@@ -70,14 +70,7 @@ class Model(nn.Module):
 
     def encode(self, x):
         symbols = self.symbol(x)
-
-        first = functional.permute(symbols[:, 0:-2], shifts=2)
-        second = functional.permute(symbols[:, 1:-1])
-        third = symbols[:, 2:None]
-
-        sample_hv = functional.bind(first, second)
-        sample_hv = functional.bind(sample_hv, third)
-        sample_hv = functional.batch_bundle(sample_hv)
+        sample_hv = functional.ngrams(symbols, n=3)
         return functional.hard_quantize(sample_hv)
 
     def forward(self, x):
