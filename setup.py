@@ -6,8 +6,8 @@ https://github.com/pypa/sampleproject
 from setuptools import setup, find_packages
 
 setup(
-    name="torchhd",
-    version="0.6.0",
+    name="torch-hd",  # use torch-hd on PyPi to install torchhd, torchhd is too similar according to PyPi
+    version="2.0.0",
     description="Torchhd is a Python library for Hyperdimensional Computing",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

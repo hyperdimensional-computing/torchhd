@@ -39,7 +39,7 @@ class Model(nn.Module):
 
     def encode(self, x):
         sample_hv = functional.bind(self.id.weight, self.value(x))
-        sample_hv = functional.batch_bundle(sample_hv)
+        sample_hv = functional.multiset(sample_hv)
         return functional.hard_quantize(sample_hv)
 
     def forward(self, x):
