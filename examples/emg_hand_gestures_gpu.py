@@ -25,7 +25,7 @@ print("Using {} device".format(device))
 
 DIMENSIONS = 10000  # number of hypervector dimensions
 NUM_LEVELS = 21
-BATCH_SIZE = 1  # for GPUs with enough memory we can process multiple images at ones
+BATCH_SIZE = 128  # for GPUs with enough memory we can process multiple images at ones
 WINDOW = 256
 N_GRAM_SIZE = 4
 DOWNSAMPLE = 5
