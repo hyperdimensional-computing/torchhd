@@ -23,7 +23,7 @@ device = torch.device("cuda:2")
 print("Using {} device".format(device))
 
 DIMENSIONS = 10000
-BATCH_SIZE = 1  # for GPUs with enough memory we can process multiple images at ones
+BATCH_SIZE = 128  # for GPUs with enough memory we can process multiple images at ones
 # cap maximum sample size to 128 characters (including spaces)
 MAX_INPUT_SIZE = 128
 PADDING_IDX = 0
@@ -73,14 +73,7 @@ class Model(nn.Module):
 
     def encode(self, x):
         symbols = self.symbol(x)
-
-        first = functional.permute(symbols[:, 0:-2], shifts=2)
-        second = functional.permute(symbols[:, 1:-1])
-        third = symbols[:, 2:None]
-
-        sample_hv = functional.bind(first, second)
-        sample_hv = functional.bind(sample_hv, third)
-        sample_hv = functional.batch_bundle(sample_hv)
+        sample_hv = functional.ngrams(symbols, n=3)
         return functional.hard_quantize(sample_hv)
 
     def forward(self, x):
@@ -98,7 +91,8 @@ with torch.no_grad():
         labels = labels.to(device)
 
         samples_hv = model.encode(samples)
-        model.classify.weight[labels] += samples_hv
+        for sample_hv, label in zip(torch.unbind(samples_hv), torch.unbind(labels)):
+            model.classify.weight[label] += sample_hv
 
     model.classify.weight[:] = F.normalize(model.classify.weight)
 

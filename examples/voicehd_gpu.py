@@ -24,7 +24,7 @@ print("Using {} device".format(device))
 
 DIMENSIONS = 10000  # number of hypervector dimensions
 NUM_LEVELS = 100
-BATCH_SIZE = 1  # for GPUs with enough memory we can process multiple images at ones
+BATCH_SIZE = 128  # for GPUs with enough memory we can process multiple images at ones
 
 
 class Model(nn.Module):
@@ -39,7 +39,7 @@ class Model(nn.Module):
 
     def encode(self, x):
         sample_hv = functional.bind(self.id.weight, self.value(x))
-        sample_hv = functional.batch_bundle(sample_hv)
+        sample_hv = functional.multiset(sample_hv)
         return functional.hard_quantize(sample_hv)
 
     def forward(self, x):
@@ -63,7 +63,8 @@ with torch.no_grad():
         labels = labels.to(device)
 
         samples_hv = model.encode(samples)
-        model.classify.weight[labels] += samples_hv
+        for sample_hv, label in zip(torch.unbind(samples_hv), torch.unbind(labels)):
+            model.classify.weight[label] += sample_hv
 
     model.classify.weight[:] = F.normalize(model.classify.weight)
 

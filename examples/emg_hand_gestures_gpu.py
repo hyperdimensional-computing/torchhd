@@ -52,26 +52,8 @@ class Model(nn.Module):
         samples = functional.bind(signal, self.channels.weight.unsqueeze(0))
         samples = functional.bind(signal, self.timestamps.weight.unsqueeze(1))
 
-        samples = functional.batch_bundle(samples)
-
-        n_gram = None
-        for i in range(0, N_GRAM_SIZE):
-
-            if i == (N_GRAM_SIZE - 1):
-                last_sample = None
-            else:
-                last_sample = -(N_GRAM_SIZE - i - 1)
-
-            sample = functional.permute(
-                samples[:, i:last_sample], shifts=N_GRAM_SIZE - i - 1
-            )
-
-            if n_gram == None:
-                n_gram = sample
-            else:
-                n_gram = functional.bind(n_gram, sample)
-
-        sample_hv = functional.batch_bundle(n_gram)
+        samples = functional.multiset(samples)
+        sample_hv = functional.ngrams(samples, n=N_GRAM_SIZE)
         return functional.hard_quantize(sample_hv)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -102,7 +84,8 @@ def experiment(subjects=[0]):
             labels = labels.to(device)
 
             samples_hv = model.encode(samples)
-            model.classify.weight[labels] += samples_hv
+            for sample_hv, label in zip(torch.unbind(samples_hv), torch.unbind(labels)):
+                model.classify.weight[label] += sample_hv
 
         model.classify.weight[:] = F.normalize(model.classify.weight)
 
