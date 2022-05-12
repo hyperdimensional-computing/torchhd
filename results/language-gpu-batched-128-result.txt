@@ -1,0 +1,25 @@
+Using cuda:2 device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 97.248%
+Duration 132.7694833278656
+Using cuda:2 device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 97.281%
+Duration 120.18808197975159
+Using cuda:2 device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 97.319%
+Duration 121.05425572395325
+Using cuda:2 device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 97.414%
+Duration 134.69688630104065
+Using cuda:2 device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 97.329%
+Duration 120.7320168018341
