@@ -18,6 +18,6 @@ setup(
     python_requires=">=3.6, <4",
     project_urls={
         "Source": "https://github.com/hyperdimensional-computing/torchhd",
-        "Documentation": "https://hyperdimensional-computing.github.io/torchhd/",
+        "Documentation": "https://torchhd.readthedocs.io",
     },
 )
