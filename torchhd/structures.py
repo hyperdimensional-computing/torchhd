@@ -81,6 +81,9 @@ class Multiset:
     def __len__(self) -> int:
         return self.size
 
+    def clear(self) -> None:
+        self.value.fill_(0.0)
+
     @classmethod
     def from_ngrams(cls, input: Tensor, n=3):
         value = functional.ngrams(input, n)
@@ -89,6 +92,56 @@ class Multiset:
     @classmethod
     def from_tensor(cls, input: Tensor):
         value = functional.multiset(input, dim=-2)
+        return cls(value, size=input.size(-2))
+
+
+class HashTable:
+    @overload
+    def __init__(self, dimensions: int, *, device=None, dtype=None):
+        ...
+
+    @overload
+    def __init__(self, input: Tensor, *, size=0):
+        ...
+
+    def __init__(self, dim_or_input: int, **kwargs):
+        self.size = kwargs.get("size", 0)
+        if torch.is_tensor(dim_or_input):
+            self.value = dim_or_input
+        else:
+            dtype = kwargs.get("dtype", torch.get_default_dtype())
+            device = kwargs.get("device", None)
+            self.value = torch.zeros(dim_or_input, dtype=dtype, device=device)
+
+    def add(self, key: Tensor, value: Tensor) -> None:
+        pair = functional.bind(key, value)
+        self.value = functional.bundle(self.value, pair)
+        self.size += 1
+
+    def remove(self, key: Tensor, value: Tensor) -> None:
+        pair = functional.bind(key, value)
+        self.value = functional.bundle(self.value, -pair)
+        self.size -= 1
+
+    def get(self, key: Tensor) -> Tensor:
+        return functional.bind(self.value, key)
+
+    def update(self, key: Tensor, old: Tensor, new: Tensor) -> None:
+        self.remove(key, old)
+        self.add(key, new)
+
+    def __getitem__(self, key: Tensor) -> Tensor:
+        return self.get(key)
+
+    def __len__(self) -> int:
+        return self.size
+
+    def clear(self) -> None:
+        self.value.fill_(0.0)
+
+    @classmethod
+    def from_tensors(cls, keys: Tensor, values: Tensor):
+        value = functional.hash_table(keys, values)
         return cls(value, size=input.size(-2))
 
 
@@ -148,6 +201,9 @@ class Sequence:
     def __len__(self) -> int:
         return self.length
 
+    def clear(self) -> None:
+        self.value.fill_(0.0)
+
 
 class DistinctSequence:
     @overload
@@ -197,6 +253,9 @@ class DistinctSequence:
     def __len__(self) -> int:
         return self.length
 
+    def clear(self) -> None:
+        self.value.fill_(0.0)
+
 
 class Graph:
     def __init__(self, dimensions, directed=False, device=None, dtype=None):
@@ -226,6 +285,9 @@ class Graph:
 
     def contains(self, input: Tensor) -> Tensor:
         return functional.cosine_similarity(input, self.value.unsqueeze(0))
+
+    def clear(self) -> None:
+        self.value.fill_(0.0)
 
 
 class Tree:
@@ -275,6 +337,9 @@ class Tree:
 
         return functional.bind(hv_path, self.value)
 
+    def clear(self) -> None:
+        self.value.fill_(0.0)
+
 
 class FiniteStateAutomata:
     def __init__(self, dimensions, device=None, dtype=None):
@@ -298,3 +363,6 @@ class FiniteStateAutomata:
         next_state = functional.bind(self.value, state)
         next_state = functional.bind(next_state, action)
         return functional.permute(next_state, shifts=-1)
+
+    def clear(self) -> None:
+        self.value.fill_(0.0)
