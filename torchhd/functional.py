@@ -14,6 +14,7 @@ __all__ = [
     "bind",
     "bundle",
     "permute",
+    "cleanup",
     "hard_quantize",
     "soft_quantize",
     "hamming_similarity",
