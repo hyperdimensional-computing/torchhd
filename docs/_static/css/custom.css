@@ -1,0 +1,54 @@
+a,
+a:hover,
+a:visited {
+    color: #ee4c2c;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.wy-menu-vertical header,
+.wy-menu-vertical p.caption {
+    color: #262626;
+}
+
+
+.wy-nav-side {
+    background: #f3f4f7;
+}
+
+.wy-menu-vertical a,
+.wy-menu-vertical a:active,
+.wy-menu-vertical a:hover {
+    color: #6c6c6d;
+}
+
+.wy-menu-vertical a:hover {
+    background-color: #e8e9ea;
+    cursor: pointer;
+}
+
+.wy-menu-vertical a:active {
+    background-color: #e8e9ea;
+}
+
+.wy-side-nav-search input[type=text] {
+    border-color: #c9c9c9;
+}
+
+.rst-content .viewcode-back,
+.rst-content .viewcode-link {
+    color: #4974D1;
+}
+
+html.writer-html4 .rst-content dl:not(.docutils)>dt,
+html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(.footnote):not(.glossary):not(.simple)>dt {
+    background: #f3f4f7;
+    color: #6c6c6d;
+    border-top: none;
+    border-left: 3px solid #ee4c2c;
+    padding: 0.5rem;
+    padding-right: 100px;
+    word-wrap: break-word;
+}
