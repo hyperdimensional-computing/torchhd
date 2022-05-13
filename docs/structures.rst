@@ -9,6 +9,7 @@ Structures
 
     Memory
     Multiset
+    HashTable
     Sequence
     DistinctSequence
     Graph
