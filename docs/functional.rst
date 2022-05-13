@@ -28,6 +28,7 @@ Operations
     bind
     bundle
     permute
+    cleanup
     soft_quantize
     hard_quantize
 
