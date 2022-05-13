@@ -8,7 +8,7 @@
 
 <div align="center">
     <a href="https://github.com/hyperdimensional-computing/torchhd">
-        <img width="380px"  alt="Torchhd logo" src="https://raw.githubusercontent.com/hyperdimensional-computing/torchhd/main/resources/torchhd-logo.svg" />
+        <img width="380px"  alt="Torchhd logo" src="https://raw.githubusercontent.com/hyperdimensional-computing/torchhd/main/docs/images/torchhd-logo.svg" />
     </a>
 </div>
 
@@ -33,7 +33,7 @@ conda install -c torchhd torchhd
 
 ## Documentation
 
-You can find documentation for Torchhd [on the website](https://hyperdimensional-computing.github.io/torchhd/).
+You can find documentation for Torchhd [on the website](https://torchhd.readthedocs.io).
 
 ## Examples
 
