@@ -16,11 +16,12 @@ D = 10000
 num_hash_fun = 100
 dens = num_hash_fun/D
 N = 10000
-simul = 10
+simul = 100
 BEST_ABF = []
 CURRENT_BF = []
 BEST_BF = []
-hd = torch.full((D,N), -1)
+hd = torch.full((D,N), 0, dtype=torch.long)
+
 
 for i in hd:
     perm = torch.randperm(D)[:num_hash_fun]
@@ -28,7 +29,7 @@ for i in hd:
 
 thr_limit = torch.tensor([20]*30 + [30]*20 + [40]*15 + [50]*15 + [60]*20)
 
-f_range = torch.range(50,5050,50)
+f_range = torch.range(50,5000,50)
 current_rbf = torch.zeros(num_hash_fun, 3)
 
 for i in range(len(f_range)):
@@ -40,22 +41,22 @@ for i in range(len(f_range)):
         ind = rand_perm[:int(F)]
         ll_ind = rand_perm[int(F):]
         # l_ind = torch.full((N,1), 1)
-        rbf = functional.multiset(hd[ind,:])
-
+        rbf = torch.sum(hd[ind,:], dim=0)
         positive = torch.tensor(1.0)
-        negative = torch.tensor(-1.0)
-        rbf = torch.where(rbf > -F, positive, negative)
-        rbf_ind = ((rbf != -1).nonzero())
+        negative = torch.tensor(0.0)
+        rbf = torch.where(rbf > 0, positive, negative)
+        rbf_ind = ((rbf != 0).nonzero())
 
-        puncture = int(D*(0.001*(len(rbf_ind)/D)))
+        puncture = int(D*(0.001*(len(rbf_ind)/D)))+1
         p_ind = torch.randperm(N)[:puncture]
 
         rbf[p_ind] = -1
-        dp = functional.bind(hd, rbf)
-        rbf_tpr[j] = (sum(dp[ind,1] != 1)/F.item()).item()
-        rbf_fpr[j] = ((sum(dp[ind,1] != 1)/(N-F.item())).item())
 
-    print(i)
+        dp = torch.matmul(hd, rbf.long())
+
+        rbf_tpr[j] = (sum(dp[ind] == num_hash_fun)/F.item()).item()
+        rbf_fpr[j] = ((sum(dp[ll_ind] == num_hash_fun)/(N-F.item())).item())
+
     current_rbf[i,0] = torch.mean(rbf_tpr)
     current_rbf[i,1] = torch.mean(rbf_fpr)
     current_rbf[i,2] = (current_rbf[int(i),0]+(1-current_rbf[i,1]))/2
@@ -102,4 +103,7 @@ for i in range(len(f_range)):
         one_n_opt = 1
     fpr = pow(1-np.exp(-(one_n_opt*int(F)/D)), one_n_opt)
     BEST_BF.append([one_n_opt, 1, fpr, (1+(1-fpr))/2])
-    print(BEST_BF)
+print(BEST_BF)
+print(BEST_ABF)
+print(CURRENT_BF)
+print(current_rbf)
