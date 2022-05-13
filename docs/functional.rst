@@ -45,6 +45,18 @@ Similarities
     hamming_similarity
 
 
+Encodings
+------------------------
+
+.. autosummary::
+    :toctree: generated/
+    :template: function.rst
+
+    
+    ngrams
+    hash_table
+
+
 Utilities
 ------------------------
 
