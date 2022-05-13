@@ -13,13 +13,15 @@ __all__ = [
     "circular_hv",
     "bind",
     "bundle",
-    "multiset",
     "permute",
     "hard_quantize",
     "soft_quantize",
     "hamming_similarity",
     "cosine_similarity",
     "dot_similarity",
+    "multiset",
+    "ngrams",
+    "hash_table",
     "map_range",
     "value_to_index",
     "index_to_value",
@@ -334,29 +336,6 @@ def bundle(input: Tensor, other: Tensor, *, out=None) -> Tensor:
     return torch.add(input, other, out=out)
 
 
-def multiset(
-    input: Tensor,
-    *,
-    dim=-2,
-    keepdim=False,
-    dtype=None,
-) -> Tensor:
-    """Returns element-wise sum of hypervectors hv
-
-    Args:
-        input (Tensor): input hypervector tensor
-        dim (int, optional): dimension over which to bundle the hypervectors. Defaults to -2.
-        keepdim (bool, optional): whether to keep the bundled dimension. Defaults to False.
-        dtype (torch.dtype, optional): if specified determins the type of the returned tensor, otherwise same as input.
-
-    Returns:
-        Tensor: bundled hypervector
-
-    """
-
-    return torch.sum(input, dim=dim, keepdim=keepdim, dtype=dtype)
-
-
 def permute(input: Tensor, *, shifts=1, dims=-1) -> Tensor:
     """Permutes input hypervector by specified number of shifts
 
@@ -448,6 +427,29 @@ def hamming_similarity(input: Tensor, others: Tensor) -> Tensor:
 
     """
     return torch.sum(input == others, dim=-1, dtype=input.dtype)
+
+
+def multiset(
+    input: Tensor,
+    *,
+    dim=-2,
+    keepdim=False,
+    dtype=None,
+) -> Tensor:
+    """Returns element-wise sum of hypervectors hv
+
+    Args:
+        input (Tensor): input hypervector tensor
+        dim (int, optional): dimension over which to bundle the hypervectors. Defaults to -2.
+        keepdim (bool, optional): whether to keep the bundled dimension. Defaults to False.
+        dtype (torch.dtype, optional): if specified determins the type of the returned tensor, otherwise same as input.
+
+    Returns:
+        Tensor: bundled hypervector
+
+    """
+
+    return torch.sum(input, dim=dim, keepdim=keepdim, dtype=dtype)
 
 
 def ngrams(input: Tensor, n=3):

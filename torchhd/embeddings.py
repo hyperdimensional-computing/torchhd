@@ -5,6 +5,14 @@ import torch.nn.functional as F
 
 import torchhd.functional as functional
 
+__all__ = [
+    "Identity",
+    "Random",
+    "Level",
+    "Circular",
+    "Projection",
+]
+
 
 class Identity(nn.Embedding):
     def __init__(self, num_embeddings, embedding_dim, requires_grad=False, **kwargs):

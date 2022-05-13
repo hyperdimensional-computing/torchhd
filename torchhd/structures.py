@@ -4,6 +4,17 @@ from torch import Tensor
 
 import torchhd.functional as functional
 
+__all__ = [
+    "Memory",
+    "Multiset",
+    "HashTable",
+    "Sequence",
+    "DistinctSequence",
+    "Graph",
+    "Tree",
+    "FiniteStateAutomata",
+]
+
 
 class Memory:
     """Associative memory"""
