@@ -1,5 +1,6 @@
 import math
 import torch
+from torch import Tensor
 import torch.nn.functional as F
 
 from collections import deque
@@ -33,20 +34,20 @@ def identity_hv(
     dtype=None,
     device=None,
     requires_grad=False,
-) -> torch.Tensor:
+) -> Tensor:
     """Creates a hypervector of all ones that when bound with x will result in x.
     Uses the bipolar system.
 
     Args:
         num_embeddings (int): size of the dictionary of embeddings.
         embedding_dim (int): size of the embedded vector.
-        out (torch.Tensor, optional): specifies the output vector. (Optional) Defaults to None.
+        out (Tensor, optional): specifies the output vector. (Optional) Defaults to None.
         dtype (torch.dtype, optional): specifies data type. Defaults to None.
         device (torch.device, optional): Defaults to None.
         requires_grad (bool, optional): Defaults to False.
 
     Returns:
-        torch.Tensor: Identity hypervector
+        Tensor: Identity hypervector
 
     """
     if dtype is None:
@@ -71,7 +72,7 @@ def random_hv(
     dtype=None,
     device=None,
     requires_grad=False,
-) -> torch.Tensor:
+) -> Tensor:
     """Creates num random hypervectors of dim dimensions in the bipolar system.
     When dim is None, creates one hypervector of num dimensions.
 
@@ -79,13 +80,13 @@ def random_hv(
         num_embeddings (int): size of the dictionary of embeddings.
         embedding_dim (int): size of the embedded vector.
         generator (torch.Generator, optional): specifies random number generator. Defaults to None.
-        out (torch.Tensor, optional): specifies the output vector. (Optional) Defaults to None.
+        out (Tensor, optional): specifies the output vector. (Optional) Defaults to None.
         dtype (torch.dtype, optional): specifies data type. Defaults to None.
         device (torch.device, optional): Defaults to None.
         requires_grad (bool, optional): Defaults to False.
 
     Returns:
-        torch.Tensor: Random Hypervector
+        Tensor: Random Hypervector
 
     """
     if dtype is None:
@@ -119,7 +120,7 @@ def level_hv(
     dtype=None,
     device=None,
     requires_grad=False,
-) -> torch.Tensor:
+) -> Tensor:
     """Creates num random level correlated hypervectors of dim-dimensions in the bipolar system.
     Span denotes the number of approximate orthogonalities in the set (only 1 is an exact guarantee)
 
@@ -128,13 +129,13 @@ def level_hv(
         embedding_dim (int): size of the embedded vector.
         randomness (float, optional): r-value to interpolate between level and random hypervectors. Defaults to 0.0.
         generator (torch.Generator, optional): specifies random number generator. Defaults to None.
-        out (torch.Tensor, optional): specifies the output vector. (Optional) Defaults to None.
+        out (Tensor, optional): specifies the output vector. (Optional) Defaults to None.
         dtype (torch.dtype, optional): specifies data type. Defaults to None.
         device (torch.device, optional): Defaults to None.
         requires_grad (bool, optional): Defaults to False.
 
     Returns:
-        torch.Tensor: Level hypervector
+        Tensor: Level hypervector
 
     """
     if dtype is None:
@@ -202,7 +203,7 @@ def circular_hv(
     dtype=None,
     device=None,
     requires_grad=False,
-) -> torch.Tensor:
+) -> Tensor:
     """Creates num random circular level correlated hypervectors
     of dim dimensions in the bipolar system.
     When dim is None, creates one hypervector of num dimensions.
@@ -212,13 +213,13 @@ def circular_hv(
         embedding_dim (int): size of the embedded vector
         randomness (float, optional): r-value. Defaults to 0.0.
         generator (torch.Generator, optional): specifies random number generator. Defaults to None.
-        out (torch.Tensor, optional): specifies the output vector. (Optional) Defaults to None.
+        out (Tensor, optional): specifies the output vector. (Optional) Defaults to None.
         dtype (torch.dtype, optional): specifies data type. Defaults to None.
         device (torch.device, optional): Defaults to None.
         requires_grad (bool, optional): Defaults to False.
 
     Returns:
-        torch.Tensor: circular hypervector
+        Tensor: circular hypervector
 
     """
     if dtype is None:
@@ -300,33 +301,33 @@ def circular_hv(
     return hv
 
 
-def bind(input: torch.Tensor, other: torch.Tensor, *, out=None) -> torch.Tensor:
+def bind(input: Tensor, other: Tensor, *, out=None) -> Tensor:
     """Combines two hypervectors a and b into a new hypervector in the
     same space, represents the vectors a and b as a pair
 
     Args:
-        input (torch.Tensor): input hypervector tensor
-        other (torch.Tensor): input hypervector tensor
-        out (torch.Tensor, optional): output tensor. Defaults to None.
+        input (Tensor): input hypervector tensor
+        other (Tensor): input hypervector tensor
+        out (Tensor, optional): output tensor. Defaults to None.
 
     Returns:
-        torch.Tensor: binded hypervector
+        Tensor: bound hypervector
 
     """
 
     return torch.mul(input, other, out=out)
 
 
-def bundle(input: torch.Tensor, other: torch.Tensor, *, out=None) -> torch.Tensor:
+def bundle(input: Tensor, other: Tensor, *, out=None) -> Tensor:
     """Returns element-wise sum of hypervectors input and other
 
     Args:
-        input (torch.Tensor): input hypervector tensor
-        other (torch.Tensor): input hypervector tensor
-        out (torch.Tensor, optional): output tensor. Defaults to None.
+        input (Tensor): input hypervector tensor
+        other (Tensor): input hypervector tensor
+        out (Tensor, optional): output tensor. Defaults to None.
 
     Returns:
-        torch.Tensor: bundled hypervector
+        Tensor: bundled hypervector
 
     """
 
@@ -334,64 +335,64 @@ def bundle(input: torch.Tensor, other: torch.Tensor, *, out=None) -> torch.Tenso
 
 
 def multiset(
-    input: torch.Tensor,
+    input: Tensor,
     *,
     dim=-2,
     keepdim=False,
     dtype=None,
-) -> torch.Tensor:
+) -> Tensor:
     """Returns element-wise sum of hypervectors hv
 
     Args:
-        input (torch.Tensor): input hypervector tensor
+        input (Tensor): input hypervector tensor
         dim (int, optional): dimension over which to bundle the hypervectors. Defaults to -2.
         keepdim (bool, optional): whether to keep the bundled dimension. Defaults to False.
         dtype (torch.dtype, optional): if specified determins the type of the returned tensor, otherwise same as input.
 
     Returns:
-        torch.Tensor: bundled hypervector
+        Tensor: bundled hypervector
 
     """
 
     return torch.sum(input, dim=dim, keepdim=keepdim, dtype=dtype)
 
 
-def permute(input: torch.Tensor, *, shifts=1, dims=-1) -> torch.Tensor:
+def permute(input: Tensor, *, shifts=1, dims=-1) -> Tensor:
     """Permutes input hypervector by specified number of shifts
 
     Args:
-        input (torch.Tensor): input tensor.
+        input (Tensor): input tensor.
         shifts (int, optional): Number of places the elements of the hypervector are shifted. Defaults to 1.
         dims (int, optional): axis along which to permute the hypervector. Defaults to -1.
 
     Returns:
-        torch.Tensor: permuted hypervector
+        Tensor: permuted hypervector
 
     """
 
     return torch.roll(input, shifts=shifts, dims=dims)
 
 
-def soft_quantize(input: torch.Tensor, *, out=None):
+def soft_quantize(input: Tensor, *, out=None):
     """Applies the hyperbolic tanh function to all elements of the input tensor
 
     Args:
-        input (torch.Tensor): input tensor.
-        out (torch.Tensor, optional): output tensor. Defaults to None.
+        input (Tensor): input tensor.
+        out (Tensor, optional): output tensor. Defaults to None.
 
     """
     return torch.tanh(input, out=out)
 
 
-def hard_quantize(input: torch.Tensor, *, out=None):
+def hard_quantize(input: Tensor, *, out=None):
     """Clamps all elements in the input tensor into the range [-1, 1]
 
     Args:
-        input (torch.Tensor): input tensor
-        out (torch.Tensor, optional): output tensor. Defaults to None.
+        input (Tensor): input tensor
+        out (Tensor, optional): output tensor. Defaults to None.
 
     Returns:
-        torch.Tensor: clamped input vector
+        Tensor: clamped input vector
     """
     # Make sure that the output tensor has the same dtype and device
     # as the input tensor.
@@ -407,49 +408,49 @@ def hard_quantize(input: torch.Tensor, *, out=None):
     return result
 
 
-def cosine_similarity(input: torch.Tensor, others: torch.Tensor) -> torch.Tensor:
+def cosine_similarity(input: Tensor, others: Tensor) -> Tensor:
     """Returns the cosine similarity between the input vector and each vector in others
 
     Args:
-        input (torch.Tensor): one-dimensional tensor (dim,)
-        others (torch.Tensor): two-dimensional tensor (num_vectors, dim)
+        input (Tensor): one-dimensional tensor (dim,)
+        others (Tensor): two-dimensional tensor (num_vectors, dim)
 
     Returns:
-        torch.Tensor: output tensor of shape (num_vectors,)
+        Tensor: output tensor of shape (num_vectors,)
 
     """
     return F.cosine_similarity(input, others)
 
 
-def dot_similarity(input: torch.Tensor, others: torch.Tensor) -> torch.Tensor:
+def dot_similarity(input: Tensor, others: Tensor) -> Tensor:
     """Returns the dot product between the input vector and each vector in others
 
     Args:
-        input (torch.Tensor): one-dimensional tensor (dim,)
-        others (torch.Tensor): two-dimensional tensor (num_vectors, dim)
+        input (Tensor): one-dimensional tensor (dim,)
+        others (Tensor): two-dimensional tensor (num_vectors, dim)
 
     Returns:
-        torch.Tensor: output tensor of shape (num_vectors,)
+        Tensor: output tensor of shape (num_vectors,)
 
     """
     return F.linear(input, others)
 
 
-def hamming_similarity(input: torch.Tensor, others: torch.Tensor) -> torch.Tensor:
+def hamming_similarity(input: Tensor, others: Tensor) -> Tensor:
     """Returns the number of equal elements between the input vector and each vector in others
 
     Args:
-        input (torch.Tensor): one-dimensional tensor (dim,)
-        others (torch.Tensor): two-dimensional tensor (num_vectors, dim)
+        input (Tensor): one-dimensional tensor (dim,)
+        others (Tensor): two-dimensional tensor (num_vectors, dim)
 
     Returns:
-        torch.Tensor: output tensor (num_vectors,)
+        Tensor: output tensor (num_vectors,)
 
     """
     return torch.sum(input == others, dim=-1, dtype=input.dtype)
 
 
-def ngrams(input: torch.Tensor, n=3):
+def ngrams(input: Tensor, n=3):
     n_gram = None
     for i in range(0, n):
         if i == (n - 1):
@@ -464,13 +465,28 @@ def ngrams(input: torch.Tensor, n=3):
     return multiset(n_gram)
 
 
+def hash_table(keys: Tensor, values: Tensor):
+    """Combines the keys and values hypervectors to create a hash table.
+    Arguments are of shape (*, v, d) where `*` is any dimensions including none, `v` is the
+    number of key-value pairs, and d is the dimensionality of the hypervector.
+
+    Args:
+        keys (Tensor): The keys hypervectors, must be the same shape as values.
+        values (Tensor): The values hypervectors, must be the same shape as keys.
+
+    Returns:
+        Tensor: output hypervector of shape (*, d)
+    """
+    return multiset(bind(keys, values))
+
+
 def map_range(
-    input: torch.Tensor,
+    input: Tensor,
     in_min: float,
     in_max: float,
     out_min: float,
     out_max: float,
-) -> torch.Tensor:
+) -> Tensor:
     """Maps the input real value range to an output real value range.
     Input values outside the min, max range are not clamped.
 
@@ -482,14 +498,14 @@ def map_range(
         out_max (float): the maximum value of the output range
 
     Returns:
-        torch.Tensor: output tensor
+        Tensor: output tensor
 
     """
     return out_min + (out_max - out_min) * (input - in_min) / (in_max - in_min)
 
 
 def value_to_index(
-    input: torch.Tensor, in_min: float, in_max: float, index_length: int
+    input: Tensor, in_min: float, in_max: float, index_length: int
 ) -> torch.LongTensor:
     """Maps the input real value range to an index range.
     Input values outside the min, max range are clamped.
@@ -501,7 +517,7 @@ def value_to_index(
         index_length (int): The length of the output index, i.e., one more than the maximum output
 
     Returns:
-        torch.Tensor: output tensor
+        Tensor: output tensor
 
     """
     mapped = map_range(input, in_min, in_max, 0, index_length - 1)
@@ -521,7 +537,7 @@ def index_to_value(
         out_max (float): the maximum value of the output range
 
     Returns:
-        torch.Tensor: output tensor
+        Tensor: output tensor
 
     """
     return map_range(input.float(), 0, index_length - 1, out_min, out_max)
