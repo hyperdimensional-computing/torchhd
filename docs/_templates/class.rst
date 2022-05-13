@@ -8,3 +8,4 @@
 .. autoclass:: {{ name }}
     :members:
     :special-members:
+    :exclude-members: __weakref__

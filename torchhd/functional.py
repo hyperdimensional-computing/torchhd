@@ -14,6 +14,7 @@ __all__ = [
     "bind",
     "bundle",
     "permute",
+    "cleanup",
     "hard_quantize",
     "soft_quantize",
     "hamming_similarity",
@@ -543,3 +544,27 @@ def index_to_value(
 
     """
     return map_range(input.float(), 0, index_length - 1, out_min, out_max)
+
+
+def cleanup(input: Tensor, memory: Tensor, threshold=0.0) -> Tensor:
+    """Returns a copy of the most similar hypervector in memory.
+
+    If the cosine similarity is less than threshold, raises a KeyError.
+
+    Args:
+        input (Tensor): The hypervector to cleanup
+        memory (Tensor): The `n` hypervectors in memory of shape (n, d)
+
+    Returns:
+        Tensor: output tensor
+    """
+    scores = cosine_similarity(input, memory)
+    value, index = torch.max(scores, dim=-1)
+
+    if value.item() < threshold:
+        raise KeyError(
+            "Hypervector with the highest similarity is less similar than the provided threshold"
+        )
+
+    # Copying prevents manipulating the memory tensor
+    return torch.clone(memory[index])
