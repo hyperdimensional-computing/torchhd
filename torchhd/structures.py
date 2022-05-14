@@ -215,6 +215,11 @@ class Sequence:
     def clear(self) -> None:
         self.value.fill_(0.0)
 
+    @classmethod
+    def from_tensor(cls, input: Tensor):
+        value = functional.sequence(input)
+        return cls(value, size=input.size(-2))
+
 
 class DistinctSequence:
     @overload
@@ -266,6 +271,11 @@ class DistinctSequence:
 
     def clear(self) -> None:
         self.value.fill_(0.0)
+
+    @classmethod
+    def from_tensor(cls, input: Tensor):
+        value = functional.distinct_sequence(input)
+        return cls(value, size=input.size(-2))
 
 
 class Graph:

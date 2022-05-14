@@ -21,6 +21,9 @@ __all__ = [
     "cosine_similarity",
     "dot_similarity",
     "multiset",
+    "multibind",
+    "sequence",
+    "distinct_sequence",
     "ngrams",
     "hash_table",
     "map_range",
@@ -436,24 +439,52 @@ def multiset(
     dim=-2,
     keepdim=False,
     dtype=None,
+    out=None,
 ) -> Tensor:
-    """Returns element-wise sum of hypervectors hv
+    """Element-wise sum of input hypervectors
 
     Args:
         input (Tensor): input hypervector tensor
         dim (int, optional): dimension over which to bundle the hypervectors. Defaults to -2.
         keepdim (bool, optional): whether to keep the bundled dimension. Defaults to False.
         dtype (torch.dtype, optional): if specified determins the type of the returned tensor, otherwise same as input.
+        out (Tensor, optional): the output tensor.
 
     Returns:
         Tensor: bundled hypervector
-
     """
+    return torch.sum(input, dim=dim, keepdim=keepdim, dtype=dtype, out=out)
 
-    return torch.sum(input, dim=dim, keepdim=keepdim, dtype=dtype)
+
+def multibind(input: Tensor, *, dim=-2, keepdim=False, dtype=None, out=None) -> Tensor:
+    """Element-wise multiplication of input hypervectors
+
+    Args:
+        input (Tensor): input hypervector tensor
+        dim (int, optional): dimension over which to bind the hypervectors. Defaults to -2.
+        keepdim (bool, optional): whether to keep the bundled dimension. Defaults to False.
+        dtype (torch.dtype, optional): if specified determins the type of the returned tensor, otherwise same as input.
+        out (Tensor, optional): the output tensor.
+
+    Returns:
+        Tensor: bound hypervector
+    """
+    return torch.prod(input, dim=dim, keepdim=keepdim, dtype=dtype, out=out)
 
 
-def ngrams(input: Tensor, n=3):
+def ngrams(input: Tensor, n=3) -> Tensor:
+    """Creates a hypervector containing the n-gram statistics of input
+
+    Arguments are of shape (*, n, d) where `*` is any dimensions including none, `n` is the
+    number of values, and d is the dimensionality of the hypervector.
+
+    Args:
+        input (Tensor): The value hypervectors.
+        n (int, optional): The size of each n-gram. Defaults to 3.
+
+    Returns:
+        Tensor: output hypervector of shape (*, d)
+    """
     n_gram = None
     for i in range(0, n):
         if i == (n - 1):
@@ -468,8 +499,9 @@ def ngrams(input: Tensor, n=3):
     return multiset(n_gram)
 
 
-def hash_table(keys: Tensor, values: Tensor):
+def hash_table(keys: Tensor, values: Tensor) -> Tensor:
     """Combines the keys and values hypervectors to create a hash table.
+
     Arguments are of shape (*, v, d) where `*` is any dimensions including none, `v` is the
     number of key-value pairs, and d is the dimensionality of the hypervector.
 
@@ -481,6 +513,48 @@ def hash_table(keys: Tensor, values: Tensor):
         Tensor: output hypervector of shape (*, d)
     """
     return multiset(bind(keys, values))
+
+
+def sequence(input: Tensor) -> Tensor:
+    """Creates a bundling-based sequence
+
+    The first value is permuted n-1 times, the last value is permuted 0 times.
+
+    Args:
+        input (Tensor): The n hypervector values of shape (*, n, d).
+
+    Returns:
+        Tensor: output hypervector of shape (*, d)
+    """
+    dim = -2
+    n = input.size(dim)
+
+    enum = enumerate(torch.unbind(input, dim))
+    permuted = [permute(hv, shifts=n - i - 1) for i, hv in enum]
+    permuted = torch.stack(permuted, dim)
+
+    return multiset(permuted)
+
+
+def distinct_sequence(input: Tensor) -> Tensor:
+    """Creates a binding-based sequence
+
+    The first value is permuted n-1 times, the last value is permuted 0 times.
+
+    Args:
+        input (Tensor): The n hypervector values of shape (*, n, d).
+
+    Returns:
+        Tensor: output hypervector of shape (*, d)
+    """
+    dim = -2
+    n = input.size(dim)
+
+    enum = enumerate(torch.unbind(input, dim))
+    permuted = [permute(hv, shifts=n - i - 1) for i, hv in enum]
+    permuted = torch.stack(permuted, dim)
+
+    return multibind(permuted)
 
 
 def map_range(
@@ -554,6 +628,7 @@ def cleanup(input: Tensor, memory: Tensor, threshold=0.0) -> Tensor:
     Args:
         input (Tensor): The hypervector to cleanup
         memory (Tensor): The `n` hypervectors in memory of shape (n, d)
+        threshold (float, optional): minimal similarity between input and any hypervector in memory. Defaults to 0.0.
 
     Returns:
         Tensor: output tensor

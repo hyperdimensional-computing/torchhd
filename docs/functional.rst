@@ -53,9 +53,12 @@ Encodings
     :toctree: generated/
     :template: function.rst
 
-    
-    ngrams
+    multiset
+    multibind
+    sequence
+    distinct_sequence
     hash_table
+    ngrams
 
 
 Utilities
