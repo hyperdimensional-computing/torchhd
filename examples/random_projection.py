@@ -1,8 +1,3 @@
-# The following two lines are only needed because of this repository organization
-import sys, os
-
-sys.path.insert(1, os.path.realpath(os.path.pardir))
-
 import math
 import torch
 import torch.utils.data as data
