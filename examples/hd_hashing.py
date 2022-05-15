@@ -1,8 +1,3 @@
-# The following two lines are only needed because of this repository organization
-import sys, os
-
-sys.path.insert(1, os.path.realpath(os.path.pardir))
-
 import torch
 
 # Note: this example requires the mmh3 library: https://github.com/hajimes/mmh3

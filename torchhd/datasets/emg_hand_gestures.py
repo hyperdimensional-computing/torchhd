@@ -10,6 +10,22 @@ from .utils import download_file_from_google_drive, unzip_file
 
 
 class EMGHandGestures(data.Dataset):
+    """EMG-based hand gestures dataset.
+
+    Dataset from the paper `"Hyperdimensional Biosignal Processing: A Case Study for EMG-based Hand Gesture Recognition" <https://iis-people.ee.ethz.ch/~arahimi/papers/ICRC16.pdf>`_.
+
+    Args:
+        root (string): Root directory of dataset where files are stored.
+        download (bool, optional): If True, downloads the dataset from the internet and
+            puts it in root directory. If dataset is already downloaded, it is not
+            downloaded again.
+        transform (callable, optional): A function/transform that takes in an torch.FloatTensor
+            and returns a transformed version.
+        target_transform (callable, optional): A function/transform that takes in the
+            target and transforms it.
+        subjects (list[int], optional): The subject numbers from 0 til 4 to include. Defaults to [0, 1, 2, 3, 4].
+        window (int, optional): The number of measurements to include in each sample. Defaults to 256.
+    """
 
     classes: List[str] = [
         "Closed hand",

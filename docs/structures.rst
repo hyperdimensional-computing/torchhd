@@ -1,4 +1,4 @@
-Structures
+torchhd.structures
 ==================
 
 .. currentmodule:: torchhd.structures

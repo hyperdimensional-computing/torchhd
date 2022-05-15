@@ -17,7 +17,7 @@ __all__ = [
 
 
 class Memory:
-    """Associative memory"""
+    """Associative memory of hypervector keys and any value"""
 
     def __init__(self, threshold=0.5):
         self.threshold = threshold
@@ -61,6 +61,8 @@ class Memory:
 
 
 class Multiset:
+    """Hypervector-based multiset data structure"""
+
     @overload
     def __init__(self, dimensions: int, *, device=None, dtype=None):
         ...
@@ -107,6 +109,8 @@ class Multiset:
 
 
 class HashTable:
+    """Hypervector-based hash table data structure"""
+
     @overload
     def __init__(self, dimensions: int, *, device=None, dtype=None):
         ...
@@ -157,6 +161,8 @@ class HashTable:
 
 
 class Sequence:
+    """Hypervector-based (bundling-based) sequence data structure"""
+
     @overload
     def __init__(self, dimensions: int, *, device=None, dtype=None):
         ...
@@ -222,6 +228,8 @@ class Sequence:
 
 
 class DistinctSequence:
+    """Hypervector-based distinct (binding-based) sequence data structure"""
+
     @overload
     def __init__(self, dimensions: int, *, device=None, dtype=None):
         ...
@@ -279,6 +287,8 @@ class DistinctSequence:
 
 
 class Graph:
+    """Hypervector-based graph data structure"""
+
     def __init__(self, dimensions, directed=False, device=None, dtype=None):
         self.length = 0
         self.directed = directed
@@ -312,6 +322,8 @@ class Graph:
 
 
 class Tree:
+    """Hypervector-based tree data structure"""
+
     def __init__(self, dimensions, device=None, dtype=None):
         self.dimensions = dimensions
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
@@ -363,6 +375,8 @@ class Tree:
 
 
 class FiniteStateAutomata:
+    """Hypervector-based finite state automata data structure"""
+
     def __init__(self, dimensions, device=None, dtype=None):
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
         self.value = torch.zeros(dimensions, dtype=dtype, device=device)

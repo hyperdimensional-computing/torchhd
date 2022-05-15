@@ -14,7 +14,7 @@ class BeijingAirQualityDataSample(NamedTuple):
 
 
 class BeijingAirQuality(data.Dataset):
-    """`Beijing Multi-Site Air-Quality <https://archive.ics.uci.edu/ml/datasets/Beijing+Multi-Site+Air-Quality+Data>`_ Dataset.
+    """`Beijing Multi-Site Air-Quality <https://archive.ics.uci.edu/ml/datasets/Beijing+Multi-Site+Air-Quality+Data>`_ dataset.
 
     .. warning::
         The data contains NaN values that need to be taken into account.

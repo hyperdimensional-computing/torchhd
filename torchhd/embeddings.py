@@ -15,6 +15,8 @@ __all__ = [
 
 
 class Identity(nn.Embedding):
+    """Embedding wrapper around functional.identity_hv"""
+
     def __init__(self, num_embeddings, embedding_dim, requires_grad=False, **kwargs):
         super(Identity, self).__init__(num_embeddings, embedding_dim, **kwargs)
         self.weight.requires_grad = requires_grad
@@ -35,6 +37,8 @@ class Identity(nn.Embedding):
 
 
 class Random(nn.Embedding):
+    """Embedding wrapper around functional.random_hv"""
+
     def __init__(
         self,
         num_embeddings,
@@ -68,6 +72,8 @@ class Random(nn.Embedding):
 
 
 class Level(nn.Embedding):
+    """Embedding wrapper around functional.level_hv"""
+
     def __init__(
         self,
         num_embeddings,
@@ -113,6 +119,8 @@ class Level(nn.Embedding):
 
 
 class Circular(nn.Embedding):
+    """Embedding wrapper around functional.circular_hv"""
+
     def __init__(
         self,
         num_embeddings,
@@ -159,6 +167,8 @@ class Circular(nn.Embedding):
 
 
 class Projection(nn.Module):
+    """Embedding using a random projection matrix"""
+
     __constants__ = ["in_features", "out_features"]
     in_features: int
     out_features: int

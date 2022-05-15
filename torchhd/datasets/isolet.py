@@ -9,7 +9,7 @@ from .utils import download_file_from_google_drive, unzip_file
 
 
 class ISOLET(data.Dataset):
-    """`ISOLET <https://archive.ics.uci.edu/ml/datasets/isolet>`_ Dataset.
+    """`ISOLET <https://archive.ics.uci.edu/ml/datasets/isolet>`_ dataset.
 
     Args:
         root (string): Root directory of dataset where ``isolet1+2+3+4.data``

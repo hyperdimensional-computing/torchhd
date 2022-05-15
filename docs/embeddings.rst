@@ -1,4 +1,4 @@
-Embeddings
+torchhd.embeddings
 ==================
 
 .. currentmodule:: torchhd.embeddings

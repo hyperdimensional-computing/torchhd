@@ -9,7 +9,9 @@ from .utils import download_file
 
 
 class AirfoilSelfNoise(data.Dataset):
-    """`NASA data set <https://archive.ics.uci.edu/ml/datasets/airfoil+self-noise>`_, obtained from a series of aerodynamic and acoustic tests of two and three-dimensional airfoil blade sections conducted in an anechoic wind tunnel.
+    """`NASA Airfoil Self-Noise <https://archive.ics.uci.edu/ml/datasets/airfoil+self-noise>`_ dataset.
+    Dataset is obtained from a series of aerodynamic and acoustic tests of two and three-dimensional
+    airfoil blade sections conducted in an anechoic wind tunnel.
 
 
     Args:
