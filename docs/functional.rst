@@ -1,4 +1,4 @@
-Functional
+torchhd.functional
 =========================
 
 .. currentmodule:: torchhd.functional 

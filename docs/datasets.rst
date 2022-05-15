@@ -1,5 +1,5 @@
-Datasets
-========
+torchhd.datasets
+================
 
 The Torchhd library provides many popular built-in datasets to work with.
 
