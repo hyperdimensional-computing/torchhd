@@ -9,7 +9,7 @@ from .utils import download_file, unzip_file
 
 
 class CyclePowerPlant(data.Dataset):
-    """`Combined cycle power planet dataset <https://archive.ics.uci.edu/ml/datasets/combined+cycle+power+plant>`_,
+    """`Combined cycle power planet <https://archive.ics.uci.edu/ml/datasets/combined+cycle+power+plant>`_ dataset.
         Features consist of hourly average ambient variables Temperature (T), Ambient Pressure (AP), Relative Humidity (RH) and Exhaust Vacuum (V) to predict the net hourly electrical energy output (EP) of the plant.
 
     Args:

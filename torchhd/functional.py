@@ -475,7 +475,7 @@ def multibind(input: Tensor, *, dim=-2, keepdim=False, dtype=None, out=None) -> 
 def ngrams(input: Tensor, n=3) -> Tensor:
     """Creates a hypervector containing the n-gram statistics of input
 
-    Arguments are of shape (*, n, d) where `*` is any dimensions including none, `n` is the
+    Arguments are of shape (\*, n, d) where \* is any dimensions including none, n is the
     number of values, and d is the dimensionality of the hypervector.
 
     Args:
@@ -483,7 +483,7 @@ def ngrams(input: Tensor, n=3) -> Tensor:
         n (int, optional): The size of each n-gram. Defaults to 3.
 
     Returns:
-        Tensor: output hypervector of shape (*, d)
+        Tensor: output hypervector of shape (\*, d)
     """
     n_gram = None
     for i in range(0, n):
@@ -502,7 +502,7 @@ def ngrams(input: Tensor, n=3) -> Tensor:
 def hash_table(keys: Tensor, values: Tensor) -> Tensor:
     """Combines the keys and values hypervectors to create a hash table.
 
-    Arguments are of shape (*, v, d) where `*` is any dimensions including none, `v` is the
+    Arguments are of shape (\*, v, d) where \* is any dimensions including none, v is the
     number of key-value pairs, and d is the dimensionality of the hypervector.
 
     Args:
@@ -510,7 +510,7 @@ def hash_table(keys: Tensor, values: Tensor) -> Tensor:
         values (Tensor): The values hypervectors, must be the same shape as keys.
 
     Returns:
-        Tensor: output hypervector of shape (*, d)
+        Tensor: output hypervector of shape (\*, d)
     """
     return multiset(bind(keys, values))
 
@@ -521,10 +521,10 @@ def sequence(input: Tensor) -> Tensor:
     The first value is permuted n-1 times, the last value is permuted 0 times.
 
     Args:
-        input (Tensor): The n hypervector values of shape (*, n, d).
+        input (Tensor): The n hypervector values of shape (\*, n, d).
 
     Returns:
-        Tensor: output hypervector of shape (*, d)
+        Tensor: output hypervector of shape (\*, d)
     """
     dim = -2
     n = input.size(dim)
@@ -542,10 +542,10 @@ def distinct_sequence(input: Tensor) -> Tensor:
     The first value is permuted n-1 times, the last value is permuted 0 times.
 
     Args:
-        input (Tensor): The n hypervector values of shape (*, n, d).
+        input (Tensor): The n hypervector values of shape (\*, n, d).
 
     Returns:
-        Tensor: output hypervector of shape (*, d)
+        Tensor: output hypervector of shape (\*, d)
     """
     dim = -2
     n = input.size(dim)
@@ -627,7 +627,7 @@ def cleanup(input: Tensor, memory: Tensor, threshold=0.0) -> Tensor:
 
     Args:
         input (Tensor): The hypervector to cleanup
-        memory (Tensor): The `n` hypervectors in memory of shape (n, d)
+        memory (Tensor): The n hypervectors in memory of shape (n, d)
         threshold (float, optional): minimal similarity between input and any hypervector in memory. Defaults to 0.0.
 
     Returns:

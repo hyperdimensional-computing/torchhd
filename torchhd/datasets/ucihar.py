@@ -10,8 +10,8 @@ from .utils import download_file, unzip_file
 
 
 class UCIHAR(data.Dataset):
-    """`UCI Human Activity Recognition <https://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones>`_ Dataset.
-    As found in the paper `"Human Activity Recognition Using Smartphones"<https://ieeexplore.ieee.org/document/8567275>`_.
+    """`UCI Human Activity Recognition <https://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones>`_ dataset.
+    As found in the paper `"Human Activity Recognition Using Smartphones" <https://ieeexplore.ieee.org/document/8567275>`_.
 
     Args:
         root (string): Root directory of dataset where the training and testing samples are located.
