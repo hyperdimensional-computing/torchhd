@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="torch-hd",  # use torch-hd on PyPi to install torchhd, torchhd is too similar according to PyPi
-    version="2.1.2",
+    version="2.1.3",
     description="Torchhd is a Python library for Hyperdimensional Computing",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -16,6 +16,7 @@ setup(
     install_requires=[
         "torch",
         "pandas",
+        "numpy",
         "requests",
     ],
     packages=find_packages(exclude=["docs", "torchhd.tests", "examples"]),
