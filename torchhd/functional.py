@@ -475,20 +475,24 @@ def multibind(input: Tensor, *, dim=-2, keepdim=False, dtype=None, out=None) -> 
 def ngrams(input: Tensor, n=3) -> Tensor:
     """Creates a hypervector containing the n-gram statistics of input
 
-    Arguments are of shape (\*, n, d) where \* is any dimensions including none, n is the
+    Arguments are of shape (\*, m, d) where \* is any dimensions including none, m is the
     number of values, and d is the dimensionality of the hypervector.
+
+    .. note::
+        For :math:`n=1` use :func:`~torchhd.functional.multiset` instead and for :math:`n=m` use :func:`~torchhd.functional.distinct_sequence` instead.
 
     Args:
         input (Tensor): The value hypervectors.
-        n (int, optional): The size of each n-gram. Defaults to 3.
+        n (int, optional): The size of each n-gram, :math:`2 \leq n \leq m`. Defaults to 3.
 
     Returns:
         Tensor: output hypervector of shape (\*, d)
     """
     n_gram = permute(input[..., : -(n - 1), :], shifts=n - 1)
     for i in range(1, n - 1):
-        n_gram.mul_(permute(input[..., i : -(n - 1 - i), :], shifts=n - 1 - i))
-    n_gram.mul_(input[..., n - 1 :, :])
+        n_gram = bind(n_gram, permute(input[..., i : -(n - 1 - i), :], shifts=n - 1 - i))
+    n_gram = bind(n_gram, input[..., n - 1 :, :])
+
     return multiset(n_gram)
 
 
