@@ -13,7 +13,11 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/hyperdimensional-computing/torchhd",
     license="MIT",
-    install_requires=open("requirements.txt").readlines(),
+    install_requires=[
+        "torch",
+        "pandas",
+        "requests",
+    ],
     packages=find_packages(exclude=["docs", "torchhd.tests", "examples"]),
     python_requires=">=3.6, <4",
     project_urls={
