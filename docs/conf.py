@@ -20,9 +20,9 @@ sys.path.insert(0, os.path.abspath("../"))
 
 project = "Torchhd"
 copyright = (
-    "2022, Mike Heddes, Igor De Oliveira Nunes, Dheyay Desai, Pere Verges Boncompte"
+    "2022, Mike Heddes, Igor Nunes, Dheyay Desai, Pere Verges Boncompte"
 )
-author = "Mike Heddes, Igor De Oliveira Nunes, Dheyay Desai, Pere Verges Boncompte"
+author = "Mike Heddes, Igor Nunes, Dheyay Desai, Pere Verges Boncompte"
 
 
 # -- General configuration ---------------------------------------------------
