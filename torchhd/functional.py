@@ -485,10 +485,10 @@ def ngrams(input: Tensor, n=3) -> Tensor:
     Returns:
         Tensor: output hypervector of shape (\*, d)
     """
-    n_gram = permute(input[..., :-(n-1), :], shifts=n-1)
-    for i in range(1, n-1):
-        n_gram.mul_(permute(input[..., i:-(n-1 - i), :], shifts=n-1 - i))
-    n_gram.mul_(input[...,n-1:,:])
+    n_gram = permute(input[..., : -(n - 1), :], shifts=n - 1)
+    for i in range(1, n - 1):
+        n_gram.mul_(permute(input[..., i : -(n - 1 - i), :], shifts=n - 1 - i))
+    n_gram.mul_(input[..., n - 1 :, :])
     return multiset(n_gram)
 
 
