@@ -471,8 +471,8 @@ def multibind(input: Tensor, *, dim=-2, keepdim=False, dtype=None, out=None) -> 
     """
     return torch.prod(input, dim=dim, keepdim=keepdim, dtype=dtype, out=out)
 
-
-def ngrams(input: Tensor, n=3) -> Tensor:
+@torch.jit.script
+def ngrams(input: Tensor, n: int=3) -> Tensor:
     """Creates a hypervector containing the n-gram statistics of input
 
     Arguments are of shape (\*, m, d) where \* is any dimensions including none, m is the
@@ -488,14 +488,11 @@ def ngrams(input: Tensor, n=3) -> Tensor:
     Returns:
         Tensor: output hypervector of shape (\*, d)
     """
-    n_gram = permute(input[..., : -(n - 1), :], shifts=n - 1)
+    n_gram = input[..., : -(n - 1), :].roll(n - 1, -1)
     for i in range(1, n - 1):
-        n_gram = bind(
-            n_gram, permute(input[..., i : -(n - 1 - i), :], shifts=n - 1 - i)
-        )
-    n_gram = bind(n_gram, input[..., n - 1 :, :])
-
-    return multiset(n_gram)
+        n_gram = n_gram.mul(input[..., i : -(n - 1 - i), :].roll(n - 1 - i, -1))
+    n_gram = n_gram.mul(input[..., n - 1 :, :])
+    return n_gram.sum(-2)
 
 
 def hash_table(keys: Tensor, values: Tensor) -> Tensor:
