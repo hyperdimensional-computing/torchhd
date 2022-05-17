@@ -21,7 +21,7 @@ Torchhd is a Python library for Hyperdimensional Computing.
 
 ## Installation
 
-Torchhd is hosted on PyPi and Anaconda, use one of the following commands to install:
+Torchhd is hosted on PyPi, use the following command to install:
 
 ```bash
 pip install torch-hd
