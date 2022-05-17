@@ -84,7 +84,7 @@ You will notice that we first declare all the symbols which are used to represen
 
 ## About
 
-Initial development of Torchhd was performed by Mike Heddes and Igor Nunes as part of their research in Hyperdimensional Computing at the University of California, Irvine. The library was extended with significant contributions from Pere Verges Boncompte and Dheyay Desai. Torchhd later merged with a project by Rishikanth Chandrasekaran who worked on similar problems as part of his research at the University of California, San Diego.
+Initial development of Torchhd was performed by Mike Heddes and Igor Nunes as part of their research in Hyperdimensional Computing at the University of California, Irvine. The library was extended with significant contributions from Pere Vergés and Dheyay Desai. Torchhd later merged with a project by Rishikanth Chandrasekaran who worked on similar problems as part of his research at the University of California, San Diego.
 
 ## Contributing
 
