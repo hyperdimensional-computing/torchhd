@@ -1,13 +1,10 @@
-# GitHub Action that uses Black to reformat the Python code in an incoming pull request.
-# If all Python code in the pull request is compliant with Black then this Action does nothing.
-# Otherwise, Black is run and its changes are committed back to the incoming pull request.
+# Uses Black to reformat the Python code on the main branch.
 
 name: Format
 
 on:
   push:
     branches: [ main ]
-  pull_request:
 
 permissions:
   contents: write
@@ -16,25 +13,27 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
+      # Checkout the main branch
       - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.x
-      - name: Install Black
+
+      # Setup Python environment
+      - uses: actions/setup-python@v3
+
+      # Install black
+      - name: Install black
         run: pip install black
-      - name: If needed, commit black changes to the pull request
+
+      # Execute black in check mode
+      - name: Black
+        id: black
+        run: echo ::set-output name=format::$(black --check --quiet . || echo "true")
+
+      # Execute black and commit the change to the main branch
+      - name: Commit to the main branch
+        if: steps.black.outputs.format == 'true'
         run: |
-          if black --check .
-          then
-            echo "nothing to do"
-          else
-            black .
-            git config --global user.name 'formatting'
-            git config --global user.email 'mikeheddes@users.noreply.github.com'
-            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
-            git fetch
-            git checkout $GITHUB_HEAD_REF
-            git commit -am "Format Python code"
-            git push
-          fi
+          black .
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git commit -am "[github-action] formatting fixes"
+          git push

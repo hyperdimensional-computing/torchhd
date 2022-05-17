@@ -535,7 +535,7 @@ def sequence(input: Tensor) -> Tensor:
     return multiset(permuted)
 
 
-def distinct_sequence(input: Tensor) -> Tensor:
+def distinct_sequence(input: Tensor  ) -> Tensor:
     """Creates a binding-based sequence
 
     The first value is permuted n-1 times, the last value is permuted 0 times.
