@@ -27,9 +27,9 @@ Torchhd is hosted on PyPi and Anaconda, use one of the following commands to ins
 pip install torch-hd
 ```
 
-```bash
+<!-- ```bash
 conda install -c torchhd torchhd
-```
+``` -->
 
 ## Documentation
 
