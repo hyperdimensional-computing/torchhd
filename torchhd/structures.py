@@ -20,16 +20,42 @@ class Memory:
     """Associative memory of hypervector keys and any value"""
 
     def __init__(self, threshold=0.5):
+        """Creates a memory object.
+
+        Args:
+            threshold (float): the similarity threshold used when doing lookups in memory.
+        Examples::
+
+            >>> M = structures.Memory(threshold=0.5)
+
+        """
         self.threshold = threshold
         self.keys: List[Tensor] = []
         self.values: List[Any] = []
 
     def __len__(self) -> int:
-        """Returns the number of items in memory"""
+        """Returns the number of items in memory
+        Examples::
+
+            >>> len(M)
+            0
+
+        """
         return len(self.values)
 
     def add(self, key: Tensor, value: Any) -> None:
-        """Adds one (key, value) pair to memory"""
+        """Adds one (key, value) pair to memory"
+
+        Args:
+            key (Tensor): Hypervector used as key for adding the key-value pair.
+            value (Any): Value to be added to the memory.
+        Examples::
+
+
+            >>>
+            >>> M.add()
+
+        """
         self.keys.append(key)
         self.values.append(value)
 
