@@ -51,7 +51,7 @@ jobs:
         cd ./conda  # go to build dir
 
         # Build for Linux
-        conda build -c conda-forge -c pytorch --output-folder . .
+        conda build --output-folder . .
 
         # Convert to other platforms: OSX, WIN
         conda convert -p osx-64 linux-64/*.tar.bz2
