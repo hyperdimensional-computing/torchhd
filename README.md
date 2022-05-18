@@ -40,47 +40,46 @@ You can find documentation for Torchhd [on the website](https://torchhd.readthed
 We have several examples [in the repository](https://github.com/hyperdimensional-computing/torchhd/tree/main/examples). Here is a simple one to get you started:
 
 ```python
-import torch
-import torchhd
+import torch, torchhd
 
 d = 10000  # number of dimensions
 
-### create a hypervector for each symbol
-# keys for each field of the dictionary: fruit, weight, and season
-keys = torchhd.functional.random_hv(3, d)
-# fruits are: apple, lemon, mango
-fruits = torchhd.functional.random_hv(3, d)
-# there are 10 weight levels
-weights = torchhd.functional.level_hv(10, d)
-# the for seasons: winter, spring, summer, fall
-seasons = torchhd.functional.circular_hv(4, d)
+# create the hypervectors for each symbol
+country = torchhd.functional.random_hv(1, d)
+capital = torchhd.functional.random_hv(1, d)
+currency = torchhd.functional.random_hv(1, d)
 
-# map a float between min, max to an index of size 10
-# we map the 10 weight levels between 0 to 200 grams
-weight_index = torchhd.functional.value_to_index(149.0, 0, 200, 10)
+usa = torchhd.functional.random_hv(1, d)  # United States
+mex = torchhd.functional.random_hv(1, d)  # Mexico
 
-values = torch.stack([
-    fruits[0],
-    weights[weight_index],
-    seasons[3],
-])
-# creates a dictionary: 
-# record = key[0] * value[0] + key[1] * value[1] + key[2] * value[2]
-record = torchhd.functional.struct(keys, values)
+wdc = torchhd.functional.random_hv(1, d)  # Washington D.C.
+mxc = torchhd.functional.random_hv(1, d)  # Mexico City
 
-#### Similar Python code
-# 
-# record = dict(
-#     fruit="apple", 
-#     weight=149.0,
-#     season="fall"
-# )
-# 
+usd = torchhd.functional.random_hv(1, d)  # US Dollar
+mxn = torchhd.functional.random_hv(1, d)  # Mexican Peso
+
+# create country representations
+keys = torch.cat([country, capital, currency], dim=0)
+
+us_values = torch.cat([usa, wdc, usd])
+US = torchhd.functional.hash_table(keys, us_values)
+
+mx_values = torch.cat([mex, mxc, mxn])
+MX = torchhd.functional.hash_table(keys, mx_values)
+
+MX_US = torchhd.functional.bind(US, MX)
+
+# query for the dollar of mexico
+usd_of_mex = torchhd.functional.bind(MX_US, usd)
+
+memory = torch.cat([keys, us_values, mx_values], dim=0)
+torchhd.functional.cosine_similarity(usd_of_mex, memory)
+# tensor([ 0.0133,  0.0062, -0.0115,  0.0066, -0.0007,  0.0149, -0.0034,  0.0084,  0.3334])
+# The hypervector for the Mexican Peso is the most similar.
 ```
 
-This example creates a hypervector that represents the record of a fruit, storing its species, weight, and growing season as one hypervector. This is achieved by combining the atomic information units into a structure (similar to a Python dictionary).
+This example is from the paper [What We Mean When We Say "What's the Dollar of Mexico?": Prototypes and Mapping in Concept Space](https://redwood.berkeley.edu/wp-content/uploads/2020/05/kanerva2010what.pdf) by Kanerva. It first creates hypervectors for all the symbols that are used in the computation, i.e., the variables for `country`, `capital`, and `currency` and their values for both countries. These hypervectors are then combined to make a single hypervector for each country using a hash table structure. A hash table encodes key-value pairs as: `k1 * v1 + k2 * v2 + ... + kn * vn`. The hash tables are then bound together to form their combined representation which is finally queried by binding with the Dollar hypervector to obtain the approximate Mexican Peso hypervector. From the similarity output it shows that the Mexican Peso hypervector is indeed the most similar one.
 
-You will notice that we first declare all the symbols which are used to represent information. Note the type of hypervector used for each type of information, the fruits and keys use random hypervectors as they represent unrelated information whereas the weights and seasons use level and circular-hypervectors because they have linear and circular-correlations, respectively.
 
 ## About
 
