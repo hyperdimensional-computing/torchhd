@@ -137,7 +137,7 @@ def level_hv(
 ) -> Tensor:
     """Creates a set of level-hypervectors.
 
-    Implements level-hypervectors as an interpolation between random-hypervectors as described in `An Extension to Basis-Hypervectors for Learning from Circular Data in Hyperdimensional Computing <>`_.
+    Implements level-hypervectors as an interpolation between random-hypervectors as described in `An Extension to Basis-Hypervectors for Learning from Circular Data in Hyperdimensional Computing <https://arxiv.org/abs/2205.07920>`_.
     The first and last hypervector in the generated set are quasi-orthogonal.
 
     Args:
@@ -225,13 +225,13 @@ def circular_hv(
 ) -> Tensor:
     """Creates a set of circular-hypervectors.
 
-    Implements circular-hypervectors based on level-hypervectors as described in `An Extension to Basis-Hypervectors for Learning from Circular Data in Hyperdimensional Computing <>`_.
+    Implements circular-hypervectors based on level-hypervectors as described in `An Extension to Basis-Hypervectors for Learning from Circular Data in Hyperdimensional Computing <https://arxiv.org/abs/2205.07920>`_.
     Any hypervector is quasi-orthogonal to the hypervector opposite site of the circle.
 
     Args:
         num_embeddings (int): the number of hypervectors to generate.
         embedding_dim (int): the dimensionality of the hypervectors.
-        randomness (float, optional): r-value to interpolate between level at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
+        randomness (float, optional): r-value to interpolate between circular at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
         out (Tensor, optional): the output tensor.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
