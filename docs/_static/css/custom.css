@@ -231,3 +231,12 @@ html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(
 html.writer-html5 .rst-content table.docutils th {
     border: none;
 }
+
+html,
+body {
+    background: #ffffff;
+}
+
+.wy-nav-content-wrap {
+    background: none;
+}
