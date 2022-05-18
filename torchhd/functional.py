@@ -41,19 +41,23 @@ def identity_hv(
     device=None,
     requires_grad=False,
 ) -> Tensor:
-    """Creates a hypervector of all ones that when bound with x will result in x.
-    Uses the bipolar system.
+    """Creates a set of identity hypervector.
+
+    When bound with a random-hypervector :math:`x`, the result is :math:`x`.
 
     Args:
-        num_embeddings (int): size of the dictionary of embeddings.
-        embedding_dim (int): size of the embedded vector.
-        out (Tensor, optional): specifies the output vector. (Optional) Defaults to None.
-        dtype (torch.dtype, optional): specifies data type. Defaults to None.
-        device (torch.device, optional): Defaults to None.
-        requires_grad (bool, optional): Defaults to False.
+        num_embeddings (int): the number of hypervectors to generate.
+        embedding_dim (int): the dimensionality of the hypervectors.
+        out (Tensor, optional): the output tensor.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
-    Returns:
-        Tensor: Identity hypervector
+    Examples::
+
+        >>> functional.identity_hv(2, 3)
+        tensor([[ 1.,  1.,  1.],
+                [ 1.,  1.,  1.]])
 
     """
     if dtype is None:
@@ -79,20 +83,24 @@ def random_hv(
     device=None,
     requires_grad=False,
 ) -> Tensor:
-    """Creates num random hypervectors of dim dimensions in the bipolar system.
-    When dim is None, creates one hypervector of num dimensions.
+    """Creates a set of random-hypervectors.
+
+    The resulting hypervectors are sampled uniformly at random from the ``embedding_dim``-dimensional hyperspace.
 
     Args:
-        num_embeddings (int): size of the dictionary of embeddings.
-        embedding_dim (int): size of the embedded vector.
-        generator (torch.Generator, optional): specifies random number generator. Defaults to None.
-        out (Tensor, optional): specifies the output vector. (Optional) Defaults to None.
-        dtype (torch.dtype, optional): specifies data type. Defaults to None.
-        device (torch.device, optional): Defaults to None.
-        requires_grad (bool, optional): Defaults to False.
+        num_embeddings (int): the number of hypervectors to generate.
+        embedding_dim (int): the dimensionality of the hypervectors.
+        generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
+        out (Tensor, optional): the output tensor.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
-    Returns:
-        Tensor: Random Hypervector
+    Examples::
+
+        >>> functional.random_hv(2, 3)
+        tensor([[ 1.,  -1.,  -1.],
+                [ -1.,  1.,  -1.]])
 
     """
     if dtype is None:
@@ -127,21 +135,26 @@ def level_hv(
     device=None,
     requires_grad=False,
 ) -> Tensor:
-    """Creates num random level correlated hypervectors of dim-dimensions in the bipolar system.
-    Span denotes the number of approximate orthogonalities in the set (only 1 is an exact guarantee)
+    """Creates a set of level-hypervectors.
+
+    Implements level-hypervectors as an interpolation between random-hypervectors as described in `An Extension to Basis-Hypervectors for Learning from Circular Data in Hyperdimensional Computing <https://arxiv.org/abs/2205.07920>`_.
+    The first and last hypervector in the generated set are quasi-orthogonal.
 
     Args:
-        num_embeddings (int): size of the dictionary of embeddings.
-        embedding_dim (int): size of the embedded vector.
-        randomness (float, optional): r-value to interpolate between level and random hypervectors. Defaults to 0.0.
-        generator (torch.Generator, optional): specifies random number generator. Defaults to None.
-        out (Tensor, optional): specifies the output vector. (Optional) Defaults to None.
-        dtype (torch.dtype, optional): specifies data type. Defaults to None.
-        device (torch.device, optional): Defaults to None.
-        requires_grad (bool, optional): Defaults to False.
+        num_embeddings (int): the number of hypervectors to generate.
+        embedding_dim (int): the dimensionality of the hypervectors.
+        randomness (float, optional): r-value to interpolate between level at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
+        generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
+        out (Tensor, optional): the output tensor.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
-    Returns:
-        Tensor: Level hypervector
+    Examples::
+
+        >>> functional.level_hv(2, 3)
+        tensor([[ 1.,  -1.,  -1.],
+                [ -1.,  1.,  -1.]])
 
     """
     if dtype is None:
@@ -210,22 +223,26 @@ def circular_hv(
     device=None,
     requires_grad=False,
 ) -> Tensor:
-    """Creates num random circular level correlated hypervectors
-    of dim dimensions in the bipolar system.
-    When dim is None, creates one hypervector of num dimensions.
+    """Creates a set of circular-hypervectors.
+
+    Implements circular-hypervectors based on level-hypervectors as described in `An Extension to Basis-Hypervectors for Learning from Circular Data in Hyperdimensional Computing <https://arxiv.org/abs/2205.07920>`_.
+    Any hypervector is quasi-orthogonal to the hypervector opposite site of the circle.
 
     Args:
-        num_embeddings (int): size of the dictionary of embeddings
-        embedding_dim (int): size of the embedded vector
-        randomness (float, optional): r-value. Defaults to 0.0.
-        generator (torch.Generator, optional): specifies random number generator. Defaults to None.
-        out (Tensor, optional): specifies the output vector. (Optional) Defaults to None.
-        dtype (torch.dtype, optional): specifies data type. Defaults to None.
-        device (torch.device, optional): Defaults to None.
-        requires_grad (bool, optional): Defaults to False.
+        num_embeddings (int): the number of hypervectors to generate.
+        embedding_dim (int): the dimensionality of the hypervectors.
+        randomness (float, optional): r-value to interpolate between circular at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
+        generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
+        out (Tensor, optional): the output tensor.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
-    Returns:
-        Tensor: circular hypervector
+    Examples::
+
+        >>> functional.circular_hv(2, 3)
+        tensor([[ 1.,  -1.,  -1.],
+                [ -1.,  1.,  -1.]])
 
     """
     if dtype is None:
@@ -308,32 +325,64 @@ def circular_hv(
 
 
 def bind(input: Tensor, other: Tensor, *, out=None) -> Tensor:
-    """Combines two hypervectors a and b into a new hypervector in the
-    same space, represents the vectors a and b as a pair
+    r"""Binds two hypervectors which produces a hypervector dissimilar to both.
+
+    Binding is used to associate information, for instance, to assign values to variables.
+
+    .. math::
+
+        \otimes: \mathcal{H} \times \mathcal{H} \to \mathcal{H}
 
     Args:
-        input (Tensor): input hypervector tensor
-        other (Tensor): input hypervector tensor
-        out (Tensor, optional): output tensor. Defaults to None.
+        input (Tensor): input hypervector
+        other (Tensor): other input hypervector
+        out (Tensor, optional): the output tensor.
 
-    Returns:
-        Tensor: bound hypervector
+    Shapes:
+        - Input: :math:`(*)`
+        - Other: :math:`(*)`
+        - Output: :math:`(*)`
+
+    Examples::
+
+        >>> x = functional.random_hv(2, 3)
+        >>> x
+        tensor([[ 1., -1., -1.],
+                [ 1.,  1.,  1.]])
+        >>> functional.bind(x[0], x[1])
+        tensor([ 1., -1., -1.])
 
     """
-
     return torch.mul(input, other, out=out)
 
 
 def bundle(input: Tensor, other: Tensor, *, out=None) -> Tensor:
-    """Returns element-wise sum of hypervectors input and other
+    r"""Bundles two hypervectors which produces a hypervector maximally similar to both.
+
+    The bundling operation is used to aggregate information into a single hypervector.
+
+    .. math::
+
+        \oplus: \mathcal{H} \times \mathcal{H} \to \mathcal{H}
 
     Args:
-        input (Tensor): input hypervector tensor
-        other (Tensor): input hypervector tensor
-        out (Tensor, optional): output tensor. Defaults to None.
+        input (Tensor): input hypervector
+        other (Tensor): other input hypervector
+        out (Tensor, optional): the output tensor.
 
-    Returns:
-        Tensor: bundled hypervector
+    Shapes:
+        - Input: :math:`(*)`
+        - Other: :math:`(*)`
+        - Output: :math:`(*)`
+
+    Examples::
+
+        >>> x = functional.random_hv(2, 3)
+        >>> x
+        tensor([[ 1.,  1.,  1.],
+                [-1.,  1., -1.]])
+        >>> functional.bundle(x[0], x[1])
+        tensor([0., 2., 0.])
 
     """
 
@@ -341,15 +390,30 @@ def bundle(input: Tensor, other: Tensor, *, out=None) -> Tensor:
 
 
 def permute(input: Tensor, *, shifts=1, dims=-1) -> Tensor:
-    """Permutes input hypervector by specified number of shifts
+    r"""Permutes hypervector by specified number of shifts.
+
+    The permutation operator is used to assign an order to hypervectors.
+
+    .. math::
+
+        \Pi: \mathcal{H} \to \mathcal{H}
 
     Args:
-        input (Tensor): input tensor.
-        shifts (int, optional): Number of places the elements of the hypervector are shifted. Defaults to 1.
-        dims (int, optional): axis along which to permute the hypervector. Defaults to -1.
+        input (Tensor): input hypervector
+        shifts (int or tuple of ints, optional): The number of places by which the elements of the tensor are shifted. If shifts is a tuple, dims must be a tuple of the same size, and each dimension will be rolled by the corresponding value.
+        dims (int or tuple of ints, optional): axis along which to permute the hypervector. Default: ``-1``.
 
-    Returns:
-        Tensor: permuted hypervector
+    Shapes:
+        - Input: :math:`(*)`
+        - Output: :math:`(*)`
+
+    Examples::
+
+        >>> x = functional.random_hv(1, 3)
+        >>> x
+        tensor([ 1.,  -1.,  -1.])
+        >>> functional.permute(x)
+        tensor([ -1.,  1.,  -1.])
 
     """
 
@@ -357,25 +421,49 @@ def permute(input: Tensor, *, shifts=1, dims=-1) -> Tensor:
 
 
 def soft_quantize(input: Tensor, *, out=None):
-    """Applies the hyperbolic tanh function to all elements of the input tensor
+    """Applies the hyperbolic tanh function to all elements of the input tensor.
 
     Args:
         input (Tensor): input tensor.
         out (Tensor, optional): output tensor. Defaults to None.
+
+    Shapes:
+        - Input: :math:`(*)`
+        - Output: :math:`(*)`
+
+    Examples::
+
+        >>> x = functional.random_hv(2, 3)
+        >>> y = functional.bundle(x[0], x[1])
+        >>> y
+        tensor([0., 2., 0.])
+        >>> functional.soft_quantize(y)
+        tensor([0.0000, 0.9640, 0.0000])
 
     """
     return torch.tanh(input, out=out)
 
 
 def hard_quantize(input: Tensor, *, out=None):
-    """Clamps all elements in the input tensor into the range [-1, 1]
+    """Applies binary quantization to all elements of the input tensor.
 
     Args:
         input (Tensor): input tensor
         out (Tensor, optional): output tensor. Defaults to None.
 
-    Returns:
-        Tensor: clamped input vector
+    Shapes:
+        - Input: :math:`(*)`
+        - Output: :math:`(*)`
+
+    Examples::
+
+        >>> x = functional.random_hv(2, 3)
+        >>> y = functional.bundle(x[0], x[1])
+        >>> y
+        tensor([ 0., -2., -2.])
+        >>> functional.hard_quantize(y)
+        tensor([ 1., -1., -1.])
+
     """
     # Make sure that the output tensor has the same dtype and device
     # as the input tensor.
@@ -392,42 +480,75 @@ def hard_quantize(input: Tensor, *, out=None):
 
 
 def cosine_similarity(input: Tensor, others: Tensor) -> Tensor:
-    """Returns the cosine similarity between the input vector and each vector in others
+    """Cosine similarity between the input vector and each vector in others.
 
     Args:
-        input (Tensor): one-dimensional tensor (dim,)
-        others (Tensor): two-dimensional tensor (num_vectors, dim)
+        input (Tensor): one-dimensional tensor
+        others (Tensor): two-dimensional tensor
 
-    Returns:
-        Tensor: output tensor of shape (num_vectors,)
+    Shapes:
+        - Input: :math:`(d)`
+        - Others: :math:`(n, d)`
+        - Output: :math:`(n)`
+
+    Examples::
+
+        >>> x = functional.random_hv(2, 3)
+        >>> x
+        tensor([[-1., -1.,  1.],
+                [ 1.,  1., -1.]])
+        >>> functional.cosine_similarity(x[0], x)
+        tensor([ 1., -1.])
 
     """
     return F.cosine_similarity(input, others)
 
 
 def dot_similarity(input: Tensor, others: Tensor) -> Tensor:
-    """Returns the dot product between the input vector and each vector in others
+    """Dot product between the input vector and each vector in others.
 
     Args:
-        input (Tensor): one-dimensional tensor (dim,)
-        others (Tensor): two-dimensional tensor (num_vectors, dim)
+        input (Tensor): one-dimensional tensor
+        others (Tensor): two-dimensional tensor
 
-    Returns:
-        Tensor: output tensor of shape (num_vectors,)
+    Shapes:
+        - Input: :math:`(d)`
+        - Others: :math:`(n, d)`
+        - Output: :math:`(n)`
+
+    Examples::
+
+        >>> x = functional.random_hv(2, 3)
+        >>> x
+        tensor([[ 1., -1.,  1.],
+                [ 1.,  1.,  1.]])
+        >>> functional.dot_similarity(x[0], x)
+        tensor([3., 1.])
 
     """
     return F.linear(input, others)
 
 
 def hamming_similarity(input: Tensor, others: Tensor) -> Tensor:
-    """Returns the number of equal elements between the input vector and each vector in others
+    """Number of equal elements between the input vector and each vector in others.
 
     Args:
-        input (Tensor): one-dimensional tensor (dim,)
-        others (Tensor): two-dimensional tensor (num_vectors, dim)
+        input (Tensor): one-dimensional tensor
+        others (Tensor): two-dimensional tensor
 
-    Returns:
-        Tensor: output tensor (num_vectors,)
+    Shapes:
+        - Input: :math:`(d)`
+        - Others: :math:`(n, d)`
+        - Output: :math:`(n)`
+
+    Examples::
+
+        >>> x = functional.random_hv(2, 3)
+        >>> x
+        tensor([[ 1.,  1., -1.],
+                [-1., -1., -1.]])
+        >>> functional.hamming_similarity(x[0], x)
+        tensor([3., 1.])
 
     """
     return torch.sum(input == others, dim=-1, dtype=input.dtype)
@@ -441,89 +562,174 @@ def multiset(
     dtype=None,
     out=None,
 ) -> Tensor:
-    """Element-wise sum of input hypervectors
+    r"""Multiset of input hypervectors.
+
+    Bundles all the input hypervectors together.
+
+    .. math::
+
+        \bigoplus_{i=0}^{n-1} V_i
 
     Args:
         input (Tensor): input hypervector tensor
-        dim (int, optional): dimension over which to bundle the hypervectors. Defaults to -2.
-        keepdim (bool, optional): whether to keep the bundled dimension. Defaults to False.
-        dtype (torch.dtype, optional): if specified determins the type of the returned tensor, otherwise same as input.
+        dim (int, optional): dimension over which to bundle the hypervectors. Default: ``-2``.
+        keepdim (bool, optional): whether to keep the bundled dimension. Default: ``False``.
+        dtype (``torch.dtype``, optional): if specified determins the type of the returned tensor, otherwise same as input.
         out (Tensor, optional): the output tensor.
 
-    Returns:
-        Tensor: bundled hypervector
+    Shapes:
+        - Input: :math:`(*, n, d)`
+        - Output: :math:`(*, d)`
+
+    Examples::
+
+        >>> x = functional.random_hv(3, 3)
+        >>> x
+        tensor([[ 1.,  1.,  1.],
+                [-1.,  1.,  1.],
+                [-1.,  1., -1.]])
+        >>> functional.multiset(x)
+        tensor([-1.,  3.,  1.])
+
     """
     return torch.sum(input, dim=dim, keepdim=keepdim, dtype=dtype, out=out)
 
 
 def multibind(input: Tensor, *, dim=-2, keepdim=False, dtype=None, out=None) -> Tensor:
-    """Element-wise multiplication of input hypervectors
+    r"""Binding of multiple hypervectors.
+
+    Binds all the input hypervectors together.
+
+    .. math::
+
+        \bigotimes_{i=0}^{n-1} V_i
 
     Args:
         input (Tensor): input hypervector tensor
-        dim (int, optional): dimension over which to bind the hypervectors. Defaults to -2.
-        keepdim (bool, optional): whether to keep the bundled dimension. Defaults to False.
-        dtype (torch.dtype, optional): if specified determins the type of the returned tensor, otherwise same as input.
+        dim (int, optional): dimension over which to bind the hypervectors. Default: ``-2``.
+        keepdim (bool, optional): whether to keep the bundled dimension. Default: ``False``.
+        dtype (``torch.dtype``, optional): if specified determins the type of the returned tensor, otherwise same as input.
         out (Tensor, optional): the output tensor.
 
-    Returns:
-        Tensor: bound hypervector
+    Shapes:
+        - Input: :math:`(*, n, d)`
+        - Output: :math:`(*, d)`
+
+    Examples::
+
+        >>> x = functional.random_hv(3, 3)
+        >>> x
+        tensor([[ 1.,  1.,  1.],
+                [-1.,  1.,  1.],
+                [-1.,  1., -1.]])
+        >>> functional.multibind(x)
+        tensor([ 1.,  1., -1.])
+
     """
     return torch.prod(input, dim=dim, keepdim=keepdim, dtype=dtype, out=out)
 
 
-def ngrams(input: Tensor, n=3) -> Tensor:
-    """Creates a hypervector containing the n-gram statistics of input
+def ngrams(input: Tensor, n: int = 3) -> Tensor:
+    r"""Creates a hypervector with the :math:`n`-gram statistics of the input.
 
-    Arguments are of shape (\*, m, d) where \* is any dimensions including none, m is the
-    number of values, and d is the dimensionality of the hypervector.
+    .. math::
+
+        \bigoplus_{i=0}^{m - n} \bigotimes_{j = 0}^{n - 1} \Pi^{n - j - 1}(V_{i + j})
 
     .. note::
         For :math:`n=1` use :func:`~torchhd.functional.multiset` instead and for :math:`n=m` use :func:`~torchhd.functional.distinct_sequence` instead.
 
     Args:
         input (Tensor): The value hypervectors.
-        n (int, optional): The size of each n-gram, :math:`2 \leq n \leq m`. Defaults to 3.
+        n (int, optional): The size of each :math:`n`-gram, :math:`1 \leq n \leq m`. Default: ``3``.
 
-    Returns:
-        Tensor: output hypervector of shape (\*, d)
+    Shapes:
+        - Input: :math:`(*, m, d)`
+        - Output: :math:`(*, d)`
+
+    Examples::
+
+        >>> x = functional.random_hv(5, 3)
+        >>> x
+        tensor([[ 1., -1.,  1.],
+                [-1., -1.,  1.],
+                [ 1.,  1.,  1.],
+                [-1.,  1.,  1.],
+                [-1., -1., -1.]])
+        >>> functional.ngrams(x)
+        tensor([-1.,  1., -3.])
+
     """
     n_gram = permute(input[..., : -(n - 1), :], shifts=n - 1)
-    for i in range(1, n - 1):
-        n_gram = bind(
-            n_gram, permute(input[..., i : -(n - 1 - i), :], shifts=n - 1 - i)
-        )
-    n_gram = bind(n_gram, input[..., n - 1 :, :])
+    for i in range(1, n):
+        stop = None if i == (n - 1) else -(n - i - 1)
+        sample = permute(input[..., i:stop, :], shifts=n - i - 1)
+        n_gram = bind(n_gram, sample)
 
     return multiset(n_gram)
 
 
 def hash_table(keys: Tensor, values: Tensor) -> Tensor:
-    """Combines the keys and values hypervectors to create a hash table.
+    r"""Hash table from keys-values hypervector pairs.
 
-    Arguments are of shape (\*, v, d) where \* is any dimensions including none, v is the
-    number of key-value pairs, and d is the dimensionality of the hypervector.
+    .. math::
+
+        \bigoplus_{i = 0}^{m - 1} K_i \otimes V_i
 
     Args:
         keys (Tensor): The keys hypervectors, must be the same shape as values.
         values (Tensor): The values hypervectors, must be the same shape as keys.
 
-    Returns:
-        Tensor: output hypervector of shape (\*, d)
+    Shapes:
+        - Keys: :math:`(*, n, d)`
+        - Values: :math:`(*, n, d)`
+        - Output: :math:`(*, d)`
+
+    Examples::
+
+        >>> keys = functional.random_hv(2, 3)
+        >>> keys
+        tensor([[ 1., -1.,  1.],
+                [ 1., -1.,  1.]])
+        >>> values = functional.random_hv(2, 3)
+        >>> values
+        tensor([[-1., -1.,  1.],
+                [ 1., -1., -1.]])
+        >>> functional.hash_table(keys, values)
+        tensor([0., 2., 0.])
+
     """
     return multiset(bind(keys, values))
 
 
 def sequence(input: Tensor) -> Tensor:
-    """Creates a bundling-based sequence
+    r"""Bundling-based sequence.
 
-    The first value is permuted n-1 times, the last value is permuted 0 times.
+    The first value is permuted :math:`n-1` times, the last value is not permuted.
+
+    .. math::
+
+        \bigoplus_{i=0}^{m-1} \Pi^{m - i - 1}(V_i)
 
     Args:
-        input (Tensor): The n hypervector values of shape (\*, n, d).
+        input (Tensor): The hypervector values.
 
-    Returns:
-        Tensor: output hypervector of shape (\*, d)
+    Shapes:
+        - Input: :math:`(*, n, d)`
+        - Output: :math:`(*, d)`
+
+    Examples::
+
+        >>> x = functional.random_hv(5, 3)
+        >>> x
+        tensor([[ 1., -1., -1.],
+                [-1.,  1.,  1.],
+                [ 1.,  1.,  1.],
+                [-1., -1., -1.],
+                [ 1.,  1.,  1.]])
+        >>> functional.sequence(x)
+        tensor([-1.,  3.,  1.])
+
     """
     dim = -2
     n = input.size(dim)
@@ -536,15 +742,33 @@ def sequence(input: Tensor) -> Tensor:
 
 
 def distinct_sequence(input: Tensor) -> Tensor:
-    """Creates a binding-based sequence
+    r"""Binding-based sequence.
 
-    The first value is permuted n-1 times, the last value is permuted 0 times.
+    The first value is permuted :math:`n-1` times, the last value is not permuted.
+
+    .. math::
+
+        \bigotimes_{i=0}^{m-1} \Pi^{m - i - 1}(V_i)
 
     Args:
-        input (Tensor): The n hypervector values of shape (\*, n, d).
+        input (Tensor): The hypervector values.
 
-    Returns:
-        Tensor: output hypervector of shape (\*, d)
+    Shapes:
+        - Input: :math:`(*, n, d)`
+        - Output: :math:`(*, d)`
+
+    Examples::
+
+        >>> x = functional.random_hv(5, 3)
+        >>> x
+        tensor([[-1.,  1., -1.],
+                [-1., -1.,  1.],
+                [ 1., -1., -1.],
+                [ 1., -1., -1.],
+                [-1., -1., -1.]])
+        >>> functional.distinct_sequence(x)
+        tensor([-1.,  1.,  1.])
+
     """
     dim = -2
     n = input.size(dim)
@@ -564,17 +788,31 @@ def map_range(
     out_max: float,
 ) -> Tensor:
     """Maps the input real value range to an output real value range.
-    Input values outside the min, max range are not clamped.
+
+    .. note::
+
+        Input values outside the min-max range are not clamped.
 
     Args:
-        input (torch.LongTensor): The values to map
+        input (Tensor): The values to map
         in_min (float): the minimum value of the input range
         in_max (float): the maximum value of the input range
         out_min (float): the minimum value of the output range
         out_max (float): the maximum value of the output range
 
-    Returns:
-        Tensor: output tensor
+    Shapes:
+        - Input: :math:`(*)`
+        - Output: :math:`(*)`
+
+    Examples::
+
+        >>> x = torch.rand(2, 3)
+        >>> x
+        tensor([[0.2211, 0.1291, 0.3081],
+                [0.7654, 0.2155, 0.4381]])
+        >>> functional.map_range(x, 0, 1, -10, 10)
+        tensor([[-5.5781, -7.4176, -3.8374],
+                [ 5.3082, -5.6906, -1.2383]])
 
     """
     return out_min + (out_max - out_min) * (input - in_min) / (in_max - in_min)
@@ -584,7 +822,10 @@ def value_to_index(
     input: Tensor, in_min: float, in_max: float, index_length: int
 ) -> torch.LongTensor:
     """Maps the input real value range to an index range.
-    Input values outside the min, max range are clamped.
+
+    .. note::
+
+        Input values outside the min-max range are clamped.
 
     Args:
         input (torch.LongTensor): The values to map
@@ -592,8 +833,19 @@ def value_to_index(
         in_max (float): the maximum value of the input range
         index_length (int): The length of the output index, i.e., one more than the maximum output
 
-    Returns:
-        Tensor: output tensor
+    Shapes:
+        - Input: :math:`(*)`
+        - Output: :math:`(*)`
+
+    Examples::
+
+        >>> x = torch.rand(2, 3)
+        >>> x
+        tensor([[0.2211, 0.1291, 0.3081],
+                [0.7654, 0.2155, 0.4381]])
+        >>> functional.value_to_index(x, 0, 1, 10)
+        tensor([[2, 1, 3],
+                [7, 2, 4]])
 
     """
     mapped = map_range(input, in_min, in_max, 0, index_length - 1)
@@ -604,7 +856,10 @@ def index_to_value(
     input: torch.LongTensor, index_length: int, out_min: float, out_max: float
 ) -> torch.FloatTensor:
     """Maps the input index range to a real value range.
-    Input values greater or equal to index_length are not clamped.
+
+    .. note::
+
+        Input values greater or equal to ``index_length`` are not clamped.
 
     Args:
         input (torch.LongTensor): The values to map
@@ -612,25 +867,48 @@ def index_to_value(
         out_min (float): the minimum value of the output range
         out_max (float): the maximum value of the output range
 
-    Returns:
-        Tensor: output tensor
+    Shapes:
+        - Input: :math:`(*)`
+        - Output: :math:`(*)`
+
+    Examples::
+
+        >>> x = torch.randint(0, 10, (2, 3))
+        >>> x
+        tensor([[3, 0, 3],
+                [2, 5, 5]])
+        >>> functional.index_to_value(x, 10, 0, 1)
+        tensor([[0.3333, 0.0000, 0.3333],
+                [0.2222, 0.5556, 0.5556]])
 
     """
     return map_range(input.float(), 0, index_length - 1, out_min, out_max)
 
 
 def cleanup(input: Tensor, memory: Tensor, threshold=0.0) -> Tensor:
-    """Returns a copy of the most similar hypervector in memory.
+    """Gets the most similar hypervector in memory.
 
     If the cosine similarity is less than threshold, raises a KeyError.
 
     Args:
-        input (Tensor): The hypervector to cleanup
-        memory (Tensor): The n hypervectors in memory of shape (n, d)
-        threshold (float, optional): minimal similarity between input and any hypervector in memory. Defaults to 0.0.
+        input (Tensor): The hypervector to cleanup.
+        memory (Tensor): The hypervectors in memory.
+        threshold (float, optional): minimal similarity between input and any hypervector in memory. Default: ``0.0``.
 
-    Returns:
-        Tensor: output tensor
+    Shapes:
+        - Input: :math:`(d)`
+        - Memory: :math:`(n, d)`
+        - Output: :math:`(d)`
+
+    Examples::
+
+        >>> x = functional.random_hv(2, 3)
+        >>> x
+        tensor([[ 1., -1., -1.],
+                [ 1.,  1.,  1.]])
+        >>> functional.cleanup(x[0], x)
+        tensor([[ 1., -1., -1.]])
+
     """
     scores = cosine_similarity(input, memory)
     value, index = torch.max(scores, dim=-1)
@@ -640,5 +918,4 @@ def cleanup(input: Tensor, memory: Tensor, threshold=0.0) -> Tensor:
             "Hypervector with the highest similarity is less similar than the provided threshold"
         )
 
-    # Copying prevents manipulating the memory tensor
-    return torch.clone(memory[index])
+    return torch.index_select(memory, -2, index)

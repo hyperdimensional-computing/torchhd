@@ -88,6 +88,10 @@ Initial development of Torchhd was performed by Mike Heddes and Igor Nunes as pa
 
 ## Contributing
 
+### Documentation
+
+To build the documentation locally, use `pip install -r docs/requirements.txt` to install the required packages. Then, with `sphinx-build -b html docs build` you can generate the html documentation in the `/build` directory. To create a clean build, remove the `/build` and `/docs/generated` directories.
+
 ### Creating a New Release
 
 - A GitHub release triggers a GitHub action that builds the library and publishes it to PyPi and Conda in addition to the documentation website.
