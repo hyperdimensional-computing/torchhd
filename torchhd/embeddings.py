@@ -34,7 +34,6 @@ class Identity(nn.Embedding):
                 [1., 1., 1.]])
 
     """
-
     def __init__(self, num_embeddings, embedding_dim, requires_grad=False, **kwargs):
         super(Identity, self).__init__(num_embeddings, embedding_dim, **kwargs)
         self.weight.requires_grad = requires_grad
@@ -74,8 +73,13 @@ class Random(nn.Embedding):
                 [ 1.,  1.,  1.]])
 
     """
-
-    def __init__(self, num_embeddings, embedding_dim, requires_grad=False, **kwargs):
+    def __init__(
+        self,
+        num_embeddings,
+        embedding_dim,
+        requires_grad=False,
+        **kwargs
+    ):
         super(Random, self).__init__(num_embeddings, embedding_dim, **kwargs)
         self.weight.requires_grad = requires_grad
 
@@ -117,7 +121,6 @@ class Level(nn.Embedding):
                 [ 1., -1.,  1., -1., -1., -1.,  1.,  1., -1.,  1.]])
 
     """
-
     def __init__(
         self,
         num_embeddings,
@@ -185,7 +188,6 @@ class Circular(nn.Embedding):
                 [ 1., -1., -1., -1.,  1.,  1.,  1.,  1.,  1., -1.]])
 
     """
-
     def __init__(
         self,
         num_embeddings,
@@ -233,9 +235,9 @@ class Circular(nn.Embedding):
 
 class Projection(nn.Module):
     r"""Embedding using a random projection matrix.
-
+    
     Implemented based on `A Theoretical Perspective on Hyperdimensional Computing <https://arxiv.org/abs/2010.07426>`_.
-    :math:`\Phi x` where :math:`\Phi \in \mathbb{R}^{d \times m}` is a matrix whose rows are uniformly sampled at random from the surface of an :math:`m`-dimensional unit sphere.
+    :math:`\Phi x` where :math:`\Phi \in \mathbb{R}^{d \times m}` is a matrix whose rows are uniformly sampled at random from the surface of an :math:`m`-dimensional unit sphere. 
     This encoding ensures that similarities in the input space are preserved in the hyperspace.
 
     Args:
