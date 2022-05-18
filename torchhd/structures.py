@@ -18,12 +18,12 @@ __all__ = [
 
 class Memory:
     """Associative memory of hypervector keys and any value.
-    
+
     Creates a memory object.
 
     Args:
         threshold (float, optional): minimal similarity between input and any hypervector in memory. Default: ``0.0``.
-    
+
     Examples::
 
         >>> memory = structures.Memory()
@@ -37,7 +37,7 @@ class Memory:
 
     def __len__(self) -> int:
         """Returns the number of items in memory.
-        
+
         Examples::
 
             >>> len(memory)
@@ -52,7 +52,7 @@ class Memory:
         Args:
             key (Tensor): Hypervector used as key for adding the key-value pair.
             value (Any): Value to be added to the memory.
-        
+
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
@@ -582,7 +582,7 @@ class Sequence:
 
         Args:
             seq (Sequence): Sequence to be concatenated with the current one.
-        
+
         Examples::
 
             >>> S1 = structures.Sequence(dimensions=10000)
@@ -778,7 +778,7 @@ class DistinctSequence:
 
     def clear(self) -> None:
         """Empties the sequence.
-        
+
         Examples::
 
             >>> DS.clear()
@@ -842,10 +842,10 @@ class Graph:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
             self.value = torch.zeros(dim_or_input, dtype=dtype, device=device)
-    
+
     def add_edge(self, node1: Tensor, node2: Tensor) -> None:
         """Adds an edge to the graph.
-         
+
         If directed the direction goes from the first node to the second one.
 
         Args:
@@ -864,7 +864,7 @@ class Graph:
 
     def encode_edge(self, node1: Tensor, node2: Tensor) -> Tensor:
         """Returns the encoding of an edge.
-        
+
         If directed the direction goes from the first node to the second one.
 
         Args:
@@ -1054,7 +1054,7 @@ class FiniteStateAutomata:
     Examples::
 
         >>> FSA = structures.FiniteStateAutomata(10000)
-        
+
     """
 
     def __init__(self, dimensions, device=None, dtype=None):
