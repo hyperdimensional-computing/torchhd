@@ -633,7 +633,7 @@ def multibind(input: Tensor, *, dim=-2, keepdim=False, dtype=None, out=None) -> 
 def cross_product(input: Tensor, other: Tensor) -> Tensor:
     r"""Cross product between two sets of hypervectors.
 
-    First creates a multiset from both tensors ``input`` (:math:`A`) and ``other`` (:math:`B`). 
+    First creates a multiset from both tensors ``input`` (:math:`A`) and ``other`` (:math:`B`).
     Then binds those together to generate all cross products, i.e., :math:`A_1 * B_1 + A_1 * B_2 + \dots + A_1 * B_m + \dots + A_n * B_m`.
 
     .. math::
