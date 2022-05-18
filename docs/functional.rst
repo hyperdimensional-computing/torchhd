@@ -1,3 +1,5 @@
+.. _functional:
+
 torchhd.functional
 =========================
 

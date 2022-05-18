@@ -1,3 +1,5 @@
+.. _datasets:
+
 torchhd.datasets
 ================
 
