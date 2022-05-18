@@ -22,6 +22,7 @@ __all__ = [
     "dot_similarity",
     "multiset",
     "multibind",
+    "cross_product",
     "sequence",
     "distinct_sequence",
     "ngrams",
@@ -627,6 +628,45 @@ def multibind(input: Tensor, *, dim=-2, keepdim=False, dtype=None, out=None) -> 
 
     """
     return torch.prod(input, dim=dim, keepdim=keepdim, dtype=dtype, out=out)
+
+
+def cross_product(input: Tensor, other: Tensor) -> Tensor:
+    r"""Cross product between two sets of hypervectors.
+
+    First creates a multiset from both tensors ``input`` (:math:`A`) and ``other`` (:math:`B`). 
+    Then binds those together to generate all cross products, i.e., :math:`A_1 * B_1 + A_1 * B_2 + \dots + A_1 * B_m + \dots + A_n * B_m`.
+
+    .. math::
+
+        \big( \bigoplus_{i=0}^{n-1} A_i \big) \otimes \big( \bigoplus_{i=0}^{m-1} B_i \big)
+
+    Args:
+        input (Tensor): first set of input hypervectors
+        other (Tensor): second set of input hypervectors
+
+    Shapes:
+        - Input: :math:`(*, n, d)`
+        - Other: :math:`(*, m, d)`
+        - Output: :math:`(*, d)`
+
+    Examples::
+
+        >>> a = functional.random_hv(2, 3)
+        >>> a
+        tensor([[ 1.,  1., -1.],
+                [ 1., -1.,  1.]])
+        >>> b = functional.random_hv(5, 3)
+        >>> b
+        tensor([[ 1., -1.,  1.],
+                [-1., -1., -1.],
+                [-1., -1., -1.],
+                [ 1.,  1., -1.],
+                [ 1., -1., -1.]])
+        >>> functional.cross_product(a, b)
+        tensor([2., -0., -0.])
+
+    """
+    return bind(multiset(input), multiset(other))
 
 
 def ngrams(input: Tensor, n: int = 3) -> Tensor:
