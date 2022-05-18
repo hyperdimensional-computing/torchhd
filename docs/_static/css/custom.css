@@ -226,3 +226,8 @@ html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(
 .wy-alert.wy-alert-warning .wy-alert-title {
     background: #e94f3b;
 }
+
+
+html.writer-html5 .rst-content table.docutils th {
+    border: none;
+}
