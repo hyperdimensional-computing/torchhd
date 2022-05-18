@@ -44,22 +44,31 @@ class Memory:
         return len(self.values)
 
     def add(self, key: Tensor, value: Any) -> None:
-        """Adds one (key, value) pair to memory"
+        """Adds one (key, value) pair to memory
 
         Args:
             key (Tensor): Hypervector used as key for adding the key-value pair.
             value (Any): Value to be added to the memory.
         Examples::
 
-
-            >>>
-            >>> M.add()
-
+            >>> letters = list(string.ascii_lowercase)
+            >>> letters_hv = functional.random_hv(len(letters), 10000)
+            >>> M.add(letters_hv[0], letters[0])
         """
         self.keys.append(key)
         self.values.append(value)
 
     def _get_index(self, key: Tensor) -> int:
+        """Returns the index of the tensor in memory with an aproximate key
+
+        Args:
+            key (Tensor): Hypervector key used for index lookup postion.
+        Examples::
+
+            >>> M._get_index(letters_hv[0])
+        """
+        if len(self.keys) == 0:
+            raise Exception("No elements in memory")
         key_stack = torch.stack(self.keys, dim=0)
         sim = functional.cosine_similarity(key, key_stack)
         value, index = torch.max(sim, 0)
@@ -70,17 +79,43 @@ class Memory:
         return index
 
     def __getitem__(self, key: Tensor) -> Tuple[Tensor, Any]:
-        """Get the (key, value) pair with an approximate key"""
+        """Get the (key, value) pair with an approximate key
+
+        Args:
+            key (Tensor): Hypervector key used for item lookup.
+        Examples::
+
+            >>> M[letters_hv[0]]
+            (tensor([-1.,  1.,  1.,  ...,  1.,  1., -1.]), 'a')
+        """
         index = self._get_index(key)
         return self.keys[index], self.values[index]
 
     def __setitem__(self, key: Tensor, value: Any) -> None:
-        """Set the value of an (key, value) pair with an approximate key"""
+        """Set the value of an (key, value) pair with an approximate key
+
+        Args:
+            key (Tensor): Hypervector key used for item lookup.
+        Examples::
+
+            >>> M[letters_hv[0]] = letters[1]
+            >>> M[letters_hv[0]]
+            (tensor([-1.,  1.,  1.,  ...,  1.,  1., -1.]), 'b')
+        """
         index = self._get_index(key)
         self.values[index] = value
 
     def __delitem__(self, key: Tensor) -> None:
-        """Delete the (key, value) pair with an approximate key"""
+        """Delete the (key, value) pair with an approximate key
+
+        Args:
+            key (Tensor): Hypervector key used for item lookup.
+        Examples::
+
+            >>> del M[letters_hv[0]]
+            >>> M[letters_hv[0]]
+            Exception: No elements in memory
+        """
         index = self._get_index(key)
         del self.keys[index]
         del self.values[index]
