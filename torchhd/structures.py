@@ -17,55 +17,63 @@ __all__ = [
 
 
 class Memory:
-    """Associative memory of hypervector keys and any value"""
+    """Associative memory of hypervector keys and any value.
+    
+    Creates a memory object.
 
-    def __init__(self, threshold=0.5):
-        """Creates a memory object.
+    Args:
+        threshold (float, optional): minimal similarity between input and any hypervector in memory. Default: ``0.0``.
+    
+    Examples::
 
-        Args:
-            threshold (float): the similarity threshold used when doing lookups in memory.
-        Examples::
+        >>> memory = structures.Memory()
 
-            >>> M = structures.Memory(threshold=0.5)
+    """
 
-        """
+    def __init__(self, threshold=0.0):
         self.threshold = threshold
         self.keys: List[Tensor] = []
         self.values: List[Any] = []
 
     def __len__(self) -> int:
-        """Returns the number of items in memory
+        """Returns the number of items in memory.
+        
         Examples::
 
-            >>> len(M)
+            >>> len(memory)
             0
 
         """
         return len(self.values)
 
     def add(self, key: Tensor, value: Any) -> None:
-        """Adds one (key, value) pair to memory
+        """Adds one (key, value) pair to memory.
 
         Args:
             key (Tensor): Hypervector used as key for adding the key-value pair.
             value (Any): Value to be added to the memory.
+        
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
             >>> letters_hv = functional.random_hv(len(letters), 10000)
-            >>> M.add(letters_hv[0], letters[0])
+            >>> memory.add(letters_hv[0], letters[0])
+
         """
         self.keys.append(key)
         self.values.append(value)
 
-    def _get_index(self, key: Tensor) -> int:
-        """Returns the index of the tensor in memory with an aproximate key
+    def index(self, key: Tensor) -> int:
+        """Returns the index of the tensor in memory from an approximate key.
 
         Args:
-            key (Tensor): Hypervector key used for index lookup postion.
+            key (Tensor): Hypervector key used for index lookup position.
+
         Examples::
 
-            >>> M._get_index(letters_hv[0])
+            >>> memory.index(letters_hv[0])
+            >>> 0
+
         """
         if len(self.keys) == 0:
             raise Exception("No elements in memory")
@@ -79,91 +87,102 @@ class Memory:
         return index
 
     def __getitem__(self, key: Tensor) -> Tuple[Tensor, Any]:
-        """Get the (key, value) pair with an approximate key
+        """Get the (key, value) pair from an approximate key.
 
         Args:
             key (Tensor): Hypervector key used for item lookup.
+
         Examples::
 
-            >>> M[letters_hv[0]]
+            >>> memory[letters_hv[0]]
             (tensor([-1.,  1.,  1.,  ...,  1.,  1., -1.]), 'a')
+
         """
-        index = self._get_index(key)
+        index = self.index(key)
         return self.keys[index], self.values[index]
 
     def __setitem__(self, key: Tensor, value: Any) -> None:
-        """Set the value of an (key, value) pair with an approximate key
+        """Set the value of an (key, value) pair from an approximate key.
 
         Args:
             key (Tensor): Hypervector key used for item lookup.
+
         Examples::
 
-            >>> M[letters_hv[0]] = letters[1]
-            >>> M[letters_hv[0]]
+            >>> memory[letters_hv[0]] = letters[1]
+            >>> memory[letters_hv[0]]
             (tensor([-1.,  1.,  1.,  ...,  1.,  1., -1.]), 'b')
         """
-        index = self._get_index(key)
+        index = self.index(key)
         self.values[index] = value
 
     def __delitem__(self, key: Tensor) -> None:
-        """Delete the (key, value) pair with an approximate key
+        """Delete the (key, value) pair from an approximate key.
 
         Args:
             key (Tensor): Hypervector key used for item lookup.
+
         Examples::
 
-            >>> del M[letters_hv[0]]
-            >>> M[letters_hv[0]]
+            >>> del memory[letters_hv[0]]
+            >>> memory[letters_hv[0]]
             Exception: No elements in memory
         """
-        index = self._get_index(key)
+        index = self.index(key)
         del self.keys[index]
         del self.values[index]
 
 
 class Multiset:
-    """Hypervector-based multiset data structure"""
+    """Hypervector-based multiset data structure.
+
+    Creates an empty multiset of dim dimensions or from an input tensor.
+
+    Args:
+        dimensions (int): number of dimensions of the multiset.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+
+    Args:
+        input (Tensor): tensor representing a multiset.
+        size (int, optional): the size of the multiset provided as input. Default: ``0``.
+
+    Examples::
+
+        >>> M = structures.Multiset(10000)
+
+        >>> x = functional.random_hv(1, 10000)
+        >>> M = structures.Multiset(x[0], size=1)
+
+    """
 
     @overload
-    def __init__(self, dim: int, *, device=None, dtype=None):
-        """Creates an empty multiset of dimensions
+    def __init__(self, dimensions: int, *, device=None, dtype=None):
+        # """Creates an empty multiset of dimensions
 
-        Args:
-            dim (int): number of dimensions of the multiset.
-        Examples::
+        # Args:
+        #     dim (int): number of dimensions of the multiset.
+        # Examples::
 
-            >>> M = structures.Multiset(dimensions=10000)
-        """
+        #     >>> M = structures.Multiset(dimensions=10000)
+        # """
         ...
 
     @overload
     def __init__(self, input: Tensor, *, size=0):
-        """Creates an empty multiset of dimensions
+        # """Creates an empty multiset of dimensions
 
-        Args:
-            input (Tensor): tensor representing a multiset.
-        Examples::
+        # Args:
+        #     input (Tensor): tensor representing a multiset.
+        # Examples::
 
-            >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random_hv(len(letters), 10000)
-            >>> M = structures.Multiset(input = letters_hv[0])
-        """
+        #     >>> letters = list(string.ascii_lowercase)
+        #     >>> letters_hv = functional.random_hv(len(letters), 10000)
+        #     >>> M = structures.Multiset(input = letters_hv[0])
+        # """
         ...
 
     def __init__(self, dim_or_input: Any, **kwargs):
-        """Creates an empty multiset of dim dimensions or from an input tensor
-
-            Args:
-                dim_or_input (Any): dimensions of the new multiset or tensor representing a multiset.
-
-            Examples::
-
-                >>> M = structures.Multiset(dim_or_input=10000)
-                >>>
-                >>> x = functional.random_hv(3, 10000)
-                >>> M = structures.Multiset(x)
-
-        """
         self.size = kwargs.get("size", 0)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
@@ -173,45 +192,52 @@ class Multiset:
             self.value = torch.zeros(dim_or_input, dtype=dtype, device=device)
 
     def add(self, input: Tensor) -> None:
-        """Adds a new hypervector (input) to the multiset
+        """Adds a new hypervector (input) to the multiset.
 
         Args:
             input (Tensor): Hypervector to add to the multiset.
+
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
             >>> letters_hv = functional.random_hv(len(letters), 10000)
             >>> M.add(letters_hv[0])
+
         """
         self.value = functional.bundle(self.value, input)
         self.size += 1
 
     def remove(self, input: Tensor) -> None:
-        """Removes a hypervector (input) from the multiset
+        """Removes a hypervector (input) from the multiset.
 
         Args:
             input (Tensor): Hypervector to be removed from the multiset.
+
         Examples::
 
             >>> M.remove(letters_hv[0])
+
         """
         self.value = functional.bundle(self.value, -input)
         self.size -= 1
 
     def contains(self, input: Tensor) -> Tensor:
-        """Returns the cosine similarity of the input vector against the multiset
+        """Returns the cosine similarity of the input vector against the multiset.
 
         Args:
             input (Tensor): Hypervector to compare against the multiset.
+
         Examples::
 
             >>> M.contains(letters_hv[0])
             tensor([0.4575])
+
         """
         return functional.cosine_similarity(input, self.value.unsqueeze(0))
 
     def __len__(self) -> int:
-        """Returns the size of the multiset
+        """Returns the size of the multiset.
+
         Examples::
 
             >>> len(M)
@@ -222,44 +248,74 @@ class Multiset:
 
     def clear(self) -> None:
         """Empties the multiset
+
         Examples::
 
             >>> M.clear()
+
         """
         self.size = 0
         self.value.fill_(0.0)
 
     @classmethod
     def from_ngrams(cls, input: Tensor, n=3):
-        """Creates a multiset from a set of hypervectors representing ngrams
+        """Creates a multiset from the ngrams of a set of hypervectors.
+
+        See: :func:`~torchhd.functional.ngrams`.
 
         Args:
             input (Tensor): Set of hypervectors to convert in a multiset.
+            n (int, optional): The size of each :math:`n`-gram, :math:`1 \leq n \leq m`. Default: ``3``.
 
         Examples::
+
             >>> x = functional.random_hv(5, 3)
-            >>> M.from_ngrams(x)
+            >>> M = structures.Multiset.from_ngrams(x)
+
         """
         value = functional.ngrams(input, n)
         return cls(value, size=input.size(-2) - n + 1)
 
     @classmethod
     def from_tensor(cls, input: Tensor):
-        """Creates a multiset from a set of hypervectors
+        """Creates a multiset from a set of hypervectors.
+
+        See: :func:`~torchhd.functional.multiset`.
 
         Args:
             input (Tensor): Set of hypervectors to convert in a multiset.
 
         Examples::
+
             >>> x = functional.random_hv(3, 3)
-            >>> M.from_tensor(x)
+            >>> M = structures.Multiset.from_tensor(x)
+
         """
         value = functional.multiset(input, dim=-2)
         return cls(value, size=input.size(-2))
 
 
 class HashTable:
-    """Hypervector-based hash table data structure"""
+    """Hypervector-based hash table data structure.
+
+    Creates an empty hash table of dim dimensions or a hash table from an input tensor.
+
+    Args:
+        dimensions (int): number of dimensions of the hash table.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+
+    Args:
+        input (Tensor): tensor representing a hash table.
+        size (int, optional): the size of the hash table provided as input. Default: ``0``.
+
+    Examples::
+
+        >>> H = structures.HashTable(10000)
+
+        >>> x = functional.random_hv(3, 10000)
+        >>> M = structures.HashTable(x)
+    """
 
     @overload
     def __init__(self, dimensions: int, *, device=None, dtype=None):
@@ -270,18 +326,6 @@ class HashTable:
         ...
 
     def __init__(self, dim_or_input: int, **kwargs):
-        """Creates an empty hashtable of dim dimensions or a hashtable from an input tensor
-
-            Args:
-                dim_or_input (Any): dimensions of the new hashtable or tensor representing a hashtable.
-
-            Examples::
-
-                >>> H = structures.HashTable(dim_or_input=10000)
-                >>>
-                >>> x = functional.random_hv(3, 10000)
-                >>> M = structures.HashTable(x)
-        """
         self.size = kwargs.get("size", 0)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
@@ -291,76 +335,87 @@ class HashTable:
             self.value = torch.zeros(dim_or_input, dtype=dtype, device=device)
 
     def add(self, key: Tensor, value: Tensor) -> None:
-        """Adds one (key, value) pair to the hashtable
+        """Adds one (key, value) pair to the hash table.
 
         Args:
             key (Tensor): Hypervector used as key for adding the key-value pair.
-            value (Tensor): Tensor to be added as value to the hashtable
+            value (Tensor): Tensor to be added as value to the hash table
+
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
             >>> letters_hv = functional.random_hv(len(letters), 10000)
             >>> values = functional.random_hv(2, 10000)
             >>> H.add(letters_hv[0], values[0])
+
         """
         pair = functional.bind(key, value)
         self.value = functional.bundle(self.value, pair)
         self.size += 1
 
     def remove(self, key: Tensor, value: Tensor) -> None:
-        """Removes one (key, value) pair from the hashtable
+        """Removes one (key, value) pair from the hash table.
 
         Args:
             key (Tensor): Hypervector used as key for removing the key-value pair.
             value (Tensor): Tensor to be removed linked to the key
+
         Examples::
 
             >>> H.remove(letters_hv[0], values[0])
+
         """
         pair = functional.bind(key, value)
         self.value = functional.bundle(self.value, -pair)
         self.size -= 1
 
     def get(self, key: Tensor) -> Tensor:
-        """Gets the value from the key in the hashtable
+        """Gets the approximate value from the key in the hash table.
 
         Args:
             key (Tensor): Hypervector used as key for looking its value.
+
         Examples::
 
             >>> H.get(letters_hv[0])
             tensor([ 1., -1.,  1.,  ..., -1.,  1., -1.])
+
         """
         return functional.bind(self.value, key)
 
     def replace(self, key: Tensor, old: Tensor, new: Tensor) -> None:
-        """Replace the value from key-value pair in the hashtable
+        """Replace the value from key-value pair in the hash table.
 
         Args:
             key (Tensor): Hypervector used as key for looking its value.
             old (Tensor): Old value hypervector.
             new (Tensor): New value hypervector.
+
         Examples::
 
             >>> H.replace(letters_hv[0], values[0], values[1])
+
         """
         self.remove(key, old)
         self.add(key, new)
 
     def __getitem__(self, key: Tensor) -> Tensor:
-        """Gets the value from the key in the hashtable
+        """Gets the approximate value from the key in the hash table.
 
         Args:
             key (Tensor): Hypervector used as key for looking its value.
+
         Examples::
 
             >>> H[letters_hv[0]]
             tensor([ 1., -1.,  1.,  ..., -1.,  1., -1.])
+
         """
         return self.get(key)
 
     def __len__(self) -> int:
-        """Returns the size of the hashtable
+        """Returns the size of the hash table.
+
         Examples::
 
             >>> len(H)
@@ -370,33 +425,59 @@ class HashTable:
         return self.size
 
     def clear(self) -> None:
-        """Empties the hashtable
+        """Empties the hash table.
+
         Examples::
 
             >>> H.clear()
+
         """
         self.size = 0
         self.value.fill_(0.0)
 
     @classmethod
     def from_tensors(cls, keys: Tensor, values: Tensor):
-        """Creates a hashtable from a set of keys and values hypervectors
+        """Creates a hash table from a set of keys and values hypervectors.
+
+        See: :func:`~torchhd.functional.hash_table`.
 
         Args:
-            keys (Tensor): Set of key hypervectors to add in the hashtable.
-            values (Tensor): Set of value hypervectors to add in the hashtable.
+            keys (Tensor): Set of key hypervectors to add in the hash table.
+            values (Tensor): Set of value hypervectors to add in the hash table.
 
         Examples::
             >>> letters_hv = functional.random_hv(len(letters), 10000)
             >>> values = functional.random_hv(len(letters), 10000)
-            >>> H.from_tensor(letters_hv, values)
+            >>> H = structures.HashTable.from_tensors(letters_hv, values)
+
         """
         value = functional.hash_table(keys, values)
         return cls(value, size=input.size(-2))
 
 
 class Sequence:
-    """Hypervector-based (bundling-based) sequence data structure"""
+    """Hypervector-based (bundling-based) sequence data structure
+
+    Creates an empty sequence of dim dimensions or from an input tensor.
+
+    Args:
+        dimensions (int): number of dimensions of the sequence.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+
+    Args:
+        input (Tensor): tensor representing a sequence.
+        length (int, optional): the length of the sequence provided as input. Default: ``0``.
+
+    Examples::
+
+        >>> S = structures.Sequence(10000)
+
+        >>> letters = list(string.ascii_lowercase)
+        >>> letters_hv = functional.random_hv(len(letters), 10000)
+        >>> S = structures.Sequence(letters_hv[0], length=1)
+
+    """
 
     @overload
     def __init__(self, dimensions: int, *, device=None, dtype=None):
@@ -407,19 +488,6 @@ class Sequence:
         ...
 
     def __init__(self, dim_or_input: int, **kwargs):
-        """Creates an empty sequence of dim dimensions or from an input tensor
-
-        Args:
-            dim_or_input (Any): dimensions of the new sequence or tensor representing a sequence.
-
-        Examples::
-
-            >>> S = structures.Sequence(dimensions=10000)
-            >>>
-            >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random_hv(len(letters), 10000)
-            >>> S = structures.Sequence(input=letters_hv)
-        """
         self.length = kwargs.get("length", 0)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
@@ -429,70 +497,79 @@ class Sequence:
             self.value = torch.zeros(dim_or_input, dtype=dtype, device=device)
 
     def append(self, input: Tensor) -> None:
-        """Appends the input tensor to the right of the sequence
+        """Appends the input tensor to the right of the sequence.
 
         Args:
             input (Tensor): Hypervector to append to the sequence.
+
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
             >>> letters_hv = functional.random_hv(len(letters), 10000)
             >>> S.append(letters_hv[0])
+
         """
         rotated_value = functional.permute(self.value, shifts=1)
         self.value = functional.bundle(input, rotated_value)
         self.length += 1
 
     def appendleft(self, input: Tensor) -> None:
-        """Appends the input tensor to the left of the sequence
+        """Appends the input tensor to the left of the sequence.
 
         Args:
             input (Tensor): Hypervector to append to the right of the sequence.
+
         Examples::
 
             >>> S.appendleft(letters_hv[1])
+
         """
         rotated_input = functional.permute(input, shifts=len(self))
         self.value = functional.bundle(self.value, rotated_input)
         self.length += 1
 
     def pop(self, input: Tensor) -> None:
-        """Pops the input tensor from the right of the sequence
+        """Pops the input tensor from the right of the sequence.
 
         Args:
             input (Tensor): Hypervector to pop from the sequence.
+
         Examples::
 
             >>> S.pop(letters_hv[0])
+
         """
         self.length -= 1
         self.value = functional.bundle(self.value, -input)
         self.value = functional.permute(self.value, shifts=-1)
 
     def popleft(self, input: Tensor) -> None:
-        """Pops the input tensor from the left of the sequence
+        """Pops the input tensor from the left of the sequence.
 
         Args:
             input (Tensor): Hypervector to pop left from the sequence.
+
         Examples::
 
             >>> S.popleft(letters_hv[1])
+
         """
         self.length -= 1
         rotated_input = functional.permute(input, shifts=len(self))
         self.value = functional.bundle(self.value, -rotated_input)
 
     def replace(self, index: int, old: Tensor, new: Tensor) -> None:
-        """Replace the old hypervector value from the given index, for the new hypervector value
+        """Replace the old hypervector value from the given index, for the new hypervector value.
 
         Args:
             index (int): Index from the sequence to replace its value.
             old (Tensor): Old value hypervector.
             new (Tensor): New value hypervector.
+
         Examples::
 
-            >>> S1 = structures.Sequence(dimensions=10000)
-            >>> S.concat(S1)
+            >>> S.replace(0, letters_hv[0], letters_hv[1])
+
         """
         rotated_old = functional.permute(old, shifts=-self.length + index + 1)
         self.value = functional.bundle(self.value, -rotated_old)
@@ -501,32 +578,38 @@ class Sequence:
         self.value = functional.bundle(self.value, rotated_new)
 
     def concat(self, seq: "Sequence") -> "Sequence":
-        """Concats the actual sequence with the given one
+        """Concatenates the current sequence with the given one.
 
         Args:
-            seq (Sequence): Sequence to be concated with the actual one.
+            seq (Sequence): Sequence to be concatenated with the current one.
+        
         Examples::
 
-            >>> S.replace(0, letters_hv[0], letters_hv[1])
+            >>> S1 = structures.Sequence(dimensions=10000)
+            >>> S2 = S.concat(S1)
+
         """
         value = functional.permute(self.value, shifts=len(seq))
         value = functional.bundle(value, seq.value)
         return Sequence(value, length=len(self) + len(seq))
 
     def __getitem__(self, index: int) -> Tensor:
-        """Gets the value from given index
+        """Gets the approximate value from given index.
 
         Args:
             index (int): Index of the value in the sequence.
+
         Examples::
 
             >>> S[0]
             tensor([ 1., -1.,  1.,  ..., -1.,  1., -1.])
+
         """
         return functional.permute(self.value, shifts=-self.length + index + 1)
 
     def __len__(self) -> int:
-        """Returns the size of the sequence
+        """Returns the length of the sequence.
+
         Examples::
 
             >>> len(S)
@@ -536,31 +619,52 @@ class Sequence:
         return self.length
 
     def clear(self) -> None:
-        """Empties the sequence
+        """Empties the sequence.
+
         Examples::
 
             >>> S.clear()
+
         """
         self.value.fill_(0.0)
         self.length = 0
 
     @classmethod
     def from_tensor(cls, input: Tensor):
-        """Creates a sequence from tensor
+        """Creates a sequence from hypervectors.
+
+        See: :func:`~torchhd.functional.sequence`.
 
         Args:
             input (Tensor): Tensor representing a sequence.
 
         Examples::
             >>> letters_hv = functional.random_hv(len(letters), 10000)
-            >>> S.from_tensor(letters_hv)
+            >>> S = structures.Sequence.from_tensor(letters_hv)
+
         """
         value = functional.sequence(input)
         return cls(value, size=input.size(-2))
 
 
 class DistinctSequence:
-    """Hypervector-based distinct (binding-based) sequence data structure"""
+    """Hypervector-based distinct (binding-based) sequence data structure.
+
+    Creates an empty sequence of dim dimensions or from an input tensor.
+
+    Args:
+        dimensions (int): number of dimensions of the distinct sequence.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+
+    Args:
+        input (Tensor): tensor representing a distinct sequence.
+        length (int, optional): the size of the distinct sequence provided as input. Default: ``0``.
+
+    Examples::
+
+        >>> DS = structures.DistinctSequence(10000)
+    """
 
     @overload
     def __init__(self, dimensions: int, *, device=None, dtype=None):
@@ -571,15 +675,6 @@ class DistinctSequence:
         ...
 
     def __init__(self, dim_or_input: int, **kwargs):
-        """Creates an empty sequence of dim dimensions or from an input tensor
-
-        Args:
-            dim_or_input (Any): dimensions of the new sequence or tensor representing a sequence.
-
-        Examples::
-
-            >>> DS = structures.DistinctSequence(dimensions=10000)
-        """
         self.length = kwargs.get("length", 0)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
@@ -589,70 +684,80 @@ class DistinctSequence:
             self.value = torch.zeros(dim_or_input, dtype=dtype, device=device)
 
     def append(self, input: Tensor) -> None:
-        """Appends the input tensor to the right of the sequence
+        """Appends the input tensor to the right of the sequence.
 
         Args:
             input (Tensor): Hypervector to append to the sequence.
+
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
             >>> letters_hv = functional.random_hv(len(letters), 10000)
             >>> DS.append(letters_hv[0])
+
         """
         rotated_value = functional.permute(self.value, shifts=1)
         self.value = functional.bind(input, rotated_value)
         self.length += 1
 
     def appendleft(self, input: Tensor) -> None:
-        """Appends the input tensor to the left of the sequence
+        """Appends the input tensor to the left of the sequence.
 
         Args:
             input (Tensor): Hypervector to append to the right of the sequence.
+
         Examples::
 
             >>> DS.appendleft(letters_hv[1])
+
         """
         rotated_input = functional.permute(input, shifts=len(self))
         self.value = functional.bind(self.value, rotated_input)
         self.length += 1
 
     def pop(self, input: Tensor) -> None:
-        """Pops the input tensor from the right of the sequence
+        """Pops the input tensor from the right of the sequence.
 
         Args:
             input (Tensor): Hypervector to pop from the sequence.
+
         Examples::
 
             >>> DS.pop(letters_hv[0])
+
         """
         self.length -= 1
         self.value = functional.bind(self.value, input)
         self.value = functional.permute(self.value, shifts=-1)
 
     def popleft(self, input: Tensor) -> None:
-        """Pops the input tensor from the left of the sequence
+        """Pops the input tensor from the left of the sequence.
 
         Args:
             input (Tensor): Hypervector to pop left from the sequence.
+
         Examples::
 
             >>> DS.popleft(letters_hv[1])
+
         """
         self.length -= 1
         rotated_input = functional.permute(input, shifts=len(self))
         self.value = functional.bind(self.value, rotated_input)
 
     def replace(self, index: int, old: Tensor, new: Tensor) -> None:
-        """Replace the old hypervector value from the given index, for the new hypervector value
+        """Replace the old hypervector value from the given index, for the new hypervector value.
 
         Args:
             index (int): Index from the sequence to replace its value.
             old (Tensor): Old value hypervector.
             new (Tensor): New value hypervector.
+
         Examples::
 
             >>> DS1 = structures.DistinctSequence(dimensions=10000)
             >>> DS.concat(DS1)
+
         """
         rotated_old = functional.permute(old, shifts=-self.length + index + 1)
         self.value = functional.bind(self.value, rotated_old)
@@ -661,7 +766,8 @@ class DistinctSequence:
         self.value = functional.bind(self.value, rotated_new)
 
     def __len__(self) -> int:
-        """Returns the size of the sequence
+        """Returns the size of the sequence.
+
         Examples::
 
             >>> len(DS)
@@ -671,70 +777,100 @@ class DistinctSequence:
         return self.length
 
     def clear(self) -> None:
-        """Empties the sequence
+        """Empties the sequence.
+        
         Examples::
 
             >>> DS.clear()
+
         """
         self.value.fill_(0.0)
         self.length = 0
 
     @classmethod
     def from_tensor(cls, input: Tensor):
-        """Creates a sequence from tensor
+        """Creates a sequence from tensor.
+
+        See: :func:`~torchhd.functional.distinct_sequence`.
 
         Args:
             input (Tensor): Tensor representing a sequence.
 
         Examples::
             >>> letters_hv = functional.random_hv(len(letters), 10000)
-            >>> DS.from_tensor(letters_hv)
+            >>> DS = structures.DistinctSequence.from_tensor(letters_hv)
+
         """
         value = functional.distinct_sequence(input)
         return cls(value, size=input.size(-2))
 
 
 class Graph:
-    """Hypervector-based graph data structure"""
+    """Hypervector-based graph data structure.
 
-    def __init__(self, dimensions, directed=False, device=None, dtype=None):
-        """Creates an empty graph
+    Creates an empty sequence of dim dimensions or from an input tensor.
 
-        Args:
-            dimensions (int): dimensions of the graph.
-            directed (bool): decidies if the graph will be directed or not.
-            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
-            device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
-        Examples::
+    Args:
+        dimensions (int): number of dimensions of the graph.
+        directed (bool): decidies if the graph will be directed or not.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
 
-            >>> G = structures.Graph(dimensions=10000, directed=True)
-        """
-        self.length = 0
-        self.directed = directed
-        self.dtype = dtype if dtype is not None else torch.get_default_dtype()
-        self.value = torch.zeros(dimensions, dtype=dtype, device=device)
+    Args:
+        input (Tensor): tensor representing a graph hypervector.
+        directed (bool): decidies if the graph will be directed or not.
 
+    Examples::
+
+        >>> G = structures.Graph(10000, directed=True)
+
+    """
+
+    @overload
+    def __init__(self, dimensions: int, *, directed=False, device=None, dtype=None):
+        ...
+
+    @overload
+    def __init__(self, input: Tensor, *, directed=False):
+        ...
+
+    def __init__(self, dim_or_input: int, **kwargs):
+        self.directed = kwargs.get("directed", False)
+        if torch.is_tensor(dim_or_input):
+            self.value = dim_or_input
+        else:
+            dtype = kwargs.get("dtype", torch.get_default_dtype())
+            device = kwargs.get("device", None)
+            self.value = torch.zeros(dim_or_input, dtype=dtype, device=device)
+    
     def add_edge(self, node1: Tensor, node2: Tensor) -> None:
-        """Adds an edge to the graph, if directed the direction goes from the first node to the second one
+        """Adds an edge to the graph.
+         
+        If directed the direction goes from the first node to the second one.
 
         Args:
             node1 (Tensor): Hypervector representing the first node of the edge.
             node2 (Tensor): Hypervector representing the second node of the edge.
+
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
             >>> letters_hv = functional.random_hv(len(letters), 10000)
             >>> G.add_edge(letters_hv[0], letters_hv[1])
+
         """
         edge = self.encode_edge(node1, node2)
         self.value = functional.bundle(self.value, edge)
 
     def encode_edge(self, node1: Tensor, node2: Tensor) -> Tensor:
-        """Returns the codification of an edge, if directed the direction goes from the first node to the second one
+        """Returns the encoding of an edge.
+        
+        If directed the direction goes from the first node to the second one.
 
         Args:
             node1 (Tensor): Hypervector representing the first node of the edge.
             node2 (Tensor): Hypervector representing the second node of the edge.
+
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
@@ -749,10 +885,11 @@ class Graph:
             return functional.bind(node1, functional.permute(node2))
 
     def node_neighbors(self, input: Tensor, outgoing=True) -> Tensor:
-        """Returns the node neighbors of the input
+        """Returns the multiset of node neighbors of the input node.
 
         Args:
             input (Tensor): Hypervector representing the node.
+
         Examples::
 
             >>> G.node_neighbors(letters_hv[0])
@@ -768,10 +905,11 @@ class Graph:
             return functional.bind(self.value, input)
 
     def contains(self, input: Tensor) -> Tensor:
-        """Returns the cosine similarity of the input vector against the multiset
+        """Returns the cosine similarity of the input vector against the graph.
 
         Args:
             input (Tensor): Hypervector to compare against the multiset.
+
         Examples::
 
             >>> e = G.encode_edge(letters_hv[0], letters_hv[1])
@@ -781,7 +919,8 @@ class Graph:
         return functional.cosine_similarity(input, self.value.unsqueeze(0))
 
     def clear(self) -> None:
-        """Empties the graph
+        """Empties the graph.
+
         Examples::
 
             >>> G.clear()
@@ -790,35 +929,40 @@ class Graph:
 
 
 class Tree:
-    """Hypervector-based tree data structure"""
+    """Hypervector-based tree data structure.
+
+    Creates an empty tree.
+
+    Args:
+        dimensions (int): dimensions of the tree.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+
+    Examples::
+
+        >>> T = structures.Tree(10000)
+
+    """
 
     def __init__(self, dimensions, device=None, dtype=None):
-        """Creates an empty tree
-
-        Args:
-            dimensions (int): dimensions of the tree.
-            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
-            device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
-        Examples::
-
-            >>> T = structures.Tree(dimensions=10000)
-        """
         self.dimensions = dimensions
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
         self.value = torch.zeros(dimensions, dtype=dtype, device=device)
         self.l_r = functional.random_hv(2, dimensions, dtype=dtype, device=device)
 
     def add_leaf(self, value: Tensor, path: List[str]) -> None:
-        """Adds a leaf to the tree
+        """Adds a leaf to the tree.
 
         Args:
             value (Tensor): Hypervector representing the first node of the edge.
             path (List[str]): Path of the leaf, using 'l' to refer as left and right 'r'.
+
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
             >>> letters_hv = functional.random_hv(len(letters), 10000)
             >>> T.add_leaf(letters_hv[0], ['l','l'])
+
         """
         for idx, i in enumerate(path):
             if i == "l":
@@ -834,32 +978,39 @@ class Tree:
 
     @property
     def left(self) -> Tensor:
-        """Returns the left branch of the tree at the corresponding level
+        """Returns the left branch of the tree at the corresponding level.
 
         Examples::
+
             >>> T.left
             tensor([ 1., -1.,  1.,  ...,  1.,  1., -1.])
+
         """
         return self.l_r[0]
 
     @property
     def right(self) -> Tensor:
-        """Returns the right branch of the tree at the corresponding level
+        """Returns the right branch of the tree at the corresponding level.
 
         Examples::
+
             >>> T.right
             tensor([-1., -1.,  1.,  ...,  1., -1., -1.])
+
         """
         return self.l_r[1]
 
     def get_leaf(self, path: List[str]) -> Tensor:
-        """Returns the value, either subtree or node given by the path
+        """Returns the value, either subtree or node given by the path.
 
         Args:
-            path (List[str]): Path of the tree or node wanted to get
+            path (List[str]): Path of the tree or node wanted to get.
+
         Examples::
+
             >>> T.get_leaf(['l','l'])
             tensor([ 1., -1.,  1.,  ...,  1.,  1., -1.])
+
         """
         for idx, i in enumerate(path):
             if i == "l":
@@ -880,28 +1031,33 @@ class Tree:
         return functional.bind(hv_path, self.value)
 
     def clear(self) -> None:
-        """Empties the tree
+        """Empties the tree.
+
         Examples::
 
             >>> T.clear()
+
         """
         self.value.fill_(0.0)
 
 
 class FiniteStateAutomata:
-    """Hypervector-based finite state automata data structure"""
+    """Hypervector-based finite state automata data structure.
+
+    Creates an empty finite state automata.
+
+    Args:
+        dimensions (int): dimensions of the automata.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+
+    Examples::
+
+        >>> FSA = structures.FiniteStateAutomata(10000)
+        
+    """
 
     def __init__(self, dimensions, device=None, dtype=None):
-        """Creates an empty finite state automata
-
-        Args:
-            dimensions (int): dimensions of the automata.
-            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
-            device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
-        Examples::
-
-            >>> FSA = structures.FiniteStateAutomata(dimensions=10000)
-        """
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
         self.value = torch.zeros(dimensions, dtype=dtype, device=device)
 
@@ -911,17 +1067,19 @@ class FiniteStateAutomata:
         initial_state: Tensor,
         final_state: Tensor,
     ) -> None:
-        """Adds a transition to the automata
+        """Adds a transition to the automata.
 
         Args:
             token (Tensor): token used for changing state.
             initial_state (Tensor): initial state of the transition.
             final_state (Tensor): final state of the transition.
+
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
             >>> letters_hv = functional.random_hv(len(letters), 10000)
             >>> T.add_transition(letters_hv[0], letters_hv[1], letters_hv[2])
+
         """
         transition_edge = functional.bind(
             initial_state, functional.permute(final_state)
@@ -930,24 +1088,28 @@ class FiniteStateAutomata:
         self.value = functional.bundle(self.value, transition)
 
     def transition(self, state: Tensor, action: Tensor) -> Tensor:
-        """Returns the next state off the automata plus some noise
+        """Returns the next state off the automata plus some noise.
 
         Args:
             state (Tensor): initial state of the transition.
             action (Tensor): token used for changing state.
+
         Examples::
 
             >>> FSA.transition(letters_hv[1], letters_hv[0])
             tensor([ 1.,  1., -1.,  ..., -1., -1.,  1.])
+
         """
         next_state = functional.bind(self.value, state)
         next_state = functional.bind(next_state, action)
         return functional.permute(next_state, shifts=-1)
 
     def clear(self) -> None:
-        """Empties the tree
+        """Empties the tree.
+
         Examples::
 
             >>> FSA.clear()
+
         """
         self.value.fill_(0.0)
