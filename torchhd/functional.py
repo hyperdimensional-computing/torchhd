@@ -1,6 +1,6 @@
 import math
 import torch
-from torch import Tensor
+from torch import LongTensor, Tensor
 import torch.nn.functional as F
 
 from collections import deque
@@ -576,7 +576,7 @@ def dot_similarity(input: Tensor, others: Tensor) -> Tensor:
     return F.linear(input, others)
 
 
-def hamming_similarity(input: Tensor, others: Tensor) -> Tensor:
+def hamming_similarity(input: Tensor, others: Tensor) -> LongTensor:
     """Number of equal elements between the input vector and each vector in others.
 
     Args:
@@ -598,16 +598,11 @@ def hamming_similarity(input: Tensor, others: Tensor) -> Tensor:
         tensor([3., 1.])
 
     """
-    return torch.sum(input == others, dim=-1, dtype=input.dtype)
+    return torch.sum(input == others, dim=-1, dtype=torch.long)
 
 
 def multiset(
     input: Tensor,
-    *,
-    dim=-2,
-    keepdim=False,
-    dtype=None,
-    out=None,
 ) -> Tensor:
     r"""Multiset of input hypervectors.
 
@@ -619,10 +614,6 @@ def multiset(
 
     Args:
         input (Tensor): input hypervector tensor
-        dim (int, optional): dimension over which to bundle the hypervectors. Default: ``-2``.
-        keepdim (bool, optional): whether to keep the bundled dimension. Default: ``False``.
-        dtype (``torch.dtype``, optional): if specified determins the type of the returned tensor, otherwise same as input.
-        out (Tensor, optional): the output tensor.
 
     Shapes:
         - Input: :math:`(*, n, d)`
@@ -639,10 +630,19 @@ def multiset(
         tensor([-1.,  3.,  1.])
 
     """
-    return torch.sum(input, dim=dim, keepdim=keepdim, dtype=dtype, out=out)
+
+    if input.dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if input.dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
+    return torch.sum(input, dim=-2, dtype=input.dtype)
 
 
-def multibind(input: Tensor, *, dim=-2, keepdim=False, dtype=None, out=None) -> Tensor:
+def multibind(input: Tensor) -> Tensor:
     r"""Binding of multiple hypervectors.
 
     Binds all the input hypervectors together.
@@ -652,11 +652,7 @@ def multibind(input: Tensor, *, dim=-2, keepdim=False, dtype=None, out=None) -> 
         \bigotimes_{i=0}^{n-1} V_i
 
     Args:
-        input (Tensor): input hypervector tensor
-        dim (int, optional): dimension over which to bind the hypervectors. Default: ``-2``.
-        keepdim (bool, optional): whether to keep the bundled dimension. Default: ``False``.
-        dtype (``torch.dtype``, optional): if specified determins the type of the returned tensor, otherwise same as input.
-        out (Tensor, optional): the output tensor.
+        input (Tensor): input hypervector tensor.
 
     Shapes:
         - Input: :math:`(*, n, d)`
@@ -673,7 +669,15 @@ def multibind(input: Tensor, *, dim=-2, keepdim=False, dtype=None, out=None) -> 
         tensor([ 1.,  1., -1.])
 
     """
-    return torch.prod(input, dim=dim, keepdim=keepdim, dtype=dtype, out=out)
+    if input.dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if input.dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
+    return torch.prod(input, dim=-2, dtype=input.dtype)
 
 
 def cross_product(input: Tensor, other: Tensor) -> Tensor:
