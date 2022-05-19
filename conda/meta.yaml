@@ -6,6 +6,7 @@ package:
 
 source:
   path: ..
+  git_url: https://github.com/hyperdimensional-computing/torchhd
 
 build:
   number: 0

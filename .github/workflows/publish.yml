@@ -51,12 +51,11 @@ jobs:
         cd ./conda  # go to build dir
 
         # Build for Linux
-        conda build -c conda-forge -c pytorch --output-folder . .
+        conda build --output-folder ./conda_build . .
 
         # Convert to other platforms: OSX, WIN
-        conda convert -p osx-64 linux-64/*.tar.bz2
-        conda convert -p win-64 linux-64/*.tar.bz2
+        conda convert --platform all ./conda_build/linux-64/*.tar.bz2
 
-        anaconda upload --label main osx-64/*.tar.bz2
-        anaconda upload --label main linux-64/*.tar.bz2
-        anaconda upload --label main win-64/*.tar.bz2
+        anaconda upload --label main ./conda_build/osx-64/*.tar.bz2
+        anaconda upload --label main ./conda_build/linux-64/*.tar.bz2
+        anaconda upload --label main ./conda_build/win-64/*.tar.bz2
