@@ -1,3 +1,5 @@
+.. _functional:
+
 torchhd.functional
 =========================
 
@@ -58,6 +60,7 @@ Encodings
     sequence
     distinct_sequence
     hash_table
+    cross_product
     ngrams
 
 
