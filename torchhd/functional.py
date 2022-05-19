@@ -44,7 +44,7 @@ def identity_hv(
     """Creates a set of identity hypervector.
 
     When bound with a random-hypervector :math:`x`, the result is :math:`x`.
-    
+
     Aliased as ``torchhd.identity_hv``.
 
     Args:
