@@ -1,3 +1,5 @@
+.. _structures:
+
 torchhd.structures
 ==================
 
