@@ -30,7 +30,7 @@ class Memory:
 
     """
 
-    def __init__(self, threshold=0.0):
+    def __init__(self, threshold=0.5):
         self.threshold = threshold
         self.keys: List[Tensor] = []
         self.values: List[Any] = []
@@ -81,8 +81,9 @@ class Memory:
         sim = functional.cosine_similarity(key, key_stack)
         value, index = torch.max(sim, 0)
 
+
         if value.item() < self.threshold:
-            raise IndexError()
+            raise IndexError("No elements in memory")
 
         return index
 
