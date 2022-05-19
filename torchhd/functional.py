@@ -282,7 +282,7 @@ def circular_hv(
     if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
 
-    hv = torch.zeros(
+    hv = torch.empty(
         num_embeddings,
         embedding_dim,
         dtype=dtype,

@@ -472,6 +472,18 @@ class TestBind:
         assert res.size(0) == 100
         assert torch.all((hv == -1) | (hv == 1)).item(), "values are either -1 or +1"
 
+        hv = torch.zeros(2, 10000, dtype=torch.bool)
+        with pytest.raises(NotImplementedError):
+            functional.bind(hv[0], hv[1])
+
+        hv = torch.zeros(2, 10000, dtype=torch.complex64)
+        with pytest.raises(NotImplementedError):
+            functional.bind(hv[0], hv[1])        
+
+        hv = torch.zeros(2, 10000, dtype=torch.uint8)
+        with pytest.raises(ValueError):
+            functional.bind(hv[0], hv[1])        
+
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -522,6 +534,18 @@ class TestBundle:
         assert res.dim() == 1
         assert res.size(0) == 100
         assert torch.all((hv <= 2) & (hv >= -2)).item(), "values are between -2 and +2"
+
+        hv = torch.zeros(2, 10000, dtype=torch.bool)
+        with pytest.raises(NotImplementedError):
+            functional.bundle(hv[0], hv[1])
+
+        hv = torch.zeros(2, 10000, dtype=torch.complex64)
+        with pytest.raises(NotImplementedError):
+            functional.bundle(hv[0], hv[1])        
+
+        hv = torch.zeros(2, 10000, dtype=torch.uint8)
+        with pytest.raises(ValueError):
+            functional.bundle(hv[0], hv[1])  
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
