@@ -95,7 +95,7 @@ To build the documentation locally, use `pip install -r docs/requirements.txt` t
 
 - A GitHub release triggers a GitHub action that builds the library and publishes it to PyPi and Conda in addition to the documentation website.
 - Before creating a new GitHub release, increment the version number in [setup.py](https://github.com/hyperdimensional-computing/torchhd/blob/main/setup.py) using [semantic versioning](https://semver.org).
-- When creating a new GitHub release, set the tag according to [PEP 440](https://peps.python.org/pep-0440/), e.g., 1.5.2, and provide a clear description of the changes. You can use GitHub's "auto-generate release notes" button. Look at previous releases for examples.
+- When creating a new GitHub release, set the tag according to [PEP 440](https://peps.python.org/pep-0440/), e.g., v1.5.2, and provide a clear description of the changes. You can use GitHub's "auto-generate release notes" button. Look at previous releases for examples.
 
 ### License
 
