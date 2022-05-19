@@ -164,9 +164,12 @@ def level_hv(
 
     Examples::
 
-        >>> functional.level_hv(2, 3)
-        tensor([[ 1.,  -1.,  -1.],
-                [ -1.,  1.,  -1.]])
+        >>> functional.level_hv(5, 10)
+        tensor([[ 1.,  1.,  1.,  1.,  1., -1., -1., -1.,  1., -1.],
+                [ 1.,  1.,  1.,  1.,  1., -1., -1., -1.,  1.,  1.],
+                [ 1.,  1.,  1., -1.,  1., -1.,  1., -1., -1.,  1.],
+                [ 1., -1.,  1., -1., -1., -1.,  1., -1., -1.,  1.],
+                [ 1., -1.,  1., -1., -1.,  1.,  1.,  1., -1.,  1.]])
 
     """
     if dtype is None:
@@ -180,14 +183,14 @@ def level_hv(
     if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
 
-    hv = torch.zeros(
+    hv = torch.empty(
         num_embeddings,
         embedding_dim,
         dtype=dtype,
         device=device,
     )
 
-    # convert from normilzed "randomness" variable r to number of orthogonal vectors sets "span"
+    # convert from normalized "randomness" variable r to number of orthogonal vectors sets "span"
     levels_per_span = (1 - randomness) * (num_embeddings - 1) + randomness * 1
     span = (num_embeddings - 1) / levels_per_span
     # generate the set of orthogonal vectors within the level vector set
@@ -198,10 +201,10 @@ def level_hv(
         dtype=dtype,
         device=device,
     )
-    # for each span within the set create a treshold vector
-    # the treshold vector is used to interpolate between the
+    # for each span within the set create a threshold vector
+    # the threshold vector is used to interpolate between the
     # two random vector bounds of each span.
-    treshold_v = torch.rand(
+    threshold_v = torch.rand(
         int(math.ceil(span)),
         embedding_dim,
         generator=generator,
@@ -215,17 +218,17 @@ def level_hv(
         # special case: if we are on a span border (e.g. on the first or last levels)
         # then set the orthogonal vector directly.
         # This also prevents an index out of bounds error for the last level
-        # when treshold_v[span_idx], and span_hv[span_idx + 1] are not available.
+        # when threshold_v[span_idx], and span_hv[span_idx + 1] are not available.
         if abs(i % levels_per_span) < 1e-12:
             hv[i] = span_hv[span_idx]
         else:
             level_within_span = i % levels_per_span
-            # the treshold value from the start hv's perspective
+            # the threshold value from the start hv's perspective
             t = 1 - (level_within_span / levels_per_span)
 
             span_start_hv = span_hv[span_idx]
             span_end_hv = span_hv[span_idx + 1]
-            hv[i] = torch.where(treshold_v[span_idx] < t, span_start_hv, span_end_hv)
+            hv[i] = torch.where(threshold_v[span_idx] < t, span_start_hv, span_end_hv)
 
     hv.requires_grad = requires_grad
     return hv
@@ -257,9 +260,15 @@ def circular_hv(
 
     Examples::
 
-        >>> functional.circular_hv(2, 3)
-        tensor([[ 1.,  -1.,  -1.],
-                [ -1.,  1.,  -1.]])
+        >>> functional.circular_hv(8, 10)
+        tensor([[-1.,  1., -1., -1.,  1.,  1.,  1.,  1., -1., -1.],
+                [-1.,  1., -1., -1., -1.,  1.,  1., -1., -1., -1.],
+                [-1.,  1., -1., -1., -1.,  1.,  1., -1., -1., -1.],
+                [-1.,  1.,  1., -1., -1.,  1.,  1., -1., -1., -1.],
+                [ 1.,  1.,  1., -1., -1.,  1., -1., -1., -1., -1.],
+                [ 1.,  1.,  1., -1.,  1.,  1., -1.,  1., -1., -1.],
+                [ 1.,  1.,  1., -1.,  1.,  1., -1.,  1., -1., -1.],
+                [ 1.,  1., -1., -1.,  1.,  1., -1.,  1., -1., -1.]])
 
     """
     if dtype is None:
@@ -293,10 +302,10 @@ def circular_hv(
         dtype=dtype,
         device=device,
     )
-    # for each span within the set create a treshold vector
-    # the treshold vector is used to interpolate between the
+    # for each span within the set create a threshold vector
+    # the threshold vector is used to interpolate between the
     # two random vector bounds of each span.
-    treshold_v = torch.rand(
+    threshold_v = torch.rand(
         int(math.ceil(span)),
         embedding_dim,
         generator=generator,
@@ -317,7 +326,7 @@ def circular_hv(
         # special case: if we are on a span border (e.g. on the first or last levels)
         # then set the orthogonal vector directly.
         # This also prevents an index out of bounds error for the last level
-        # when treshold_v[span_idx], and span_hv[span_idx + 1] are not available.
+        # when threshold_v[span_idx], and span_hv[span_idx + 1] are not available.
         if abs(i % levels_per_span) < 1e-12:
             temp_hv = span_hv[span_idx]
 
@@ -326,10 +335,10 @@ def circular_hv(
             span_end_hv = span_hv[span_idx + 1]
 
             level_within_span = i % levels_per_span
-            # the treshold value from the start hv's perspective
+            # the threshold value from the start hv's perspective
             t = 1 - (level_within_span / levels_per_span)
 
-            temp_hv = torch.where(treshold_v[span_idx] < t, span_start_hv, span_end_hv)
+            temp_hv = torch.where(threshold_v[span_idx] < t, span_start_hv, span_end_hv)
 
         mutation_history.append(temp_hv * mutation_hv)
         mutation_hv = temp_hv
