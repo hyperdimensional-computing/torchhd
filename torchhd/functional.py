@@ -44,6 +44,8 @@ def identity_hv(
     """Creates a set of identity hypervector.
 
     When bound with a random-hypervector :math:`x`, the result is :math:`x`.
+    
+    Aliased as ``torchhd.identity_hv``.
 
     Args:
         num_embeddings (int): the number of hypervectors to generate.
@@ -92,6 +94,8 @@ def random_hv(
     """Creates a set of random-hypervectors.
 
     The resulting hypervectors are sampled uniformly at random from the ``embedding_dim``-dimensional hyperspace.
+
+    Aliased as ``torchhd.random_hv``.
 
     Args:
         num_embeddings (int): the number of hypervectors to generate.
@@ -152,6 +156,8 @@ def level_hv(
 
     Implements level-hypervectors as an interpolation between random-hypervectors as described in `An Extension to Basis-Hypervectors for Learning from Circular Data in Hyperdimensional Computing <https://arxiv.org/abs/2205.07920>`_.
     The first and last hypervector in the generated set are quasi-orthogonal.
+
+    Aliased as ``torchhd.level_hv``.
 
     Args:
         num_embeddings (int): the number of hypervectors to generate.
@@ -248,6 +254,8 @@ def circular_hv(
 
     Implements circular-hypervectors based on level-hypervectors as described in `An Extension to Basis-Hypervectors for Learning from Circular Data in Hyperdimensional Computing <https://arxiv.org/abs/2205.07920>`_.
     Any hypervector is quasi-orthogonal to the hypervector opposite site of the circle.
+
+    Aliased as ``torchhd.circular_hv``.
 
     Args:
         num_embeddings (int): the number of hypervectors to generate.
@@ -366,6 +374,8 @@ def bind(input: Tensor, other: Tensor, *, out=None) -> Tensor:
 
         \otimes: \mathcal{H} \times \mathcal{H} \to \mathcal{H}
 
+    Aliased as ``torchhd.bind``.
+
     Args:
         input (Tensor): input hypervector
         other (Tensor): other input hypervector
@@ -406,6 +416,8 @@ def bundle(input: Tensor, other: Tensor, *, out=None) -> Tensor:
 
         \oplus: \mathcal{H} \times \mathcal{H} \to \mathcal{H}
 
+    Aliased as ``torchhd.bundle``.
+
     Args:
         input (Tensor): input hypervector
         other (Tensor): other input hypervector
@@ -445,6 +457,8 @@ def permute(input: Tensor, *, shifts=1, dims=-1) -> Tensor:
     .. math::
 
         \Pi: \mathcal{H} \to \mathcal{H}
+
+    Aliased as ``torchhd.permute``.
 
     Args:
         input (Tensor): input hypervector

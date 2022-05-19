@@ -45,18 +45,18 @@ import torch, torchhd
 d = 10000  # number of dimensions
 
 # create the hypervectors for each symbol
-country = torchhd.functional.random_hv(1, d)
-capital = torchhd.functional.random_hv(1, d)
-currency = torchhd.functional.random_hv(1, d)
+country = torchhd.random_hv(1, d)
+capital = torchhd.random_hv(1, d)
+currency = torchhd.random_hv(1, d)
 
-usa = torchhd.functional.random_hv(1, d)  # United States
-mex = torchhd.functional.random_hv(1, d)  # Mexico
+usa = torchhd.random_hv(1, d)  # United States
+mex = torchhd.random_hv(1, d)  # Mexico
 
-wdc = torchhd.functional.random_hv(1, d)  # Washington D.C.
-mxc = torchhd.functional.random_hv(1, d)  # Mexico City
+wdc = torchhd.random_hv(1, d)  # Washington D.C.
+mxc = torchhd.random_hv(1, d)  # Mexico City
 
-usd = torchhd.functional.random_hv(1, d)  # US Dollar
-mxn = torchhd.functional.random_hv(1, d)  # Mexican Peso
+usd = torchhd.random_hv(1, d)  # US Dollar
+mxn = torchhd.random_hv(1, d)  # Mexican Peso
 
 # create country representations
 keys = torch.cat([country, capital, currency], dim=0)
@@ -67,10 +67,10 @@ US = torchhd.functional.hash_table(keys, us_values)
 mx_values = torch.cat([mex, mxc, mxn])
 MX = torchhd.functional.hash_table(keys, mx_values)
 
-MX_US = torchhd.functional.bind(US, MX)
+MX_US = torchhd.bind(US, MX)
 
 # query for the dollar of mexico
-usd_of_mex = torchhd.functional.bind(MX_US, usd)
+usd_of_mex = torchhd.bind(MX_US, usd)
 
 memory = torch.cat([keys, us_values, mx_values], dim=0)
 torchhd.functional.cosine_similarity(usd_of_mex, memory)
