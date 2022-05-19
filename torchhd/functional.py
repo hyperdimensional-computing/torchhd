@@ -62,6 +62,14 @@ def identity_hv(
     if dtype is None:
         dtype = torch.get_default_dtype()
 
+    if dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
     return torch.ones(
         num_embeddings,
         embedding_dim,
@@ -110,6 +118,14 @@ def random_hv(
     if dtype is None:
         dtype = torch.get_default_dtype()
 
+    if dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
     select = torch.empty(
         (
             num_embeddings,
@@ -155,6 +171,14 @@ def level_hv(
     """
     if dtype is None:
         dtype = torch.get_default_dtype()
+
+    if dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
 
     hv = torch.zeros(
         num_embeddings,
@@ -241,6 +265,14 @@ def circular_hv(
     if dtype is None:
         dtype = torch.get_default_dtype()
 
+    if dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
     hv = torch.zeros(
         num_embeddings,
         embedding_dim,
@@ -248,7 +280,7 @@ def circular_hv(
         device=device,
     )
 
-    # convert from normilzed "randomness" variable r to
+    # convert from normalized "randomness" variable r to
     # number of levels between orthogonal pairs or "span"
     levels_per_span = ((1 - randomness) * (num_embeddings / 2) + randomness * 1) * 2
     span = num_embeddings / levels_per_span
@@ -345,6 +377,14 @@ def bind(input: Tensor, other: Tensor, *, out=None) -> Tensor:
         tensor([ 1., -1., -1.])
 
     """
+    if input.dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if input.dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
     return torch.mul(input, other, out=out)
 
 
@@ -377,6 +417,13 @@ def bundle(input: Tensor, other: Tensor, *, out=None) -> Tensor:
         tensor([0., 2., 0.])
 
     """
+    if input.dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if input.dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
 
     return torch.add(input, other, out=out)
 
@@ -408,7 +455,6 @@ def permute(input: Tensor, *, shifts=1, dims=-1) -> Tensor:
         tensor([ -1.,  1.,  -1.])
 
     """
-
     return torch.roll(input, shifts=shifts, dims=dims)
 
 
