@@ -151,13 +151,9 @@ class Level(nn.Embedding):
         self._fill_padding_idx_with_zero()
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
-        # tranform the floating point input to an index
-        # make first variable a copy of the input, then we can reuse the buffer.
-        # normalized between 0 and 1
-        normalized = (input - self.low_value) / (self.high_value - self.low_value)
-
-        indices = normalized.mul_(self.num_embeddings).floor_()
-        indices = indices.clamp_(0, self.num_embeddings - 1).long()
+        indices = functional.value_to_index(
+            input, self.low_value, self.high_value, self.num_embeddings
+        ).clamp(0, self.num_embeddings - 1)
 
         return super(Level, self).forward(indices)
 
@@ -219,14 +215,9 @@ class Circular(nn.Embedding):
         self._fill_padding_idx_with_zero()
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
-        # tranform the floating point input to an index
-        # make first variable a copy of the input, then we can reuse the buffer.
-        # normalized between 0 and 1
-        normalized = (input - self.low_value) / (self.high_value - self.low_value)
-        normalized.remainder_(1.0)
-
-        indices = normalized.mul_(self.num_embeddings).floor_()
-        indices = indices.clamp_(0, self.num_embeddings - 1).long()
+        indices = functional.value_to_index(
+            input, self.low_value, self.high_value, self.num_embeddings
+        ).remainder(self.num_embeddings - 1)
 
         return super(Circular, self).forward(indices)
 
