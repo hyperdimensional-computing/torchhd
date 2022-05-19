@@ -18,18 +18,18 @@ class TestMemory:
     def test_generator(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        hv1 = functional.circular_hv(60, 10000, generator=generator)
+        hv1 = functional.random_hv(60, 10000, generator=generator)
 
         generator = torch.Generator()
         generator.manual_seed(seed)
-        hv2 = functional.circular_hv(60, 10000, generator=generator)
+        hv2 = functional.random_hv(60, 10000, generator=generator)
 
         assert (hv1 == hv2).min().item()
 
     def test_add(self):
-        generator_key = torch.Generator()
-        generator_key.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 10000)
+        generator = torch.Generator()
+        generator.manual_seed(seed)
+        keys_hv = functional.random_hv(len(letters), 10000, generator=generator)
 
         M = structures.Memory()
         M.add(keys_hv[0], letters[0])
@@ -44,9 +44,9 @@ class TestMemory:
         assert M.values[2] == letters[2]
 
     def test_index(self):
-        generator_key = torch.Generator()
-        generator_key.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 10000)
+        generator = torch.Generator()
+        generator.manual_seed(seed)
+        keys_hv = functional.random_hv(len(letters), 10000, generator=generator)
 
         M = structures.Memory()
         M.add(keys_hv[0], letters[0])
@@ -58,9 +58,9 @@ class TestMemory:
         assert M.index(keys_hv[2]) == 2
 
     def test_length(self):
-        generator_key = torch.Generator()
-        generator_key.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 10000)
+        generator = torch.Generator()
+        generator.manual_seed(seed)
+        keys_hv = functional.random_hv(len(letters), 10000, generator=generator)
 
         M = structures.Memory()
         M.add(keys_hv[0], letters[0])
@@ -76,9 +76,9 @@ class TestMemory:
         assert len(M) == 3
 
     def test_getitem(self):
-        generator_key = torch.Generator()
-        generator_key.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 10000)
+        generator = torch.Generator()
+        generator.manual_seed(seed)
+        keys_hv = functional.random_hv(len(letters), 10000, generator=generator)
 
         M = structures.Memory()
         M.add(keys_hv[0], letters[0])
@@ -90,9 +90,9 @@ class TestMemory:
         assert M[keys_hv[2]][1] == letters[2]
 
     def test_setitem(self):
-        generator_key = torch.Generator()
-        generator_key.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 10000)
+        generator = torch.Generator()
+        generator.manual_seed(seed)
+        keys_hv = functional.random_hv(len(letters), 10000, generator=generator)
 
         M = structures.Memory()
         M.add(keys_hv[0], letters[0])
@@ -109,9 +109,9 @@ class TestMemory:
         assert M[keys_hv[0]][1] == letters[3]
 
     def test_delitem(self):
-        generator_key = torch.Generator()
-        generator_key.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 10000)
+        generator = torch.Generator()
+        generator.manual_seed(seed)
+        keys_hv = functional.random_hv(len(letters), 10000, generator=generator)
 
         M = structures.Memory()
         M.add(keys_hv[0], letters[0])
