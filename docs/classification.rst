@@ -87,7 +87,7 @@ Having defined the model, we iterate over the training samples to create the cla
 Testing
 -------
 
-With the model trained, we can classify the testing samples by coding them and comparing them to the class-vectors:
+With the model trained, we can classify the testing samples by encoding them and comparing them to the class-vectors:
 
 .. code-block:: python
 

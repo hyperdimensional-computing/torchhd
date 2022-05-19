@@ -9,9 +9,9 @@ In this tutorial, we demonstrate some basic features of Torchhd. We show how the
    :header-rows: 1
 
    * - Record
-     - Fruit (F)
-     - Weight (W)
-     - Season (S)
+     - Fruit
+     - Weight
+     - Season
    * - :math:`r_1`
      - apple
      - 149.0
@@ -35,11 +35,11 @@ The first step to encode these records is to define the basis-hypervectors for e
 
 	from torchhd import functional
 
-	d = 10000                         # dimensions
-	F = functional.random_hv(3, d)    # fruits
-	W = functional.level_hv(10, d)    # weights
-	S = functional.circular_hv(4, d)  # seasons
-	V = functional.random_hv(3, d)    # variables
+	d = 10000 # dimensions
+	fruits = functional.random_hv(3, d)
+	weights = functional.level_hv(10, d)
+	seasons = functional.circular_hv(4, d)
+	var = functional.random_hv(3, d)
 
 which creates hypervectors for the 3 fruit types, 10 weight levels, 4 seasons and the 3 variables.
 
@@ -52,7 +52,7 @@ Similar behavior can be achieved using the classes in the :ref:`embeddings` modu
 	weight = torch.tensor([149.0])
 	# explicit mapping of the fruit weight to an index
 	w_i = functional.value_to_index(weight, 0, 200, 10)
-	W[w_i]  # select representation of 149
+	weights[w_i]  # select representation of 149
 
 whereas the :ref:`embeddings<embeddings>` have this common behavior built-in:
 
@@ -62,7 +62,7 @@ whereas the :ref:`embeddings<embeddings>` have this common behavior built-in:
 
 	W_emb = embeddings.Level(10, d, low=0, high=200)
 	# select representation of 149
-	W_emb(weight)  # same result as W[w_i]
+	W_emb(weight)  # same result as weights[w_i]
 
 Operations
 ----------
@@ -71,16 +71,16 @@ Once the basis-hypervectors are defined, we can use the MAP operations from :ref
 
 .. code-block:: python
 
-	f = functional.bind(V[0], F[0])   # fruit = apple
-	w = functional.bind(V[1], W[w_i]) # weight = 149
-	s = functional.bind(V[2], S[3])   # season = fall
+	f = functional.bind(var[0], fruits[0])   # fruit = apple
+	w = functional.bind(var[1], weights[w_i]) # weight = 149
+	s = functional.bind(var[2], seasons[3])   # season = fall
 	r1 = functional.bundle(functional.bundle(f, w), s)
 
 which is equivalent to using the following shortened syntax:
 
 .. code-block:: python
 	
-	r1 = V[0] * F[0] + V[1] * W[w_i] + V[2] * S[3]
+	r1 = var[0] * fruits[0] + var[1] * weights[w_i] + var[2] * seasons[3]
 
 Data Structures
 ---------------
@@ -90,8 +90,8 @@ Alternatively, we can use one of the commonly used encodings provided in the :re
 .. code-block:: python
 
 	# combine values in one tensor of shape (3, d)
-	values = torch.stack([F[0], W[w_i], S[3]])
-	r1 = functional.hash_table(V, values)
+	values = torch.stack([fruits[0], weights[w_i], seasons[3]])
+	r1 = functional.hash_table(var, values)
 
 The :ref:`structures` module contains the same encoding patterns in addition to binary trees and finite state automata, but provides them as data structures. This module provides class-based implementations of HDC data structures. Using the hash table class, record :math:`r_1` can be implemented as follows:
 
@@ -100,10 +100,10 @@ The :ref:`structures` module contains the same encoding patterns in addition to 
 	from torchhd import structures
 
 	r1 = structures.HashTable(d)  # r1 = 0
-	r1.add(V[0], F[0])     # r1 + V[0] * F[0]
-	r1.add(V[1], W[w_i])   # r1 + V[1] * W[w_i]
-	r1.add(V[2], S[3])     # r1 + V[2] * S[3]
+	r1.add(var[0], fruits[0])     # r1 + var[0] * fruits[0]
+	r1.add(var[1], weights[w_i])   # r1 + var[1] * weights[w_i]
+	r1.add(var[2], seasons[3])     # r1 + var[2] * seasons[3]
 	# query the hash table by key:
-	fruit = r1.get(V[0])   # r1 * V[0]
-	weight = r1.get(V[1])  # r1 * V[1]
-	season = r1.get(V[2])  # r1 * V[2]
+	fruit = r1.get(var[0])   # r1 * var[0]
+	weight = r1.get(var[1])  # r1 * var[1]
+	season = r1.get(var[2])  # r1 * var[2]
