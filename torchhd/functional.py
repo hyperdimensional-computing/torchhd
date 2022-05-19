@@ -38,9 +38,7 @@ def identity_hv(
     num_embeddings: int,
     embedding_dim: int,
     *,
-    out=None,
     dtype=None,
-    layout=torch.strided,
     device=None,
     requires_grad=False,
 ) -> Tensor:
@@ -51,8 +49,6 @@ def identity_hv(
     Args:
         num_embeddings (int): the number of hypervectors to generate.
         embedding_dim (int): the dimensionality of the hypervectors.
-        out (Tensor, optional): the output tensor.
-        layout (``torch.layout``, optional): the desired layout of returned Tensor. Default: ``torch.strided``.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
@@ -70,9 +66,7 @@ def identity_hv(
     return torch.ones(
         num_embeddings,
         embedding_dim,
-        out=out,
         dtype=dtype,
-        layout=layout,
         device=device,
         requires_grad=requires_grad,
     )
@@ -84,9 +78,7 @@ def random_hv(
     *,
     sparsity=0.5,
     generator=None,
-    out=None,
     dtype=None,
-    layout=torch.strided,
     device=None,
     requires_grad=False,
 ) -> Tensor:
@@ -99,9 +91,7 @@ def random_hv(
         embedding_dim (int): the dimensionality of the hypervectors.
         sparsity (float, optional): the expected fraction of elements to be +1. Default: ``0.5``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
-        out (Tensor, optional): the output tensor.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
-        layout (``torch.layout``, optional): the desired layout of returned Tensor. Default: ``torch.strided``.
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
@@ -113,27 +103,24 @@ def random_hv(
         >>> functional.random_hv(2, 5, sparsity=0.9)
         tensor([[ 1.,  1.,  1., -1.,  1.],
                 [ 1.,  1.,  1.,  1.,  1.]])
+        >>> functional.random_hv(2, 5, dtype=torch.long)
+        tensor([[ 1, -1,  1,  1,  1],
+                [ 1,  1, -1, -1,  1]])
 
     """
     if dtype is None:
         dtype = torch.get_default_dtype()
 
-    return (
-        torch.rand(
-            (
-                num_embeddings,
-                embedding_dim,
-            ),
-            generator=generator,
-            dtype=dtype,
-            device=device,
-            layout=layout,
-            out=out,
-            requires_grad=requires_grad,
-        )
-        .sub_(1.0 - sparsity)
-        .sign_()
-    )
+    select = torch.empty(
+        (
+            num_embeddings,
+            embedding_dim,
+        ),
+        dtype=torch.bool,
+    ).bernoulli_(1.0 - sparsity, generator=generator)
+    result = torch.where(select, -1, +1).to(dtype=dtype, device=device)
+    result.requires_grad = requires_grad
+    return result
 
 
 def level_hv(
@@ -142,7 +129,6 @@ def level_hv(
     *,
     randomness=0.0,
     generator=None,
-    out=None,
     dtype=None,
     device=None,
     requires_grad=False,
@@ -157,7 +143,6 @@ def level_hv(
         embedding_dim (int): the dimensionality of the hypervectors.
         randomness (float, optional): r-value to interpolate between level at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
-        out (Tensor, optional): the output tensor.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
@@ -175,7 +160,6 @@ def level_hv(
     hv = torch.zeros(
         num_embeddings,
         embedding_dim,
-        out=out,
         dtype=dtype,
         device=device,
     )
@@ -230,7 +214,6 @@ def circular_hv(
     *,
     randomness=0.0,
     generator=None,
-    out=None,
     dtype=None,
     device=None,
     requires_grad=False,
@@ -245,7 +228,6 @@ def circular_hv(
         embedding_dim (int): the dimensionality of the hypervectors.
         randomness (float, optional): r-value to interpolate between circular at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
-        out (Tensor, optional): the output tensor.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
@@ -263,7 +245,6 @@ def circular_hv(
     hv = torch.zeros(
         num_embeddings,
         embedding_dim,
-        out=out,
         dtype=dtype,
         device=device,
     )

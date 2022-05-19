@@ -16,15 +16,6 @@ class TestIdentity_hv:
         hv = functional.identity_hv(4, 85)
         assert (hv == 1).min().item()
 
-    def test_out(self):
-        buffer = torch.empty(3, 52)
-        hv = functional.identity_hv(3, 52, out=buffer)
-
-        assert buffer.data_ptr() == hv.data_ptr()
-        assert hv.dim() == 2
-        assert hv.size(0) == 3
-        assert hv.size(1) == 52
-
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         hv = functional.identity_hv(3, 52, device=device)
@@ -53,22 +44,16 @@ class TestIdentity_hv:
 
     def test_integration(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        buffer = torch.empty(6, 10000, dtype=torch.float16)
         hv = functional.identity_hv(
-            6, 10000, out=buffer, dtype=torch.float16, requires_grad=True, device=device
+            6, 10000, dtype=torch.float16, requires_grad=True, device=device
         )
 
-        assert buffer.data_ptr() == hv.data_ptr()
         assert hv.dim() == 2
         assert hv.size(0) == 6
         assert hv.size(1) == 10000
         assert hv.requires_grad == True
         assert hv.dtype == torch.float16
         assert hv.device == device
-
-        with pytest.raises(RuntimeError):
-            buffer = torch.empty(6, 10000, dtype=torch.float)
-            hv = functional.identity_hv(6, 10000, out=buffer, dtype=torch.float16)
 
 
 class TestRandom_hv:
@@ -102,15 +87,6 @@ class TestRandom_hv:
 
         assert (hv1 == hv2).min().item()
 
-    def test_out(self):
-        buffer = torch.empty(3, 52)
-        hv = functional.random_hv(3, 52, out=buffer)
-
-        assert buffer.data_ptr() == hv.data_ptr()
-        assert hv.dim() == 2
-        assert hv.size(0) == 3
-        assert hv.size(1) == 52
-
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         hv = functional.random_hv(3, 52, device=device)
@@ -142,22 +118,16 @@ class TestRandom_hv:
 
     def test_integration(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        buffer = torch.empty(6, 10000, dtype=torch.float)
         hv = functional.random_hv(
-            6, 10000, out=buffer, dtype=torch.float, requires_grad=True, device=device
+            6, 10000, dtype=torch.float, requires_grad=True, device=device
         )
 
-        assert buffer.data_ptr() == hv.data_ptr()
         assert hv.dim() == 2
         assert hv.size(0) == 6
         assert hv.size(1) == 10000
         assert hv.requires_grad == True
         assert hv.dtype == torch.float
         assert hv.device == device
-
-        with pytest.raises(RuntimeError):
-            buffer = torch.empty(6, 10000, dtype=torch.float)
-            hv = functional.random_hv(6, 10000, out=buffer, dtype=torch.float16)
 
 
 class TestLevel_hv:
@@ -180,9 +150,9 @@ class TestLevel_hv:
         sim = functional.cosine_similarity(hv[0], hv[1].unsqueeze(0))
         assert sim.abs().item() > 0.98
         sim = functional.cosine_similarity(hv[0], hv[24].unsqueeze(0))
-        assert sim.abs().item() > 0.49
+        assert sim.abs().item() > 0.47
         sim = functional.cosine_similarity(hv[0], hv[24].unsqueeze(0))
-        assert sim.abs().item() < 0.51
+        assert sim.abs().item() < 0.52
         sim = functional.cosine_similarity(hv[40], hv[41].unsqueeze(0))
         assert sim.abs().item() > 0.98
 
@@ -196,15 +166,6 @@ class TestLevel_hv:
         hv2 = functional.level_hv(60, 10000, generator=generator)
 
         assert (hv1 == hv2).min().item()
-
-    def test_out(self):
-        buffer = torch.empty(20, 52)
-        hv = functional.level_hv(20, 52, out=buffer)
-
-        assert buffer.data_ptr() == hv.data_ptr()
-        assert hv.dim() == 2
-        assert hv.size(0) == 20
-        assert hv.size(1) == 52
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -237,22 +198,16 @@ class TestLevel_hv:
 
     def test_integration(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        buffer = torch.empty(6, 10000, dtype=torch.float)
         hv = functional.level_hv(
-            6, 10000, out=buffer, dtype=torch.float, requires_grad=True, device=device
+            6, 10000, dtype=torch.float, requires_grad=True, device=device
         )
 
-        assert buffer.data_ptr() == hv.data_ptr()
         assert hv.dim() == 2
         assert hv.size(0) == 6
         assert hv.size(1) == 10000
         assert hv.requires_grad == True
         assert hv.dtype == torch.float
         assert hv.device == device
-
-        with pytest.raises(RuntimeError):
-            buffer = torch.empty(6, 10000, dtype=torch.float)
-            hv = functional.level_hv(6, 10000, out=buffer, dtype=torch.float16)
 
 
 class TestCircular_hv:
@@ -277,13 +232,13 @@ class TestCircular_hv:
         sim = functional.cosine_similarity(hv[0], hv[49].unsqueeze(0))
         assert sim.abs().item() > 0.95
         sim = functional.cosine_similarity(hv[0], hv[12].unsqueeze(0))
-        assert sim.abs().item() > 0.49
+        assert sim.abs().item() > 0.47
         sim = functional.cosine_similarity(hv[0], hv[37].unsqueeze(0))
-        assert sim.abs().item() > 0.49
+        assert sim.abs().item() > 0.47
         sim = functional.cosine_similarity(hv[0], hv[12].unsqueeze(0))
-        assert sim.abs().item() < 0.52
+        assert sim.abs().item() < 0.54
         sim = functional.cosine_similarity(hv[0], hv[37].unsqueeze(0))
-        assert sim.abs().item() < 0.52
+        assert sim.abs().item() < 0.54
         sim = functional.cosine_similarity(hv[40], hv[41].unsqueeze(0))
         assert sim.abs().item() > 0.96
 
@@ -297,15 +252,6 @@ class TestCircular_hv:
         hv2 = functional.circular_hv(60, 10000, generator=generator)
 
         assert (hv1 == hv2).min().item()
-
-    def test_out(self):
-        buffer = torch.empty(20, 52)
-        hv = functional.circular_hv(20, 52, out=buffer)
-
-        assert buffer.data_ptr() == hv.data_ptr()
-        assert hv.dim() == 2
-        assert hv.size(0) == 20
-        assert hv.size(1) == 52
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -338,22 +284,16 @@ class TestCircular_hv:
 
     def test_integration(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        buffer = torch.empty(6, 10000, dtype=torch.float)
         hv = functional.circular_hv(
-            6, 10000, out=buffer, dtype=torch.float, requires_grad=True, device=device
+            6, 10000, dtype=torch.float, requires_grad=True, device=device
         )
 
-        assert buffer.data_ptr() == hv.data_ptr()
         assert hv.dim() == 2
         assert hv.size(0) == 6
         assert hv.size(1) == 10000
         assert hv.requires_grad == True
         assert hv.dtype == torch.float
         assert hv.device == device
-
-        with pytest.raises(RuntimeError):
-            buffer = torch.empty(6, 10000, dtype=torch.float)
-            hv = functional.circular_hv(6, 10000, out=buffer, dtype=torch.float16)
 
 
 class TestBind:
