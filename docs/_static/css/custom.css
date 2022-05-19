@@ -233,9 +233,12 @@ html.writer-html5 .rst-content table.docutils th {
 }
 
 html,
-body {
-    background: #ffffff;
+body,
+.wy-body-for-nav,
+.wy-nav-content {
+    background: #ffffff !important;
 }
+
 
 .wy-nav-content-wrap {
     background: none;
