@@ -1,6 +1,6 @@
 import math
 import torch
-from torch import Tensor
+from torch import LongTensor, Tensor
 import torch.nn.functional as F
 
 from collections import deque
@@ -62,6 +62,14 @@ def identity_hv(
     if dtype is None:
         dtype = torch.get_default_dtype()
 
+    if dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
     return torch.ones(
         num_embeddings,
         embedding_dim,
@@ -110,6 +118,14 @@ def random_hv(
     if dtype is None:
         dtype = torch.get_default_dtype()
 
+    if dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
     select = torch.empty(
         (
             num_embeddings,
@@ -148,22 +164,33 @@ def level_hv(
 
     Examples::
 
-        >>> functional.level_hv(2, 3)
-        tensor([[ 1.,  -1.,  -1.],
-                [ -1.,  1.,  -1.]])
+        >>> functional.level_hv(5, 10)
+        tensor([[ 1.,  1.,  1.,  1.,  1., -1., -1., -1.,  1., -1.],
+                [ 1.,  1.,  1.,  1.,  1., -1., -1., -1.,  1.,  1.],
+                [ 1.,  1.,  1., -1.,  1., -1.,  1., -1., -1.,  1.],
+                [ 1., -1.,  1., -1., -1., -1.,  1., -1., -1.,  1.],
+                [ 1., -1.,  1., -1., -1.,  1.,  1.,  1., -1.,  1.]])
 
     """
     if dtype is None:
         dtype = torch.get_default_dtype()
 
-    hv = torch.zeros(
+    if dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
+    hv = torch.empty(
         num_embeddings,
         embedding_dim,
         dtype=dtype,
         device=device,
     )
 
-    # convert from normilzed "randomness" variable r to number of orthogonal vectors sets "span"
+    # convert from normalized "randomness" variable r to number of orthogonal vectors sets "span"
     levels_per_span = (1 - randomness) * (num_embeddings - 1) + randomness * 1
     span = (num_embeddings - 1) / levels_per_span
     # generate the set of orthogonal vectors within the level vector set
@@ -174,10 +201,10 @@ def level_hv(
         dtype=dtype,
         device=device,
     )
-    # for each span within the set create a treshold vector
-    # the treshold vector is used to interpolate between the
+    # for each span within the set create a threshold vector
+    # the threshold vector is used to interpolate between the
     # two random vector bounds of each span.
-    treshold_v = torch.rand(
+    threshold_v = torch.rand(
         int(math.ceil(span)),
         embedding_dim,
         generator=generator,
@@ -191,17 +218,17 @@ def level_hv(
         # special case: if we are on a span border (e.g. on the first or last levels)
         # then set the orthogonal vector directly.
         # This also prevents an index out of bounds error for the last level
-        # when treshold_v[span_idx], and span_hv[span_idx + 1] are not available.
+        # when threshold_v[span_idx], and span_hv[span_idx + 1] are not available.
         if abs(i % levels_per_span) < 1e-12:
             hv[i] = span_hv[span_idx]
         else:
             level_within_span = i % levels_per_span
-            # the treshold value from the start hv's perspective
+            # the threshold value from the start hv's perspective
             t = 1 - (level_within_span / levels_per_span)
 
             span_start_hv = span_hv[span_idx]
             span_end_hv = span_hv[span_idx + 1]
-            hv[i] = torch.where(treshold_v[span_idx] < t, span_start_hv, span_end_hv)
+            hv[i] = torch.where(threshold_v[span_idx] < t, span_start_hv, span_end_hv)
 
     hv.requires_grad = requires_grad
     return hv
@@ -233,22 +260,36 @@ def circular_hv(
 
     Examples::
 
-        >>> functional.circular_hv(2, 3)
-        tensor([[ 1.,  -1.,  -1.],
-                [ -1.,  1.,  -1.]])
+        >>> functional.circular_hv(8, 10)
+        tensor([[-1.,  1., -1., -1.,  1.,  1.,  1.,  1., -1., -1.],
+                [-1.,  1., -1., -1., -1.,  1.,  1., -1., -1., -1.],
+                [-1.,  1., -1., -1., -1.,  1.,  1., -1., -1., -1.],
+                [-1.,  1.,  1., -1., -1.,  1.,  1., -1., -1., -1.],
+                [ 1.,  1.,  1., -1., -1.,  1., -1., -1., -1., -1.],
+                [ 1.,  1.,  1., -1.,  1.,  1., -1.,  1., -1., -1.],
+                [ 1.,  1.,  1., -1.,  1.,  1., -1.,  1., -1., -1.],
+                [ 1.,  1., -1., -1.,  1.,  1., -1.,  1., -1., -1.]])
 
     """
     if dtype is None:
         dtype = torch.get_default_dtype()
 
-    hv = torch.zeros(
+    if dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
+    hv = torch.empty(
         num_embeddings,
         embedding_dim,
         dtype=dtype,
         device=device,
     )
 
-    # convert from normilzed "randomness" variable r to
+    # convert from normalized "randomness" variable r to
     # number of levels between orthogonal pairs or "span"
     levels_per_span = ((1 - randomness) * (num_embeddings / 2) + randomness * 1) * 2
     span = num_embeddings / levels_per_span
@@ -261,10 +302,10 @@ def circular_hv(
         dtype=dtype,
         device=device,
     )
-    # for each span within the set create a treshold vector
-    # the treshold vector is used to interpolate between the
+    # for each span within the set create a threshold vector
+    # the threshold vector is used to interpolate between the
     # two random vector bounds of each span.
-    treshold_v = torch.rand(
+    threshold_v = torch.rand(
         int(math.ceil(span)),
         embedding_dim,
         generator=generator,
@@ -285,7 +326,7 @@ def circular_hv(
         # special case: if we are on a span border (e.g. on the first or last levels)
         # then set the orthogonal vector directly.
         # This also prevents an index out of bounds error for the last level
-        # when treshold_v[span_idx], and span_hv[span_idx + 1] are not available.
+        # when threshold_v[span_idx], and span_hv[span_idx + 1] are not available.
         if abs(i % levels_per_span) < 1e-12:
             temp_hv = span_hv[span_idx]
 
@@ -294,10 +335,10 @@ def circular_hv(
             span_end_hv = span_hv[span_idx + 1]
 
             level_within_span = i % levels_per_span
-            # the treshold value from the start hv's perspective
+            # the threshold value from the start hv's perspective
             t = 1 - (level_within_span / levels_per_span)
 
-            temp_hv = torch.where(treshold_v[span_idx] < t, span_start_hv, span_end_hv)
+            temp_hv = torch.where(threshold_v[span_idx] < t, span_start_hv, span_end_hv)
 
         mutation_history.append(temp_hv * mutation_hv)
         mutation_hv = temp_hv
@@ -345,6 +386,14 @@ def bind(input: Tensor, other: Tensor, *, out=None) -> Tensor:
         tensor([ 1., -1., -1.])
 
     """
+    if input.dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if input.dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
     return torch.mul(input, other, out=out)
 
 
@@ -377,6 +426,13 @@ def bundle(input: Tensor, other: Tensor, *, out=None) -> Tensor:
         tensor([0., 2., 0.])
 
     """
+    if input.dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if input.dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
 
     return torch.add(input, other, out=out)
 
@@ -408,7 +464,6 @@ def permute(input: Tensor, *, shifts=1, dims=-1) -> Tensor:
         tensor([ -1.,  1.,  -1.])
 
     """
-
     return torch.roll(input, shifts=shifts, dims=dims)
 
 
@@ -521,7 +576,7 @@ def dot_similarity(input: Tensor, others: Tensor) -> Tensor:
     return F.linear(input, others)
 
 
-def hamming_similarity(input: Tensor, others: Tensor) -> Tensor:
+def hamming_similarity(input: Tensor, others: Tensor) -> LongTensor:
     """Number of equal elements between the input vector and each vector in others.
 
     Args:
@@ -543,16 +598,11 @@ def hamming_similarity(input: Tensor, others: Tensor) -> Tensor:
         tensor([3., 1.])
 
     """
-    return torch.sum(input == others, dim=-1, dtype=input.dtype)
+    return torch.sum(input == others, dim=-1, dtype=torch.long)
 
 
 def multiset(
     input: Tensor,
-    *,
-    dim=-2,
-    keepdim=False,
-    dtype=None,
-    out=None,
 ) -> Tensor:
     r"""Multiset of input hypervectors.
 
@@ -564,10 +614,6 @@ def multiset(
 
     Args:
         input (Tensor): input hypervector tensor
-        dim (int, optional): dimension over which to bundle the hypervectors. Default: ``-2``.
-        keepdim (bool, optional): whether to keep the bundled dimension. Default: ``False``.
-        dtype (``torch.dtype``, optional): if specified determins the type of the returned tensor, otherwise same as input.
-        out (Tensor, optional): the output tensor.
 
     Shapes:
         - Input: :math:`(*, n, d)`
@@ -584,10 +630,19 @@ def multiset(
         tensor([-1.,  3.,  1.])
 
     """
-    return torch.sum(input, dim=dim, keepdim=keepdim, dtype=dtype, out=out)
+
+    if input.dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if input.dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
+    return torch.sum(input, dim=-2, dtype=input.dtype)
 
 
-def multibind(input: Tensor, *, dim=-2, keepdim=False, dtype=None, out=None) -> Tensor:
+def multibind(input: Tensor) -> Tensor:
     r"""Binding of multiple hypervectors.
 
     Binds all the input hypervectors together.
@@ -597,11 +652,7 @@ def multibind(input: Tensor, *, dim=-2, keepdim=False, dtype=None, out=None) -> 
         \bigotimes_{i=0}^{n-1} V_i
 
     Args:
-        input (Tensor): input hypervector tensor
-        dim (int, optional): dimension over which to bind the hypervectors. Default: ``-2``.
-        keepdim (bool, optional): whether to keep the bundled dimension. Default: ``False``.
-        dtype (``torch.dtype``, optional): if specified determins the type of the returned tensor, otherwise same as input.
-        out (Tensor, optional): the output tensor.
+        input (Tensor): input hypervector tensor.
 
     Shapes:
         - Input: :math:`(*, n, d)`
@@ -618,7 +669,15 @@ def multibind(input: Tensor, *, dim=-2, keepdim=False, dtype=None, out=None) -> 
         tensor([ 1.,  1., -1.])
 
     """
-    return torch.prod(input, dim=dim, keepdim=keepdim, dtype=dtype, out=out)
+    if input.dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if input.dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
+    return torch.prod(input, dim=-2, dtype=input.dtype)
 
 
 def cross_product(input: Tensor, other: Tensor) -> Tensor:
@@ -846,6 +905,9 @@ def map_range(
                 [ 5.3082, -5.6906, -1.2383]])
 
     """
+    if not torch.is_floating_point(input):
+        raise ValueError("map_range only supports floating point tensors.")
+
     return out_min + (out_max - out_min) * (input - in_min) / (in_max - in_min)
 
 
@@ -856,7 +918,7 @@ def value_to_index(
 
     .. note::
 
-        Input values outside the min-max range are clamped.
+        Input values outside the min-max range are not clamped.
 
     Args:
         input (torch.LongTensor): The values to map
@@ -879,8 +941,11 @@ def value_to_index(
                 [7, 2, 4]])
 
     """
-    mapped = map_range(input, in_min, in_max, 0, index_length - 1)
-    return mapped.round().long().clamp(0, index_length - 1)
+    if torch.is_complex(input):
+        raise ValueError("value_to_index does not support complex numbers")
+
+    mapped = map_range(input.float(), in_min, in_max, 0, index_length - 1)
+    return mapped.round().long()
 
 
 def index_to_value(
@@ -941,7 +1006,15 @@ def cleanup(input: Tensor, memory: Tensor, threshold=0.0) -> Tensor:
         tensor([[ 1., -1., -1.]])
 
     """
-    scores = cosine_similarity(input, memory)
+    if input.dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if input.dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
+    scores = cosine_similarity(input.float(), memory.float())
     value, index = torch.max(scores, dim=-1)
 
     if value.item() < threshold:
