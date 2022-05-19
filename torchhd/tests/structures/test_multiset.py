@@ -129,6 +129,5 @@ class TestMultiset:
         generator = torch.Generator()
         generator.manual_seed(seed)
         keys_hv = functional.random_hv(len(letters), 4, generator=generator)
-        M = structures.Multiset.from_ngrams(keys_hv)
-        print(M.value)
-        assert torch.equal(M.value, torch.tensor([-2.,  4.,  6., -8.]))
+        M = structures.Multiset.from_tensor(keys_hv)
+        assert torch.equal(M.value, torch.tensor([ 2., 10.,  4.,  2.]))
