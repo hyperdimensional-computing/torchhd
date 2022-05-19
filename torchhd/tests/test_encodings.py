@@ -50,6 +50,13 @@ class TestMultiset:
         with pytest.raises(ValueError):
             res = functional.multiset(hv)
 
+    def test_device(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        hv = functional.random_hv(11, 10000, device=device)
+        res = functional.multiset(hv)
+        assert res.device == device
+
 
 class TestMultibind:
     def test_value(self):
@@ -94,6 +101,13 @@ class TestMultibind:
         hv = torch.zeros(4, 1000, dtype=torch.uint8)
         with pytest.raises(ValueError):
             res = functional.multibind(hv)
+
+    def test_device(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        hv = functional.random_hv(11, 10000, device=device)
+        res = functional.multibind(hv)
+        assert res.device == device
 
 
 class TestCrossProduct:
@@ -141,13 +155,23 @@ class TestCrossProduct:
         with pytest.raises(ValueError):
             res = functional.cross_product(hv, hv)
 
+    def test_device(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        hv = functional.random_hv(11, 10000, device=device)
+        res = functional.cross_product(hv, hv)
+        assert res.device == device
+
+
 class TestNgrams:
     def test_value(self):
         hv = torch.zeros(4, 1000)
         res = functional.ngrams(hv)
         assert torch.all(res == 0).item()
 
-        hv = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1], [-1, 1, 1, -1]])
+        hv = torch.tensor(
+            [[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1], [-1, 1, 1, -1]]
+        )
         res = functional.ngrams(hv)
         assert torch.all(res == torch.tensor([0, -2, -2, 0])).item()
         assert res.dtype == hv.dtype
@@ -185,6 +209,13 @@ class TestNgrams:
         with pytest.raises(ValueError):
             res = functional.ngrams(hv)
 
+    def test_device(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        hv = functional.random_hv(11, 10000, device=device)
+        res = functional.ngrams(hv)
+        assert res.device == device
+
 
 class TestHashTable:
     def test_value(self):
@@ -195,7 +226,7 @@ class TestHashTable:
         a = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1]])
         b = torch.tensor([[-1, 1, 1, 1], [-1, 1, 1, -1]])
         res = functional.hash_table(a, b)
-        assert torch.all(res == torch.tensor([ 0, -2,  0,  0])).item()
+        assert torch.all(res == torch.tensor([0, -2, 0, 0])).item()
         assert res.dtype == a.dtype
 
     def test_dtype(self):
@@ -231,13 +262,23 @@ class TestHashTable:
         with pytest.raises(ValueError):
             res = functional.hash_table(hv, hv)
 
+    def test_device(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        hv = functional.random_hv(11, 10000, device=device)
+        res = functional.hash_table(hv, hv)
+        assert res.device == device
+
+
 class TestSequence:
     def test_value(self):
         hv = torch.zeros(4, 1000)
         res = functional.sequence(hv)
         assert torch.all(res == 0).item()
 
-        hv = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1], [-1, 1, 1, -1]])
+        hv = torch.tensor(
+            [[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1], [-1, 1, 1, -1]]
+        )
         res = functional.sequence(hv)
         assert torch.all(res == torch.tensor([0, 0, 2, 0])).item()
         assert res.dtype == hv.dtype
@@ -275,6 +316,13 @@ class TestSequence:
         with pytest.raises(ValueError):
             res = functional.sequence(hv)
 
+    def test_device(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        hv = functional.random_hv(11, 10000, device=device)
+        res = functional.sequence(hv)
+        assert res.device == device
+
 
 class TestDistinctSequence:
     def test_value(self):
@@ -282,9 +330,11 @@ class TestDistinctSequence:
         res = functional.distinct_sequence(hv)
         assert torch.all(res == 0).item()
 
-        hv = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1], [-1, 1, 1, -1]])
+        hv = torch.tensor(
+            [[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1], [-1, 1, 1, -1]]
+        )
         res = functional.distinct_sequence(hv)
-        assert torch.all(res == torch.tensor([ 1,  1, -1,  1])).item()
+        assert torch.all(res == torch.tensor([1, 1, -1, 1])).item()
         assert res.dtype == hv.dtype
 
     def test_dtype(self):
@@ -319,3 +369,10 @@ class TestDistinctSequence:
         hv = torch.zeros(4, 1000, dtype=torch.uint8)
         with pytest.raises(ValueError):
             res = functional.distinct_sequence(hv)
+
+    def test_device(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        hv = functional.random_hv(11, 10000, device=device)
+        res = functional.distinct_sequence(hv)
+        assert res.device == device

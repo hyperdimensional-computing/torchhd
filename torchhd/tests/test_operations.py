@@ -174,3 +174,77 @@ class TestPermute:
         assert res.size(0) == 100
         assert torch.all((hv == -1) | (hv == 1)).item(), "values are either -1 or +1"
         assert res.device == device
+
+
+class TestCleanup:
+    def test_value(self):
+        generator = torch.Generator()
+        generator.manual_seed(2147483644)
+
+        hv = functional.random_hv(5, 100, generator=generator)
+        noise = functional.random_hv(1, 100, sparsity=0.95, generator=generator)
+        res = functional.cleanup(functional.bind(hv[0], noise), hv)
+        assert torch.all(hv[0] == res).item()
+
+        hv = functional.random_hv(8, 100, generator=generator)
+        noise = functional.random_hv(1, 100, sparsity=0.95, generator=generator)
+        res = functional.cleanup(functional.bind(hv[3], noise), hv)
+        assert torch.all(hv[3] == res).item()
+
+    def test_threshold(self):
+        generator = torch.Generator()
+        generator.manual_seed(2147483644)
+
+        hv = functional.random_hv(5, 100, generator=generator)
+        res = functional.cleanup(hv[0], hv, threshold=0.5)
+        assert torch.all(hv[0] == res).item()
+
+        hv = functional.random_hv(5, 100, generator=generator)
+        noise = functional.random_hv(1, 100, sparsity=0.95, generator=generator)
+        res = functional.cleanup(hv[0], hv, threshold=1.0)
+        assert torch.all(hv[0] == res).item()
+
+        hv = functional.random_hv(5, 100, generator=generator)
+        noise = functional.random_hv(1, 100, sparsity=0.95, generator=generator)
+        with pytest.raises(KeyError):
+            res = functional.cleanup(functional.bind(hv[0], noise), hv, threshold=1.0)
+
+    def test_dtype(self):
+        hv = functional.random_hv(5, 100)
+        res = functional.cleanup(hv[0], hv)
+        assert res.dtype == torch.get_default_dtype()
+
+        hv = functional.random_hv(5, 100, dtype=torch.float)
+        res = functional.cleanup(hv[0], hv)
+        assert res.dtype == torch.float
+
+        hv = functional.random_hv(5, 100, dtype=torch.int)
+        res = functional.cleanup(hv[0], hv)
+        assert res.dtype == torch.int
+
+        hv = functional.random_hv(5, 100, dtype=torch.long)
+        res = functional.cleanup(hv[0], hv)
+        assert res.dtype == torch.long
+
+        hv = functional.random_hv(5, 100, dtype=torch.float64)
+        res = functional.cleanup(hv[0], hv)
+        assert res.dtype == torch.float64
+
+        hv = torch.zeros(4, 1000, dtype=torch.bool)
+        with pytest.raises(NotImplementedError):
+            res = functional.cleanup(hv[0], hv)
+
+        hv = torch.zeros(4, 1000, dtype=torch.complex128)
+        with pytest.raises(NotImplementedError):
+            res = functional.cleanup(hv[0], hv)
+
+        hv = torch.zeros(4, 1000, dtype=torch.uint8)
+        with pytest.raises(ValueError):
+            res = functional.cleanup(hv[0], hv)
+
+    def test_device(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        hv = functional.random_hv(5, 100, device=device)
+        res = functional.cleanup(hv[0], hv)
+        assert res.device == device

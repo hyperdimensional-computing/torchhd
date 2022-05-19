@@ -905,6 +905,9 @@ def map_range(
                 [ 5.3082, -5.6906, -1.2383]])
 
     """
+    if not torch.is_floating_point(input):
+        raise ValueError("map_range only supports floating point tensors.")
+
     return out_min + (out_max - out_min) * (input - in_min) / (in_max - in_min)
 
 
@@ -915,7 +918,7 @@ def value_to_index(
 
     .. note::
 
-        Input values outside the min-max range are clamped.
+        Input values outside the min-max range are not clamped.
 
     Args:
         input (torch.LongTensor): The values to map
@@ -938,8 +941,11 @@ def value_to_index(
                 [7, 2, 4]])
 
     """
-    mapped = map_range(input, in_min, in_max, 0, index_length - 1)
-    return mapped.round().long().clamp(0, index_length - 1)
+    if torch.is_complex(input):
+        raise ValueError("value_to_index does not support complex numbers")
+
+    mapped = map_range(input.float(), in_min, in_max, 0, index_length - 1)
+    return mapped.round().long()
 
 
 def index_to_value(
@@ -1000,7 +1006,15 @@ def cleanup(input: Tensor, memory: Tensor, threshold=0.0) -> Tensor:
         tensor([[ 1., -1., -1.]])
 
     """
-    scores = cosine_similarity(input, memory)
+    if input.dtype in {torch.bool, torch.complex64, torch.complex128}:
+        raise NotImplementedError(
+            "Boolean, and Complex hypervectors are not supported yet."
+        )
+
+    if input.dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
+    scores = cosine_similarity(input.float(), memory.float())
     value, index = torch.max(scores, dim=-1)
 
     if value.item() < threshold:
