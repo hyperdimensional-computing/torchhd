@@ -25,11 +25,11 @@ class TestMultiset:
     def test_generator(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        hv1 = functional.circular_hv(60, 10000, generator=generator)
+        hv1 = functional.random_hv(60, 10000, generator=generator)
 
         generator = torch.Generator()
         generator.manual_seed(seed)
-        hv2 = functional.circular_hv(60, 10000, generator=generator)
+        hv2 = functional.random_hv(60, 10000, generator=generator)
 
         assert (hv1 == hv2).min().item()
 
