@@ -435,7 +435,7 @@ class HashTable:
 
         """
         value = functional.hash_table(keys, values)
-        return cls(value, size=input.size(-2))
+        return cls(value)
 
 
 class Sequence:
