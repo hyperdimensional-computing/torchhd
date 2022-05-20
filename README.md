@@ -35,6 +35,17 @@ conda install -c torchhd torchhd
 
 You can find documentation for Torchhd [on the website](https://torchhd.readthedocs.io).
 
+Check out the [Getting Started](https://torchhd.readthedocs.io/en/stable/getting_started.html) page for a quick overview.
+
+The API documentation is divided into several sections:
+
+- [`torchhd.functional`](https://torchhd.readthedocs.io/en/stable/functional.html)
+- [`torchhd.embeddings`](https://torchhd.readthedocs.io/en/stable/embeddings.html)
+- [`torchhd.structures`](https://torchhd.readthedocs.io/en/stable/structures.html)
+- [`torchhd.datasets`](https://torchhd.readthedocs.io/en/stable/datasets.html)
+
+You can improve the documentation by sending pull requests to this repository.
+
 ## Examples
 
 We have several examples [in the repository](https://github.com/hyperdimensional-computing/torchhd/tree/main/examples). Here is a simple one to get you started:
@@ -45,18 +56,18 @@ import torch, torchhd
 d = 10000  # number of dimensions
 
 # create the hypervectors for each symbol
-country = torchhd.functional.random_hv(1, d)
-capital = torchhd.functional.random_hv(1, d)
-currency = torchhd.functional.random_hv(1, d)
+country = torchhd.random_hv(1, d)
+capital = torchhd.random_hv(1, d)
+currency = torchhd.random_hv(1, d)
 
-usa = torchhd.functional.random_hv(1, d)  # United States
-mex = torchhd.functional.random_hv(1, d)  # Mexico
+usa = torchhd.random_hv(1, d)  # United States
+mex = torchhd.random_hv(1, d)  # Mexico
 
-wdc = torchhd.functional.random_hv(1, d)  # Washington D.C.
-mxc = torchhd.functional.random_hv(1, d)  # Mexico City
+wdc = torchhd.random_hv(1, d)  # Washington D.C.
+mxc = torchhd.random_hv(1, d)  # Mexico City
 
-usd = torchhd.functional.random_hv(1, d)  # US Dollar
-mxn = torchhd.functional.random_hv(1, d)  # Mexican Peso
+usd = torchhd.random_hv(1, d)  # US Dollar
+mxn = torchhd.random_hv(1, d)  # Mexican Peso
 
 # create country representations
 keys = torch.cat([country, capital, currency], dim=0)
@@ -67,10 +78,10 @@ US = torchhd.functional.hash_table(keys, us_values)
 mx_values = torch.cat([mex, mxc, mxn])
 MX = torchhd.functional.hash_table(keys, mx_values)
 
-MX_US = torchhd.functional.bind(US, MX)
+MX_US = torchhd.bind(US, MX)
 
 # query for the dollar of mexico
-usd_of_mex = torchhd.functional.bind(MX_US, usd)
+usd_of_mex = torchhd.bind(MX_US, usd)
 
 memory = torch.cat([keys, us_values, mx_values], dim=0)
 torchhd.functional.cosine_similarity(usd_of_mex, memory)
@@ -100,3 +111,17 @@ To build the documentation locally, use `pip install -r docs/requirements.txt` t
 ### License
 
 This library is [MIT licensed](https://github.com/hyperdimensional-computing/torchhd/blob/main/LICENSE).
+
+
+## Cite
+
+Consider citing [our paper](https://arxiv.org/abs/2205.09208) if you use Torchhd in your work:
+
+```
+@article{heddes2022torchhd,
+  title={Torchhd: An Open-Source Python Library to Support Hyperdimensional Computing Research},
+  author={Heddes, Mike and Nunes, Igor and Vergés, Pere and Desai, Dheyay and Givargis, Tony and Nicolau, Alexandru},
+  journal={arXiv preprint arXiv:2205.09208},
+  year={2022}
+}
+```
