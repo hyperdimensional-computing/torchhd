@@ -205,7 +205,7 @@ def level_hv(
         int(math.ceil(span + 1)),
         embedding_dim,
         generator=generator,
-        sparsity=sparsity
+        sparsity=sparsity,
         dtype=dtype,
         device=device,
     )
@@ -310,7 +310,7 @@ def circular_hv(
         int(math.ceil(span + 1)),
         embedding_dim,
         generator=generator,
-        sparsity=sparsity
+        sparsity=sparsity,
         dtype=dtype,
         device=device,
     )
