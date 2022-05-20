@@ -146,6 +146,7 @@ def level_hv(
     num_embeddings: int,
     embedding_dim: int,
     *,
+    sparsity=0.5,
     randomness=0.0,
     generator=None,
     dtype=None,
@@ -204,6 +205,7 @@ def level_hv(
         int(math.ceil(span + 1)),
         embedding_dim,
         generator=generator,
+        sparsity=sparsity
         dtype=dtype,
         device=device,
     )
@@ -244,6 +246,7 @@ def circular_hv(
     num_embeddings: int,
     embedding_dim: int,
     *,
+    sparsity=0.5,
     randomness=0.0,
     generator=None,
     dtype=None,
@@ -307,6 +310,7 @@ def circular_hv(
         int(math.ceil(span + 1)),
         embedding_dim,
         generator=generator,
+        sparsity=sparsity
         dtype=dtype,
         device=device,
     )
