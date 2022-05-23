@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 # Read the version without importing any dependencies
 version = {}
-with open('torchhd/version.py') as f:  
+with open("torchhd/version.py") as f:
     exec(f.read(), version)
 
 setup(
