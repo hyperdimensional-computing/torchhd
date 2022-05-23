@@ -5,9 +5,14 @@ https://github.com/pypa/sampleproject
 """
 from setuptools import setup, find_packages
 
+# Read the version without importing any dependencies
+version = {}
+with open("torchhd/version.py") as f:
+    exec(f.read(), version)
+
 setup(
     name="torch-hd",  # use torch-hd on PyPi to install torchhd, torchhd is too similar according to PyPi
-    version="2.2.2",
+    version=version["__version__"],
     description="Torchhd is a Python library for Hyperdimensional Computing",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
