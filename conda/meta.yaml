@@ -1,22 +1,22 @@
-{% set data = load_setup_py_data() %}
+{% set name = "torch-hd"  %}
 
 package:
   name: torchhd
-  version: {{ data['version'] }}
+  version: {{ TORCHHD_VERSION }}
 
 source:
-  path: ..
-  git_url: https://github.com/hyperdimensional-computing/torchhd
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ TORCHHD_VERSION }}.tar.gz
+  sha256: {{ TORCHHD_HASH }}
 
 build:
+  noarch: generic
   number: 0
-  script: python setup.py install --single-version-externally-managed --record=record.txt
+  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv "
 
 requirements:
   host:
     - pip
     - python>=3.6
-
   run:
     - python>=3.6
     - pytorch
@@ -26,9 +26,15 @@ requirements:
 test:
   imports:
     - torchhd
+    - torchhd.functional
+    - torchhd.embeddings
+    - torchhd.structures
     - torchhd.datasets
 
 about:
-  home: {{ data['url'] }}
-  license: {{ data['license'] }}
-summary: {{ data['description'] }}
+  home: https://github.com/hyperdimensional-computing/torchhd
+  license: MIT
+  license_file: LICENSE
+  summary: Torchhd is a Python library for Hyperdimensional Computing
+  dev_url: https://github.com/hyperdimensional-computing/torchhd
+  doc_url: https://torchhd.readthedocs.io
