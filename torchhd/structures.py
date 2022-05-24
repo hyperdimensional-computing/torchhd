@@ -159,28 +159,10 @@ class Multiset:
 
     @overload
     def __init__(self, dimensions: int, *, device=None, dtype=None):
-        # """Creates an empty multiset of dimensions
-
-        # Args:
-        #     dim (int): number of dimensions of the multiset.
-        # Examples::
-
-        #     >>> M = structures.Multiset(dimensions=10000)
-        # """
         ...
 
     @overload
     def __init__(self, input: Tensor, *, size=0):
-        # """Creates an empty multiset of dimensions
-
-        # Args:
-        #     input (Tensor): tensor representing a multiset.
-        # Examples::
-
-        #     >>> letters = list(string.ascii_lowercase)
-        #     >>> letters_hv = functional.random_hv(len(letters), 10000)
-        #     >>> M = structures.Multiset(input = letters_hv[0])
-        # """
         ...
 
     def __init__(self, dim_or_input: Any, **kwargs):
@@ -468,7 +450,7 @@ class Sequence:
 
     Args:
         input (Tensor): tensor representing a sequence.
-        length (int, optional): the length of the sequence provided as input. Default: ``0``.
+        size (int, optional): the length of the sequence provided as input. Default: ``0``.
 
     Examples::
 
@@ -476,7 +458,7 @@ class Sequence:
 
         >>> letters = list(string.ascii_lowercase)
         >>> letters_hv = functional.random_hv(len(letters), 10000)
-        >>> S = structures.Sequence(letters_hv[0], length=1)
+        >>> S = structures.Sequence(letters_hv[0], size=1)
 
     """
 
@@ -485,11 +467,11 @@ class Sequence:
         ...
 
     @overload
-    def __init__(self, input: Tensor, *, length=0):
+    def __init__(self, input: Tensor, *, size=0):
         ...
 
     def __init__(self, dim_or_input: int, **kwargs):
-        self.length = kwargs.get("length", 0)
+        self.size = kwargs.get("size", 0)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
         else:
@@ -512,7 +494,7 @@ class Sequence:
         """
         rotated_value = functional.permute(self.value, shifts=1)
         self.value = functional.bundle(input, rotated_value)
-        self.length += 1
+        self.size += 1
 
     def appendleft(self, input: Tensor) -> None:
         """Appends the input tensor to the left of the sequence.
@@ -527,7 +509,7 @@ class Sequence:
         """
         rotated_input = functional.permute(input, shifts=len(self))
         self.value = functional.bundle(self.value, rotated_input)
-        self.length += 1
+        self.size += 1
 
     def pop(self, input: Tensor) -> None:
         """Pops the input tensor from the right of the sequence.
@@ -540,7 +522,7 @@ class Sequence:
             >>> S.pop(letters_hv[0])
 
         """
-        self.length -= 1
+        self.size -= 1
         self.value = functional.bundle(self.value, -input)
         self.value = functional.permute(self.value, shifts=-1)
 
@@ -555,7 +537,7 @@ class Sequence:
             >>> S.popleft(letters_hv[1])
 
         """
-        self.length -= 1
+        self.size -= 1
         rotated_input = functional.permute(input, shifts=len(self))
         self.value = functional.bundle(self.value, -rotated_input)
 
@@ -572,10 +554,10 @@ class Sequence:
             >>> S.replace(0, letters_hv[0], letters_hv[1])
 
         """
-        rotated_old = functional.permute(old, shifts=-self.length + index + 1)
+        rotated_old = functional.permute(old, shifts=self.size - index - 1)
         self.value = functional.bundle(self.value, -rotated_old)
 
-        rotated_new = functional.permute(new, shifts=-self.length + index + 1)
+        rotated_new = functional.permute(new, shifts=self.size - index - 1)
         self.value = functional.bundle(self.value, rotated_new)
 
     def concat(self, seq: "Sequence") -> "Sequence":
@@ -592,7 +574,7 @@ class Sequence:
         """
         value = functional.permute(self.value, shifts=len(seq))
         value = functional.bundle(value, seq.value)
-        return Sequence(value, length=len(self) + len(seq))
+        return Sequence(value, size=len(self) + len(seq))
 
     def __getitem__(self, index: int) -> Tensor:
         """Gets the approximate value from given index.
@@ -606,7 +588,7 @@ class Sequence:
             tensor([ 1., -1.,  1.,  ..., -1.,  1., -1.])
 
         """
-        return functional.permute(self.value, shifts=-self.length + index + 1)
+        return functional.permute(self.value, shifts=-self.size + index + 1)
 
     def __len__(self) -> int:
         """Returns the length of the sequence.
@@ -617,7 +599,7 @@ class Sequence:
             0
 
         """
-        return self.length
+        return self.size
 
     def clear(self) -> None:
         """Empties the sequence.
@@ -628,7 +610,7 @@ class Sequence:
 
         """
         self.value.fill_(0.0)
-        self.length = 0
+        self.size = 0
 
     @classmethod
     def from_tensor(cls, input: Tensor):
@@ -660,7 +642,7 @@ class DistinctSequence:
 
     Args:
         input (Tensor): tensor representing a distinct sequence.
-        length (int, optional): the size of the distinct sequence provided as input. Default: ``0``.
+        size (int, optional): the length of the distinct sequence provided as input. Default: ``0``.
 
     Examples::
 
@@ -672,11 +654,11 @@ class DistinctSequence:
         ...
 
     @overload
-    def __init__(self, input: Tensor, *, length=0):
+    def __init__(self, input: Tensor, *, size=0):
         ...
 
     def __init__(self, dim_or_input: int, **kwargs):
-        self.length = kwargs.get("length", 0)
+        self.size = kwargs.get("size", 0)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
         else:
@@ -699,7 +681,7 @@ class DistinctSequence:
         """
         rotated_value = functional.permute(self.value, shifts=1)
         self.value = functional.bind(input, rotated_value)
-        self.length += 1
+        self.size += 1
 
     def appendleft(self, input: Tensor) -> None:
         """Appends the input tensor to the left of the sequence.
@@ -714,7 +696,7 @@ class DistinctSequence:
         """
         rotated_input = functional.permute(input, shifts=len(self))
         self.value = functional.bind(self.value, rotated_input)
-        self.length += 1
+        self.size += 1
 
     def pop(self, input: Tensor) -> None:
         """Pops the input tensor from the right of the sequence.
@@ -727,7 +709,7 @@ class DistinctSequence:
             >>> DS.pop(letters_hv[0])
 
         """
-        self.length -= 1
+        self.size -= 1
         self.value = functional.bind(self.value, input)
         self.value = functional.permute(self.value, shifts=-1)
 
@@ -742,7 +724,7 @@ class DistinctSequence:
             >>> DS.popleft(letters_hv[1])
 
         """
-        self.length -= 1
+        self.size -= 1
         rotated_input = functional.permute(input, shifts=len(self))
         self.value = functional.bind(self.value, rotated_input)
 
@@ -760,14 +742,14 @@ class DistinctSequence:
             >>> DS.concat(DS1)
 
         """
-        rotated_old = functional.permute(old, shifts=-self.length + index + 1)
+        rotated_old = functional.permute(old, shifts=self.size - index - 1)
         self.value = functional.bind(self.value, rotated_old)
 
-        rotated_new = functional.permute(new, shifts=-self.length + index + 1)
+        rotated_new = functional.permute(new, shifts=self.size - index - 1)
         self.value = functional.bind(self.value, rotated_new)
 
     def __len__(self) -> int:
-        """Returns the size of the sequence.
+        """Returns the length of the sequence.
 
         Examples::
 
@@ -775,7 +757,7 @@ class DistinctSequence:
             0
 
         """
-        return self.length
+        return self.size
 
     def clear(self) -> None:
         """Empties the sequence.
@@ -786,7 +768,7 @@ class DistinctSequence:
 
         """
         self.value.fill_(0.0)
-        self.length = 0
+        self.size = 0
 
     @classmethod
     def from_tensor(cls, input: Tensor):
@@ -813,13 +795,13 @@ class Graph:
 
     Args:
         dimensions (int): number of dimensions of the graph.
-        directed (bool): decidies if the graph will be directed or not.
+        directed (bool): decides if the graph will be directed or not.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
 
     Args:
         input (Tensor): tensor representing a graph hypervector.
-        directed (bool): decidies if the graph will be directed or not.
+        directed (bool): decides if the graph will be directed or not.
 
     Examples::
 
