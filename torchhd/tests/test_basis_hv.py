@@ -117,14 +117,14 @@ class TestRandom_hv:
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        hv = functional.random_hv(100, 10000, generator=generator, sparsity=1)
+        hv = functional.random_hv(1000, 10000, generator=generator, sparsity=1)
         assert torch.all(hv == 1).item()
 
-        hv = functional.random_hv(100, 10000, generator=generator, sparsity=0)
+        hv = functional.random_hv(1000, 10000, generator=generator, sparsity=0)
         assert torch.all(hv == -1).item()
 
-        hv = functional.random_hv(100, 10000, generator=generator, sparsity=0.5)
-        assert between(torch.sum(hv == -1).div(10000 * 100).item(), 0.499, 0.501)
+        hv = functional.random_hv(1000, 10000, generator=generator, sparsity=0.5)
+        assert between(torch.sum(hv == -1).div(10000 * 1000).item(), 0.499, 0.501)
 
     def test_orthogonality(self):
         generator = torch.Generator()
@@ -257,6 +257,23 @@ class TestLevel_hv:
             (0.249 < sims_diff) & (sims_diff < 0.251)
         ).item(), "similarity decreases linearly"
 
+    def test_sparsity(self):
+        generator = torch.Generator()
+        generator.manual_seed(2147287646)
+
+        hv = functional.level_hv(1000, 10000, generator=generator, sparsity=1)
+        assert torch.all(hv == 1).item()
+
+        hv = functional.level_hv(1000, 10000, generator=generator, sparsity=0)
+        assert torch.all(hv == -1).item()
+
+        sparsity = [None] * 100
+        for i in range(100):
+            hv = functional.level_hv(100, 10000, generator=generator, sparsity=0.5)
+            sparsity[i] = torch.sum(hv == -1).div(10000 * 100)
+        assert between(torch.vstack(sparsity).mean().item(), 0.499, 0.501)
+
+
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         hv = functional.level_hv(3, 52, device=device)
@@ -367,6 +384,22 @@ class TestCircular_hv:
         assert torch.all(
             (0.249 < abs_sims_diff) & (abs_sims_diff < 0.251)
         ).item(), "similarity decreases linearly"
+
+    def test_sparsity(self):
+        generator = torch.Generator()
+        generator.manual_seed(2147487649)
+
+        hv = functional.circular_hv(100, 10000, generator=generator, sparsity=1)
+        assert torch.all(hv == 1).item()
+
+        hv = functional.circular_hv(100, 10000, generator=generator, sparsity=0)
+        assert torch.all(hv == -1).item()
+
+        sparsity = [None] * 100
+        for i in range(100):
+            hv = functional.circular_hv(100, 10000, generator=generator, sparsity=0.5)
+            sparsity[i] = torch.sum(hv == -1).div(10000 * 100)
+        assert between(torch.vstack(sparsity).mean().item(), 0.499, 0.501)
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
