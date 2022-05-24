@@ -13,6 +13,8 @@ from torchhd.functional import (
     permute,
 )
 
+from torchhd.version import __version__
+
 __all__ = [
     "functional",
     "embeddings",
