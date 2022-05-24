@@ -14,14 +14,14 @@
 
 # Torchhd
 
-Torchhd is a Python library for Hyperdimensional Computing.
+Torchhd is a Python library for *Hyperdimensional Computing* (also known as *Vector Symbolic Architectures*).
 
-* **Easy-to-use:** Torchhd makes it painless to develop a wide range of Hyperdimensional Computing (HDC) applications and algorithms. For someone new to the field we provide Pythonic abstractions and examples to get you started fast. For the experienced researchers we made the library modular by design, giving you endless flexibility to prototype new ideas in no-time.
-* **Performant:** The library is build on top of the high-performance PyTorch library, giving you optimized tensor execution without the headaches. Moreover, PyTorch makes it effortless to accelerate your code on a GPU.
+* **Easy-to-use:** Torchhd makes it painless to develop a wide range of Hyperdimensional Computing (HDC) applications and algorithms. For someone new to the field, we provide Pythonic abstractions and examples to get you started fast. For the experienced researchers, we made the library modular by design, giving you endless flexibility to prototype new ideas in no-time.
+* **Performant:** The library is build on top of the high-performance [PyTorch](https://pytorch.org/) library, giving you optimized tensor execution without the headaches. Moreover, PyTorch makes it effortless to accelerate your code on a GPU.
 
 ## Installation
 
-Torchhd is hosted on PyPi and Anaconda, use one of the following commands to install:
+Torchhd is hosted on PyPi and Anaconda. Use one of the following commands to install:
 
 ```bash
 pip install torch-hd
@@ -89,12 +89,12 @@ torchhd.functional.cosine_similarity(usd_of_mex, memory)
 # The hypervector for the Mexican Peso is the most similar.
 ```
 
-This example is from the paper [What We Mean When We Say "What's the Dollar of Mexico?": Prototypes and Mapping in Concept Space](https://redwood.berkeley.edu/wp-content/uploads/2020/05/kanerva2010what.pdf) by Kanerva. It first creates hypervectors for all the symbols that are used in the computation, i.e., the variables for `country`, `capital`, and `currency` and their values for both countries. These hypervectors are then combined to make a single hypervector for each country using a hash table structure. A hash table encodes key-value pairs as: `k1 * v1 + k2 * v2 + ... + kn * vn`. The hash tables are then bound together to form their combined representation which is finally queried by binding with the Dollar hypervector to obtain the approximate Mexican Peso hypervector. From the similarity output it shows that the Mexican Peso hypervector is indeed the most similar one.
+This example is from the paper [What We Mean When We Say "What's the Dollar of Mexico?": Prototypes and Mapping in Concept Space](https://redwood.berkeley.edu/wp-content/uploads/2020/05/kanerva2010what.pdf) by Kanerva. It first creates hypervectors for all the symbols that are used in the computation, i.e., the variables for `country`, `capital`, and `currency` and their values for both countries. These hypervectors are then combined to make a single hypervector for each country using a hash table structure. A hash table encodes key-value pairs as: `k1 * v1 + k2 * v2 + ... + kn * vn`. The hash tables are then bound together to form their combined representation which is finally queried by binding with the Dollar hypervector to obtain the approximate Mexican Peso hypervector. The similarity output shows that the Mexican Peso hypervector is indeed the most similar one.
 
 
 ## About
 
-Initial development of Torchhd was performed by Mike Heddes and Igor Nunes as part of their research in Hyperdimensional Computing at the University of California, Irvine. The library was extended with significant contributions from Pere Vergés and Dheyay Desai. Torchhd later merged with a project by Rishikanth Chandrasekaran who worked on similar problems as part of his research at the University of California, San Diego.
+Initial development of Torchhd was performed by [Mike Heddes](https://www.mikeheddes.nl/) and [Igor Nunes](https://sites.uci.edu/inunes/) as part of their research in Hyperdimensional Computing at the University of California, Irvine. The library was extended with significant contributions from Pere Vergés and Dheyay Desai. Torchhd later merged with a project by Rishikanth Chandrasekaran, who worked on similar problems as part of his research at the University of California, San Diego.
 
 ## Contributing
 

@@ -41,7 +41,11 @@ The first step to encode these records is to define the basis-hypervectors for e
 	seasons = functional.circular_hv(4, d)
 	var = functional.random_hv(3, d)
 
-which creates hypervectors for the 3 fruit types, 10 weight levels, 4 seasons and the 3 variables.
+which creates hypervectors for the 3 fruit types, 10 weight levels, 4 seasons and the 3 variables. The figure below illustrates the distance between the pairs of hypervectors in each set:
+
+.. image:: images/basis-hvs.png
+	:width: 500
+	:align: center
 
 Similar behavior can be achieved using the classes in the :ref:`embeddings` module. The classes add convenience methods for mapping values to hypervectors. For example, to map the interval :math:`[0, 200]` to the ten weight hypervectors the :ref:`functional<functional>` version above requires an explicit mapping to an index:
 
@@ -67,7 +71,7 @@ whereas the :ref:`embeddings<embeddings>` have this common behavior built-in:
 Operations
 ----------
 
-Once the basis-hypervectors are defined, we can use the MAP operations from :ref:`functional` to represent more complex objects. The hypervector for record :math:`r_1` can then be created as follows:
+Once the basis-hypervectors are defined, we can use the MAP operations from :ref:`functional` to encode more complex objects by combining basis-hypervectors. The hypervector for record :math:`r_1` can be created as follows:
 
 .. code-block:: python
 
@@ -93,7 +97,7 @@ Alternatively, we can use one of the commonly used encodings provided in the :re
 	values = torch.stack([fruits[0], weights[w_i], seasons[3]])
 	r1 = functional.hash_table(var, values)
 
-The :ref:`structures` module contains the same encoding patterns in addition to binary trees and finite state automata, but provides them as data structures. This module provides class-based implementations of HDC data structures. Using the hash table class, record :math:`r_1` can be implemented as follows:
+The :ref:`structures` module contains the same encoding patterns in addition to binary trees and finite state automata, but provides them as data structures. This module provides class-based implementations of HDC data structures. Using the hash table class, record :math:`r_1` can be represented as follows:
 
 .. code-block:: python 
 
