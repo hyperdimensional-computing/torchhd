@@ -70,9 +70,16 @@ class TestGraph:
         assert torch.equal(e2, torch.tensor([-1., 1., -1., -1., 1., 1., -1., 1.]))
 
     def test_node_neighbors(self):
-        """
-        NOT WORKING
-        """
+        """generator = torch.Generator()
+        generator.manual_seed(seed)
+        hv = functional.random_hv(10, 10000, generator=generator)
+        G = structures.Graph(dim_or_input=10000, directed=True)
+
+        G.add_edge(hv[0], hv[1])
+        G.add_edge(hv[0], hv[2])
+        G.add_edge(hv[1], hv[2])
+
+        print(functional.cosine_similarity(G.node_neighbors(hv[1]), hv))"""
 
     def test_contains(self):
         generator = torch.Generator()
