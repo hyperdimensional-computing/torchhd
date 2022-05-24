@@ -146,6 +146,7 @@ def level_hv(
     num_embeddings: int,
     embedding_dim: int,
     *,
+    sparsity=0.5,
     randomness=0.0,
     generator=None,
     dtype=None,
@@ -162,6 +163,7 @@ def level_hv(
     Args:
         num_embeddings (int): the number of hypervectors to generate.
         embedding_dim (int): the dimensionality of the hypervectors.
+        sparsity (float, optional): the expected fraction of elements to be +1. Default: ``0.5``.
         randomness (float, optional): r-value to interpolate between level at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
@@ -204,6 +206,7 @@ def level_hv(
         int(math.ceil(span + 1)),
         embedding_dim,
         generator=generator,
+        sparsity=sparsity,
         dtype=dtype,
         device=device,
     )
@@ -244,6 +247,7 @@ def circular_hv(
     num_embeddings: int,
     embedding_dim: int,
     *,
+    sparsity=0.5,
     randomness=0.0,
     generator=None,
     dtype=None,
@@ -260,6 +264,7 @@ def circular_hv(
     Args:
         num_embeddings (int): the number of hypervectors to generate.
         embedding_dim (int): the dimensionality of the hypervectors.
+        sparsity (float, optional): the expected fraction of elements to be +1. Default: ``0.5``.
         randomness (float, optional): r-value to interpolate between circular at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
@@ -307,6 +312,7 @@ def circular_hv(
         int(math.ceil(span + 1)),
         embedding_dim,
         generator=generator,
+        sparsity=sparsity,
         dtype=dtype,
         device=device,
     )
