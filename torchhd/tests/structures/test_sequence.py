@@ -202,7 +202,7 @@ class TestSequence:
 
         assert len(S) == 2
 
-    def test_length(self):
+    def test_clear(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(8, 1000, generator=generator)
