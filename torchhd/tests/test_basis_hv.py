@@ -273,7 +273,6 @@ class TestLevel_hv:
             sparsity[i] = torch.sum(hv == -1).div(10000 * 100)
         assert between(torch.vstack(sparsity).mean().item(), 0.499, 0.501)
 
-
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         hv = functional.level_hv(3, 52, device=device)
