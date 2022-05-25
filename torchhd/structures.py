@@ -81,7 +81,6 @@ class Memory:
         sim = functional.cosine_similarity(key, key_stack)
         value, index = torch.max(sim, 0)
 
-
         if value.item() < self.threshold:
             raise IndexError("No elements in memory")
 
@@ -664,7 +663,9 @@ class DistinctSequence:
         else:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
-            self.value = torch.ones(dim_or_input, dtype=dtype, device=device)
+            self.value = functional.identity_hv(
+                1, dim_or_input, dtype=dtype, device=device
+            ).squeeze(0)
 
     def append(self, input: Tensor) -> None:
         """Appends the input tensor to the right of the sequence.
