@@ -47,7 +47,6 @@ class Identity(nn.Embedding):
         functional.identity_hv(
             self.num_embeddings,
             self.embedding_dim,
-            out=self.weight.data,
             **factory_kwargs
         )
 
