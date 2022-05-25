@@ -70,7 +70,7 @@ class TestGraph:
         assert torch.equal(e2, torch.tensor([-1., 1., -1., -1., 1., 1., -1., 1.]))
 
     def test_node_neighbors(self):
-        """generator = torch.Generator()
+        generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(10, 10000, generator=generator)
         G = structures.Graph(dim_or_input=10000, directed=True)
@@ -79,7 +79,25 @@ class TestGraph:
         G.add_edge(hv[0], hv[2])
         G.add_edge(hv[1], hv[2])
 
-        print(functional.cosine_similarity(G.node_neighbors(hv[1]), hv))"""
+        assert torch.argmax(functional.cosine_similarity(G.node_neighbors(hv[1]), hv)).item() == 2
+        assert functional.cosine_similarity(G.node_neighbors(hv[1]), hv)[2] > 0.5
+        assert functional.cosine_similarity(G.node_neighbors(hv[0]), hv)[2] > 0.5
+        assert functional.cosine_similarity(G.node_neighbors(hv[0]), hv)[1] > 0.5
+        assert functional.cosine_similarity(G.node_neighbors(hv[2]), hv)[1] < 0.5
+        assert functional.cosine_similarity(G.node_neighbors(hv[2]), hv)[0] < 0.5
+        assert functional.cosine_similarity(G.node_neighbors(hv[1]), hv)[0] < 0.5
+
+        G1 = structures.Graph(dim_or_input=10000, directed=False)
+
+        G1.add_edge(hv[0], hv[1])
+        G1.add_edge(hv[0], hv[2])
+        G1.add_edge(hv[1], hv[2])
+        assert functional.cosine_similarity(G1.node_neighbors(hv[1]), hv)[0] > 0.5
+        assert functional.cosine_similarity(G1.node_neighbors(hv[0]), hv)[1] > 0.5
+        assert functional.cosine_similarity(G1.node_neighbors(hv[0]), hv)[2] > 0.5
+        assert functional.cosine_similarity(G1.node_neighbors(hv[2]), hv)[0] > 0.5
+        assert functional.cosine_similarity(G1.node_neighbors(hv[1]), hv)[2] > 0.5
+        assert functional.cosine_similarity(G1.node_neighbors(hv[2]), hv)[1] > 0.5
 
     def test_contains(self):
         generator = torch.Generator()
@@ -95,11 +113,10 @@ class TestGraph:
         G.add_edge(hv[0], hv[2])
         G.add_edge(hv[1], hv[2])
 
-        assert G.contains(e1) > torch.tensor(0.7)
-        assert G.contains(e2) > torch.tensor(0.7)
-        assert G.contains(e3) < torch.tensor(0.7)
+        assert G.contains(e1) > torch.tensor(0.6)
+        assert G.contains(e2) > torch.tensor([0.6])
+        assert G.contains(e3) < torch.tensor(0.6)
 
-        """ DIRECTED NOT WORKING
         GD = structures.Graph(dim_or_input=8, directed=True)
 
         ee1 = GD.encode_edge(hv[0], hv[1])
@@ -114,7 +131,7 @@ class TestGraph:
         assert GD.contains(ee1) > torch.tensor(0.6)
         assert GD.contains(ee2) > torch.tensor(0.6)
         assert GD.contains(ee3) < torch.tensor(0.6)
-        assert GD.contains(ee4) < torch.tensor(0.6)"""
+        assert GD.contains(ee4) < torch.tensor(0.6)
 
     def test_clear(self):
         generator = torch.Generator()
