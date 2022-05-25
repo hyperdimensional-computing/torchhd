@@ -2,7 +2,7 @@ import pytest
 import torch
 import string
 
-from ... import structures, functional
+from torchhd import structures, functional
 
 seed = 2147483644
 letters = list(string.ascii_lowercase)
@@ -10,15 +10,15 @@ letters = list(string.ascii_lowercase)
 
 class TestDistinctSequence:
     def test_creation_dim(self):
-        S = structures.DistinctSequence(dim_or_input=10000)
-        assert torch.equal(S.value, torch.zeros(10000))
+        S = structures.DistinctSequence(10000)
+        assert torch.equal(S.value, torch.ones(10000))
 
     def test_creation_tensor(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(len(letters), 10000, generator=generator)
 
-        S = structures.DistinctSequence(dim_or_input=hv[0])
+        S = structures.DistinctSequence(hv[0])
         assert torch.equal(S.value, hv[0])
 
     def test_generator(self):
@@ -36,7 +36,7 @@ class TestDistinctSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(len(letters), 10000, generator=generator)
-        S = structures.DistinctSequence(dim_or_input=10000)
+        S = structures.DistinctSequence(10000)
         S.append(hv[0])
         assert functional.cosine_similarity(S.value, hv)[0] > 0.5
 
@@ -44,7 +44,7 @@ class TestDistinctSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(len(letters), 10000, generator=generator)
-        S = structures.DistinctSequence(dim_or_input=10000)
+        S = structures.DistinctSequence(10000)
         S.appendleft(hv[0])
         assert functional.cosine_similarity(S.value, hv)[0] > 0.5
 
@@ -52,7 +52,7 @@ class TestDistinctSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(len(letters), 10000, generator=generator)
-        S = structures.DistinctSequence(dim_or_input=10000)
+        S = structures.DistinctSequence(10000)
         S.append(hv[0])
         S.append(hv[1])
         S.pop(hv[1])
@@ -68,7 +68,7 @@ class TestDistinctSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(len(letters), 10000, generator=generator)
-        S = structures.DistinctSequence(dim_or_input=10000)
+        S = structures.DistinctSequence(10000)
         S.appendleft(hv[0])
         S.appendleft(hv[1])
         S.popleft(hv[1])
@@ -84,7 +84,7 @@ class TestDistinctSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(len(letters), 10000, generator=generator)
-        S = structures.DistinctSequence(dim_or_input=10000)
+        S = structures.DistinctSequence(10000)
         S.append(hv[0])
         assert functional.cosine_similarity(S.value, hv)[0] > 0.5
         S.replace(0, hv[0], hv[1])
@@ -94,7 +94,7 @@ class TestDistinctSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(len(letters), 10000, generator=generator)
-        S = structures.DistinctSequence(dim_or_input=10000)
+        S = structures.DistinctSequence(10000)
         S.append(hv[0])
         S.append(hv[0])
         S.append(hv[0])
@@ -113,7 +113,7 @@ class TestDistinctSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(len(letters), 10000, generator=generator)
-        S = structures.DistinctSequence(dim_or_input=10000)
+        S = structures.DistinctSequence(10000)
         S.append(hv[0])
         S.append(hv[0])
         S.append(hv[0])

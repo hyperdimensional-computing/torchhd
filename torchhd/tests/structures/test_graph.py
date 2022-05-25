@@ -2,7 +2,7 @@ import pytest
 import torch
 import string
 
-from ... import structures, functional
+from torchhd import structures, functional
 
 seed = 2147483644
 letters = list(string.ascii_lowercase)
@@ -18,7 +18,7 @@ class TestGraph:
         generator.manual_seed(seed)
         hv = functional.random_hv(len(letters), 10000, generator=generator)
         g = functional.bind(hv[0], hv[1])
-        G = structures.Graph(dim_or_input=g)
+        G = structures.Graph(g)
         assert torch.equal(G.value, g)
 
     def test_generator(self):
@@ -36,50 +36,71 @@ class TestGraph:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(4, 8, generator=generator)
-        G = structures.Graph(dim_or_input=8)
+        G = structures.Graph(8)
 
         G.add_edge(hv[0], hv[1])
-        assert torch.equal(G.value, torch.tensor([-1., -1.,  1.,  1., -1., -1., -1., 1.]))
+        assert torch.equal(
+            G.value, torch.tensor([-1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0, 1.0])
+        )
         G.add_edge(hv[2], hv[3])
-        assert torch.equal(G.value, torch.tensor([-2., 0., 0., 2., -2., -2., -2., 0.]))
+        assert torch.equal(
+            G.value, torch.tensor([-2.0, 0.0, 0.0, 2.0, -2.0, -2.0, -2.0, 0.0])
+        )
 
-        GD = structures.Graph(dim_or_input=8, directed=True)
+        GD = structures.Graph(8, directed=True)
 
         GD.add_edge(hv[0], hv[1])
-        assert torch.equal(GD.value, torch.tensor([1., -1.,  1.,  -1., -1., 1., -1., -1.]))
+        assert torch.equal(
+            GD.value, torch.tensor([1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0])
+        )
         GD.add_edge(hv[2], hv[3])
-        assert torch.equal(GD.value, torch.tensor([0., 0., 0., -2., 0., 2., -2., 0.]))
+        assert torch.equal(
+            GD.value, torch.tensor([0.0, 0.0, 0.0, -2.0, 0.0, 2.0, -2.0, 0.0])
+        )
 
     def test_encode_edge(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(4, 8, generator=generator)
-        G = structures.Graph(dim_or_input=8)
+        G = structures.Graph(8)
 
         e1 = G.encode_edge(hv[0], hv[1])
-        assert torch.equal(e1, torch.tensor([-1., -1.,  1.,  1., -1., -1., -1., 1.]))
+        assert torch.equal(
+            e1, torch.tensor([-1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0, 1.0])
+        )
         e2 = G.encode_edge(hv[2], hv[3])
-        assert torch.equal(e2, torch.tensor([-1., 1., -1., 1., -1., -1., -1., -1.]))
+        assert torch.equal(
+            e2, torch.tensor([-1.0, 1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0])
+        )
 
-        GD = structures.Graph(dim_or_input=8, directed=True)
+        GD = structures.Graph(8, directed=True)
 
         e1 = GD.encode_edge(hv[0], hv[1])
-        assert torch.equal(e1, torch.tensor([1., -1.,  1.,  -1., -1., 1., -1., -1.]))
+        assert torch.equal(
+            e1, torch.tensor([1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0])
+        )
         e2 = GD.encode_edge(hv[2], hv[3])
         print(e2)
-        assert torch.equal(e2, torch.tensor([-1., 1., -1., -1., 1., 1., -1., 1.]))
+        assert torch.equal(
+            e2, torch.tensor([-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0])
+        )
 
     def test_node_neighbors(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(10, 10000, generator=generator)
-        G = structures.Graph(dim_or_input=10000, directed=True)
+        G = structures.Graph(10000, directed=True)
 
         G.add_edge(hv[0], hv[1])
         G.add_edge(hv[0], hv[2])
         G.add_edge(hv[1], hv[2])
 
-        assert torch.argmax(functional.cosine_similarity(G.node_neighbors(hv[1]), hv)).item() == 2
+        assert (
+            torch.argmax(
+                functional.cosine_similarity(G.node_neighbors(hv[1]), hv)
+            ).item()
+            == 2
+        )
         assert functional.cosine_similarity(G.node_neighbors(hv[1]), hv)[2] > 0.5
         assert functional.cosine_similarity(G.node_neighbors(hv[0]), hv)[2] > 0.5
         assert functional.cosine_similarity(G.node_neighbors(hv[0]), hv)[1] > 0.5
@@ -87,7 +108,7 @@ class TestGraph:
         assert functional.cosine_similarity(G.node_neighbors(hv[2]), hv)[0] < 0.5
         assert functional.cosine_similarity(G.node_neighbors(hv[1]), hv)[0] < 0.5
 
-        G1 = structures.Graph(dim_or_input=10000, directed=False)
+        G1 = structures.Graph(10000, directed=False)
 
         G1.add_edge(hv[0], hv[1])
         G1.add_edge(hv[0], hv[2])
@@ -103,7 +124,7 @@ class TestGraph:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(4, 8, generator=generator)
-        G = structures.Graph(dim_or_input=8)
+        G = structures.Graph(8)
 
         e1 = G.encode_edge(hv[0], hv[1])
         e2 = G.encode_edge(hv[0], hv[2])
@@ -117,7 +138,7 @@ class TestGraph:
         assert G.contains(e2) > torch.tensor([0.6])
         assert G.contains(e3) < torch.tensor(0.6)
 
-        GD = structures.Graph(dim_or_input=8, directed=True)
+        GD = structures.Graph(8, directed=True)
 
         ee1 = GD.encode_edge(hv[0], hv[1])
         ee2 = GD.encode_edge(hv[0], hv[2])
@@ -137,7 +158,7 @@ class TestGraph:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(4, 8, generator=generator)
-        G = structures.Graph(dim_or_input=8)
+        G = structures.Graph(8)
 
         G.add_edge(hv[0], hv[1])
         G.add_edge(hv[0], hv[2])
@@ -145,4 +166,6 @@ class TestGraph:
 
         G.clear()
 
-        assert torch.equal(G.value, torch.tensor([0., 0., 0., 0., 0., 0., 0., 0.]))
+        assert torch.equal(
+            G.value, torch.tensor([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        )

@@ -2,7 +2,7 @@ import pytest
 import torch
 import string
 
-from ... import structures, functional
+from torchhd import structures, functional
 
 seed = 2147483644
 letters = list(string.ascii_lowercase)
