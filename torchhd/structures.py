@@ -664,7 +664,7 @@ class DistinctSequence:
         else:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
-            self.value = torch.zeros(dim_or_input, dtype=dtype, device=device)
+            self.value = torch.ones(dim_or_input, dtype=dtype, device=device)
 
     def append(self, input: Tensor) -> None:
         """Appends the input tensor to the right of the sequence.
@@ -767,7 +767,7 @@ class DistinctSequence:
             >>> DS.clear()
 
         """
-        self.value.fill_(0.0)
+        self.value.fill_(1.0)
         self.size = 0
 
     @classmethod
