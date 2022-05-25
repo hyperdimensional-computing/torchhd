@@ -881,8 +881,8 @@ class Graph:
                 permuted_neighbors = functional.bind(self.value, input)
                 return functional.permute(permuted_neighbors, shifts=-1)
             else:
-                permuted_neighbors = functional.permute(input, shifts=1)
-                return functional.bind(self.value, permuted_neighbors)
+                permuted_node = functional.permute(input, shifts=1)
+                return functional.bind(self.value, permuted_node)
         else:
             return functional.bind(self.value, input)
 
