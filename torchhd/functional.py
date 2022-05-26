@@ -1,6 +1,7 @@
 import math
 import torch
 from torch import LongTensor, Tensor
+import matplotlib.pyplot as plt
 import torch.nn.functional as F
 
 from collections import deque
@@ -30,6 +31,8 @@ __all__ = [
     "map_range",
     "value_to_index",
     "index_to_value",
+    "visualize_basis_set",
+    "visualize_vector_similarity",,
 ]
 
 
@@ -1043,3 +1046,45 @@ def cleanup(input: Tensor, memory: Tensor, threshold=0.0) -> Tensor:
         )
 
     return torch.index_select(memory, -2, index)
+
+def visualize_basis_set(A, fignum=None, **kwargs):
+    """Displays a similarity map for the provided set of hypervectors as a 
+    matrix map
+
+    Args:
+        A: 2D array-like
+            The set of hypervectors whose similarity map is to be displayed
+        
+        fignum: None or int or False
+            If *None*, create a new figure window with automatic numbering.
+            
+            If a nonzero integer, draw into the figure with the given number
+            
+            If 0, use the current axes (or create one if it does not exist).
+        
+    Other Parameters:
+        **kwargs: `~matplotlib.axes.Axes.imshow` arguments
+    """
+    sim = []
+    for vector in A:
+        sim.append(cosine_similarity(vector, A).tolist())
+
+    plt.matshow(sim, fignum, **kwargs)
+    plt.show()
+
+def visualize_vector_similarity(A, vec, **kwargs):
+    """Displays a stem graph showing the similarity of input vector vec
+    with hypervectors in input set A
+
+    Args:
+        A:  2D array-like
+            Set of Hypervectors
+        
+        vec:    1D array-like
+    
+    Other Parameters:
+        **kwargs: `~matplotlib.pyplot.stem` arguments
+    """
+    final = cosine_similarity(vec, A).tolist()
+    plt.stem(final, **kwargs)
+    plt.show()
