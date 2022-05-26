@@ -44,10 +44,11 @@ class Identity(nn.Embedding):
             "device": self.weight.data.device,
             "dtype": self.weight.data.dtype,
         }
-        functional.identity_hv(
-            self.num_embeddings,
-            self.embedding_dim,
-            **factory_kwargs
+
+        self.weight.data.copy_(
+            functional.identity_hv(
+                self.num_embeddings, self.embedding_dim, **factory_kwargs
+            )
         )
 
         self._fill_padding_idx_with_zero()
@@ -83,11 +84,11 @@ class Random(nn.Embedding):
             "device": self.weight.data.device,
             "dtype": self.weight.data.dtype,
         }
-        functional.random_hv(
-            self.num_embeddings,
-            self.embedding_dim,
-            out=self.weight.data,
-            **factory_kwargs
+
+        self.weight.data.copy_(
+            functional.random_hv(
+                self.num_embeddings, self.embedding_dim, **factory_kwargs
+            )
         )
 
         self._fill_padding_idx_with_zero()
@@ -139,12 +140,14 @@ class Level(nn.Embedding):
             "device": self.weight.data.device,
             "dtype": self.weight.data.dtype,
         }
-        functional.level_hv(
-            self.num_embeddings,
-            self.embedding_dim,
-            randomness=self.randomness,
-            out=self.weight.data,
-            **factory_kwargs
+
+        self.weight.data.copy_(
+            functional.level_hv(
+                self.num_embeddings,
+                self.embedding_dim,
+                randomness=self.randomness,
+                **factory_kwargs
+            )
         )
 
         self._fill_padding_idx_with_zero()
@@ -203,12 +206,14 @@ class Circular(nn.Embedding):
             "device": self.weight.data.device,
             "dtype": self.weight.data.dtype,
         }
-        functional.circular_hv(
-            self.num_embeddings,
-            self.embedding_dim,
-            randomness=self.randomness,
-            out=self.weight.data,
-            **factory_kwargs
+
+        self.weight.data.copy_(
+            functional.circular_hv(
+                self.num_embeddings,
+                self.embedding_dim,
+                randomness=self.randomness,
+                **factory_kwargs
+            )
         )
 
         self._fill_padding_idx_with_zero()
