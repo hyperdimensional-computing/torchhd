@@ -241,7 +241,7 @@ class Multiset:
 
     @classmethod
     def from_ngrams(cls, input: Tensor, n=3):
-        """Creates a multiset from the ngrams of a set of hypervectors.
+        r"""Creates a multiset from the ngrams of a set of hypervectors.
 
         See: :func:`~torchhd.functional.ngrams`.
 
@@ -273,7 +273,7 @@ class Multiset:
             >>> M = structures.Multiset.from_tensor(x)
 
         """
-        value = functional.multiset(input, dim=-2)
+        value = functional.multiset(input)
         return cls(value, size=input.size(-2))
 
 
@@ -434,7 +434,7 @@ class HashTable:
 
         """
         value = functional.hash_table(keys, values)
-        return cls(value)
+        return cls(value, size=keys.size(-2))
 
 
 class Sequence:

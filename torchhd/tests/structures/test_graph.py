@@ -33,56 +33,66 @@ class TestGraph:
         assert (hv1 == hv2).min().item()
 
     def test_add_edge(self):
-        generator = torch.Generator()
-        generator.manual_seed(seed)
-        hv = functional.random_hv(4, 8, generator=generator)
         G = structures.Graph(8)
+        hv = torch.tensor(
+            [
+                [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0],
+                [1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+                [-1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0],
+                [1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0, -1.0],
+            ]
+        )
 
         G.add_edge(hv[0], hv[1])
         assert torch.equal(
-            G.value, torch.tensor([-1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0, 1.0])
+            G.value, torch.tensor([-1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0])
         )
         G.add_edge(hv[2], hv[3])
         assert torch.equal(
-            G.value, torch.tensor([-2.0, 0.0, 0.0, 2.0, -2.0, -2.0, -2.0, 0.0])
+            G.value, torch.tensor([-2.0, -2.0, 0.0, 2.0, -2.0, 0.0, 2.0, -2.0])
         )
 
         GD = structures.Graph(8, directed=True)
 
         GD.add_edge(hv[0], hv[1])
         assert torch.equal(
-            GD.value, torch.tensor([1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0])
+            GD.value, torch.tensor([-1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0])
         )
         GD.add_edge(hv[2], hv[3])
         assert torch.equal(
-            GD.value, torch.tensor([0.0, 0.0, 0.0, -2.0, 0.0, 2.0, -2.0, 0.0])
+            GD.value, torch.tensor([0.0, 0.0, 0.0, -2.0, 0.0, -2.0, 2.0, -2.0])
         )
 
     def test_encode_edge(self):
-        generator = torch.Generator()
-        generator.manual_seed(seed)
-        hv = functional.random_hv(4, 8, generator=generator)
         G = structures.Graph(8)
+        hv = torch.tensor(
+            [
+                [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0],
+                [1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+                [-1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0],
+                [1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0, -1.0],
+            ]
+        )
 
         e1 = G.encode_edge(hv[0], hv[1])
         assert torch.equal(
-            e1, torch.tensor([-1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0, 1.0])
+            e1, torch.tensor([-1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0])
         )
         e2 = G.encode_edge(hv[2], hv[3])
         assert torch.equal(
-            e2, torch.tensor([-1.0, 1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0])
+            e2, torch.tensor([-1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0])
         )
 
         GD = structures.Graph(8, directed=True)
 
         e1 = GD.encode_edge(hv[0], hv[1])
         assert torch.equal(
-            e1, torch.tensor([1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0])
+            e1, torch.tensor([-1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0])
         )
         e2 = GD.encode_edge(hv[2], hv[3])
         print(e2)
         assert torch.equal(
-            e2, torch.tensor([-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0])
+            e2, torch.tensor([1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0])
         )
 
     def test_node_neighbors(self):

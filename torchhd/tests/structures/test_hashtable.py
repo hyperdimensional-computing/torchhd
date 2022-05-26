@@ -78,7 +78,7 @@ class TestHashtable:
             torch.tensor(True),
         )
 
-        H.remove(keys_hv[0])
+        H.remove(keys_hv[0], values_hv[0])
         assert torch.equal(
             (functional.cosine_similarity(H[keys_hv[0]], values_hv) < 0.2)[0],
             torch.tensor(True),
