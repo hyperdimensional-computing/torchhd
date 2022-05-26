@@ -6,3 +6,4 @@ numpy
 flake8
 pytest
 black
+matplotlib
