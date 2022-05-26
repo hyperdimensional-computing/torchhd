@@ -30,7 +30,7 @@ class Memory:
 
     """
 
-    def __init__(self, threshold=0.0):
+    def __init__(self, threshold=0.5):
         self.threshold = threshold
         self.keys: List[Tensor] = []
         self.values: List[Any] = []
@@ -82,7 +82,7 @@ class Memory:
         value, index = torch.max(sim, 0)
 
         if value.item() < self.threshold:
-            raise IndexError()
+            raise IndexError("No elements in memory")
 
         return index
 
@@ -241,7 +241,7 @@ class Multiset:
 
     @classmethod
     def from_ngrams(cls, input: Tensor, n=3):
-        """Creates a multiset from the ngrams of a set of hypervectors.
+        r"""Creates a multiset from the ngrams of a set of hypervectors.
 
         See: :func:`~torchhd.functional.ngrams`.
 
@@ -273,7 +273,7 @@ class Multiset:
             >>> M = structures.Multiset.from_tensor(x)
 
         """
-        value = functional.multiset(input, dim=-2)
+        value = functional.multiset(input)
         return cls(value, size=input.size(-2))
 
 
@@ -434,7 +434,7 @@ class HashTable:
 
         """
         value = functional.hash_table(keys, values)
-        return cls(value, size=input.size(-2))
+        return cls(value, size=keys.size(-2))
 
 
 class Sequence:
@@ -663,7 +663,9 @@ class DistinctSequence:
         else:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
-            self.value = torch.zeros(dim_or_input, dtype=dtype, device=device)
+            self.value = functional.identity_hv(
+                1, dim_or_input, dtype=dtype, device=device
+            ).squeeze(0)
 
     def append(self, input: Tensor) -> None:
         """Appends the input tensor to the right of the sequence.
@@ -766,7 +768,7 @@ class DistinctSequence:
             >>> DS.clear()
 
         """
-        self.value.fill_(0.0)
+        self.value.fill_(1.0)
         self.size = 0
 
     @classmethod
@@ -794,13 +796,10 @@ class Graph:
 
     Args:
         dimensions (int): number of dimensions of the graph.
-        directed (bool): decides if the graph will be directed or not.
+        directed (bool, optional): specify if the graph is directed or not. Default: ``False``.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
-
-    Args:
         input (Tensor): tensor representing a graph hypervector.
-        directed (bool): decides if the graph will be directed or not.
 
     Examples::
 
@@ -817,7 +816,7 @@ class Graph:
         ...
 
     def __init__(self, dim_or_input: int, **kwargs):
-        self.directed = kwargs.get("directed", False)
+        self.is_directed = kwargs.get("directed", False)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
         else:
@@ -861,16 +860,17 @@ class Graph:
             tensor([-1.,  1., -1.,  ...,  1., -1., -1.])
 
         """
-        if self.directed:
-            return functional.bind(node1, node2)
-        else:
+        if self.is_directed:
             return functional.bind(node1, functional.permute(node2))
+        else:
+            return functional.bind(node1, node2)
 
     def node_neighbors(self, input: Tensor, outgoing=True) -> Tensor:
         """Returns the multiset of node neighbors of the input node.
 
         Args:
             input (Tensor): Hypervector representing the node.
+            outgoing (bool, optional): if ``True``, returns the neighboring nodes that ``input`` has an edge to. If ``False``, returns the neighboring nodes that ``input`` has an edge from. This only has effect for directed graphs. Default: ``True``.
 
         Examples::
 
@@ -878,11 +878,13 @@ class Graph:
             tensor([ 1.,  1.,  1.,  ..., -1., -1.,  1.])
 
         """
-        if self.directed:
+        if self.is_directed:
             if outgoing:
-                return functional.permute(functional.bind(self.value, input), shifts=-1)
+                permuted_neighbors = functional.bind(self.value, input)
+                return functional.permute(permuted_neighbors, shifts=-1)
             else:
-                return functional.bind(self.value, functional.permute(input, shifts=1))
+                permuted_node = functional.permute(input, shifts=1)
+                return functional.bind(self.value, permuted_node)
         else:
             return functional.bind(self.value, input)
 
