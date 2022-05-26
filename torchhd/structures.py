@@ -30,7 +30,7 @@ class Memory:
 
     """
 
-    def __init__(self, threshold=0.0):
+    def __init__(self, threshold=0.5):
         self.threshold = threshold
         self.keys: List[Tensor] = []
         self.values: List[Any] = []
@@ -82,7 +82,7 @@ class Memory:
         value, index = torch.max(sim, 0)
 
         if value.item() < self.threshold:
-            raise IndexError()
+            raise IndexError("No elements in memory")
 
         return index
 
@@ -241,7 +241,7 @@ class Multiset:
 
     @classmethod
     def from_ngrams(cls, input: Tensor, n=3):
-        """Creates a multiset from the ngrams of a set of hypervectors.
+        r"""Creates a multiset from the ngrams of a set of hypervectors.
 
         See: :func:`~torchhd.functional.ngrams`.
 
@@ -273,7 +273,7 @@ class Multiset:
             >>> M = structures.Multiset.from_tensor(x)
 
         """
-        value = functional.multiset(input, dim=-2)
+        value = functional.multiset(input)
         return cls(value, size=input.size(-2))
 
 
@@ -434,7 +434,7 @@ class HashTable:
 
         """
         value = functional.hash_table(keys, values)
-        return cls(value, size=input.size(-2))
+        return cls(value, size=keys.size(-2))
 
 
 class Sequence:
@@ -663,7 +663,9 @@ class DistinctSequence:
         else:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
-            self.value = torch.zeros(dim_or_input, dtype=dtype, device=device)
+            self.value = functional.identity_hv(
+                1, dim_or_input, dtype=dtype, device=device
+            ).squeeze(0)
 
     def append(self, input: Tensor) -> None:
         """Appends the input tensor to the right of the sequence.
@@ -766,7 +768,7 @@ class DistinctSequence:
             >>> DS.clear()
 
         """
-        self.value.fill_(0.0)
+        self.value.fill_(1.0)
         self.size = 0
 
     @classmethod
