@@ -32,7 +32,7 @@ __all__ = [
     "value_to_index",
     "index_to_value",
     "visualize_basis_set",
-    "visualize_vector_similarity",,
+    "visualize_vector_similarity",
 ]
 
 
