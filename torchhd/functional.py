@@ -1,7 +1,6 @@
 import math
 import torch
 from torch import LongTensor, Tensor
-import matplotlib.pyplot as plt
 import torch.nn.functional as F
 
 from collections import deque
