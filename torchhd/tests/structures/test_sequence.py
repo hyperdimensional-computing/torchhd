@@ -8,9 +8,9 @@ seed = 2147483644
 letters = list(string.ascii_lowercase)
 
 
-class TestSequence:
+class TestBundleSequence:
     def test_creation_dim(self):
-        S = structures.Sequence(10000)
+        S = structures.BundleSequence(10000)
         assert torch.equal(S.value, torch.zeros(10000))
 
     def test_creation_tensor(self):
@@ -19,7 +19,7 @@ class TestSequence:
         hv = functional.random_hv(len(letters), 10000, generator=generator)
         seq = functional.bundle(hv[1], functional.permute(hv[0], shifts=1))
 
-        S = structures.Sequence(seq)
+        S = structures.BundleSequence(seq)
         assert torch.equal(S.value, seq)
 
     def test_generator(self):
@@ -37,7 +37,7 @@ class TestSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(len(letters), 4, generator=generator)
-        S = structures.Sequence(4)
+        S = structures.BundleSequence(4)
 
         S.append(hv[0])
         assert torch.equal(S.value, torch.tensor([1.0, -1.0, 1.0, 1.0]))
@@ -52,7 +52,7 @@ class TestSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(len(letters), 4, generator=generator)
-        S = structures.Sequence(4)
+        S = structures.BundleSequence(4)
 
         S.appendleft(hv[0])
         assert torch.equal(S.value, torch.tensor([1.0, -1.0, 1.0, 1.0]))
@@ -67,7 +67,7 @@ class TestSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(len(letters), 4, generator=generator)
-        S = structures.Sequence(4)
+        S = structures.BundleSequence(4)
 
         S.append(hv[0])
         S.append(hv[1])
@@ -86,7 +86,7 @@ class TestSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(len(letters), 4, generator=generator)
-        S = structures.Sequence(4)
+        S = structures.BundleSequence(4)
 
         S.appendleft(hv[0])
         S.appendleft(hv[1])
@@ -105,7 +105,7 @@ class TestSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(len(letters), 10000, generator=generator)
-        S = structures.Sequence(10000)
+        S = structures.BundleSequence(10000)
 
         S.append(hv[0])
         S.append(hv[1])
@@ -121,7 +121,7 @@ class TestSequence:
         assert functional.cosine_similarity(S[2], hv)[6] > 0.35
 
         hv1 = functional.random_hv(10, 10000)
-        S2 = structures.Sequence.from_tensor(hv1)
+        S2 = structures.BundleSequence.from_tensor(hv1)
         assert functional.cosine_similarity(S2[2], hv1)[2] > 0.3
         S2.replace(2, hv1[2], hv1[6])
         assert functional.cosine_similarity(S2[2], hv1)[2] < 0.3
@@ -131,13 +131,13 @@ class TestSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(8, 1000, generator=generator)
-        S = structures.Sequence(1000)
+        S = structures.BundleSequence(1000)
 
         S.append(hv[0])
         S.append(hv[1])
         S.append(hv[2])
 
-        S2 = structures.Sequence(1000)
+        S2 = structures.BundleSequence(1000)
         S2.append(hv[0])
         S2.append(hv[1])
         S2.append(hv[2])
@@ -154,13 +154,13 @@ class TestSequence:
         assert torch.argmax(functional.cosine_similarity(S[4], hv)).item() == 1
         assert torch.argmax(functional.cosine_similarity(S[5], hv)).item() == 2
 
-        SS = structures.Sequence(1000)
+        SS = structures.BundleSequence(1000)
 
         SS.appendleft(hv[0])
         SS.appendleft(hv[1])
         SS.appendleft(hv[2])
 
-        SS2 = structures.Sequence(1000)
+        SS2 = structures.BundleSequence(1000)
         SS2.appendleft(hv[0])
         SS2.appendleft(hv[1])
         SS2.appendleft(hv[2])
@@ -178,7 +178,7 @@ class TestSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(8, 1000, generator=generator)
-        S = structures.Sequence(1000)
+        S = structures.BundleSequence(1000)
 
         S.append(hv[0])
         S.append(hv[1])
@@ -190,7 +190,7 @@ class TestSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(8, 1000, generator=generator)
-        S = structures.Sequence(1000)
+        S = structures.BundleSequence(1000)
 
         S.append(hv[0])
         S.append(hv[1])
@@ -205,7 +205,7 @@ class TestSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(8, 1000, generator=generator)
-        S = structures.Sequence(1000)
+        S = structures.BundleSequence(1000)
 
         S.append(hv[0])
         S.append(hv[1])
@@ -221,7 +221,7 @@ class TestSequence:
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv = functional.random_hv(len(letters), 10000, generator=generator)
-        S = structures.Sequence.from_tensor(hv)
+        S = structures.BundleSequence.from_tensor(hv)
 
         assert torch.argmax(functional.cosine_similarity(S[3], hv)).item() == 3
         assert torch.argmax(functional.cosine_similarity(S[5], hv)).item() == 5
