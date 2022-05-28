@@ -621,12 +621,12 @@ def hamming_similarity(input: Tensor, others: Tensor) -> LongTensor:
     return torch.sum(input == others, dim=-1, dtype=torch.long)
 
 
-def multiset(
-    input: Tensor,
-) -> Tensor:
+def multiset(input: Tensor) -> Tensor:
     r"""Multiset of input hypervectors.
 
     Bundles all the input hypervectors together.
+
+    Aliased as ``torchhd.functional.multibundle``.
 
     .. math::
 
@@ -660,6 +660,9 @@ def multiset(
         raise ValueError("Unsigned integer hypervectors are not supported.")
 
     return torch.sum(input, dim=-2, dtype=input.dtype)
+
+
+multibundle = multiset
 
 
 def multibind(input: Tensor) -> Tensor:
