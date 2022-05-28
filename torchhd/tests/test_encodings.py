@@ -270,109 +270,109 @@ class TestHashTable:
         assert res.device == device
 
 
-class TestSequence:
+class TestBundleSequence:
     def test_value(self):
         hv = torch.zeros(4, 1000)
-        res = functional.sequence(hv)
+        res = functional.bundle_sequence(hv)
         assert torch.all(res == 0).item()
 
         hv = torch.tensor(
             [[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1], [-1, 1, 1, -1]]
         )
-        res = functional.sequence(hv)
+        res = functional.bundle_sequence(hv)
         assert torch.all(res == torch.tensor([0, 0, 2, 0])).item()
         assert res.dtype == hv.dtype
 
     def test_dtype(self):
         hv = functional.random_hv(11, 10000)
-        res = functional.sequence(hv)
+        res = functional.bundle_sequence(hv)
         assert res.dtype == torch.get_default_dtype()
 
         hv = functional.random_hv(11, 10000, dtype=torch.float)
-        res = functional.sequence(hv)
+        res = functional.bundle_sequence(hv)
         assert res.dtype == torch.float
 
         hv = functional.random_hv(11, 10000, dtype=torch.int)
-        res = functional.sequence(hv)
+        res = functional.bundle_sequence(hv)
         assert res.dtype == torch.int
 
         hv = functional.random_hv(11, 10000, dtype=torch.long)
-        res = functional.sequence(hv)
+        res = functional.bundle_sequence(hv)
         assert res.dtype == torch.long
 
         hv = functional.random_hv(11, 10000, dtype=torch.float64)
-        res = functional.sequence(hv)
+        res = functional.bundle_sequence(hv)
         assert res.dtype == torch.float64
 
         hv = torch.zeros(4, 1000, dtype=torch.bool)
         with pytest.raises(NotImplementedError):
-            res = functional.sequence(hv)
+            res = functional.bundle_sequence(hv)
 
         hv = torch.zeros(4, 1000, dtype=torch.complex128)
         with pytest.raises(NotImplementedError):
-            res = functional.sequence(hv)
+            res = functional.bundle_sequence(hv)
 
         hv = torch.zeros(4, 1000, dtype=torch.uint8)
         with pytest.raises(ValueError):
-            res = functional.sequence(hv)
+            res = functional.bundle_sequence(hv)
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         hv = functional.random_hv(11, 10000, device=device)
-        res = functional.sequence(hv)
+        res = functional.bundle_sequence(hv)
         assert res.device == device
 
 
-class TestDistinctSequence:
+class TestBindSequence:
     def test_value(self):
         hv = torch.zeros(4, 1000)
-        res = functional.distinct_sequence(hv)
+        res = functional.bind_sequence(hv)
         assert torch.all(res == 0).item()
 
         hv = torch.tensor(
             [[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1], [-1, 1, 1, -1]]
         )
-        res = functional.distinct_sequence(hv)
+        res = functional.bind_sequence(hv)
         assert torch.all(res == torch.tensor([1, 1, -1, 1])).item()
         assert res.dtype == hv.dtype
 
     def test_dtype(self):
         hv = functional.random_hv(11, 10000)
-        res = functional.distinct_sequence(hv)
+        res = functional.bind_sequence(hv)
         assert res.dtype == torch.get_default_dtype()
 
         hv = functional.random_hv(11, 10000, dtype=torch.float)
-        res = functional.distinct_sequence(hv)
+        res = functional.bind_sequence(hv)
         assert res.dtype == torch.float
 
         hv = functional.random_hv(11, 10000, dtype=torch.int)
-        res = functional.distinct_sequence(hv)
+        res = functional.bind_sequence(hv)
         assert res.dtype == torch.int
 
         hv = functional.random_hv(11, 10000, dtype=torch.long)
-        res = functional.distinct_sequence(hv)
+        res = functional.bind_sequence(hv)
         assert res.dtype == torch.long
 
         hv = functional.random_hv(11, 10000, dtype=torch.float64)
-        res = functional.distinct_sequence(hv)
+        res = functional.bind_sequence(hv)
         assert res.dtype == torch.float64
 
         hv = torch.zeros(4, 1000, dtype=torch.bool)
         with pytest.raises(NotImplementedError):
-            res = functional.distinct_sequence(hv)
+            res = functional.bind_sequence(hv)
 
         hv = torch.zeros(4, 1000, dtype=torch.complex128)
         with pytest.raises(NotImplementedError):
-            res = functional.distinct_sequence(hv)
+            res = functional.bind_sequence(hv)
 
         hv = torch.zeros(4, 1000, dtype=torch.uint8)
         with pytest.raises(ValueError):
-            res = functional.distinct_sequence(hv)
+            res = functional.bind_sequence(hv)
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         hv = functional.random_hv(11, 10000, device=device)
-        res = functional.distinct_sequence(hv)
+        res = functional.bind_sequence(hv)
         assert res.device == device
