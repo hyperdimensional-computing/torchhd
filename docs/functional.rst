@@ -57,8 +57,8 @@ Encodings
 
     multiset
     multibind
-    sequence
-    distinct_sequence
+    bundle_sequence
+    bind_sequence
     hash_table
     cross_product
     ngrams
