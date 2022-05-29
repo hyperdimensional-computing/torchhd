@@ -23,8 +23,8 @@ __all__ = [
     "multiset",
     "multibind",
     "cross_product",
-    "sequence",
-    "distinct_sequence",
+    "bundle_sequence",
+    "bind_sequence",
     "ngrams",
     "hash_table",
     "map_range",
@@ -621,12 +621,12 @@ def hamming_similarity(input: Tensor, others: Tensor) -> LongTensor:
     return torch.sum(input == others, dim=-1, dtype=torch.long)
 
 
-def multiset(
-    input: Tensor,
-) -> Tensor:
+def multiset(input: Tensor) -> Tensor:
     r"""Multiset of input hypervectors.
 
     Bundles all the input hypervectors together.
+
+    Aliased as ``torchhd.functional.multibundle``.
 
     .. math::
 
@@ -660,6 +660,9 @@ def multiset(
         raise ValueError("Unsigned integer hypervectors are not supported.")
 
     return torch.sum(input, dim=-2, dtype=input.dtype)
+
+
+multibundle = multiset
 
 
 def multibind(input: Tensor) -> Tensor:
@@ -747,7 +750,7 @@ def ngrams(input: Tensor, n: int = 3) -> Tensor:
         \bigoplus_{i=0}^{m - n} \bigotimes_{j = 0}^{n - 1} \Pi^{n - j - 1}(V_{i + j})
 
     .. note::
-        For :math:`n=1` use :func:`~torchhd.functional.multiset` instead and for :math:`n=m` use :func:`~torchhd.functional.distinct_sequence` instead.
+        For :math:`n=1` use :func:`~torchhd.functional.multiset` instead and for :math:`n=m` use :func:`~torchhd.functional.bind_sequence` instead.
 
     Args:
         input (Tensor): The value hypervectors.
@@ -812,7 +815,7 @@ def hash_table(keys: Tensor, values: Tensor) -> Tensor:
     return multiset(bind(keys, values))
 
 
-def sequence(input: Tensor) -> Tensor:
+def bundle_sequence(input: Tensor) -> Tensor:
     r"""Bundling-based sequence.
 
     The first value is permuted :math:`n-1` times, the last value is not permuted.
@@ -837,7 +840,7 @@ def sequence(input: Tensor) -> Tensor:
                 [ 1.,  1.,  1.],
                 [-1., -1., -1.],
                 [ 1.,  1.,  1.]])
-        >>> functional.sequence(x)
+        >>> functional.bundle_sequence(x)
         tensor([-1.,  3.,  1.])
 
     """
@@ -851,7 +854,7 @@ def sequence(input: Tensor) -> Tensor:
     return multiset(permuted)
 
 
-def distinct_sequence(input: Tensor) -> Tensor:
+def bind_sequence(input: Tensor) -> Tensor:
     r"""Binding-based sequence.
 
     The first value is permuted :math:`n-1` times, the last value is not permuted.
@@ -876,7 +879,7 @@ def distinct_sequence(input: Tensor) -> Tensor:
                 [ 1., -1., -1.],
                 [ 1., -1., -1.],
                 [-1., -1., -1.]])
-        >>> functional.distinct_sequence(x)
+        >>> functional.bind_sequence(x)
         tensor([-1.,  1.,  1.])
 
     """

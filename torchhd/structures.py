@@ -8,8 +8,8 @@ __all__ = [
     "Memory",
     "Multiset",
     "HashTable",
-    "Sequence",
-    "DistinctSequence",
+    "BundleSequence",
+    "BindSequence",
     "Graph",
     "Tree",
     "FiniteStateAutomata",
@@ -134,7 +134,7 @@ class Memory:
 
 
 class Multiset:
-    """Hypervector-based multiset data structure.
+    """Hypervector multiset data structure.
 
     Creates an empty multiset of dim dimensions or from an input tensor.
 
@@ -278,7 +278,7 @@ class Multiset:
 
 
 class HashTable:
-    """Hypervector-based hash table data structure.
+    """Hypervector hash table data structure.
 
     Creates an empty hash table of dim dimensions or a hash table from an input tensor.
 
@@ -437,8 +437,8 @@ class HashTable:
         return cls(value, size=keys.size(-2))
 
 
-class Sequence:
-    """Hypervector-based (bundling-based) sequence data structure
+class BundleSequence:
+    """Hypervector bundling-based sequence data structure
 
     Creates an empty sequence of dim dimensions or from an input tensor.
 
@@ -453,11 +453,11 @@ class Sequence:
 
     Examples::
 
-        >>> S = structures.Sequence(10000)
+        >>> S = structures.BundleSequence(10000)
 
         >>> letters = list(string.ascii_lowercase)
         >>> letters_hv = functional.random_hv(len(letters), 10000)
-        >>> S = structures.Sequence(letters_hv[0], size=1)
+        >>> S = structures.BundleSequence(letters_hv[0], size=1)
 
     """
 
@@ -559,7 +559,7 @@ class Sequence:
         rotated_new = functional.permute(new, shifts=self.size - index - 1)
         self.value = functional.bundle(self.value, rotated_new)
 
-    def concat(self, seq: "Sequence") -> "Sequence":
+    def concat(self, seq: "BundleSequence") -> "BundleSequence":
         """Concatenates the current sequence with the given one.
 
         Args:
@@ -567,13 +567,13 @@ class Sequence:
 
         Examples::
 
-            >>> S1 = structures.Sequence(dimensions=10000)
+            >>> S1 = structures.BundleSequence(dimensions=10000)
             >>> S2 = S.concat(S1)
 
         """
         value = functional.permute(self.value, shifts=len(seq))
         value = functional.bundle(value, seq.value)
-        return Sequence(value, size=len(self) + len(seq))
+        return BundleSequence(value, size=len(self) + len(seq))
 
     def __getitem__(self, index: int) -> Tensor:
         """Gets the approximate value from given index.
@@ -615,37 +615,37 @@ class Sequence:
     def from_tensor(cls, input: Tensor):
         """Creates a sequence from hypervectors.
 
-        See: :func:`~torchhd.functional.sequence`.
+        See: :func:`~torchhd.functional.bundle_sequence`.
 
         Args:
-            input (Tensor): Tensor representing a sequence.
+            input (Tensor): Tensor containing hypervectors that form the sequence.
 
         Examples::
             >>> letters_hv = functional.random_hv(len(letters), 10000)
-            >>> S = structures.Sequence.from_tensor(letters_hv)
+            >>> S = structures.BundleSequence.from_tensor(letters_hv)
 
         """
-        value = functional.sequence(input)
+        value = functional.bundle_sequence(input)
         return cls(value, size=input.size(-2))
 
 
-class DistinctSequence:
-    """Hypervector-based distinct (binding-based) sequence data structure.
+class BindSequence:
+    """Hypervector binding-based sequence data structure.
 
     Creates an empty sequence of dim dimensions or from an input tensor.
 
     Args:
-        dimensions (int): number of dimensions of the distinct sequence.
+        dimensions (int): number of dimensions of the sequence.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
 
     Args:
-        input (Tensor): tensor representing a distinct sequence.
-        size (int, optional): the length of the distinct sequence provided as input. Default: ``0``.
+        input (Tensor): tensor representing a binding-based sequence.
+        size (int, optional): the length of the sequence provided as input. Default: ``0``.
 
     Examples::
 
-        >>> DS = structures.DistinctSequence(10000)
+        >>> DS = structures.BindSequence(10000)
     """
 
     @overload
@@ -739,7 +739,7 @@ class DistinctSequence:
 
         Examples::
 
-            >>> DS1 = structures.DistinctSequence(dimensions=10000)
+            >>> DS1 = structures.BindSequence(dimensions=10000)
             >>> DS.concat(DS1)
 
         """
@@ -775,17 +775,17 @@ class DistinctSequence:
     def from_tensor(cls, input: Tensor):
         """Creates a sequence from tensor.
 
-        See: :func:`~torchhd.functional.distinct_sequence`.
+        See: :func:`~torchhd.functional.bind_sequence`.
 
         Args:
-            input (Tensor): Tensor representing a sequence.
+            input (Tensor): Tensor containing hypervectors that form the sequence.
 
         Examples::
             >>> letters_hv = functional.random_hv(len(letters), 10000)
-            >>> DS = structures.DistinctSequence.from_tensor(letters_hv)
+            >>> DS = structures.BindSequence.from_tensor(letters_hv)
 
         """
-        value = functional.distinct_sequence(input)
+        value = functional.bind_sequence(input)
         return cls(value, size=input.size(-2))
 
 

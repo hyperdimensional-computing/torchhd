@@ -14,8 +14,8 @@ This module provides class-based implementations of HDC data structures.
     Memory
     Multiset
     HashTable
-    Sequence
-    DistinctSequence
+    BundleSequence
+    BindSequence
     Graph
     Tree
     FiniteStateAutomata
