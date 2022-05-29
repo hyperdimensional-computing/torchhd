@@ -471,7 +471,7 @@ def bundle(*args, out=None) -> Tensor:
         raise ValueError("Unsigned integer hypervectors are not supported.")
 
     if args[0].dtype == torch.bool:
-        return torch.where(args[0] == args[1], args[3])
+        return torch.where(args[0] == args[1], args[0], args[2])
 
     return torch.add(args[0], args[1], out=out)
 
@@ -682,7 +682,8 @@ def multiset(input: Tensor) -> Tensor:
 
     if dtype == torch.bool:
         count = torch.sum(input, dim=dim, dtype=torch.long)
-        return torch.greater(count, input.size(dim) // 2)
+        threshold = input.size(dim) // 2
+        return torch.greater(count, threshold)
 
     return torch.sum(input, dim=dim, dtype=dtype)
 
