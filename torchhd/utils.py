@@ -31,8 +31,8 @@ def plot_basis_set(memory, ax=None, **kwargs):
         See https://matplotlib.org/stable/users/installing/index.html for more information.")
 
     sim = []
-    for vector in A:
-        sim.append(functional.cosine_similarity(vector, A).tolist())
+    for vector in memory:
+        sim.append(functional.cosine_similarity(vector, memory).tolist())
     if ax is None:
         ax = plt.gca()
     axes = ax.matshow(sim, **kwargs)
@@ -72,7 +72,7 @@ def plot_similarity(vector, memory, ax=None, **kwargs):
         raise ImportError("Install matplotlib to use plotting functionality. \
         See https://matplotlib.org/stable/users/installing/index.html for more information.")
     
-    final = functional.cosine_similarity(vec, A).tolist()
+    final = functional.cosine_similarity(vector, memory).tolist()
     if ax is None:
         ax  = plt.gca()
     axes = ax.stem(final, **kwargs)
