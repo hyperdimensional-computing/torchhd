@@ -1,6 +1,7 @@
+from typing import overload
 import math
 import torch
-from torch import LongTensor, Tensor
+from torch import BoolTensor, LongTensor, Tensor
 import torch.nn.functional as F
 
 from collections import deque
@@ -420,7 +421,19 @@ def bind(input: Tensor, other: Tensor, *, out=None) -> Tensor:
     return torch.mul(input, other, out=out)
 
 
+@overload
 def bundle(input: Tensor, other: Tensor, *, out=None) -> Tensor:
+    ...
+
+
+@overload
+def bundle(
+    input: BoolTensor, other: BoolTensor, tiebreaker: BoolTensor, *, out=None
+) -> BoolTensor:
+    ...
+
+
+def bundle(*args, out=None) -> Tensor:
     r"""Bundles two hypervectors which produces a hypervector maximally similar to both.
 
     The bundling operation is used to aggregate information into a single hypervector.
@@ -451,15 +464,16 @@ def bundle(input: Tensor, other: Tensor, *, out=None) -> Tensor:
         tensor([0., 2., 0.])
 
     """
-    if input.dtype in {torch.bool, torch.complex64, torch.complex128}:
-        raise NotImplementedError(
-            "Boolean, and Complex hypervectors are not supported yet."
-        )
+    if args[0].dtype in {torch.complex64, torch.complex128}:
+        raise NotImplementedError("Complex hypervectors are not supported yet.")
 
-    if input.dtype == torch.uint8:
+    if args[0].dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
 
-    return torch.add(input, other, out=out)
+    if args[0].dtype == torch.bool:
+        return torch.where(args[0] == args[1], args[3])
+
+    return torch.add(args[0], args[1], out=out)
 
 
 def permute(input: Tensor, *, shifts=1, dims=-1) -> Tensor:
@@ -657,16 +671,20 @@ def multiset(input: Tensor) -> Tensor:
         tensor([-1.,  3.,  1.])
 
     """
+    dim = -2
+    dtype = input.dtype
 
-    if input.dtype in {torch.bool, torch.complex64, torch.complex128}:
-        raise NotImplementedError(
-            "Boolean, and Complex hypervectors are not supported yet."
-        )
+    if dtype in {torch.complex64, torch.complex128}:
+        raise NotImplementedError("Complex hypervectors are not supported yet.")
 
-    if input.dtype == torch.uint8:
+    if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
 
-    return torch.sum(input, dim=-2, dtype=input.dtype)
+    if dtype == torch.bool:
+        count = torch.sum(input, dim=dim, dtype=torch.long)
+        return torch.greater(count, input.size(dim) // 2)
+
+    return torch.sum(input, dim=dim, dtype=dtype)
 
 
 multibundle = multiset
@@ -699,13 +717,20 @@ def multibind(input: Tensor) -> Tensor:
         tensor([ 1.,  1., -1.])
 
     """
-    if input.dtype in {torch.bool, torch.complex64, torch.complex128}:
-        raise NotImplementedError(
-            "Boolean, and Complex hypervectors are not supported yet."
-        )
+    if input.dtype in {torch.complex64, torch.complex128}:
+        raise NotImplementedError("Complex hypervectors are not supported yet.")
 
     if input.dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
+
+    if input.dtype == torch.bool:
+        hvs = torch.unbind(input, -2)
+        result = hvs[0]
+
+        for i in range(1, len(hvs)):
+            result = torch.logical_xor(result, hvs[i])
+            
+        return result
 
     return torch.prod(input, dim=-2, dtype=input.dtype)
 
