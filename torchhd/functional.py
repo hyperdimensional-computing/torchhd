@@ -64,13 +64,20 @@ def identity_hv(
     if dtype is None:
         dtype = torch.get_default_dtype()
 
-    if dtype in {torch.bool, torch.complex64, torch.complex128}:
-        raise NotImplementedError(
-            "Boolean, and Complex hypervectors are not supported yet."
-        )
+    if dtype in {torch.complex64, torch.complex128}:
+        raise NotImplementedError("Complex hypervectors are not supported yet.")
 
     if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
+
+    if dtype == torch.bool:
+        return torch.zeros(
+            num_embeddings,
+            embedding_dim,
+            dtype=dtype,
+            device=device,
+            requires_grad=requires_grad,
+        )
 
     return torch.ones(
         num_embeddings,
@@ -122,10 +129,8 @@ def random_hv(
     if dtype is None:
         dtype = torch.get_default_dtype()
 
-    if dtype in {torch.bool, torch.complex64, torch.complex128}:
-        raise NotImplementedError(
-            "Boolean, and Complex hypervectors are not supported yet."
-        )
+    if dtype in {torch.complex64, torch.complex128}:
+        raise NotImplementedError("Complex hypervectors are not supported yet.")
 
     if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
@@ -137,6 +142,11 @@ def random_hv(
         ),
         dtype=torch.bool,
     ).bernoulli_(1.0 - sparsity, generator=generator)
+
+    if dtype == torch.bool:
+        select.requires_grad = requires_grad
+        return select
+
     result = torch.where(select, -1, +1).to(dtype=dtype, device=device)
     result.requires_grad = requires_grad
     return result
@@ -183,10 +193,8 @@ def level_hv(
     if dtype is None:
         dtype = torch.get_default_dtype()
 
-    if dtype in {torch.bool, torch.complex64, torch.complex128}:
-        raise NotImplementedError(
-            "Boolean, and Complex hypervectors are not supported yet."
-        )
+    if dtype in {torch.complex64, torch.complex128}:
+        raise NotImplementedError("Complex hypervectors are not supported yet.")
 
     if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
@@ -287,10 +295,8 @@ def circular_hv(
     if dtype is None:
         dtype = torch.get_default_dtype()
 
-    if dtype in {torch.bool, torch.complex64, torch.complex128}:
-        raise NotImplementedError(
-            "Boolean, and Complex hypervectors are not supported yet."
-        )
+    if dtype in {torch.complex64, torch.complex128}:
+        raise NotImplementedError("Complex hypervectors are not supported yet.")
 
     if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
@@ -354,7 +360,7 @@ def circular_hv(
 
             temp_hv = torch.where(threshold_v[span_idx] < t, span_start_hv, span_end_hv)
 
-        mutation_history.append(temp_hv * mutation_hv)
+        mutation_history.append(bind(temp_hv, mutation_hv))
         mutation_hv = temp_hv
 
         if i % 2 == 0:
@@ -362,7 +368,7 @@ def circular_hv(
 
     for i in range(num_embeddings + 1, num_embeddings * 2 - 1):
         mut = mutation_history.popleft()
-        mutation_hv *= mut
+        mutation_hv = bind(mutation_hv, mut)
 
         if i % 2 == 0:
             hv[i // 2] = mutation_hv
@@ -402,13 +408,14 @@ def bind(input: Tensor, other: Tensor, *, out=None) -> Tensor:
         tensor([ 1., -1., -1.])
 
     """
-    if input.dtype in {torch.bool, torch.complex64, torch.complex128}:
-        raise NotImplementedError(
-            "Boolean, and Complex hypervectors are not supported yet."
-        )
+    if input.dtype in {torch.complex64, torch.complex128}:
+        raise NotImplementedError("Complex hypervectors are not supported yet.")
 
     if input.dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
+
+    if input.dtype == torch.bool:
+        return torch.logical_xor(input, other, out=out)
 
     return torch.mul(input, other, out=out)
 
