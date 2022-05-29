@@ -21,6 +21,7 @@ __all__ = [
     "embeddings",
     "structures",
     "datasets",
+    "utils",
     "identity_hv",
     "random_hv",
     "level_hv",

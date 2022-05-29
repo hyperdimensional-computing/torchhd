@@ -1,11 +1,11 @@
 import torchhd.functional as functional
 
-def plot_basis_set(A, ax=None, **kwargs):
+def plot_basis_set(memory, ax=None, **kwargs):
     """Displays a similarity map for the provided set of hypervectors as a 
     matrix map
 
     Args:
-        A: 2D array-like
+        memory: 2D array-like
             The set of hypervectors whose similarity map is to be displayed
         
         ax: matplotlib Axes, optional
@@ -16,6 +16,13 @@ def plot_basis_set(A, ax=None, **kwargs):
 
     Returns:
         ax: matplotlib.axes
+
+    Examples::
+        
+        >>>  import matplotlib as plt
+        >>>  memory = torchhd.random_hvs(10, 10000)
+        >>>  utils.plot_basis_set(memory)
+        >>>  plt.show()
     """
     try:
         import matplotlib.pyplot as plt
@@ -31,16 +38,16 @@ def plot_basis_set(A, ax=None, **kwargs):
     axes = ax.matshow(sim, **kwargs)
     return axes
 
-def plot_vector_similarity(A, vec, ax=None, **kwargs):
+def plot_similarity(vector, memory, ax=None, **kwargs):
     """Displays a stem graph showing the similarity of input vector vec
     with hypervectors in input set A
 
     Args:
-        A:  2D array-like
-            Set of Hypervectors
-        
-        vec:    1D array-like
+        vector:    1D array-like
 
+        memory:  2D array-like
+                Set of Hypervectors
+        
         ax: matplotlib Axes, optional
         Axes in which to draw the plot
     
@@ -49,6 +56,15 @@ def plot_vector_similarity(A, vec, ax=None, **kwargs):
 
     Returns:
         axes: matplotlib.axes
+
+    Examples::
+        
+        >>>  import matplotlib as plt
+        >>>  memory = torchhd.level_hvs(10, 10000)
+        >>>  vector = torchhd.random_hv(1, 10000)
+        >>>  utils.plot_similarity(memory, vector)
+        >>>  plt.show()
+
     """
     try:
         import matplotlib.pyplot as plt
