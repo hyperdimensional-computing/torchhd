@@ -1,4 +1,3 @@
-from typing import overload
 import math
 import torch
 from torch import BoolTensor, LongTensor, Tensor
@@ -410,7 +409,7 @@ def bind(input: Tensor, other: Tensor) -> Tensor:
     """
     dtype = input.dtype
 
-    if torch.is_complex(dtype):
+    if torch.is_complex(input):
         raise NotImplementedError("Complex hypervectors are not supported yet.")
 
     if dtype == torch.uint8:
@@ -422,19 +421,7 @@ def bind(input: Tensor, other: Tensor) -> Tensor:
     return torch.mul(input, other)
 
 
-@overload
-def bundle(input: Tensor, other: Tensor, *, out=None) -> Tensor:
-    ...
-
-
-@overload
-def bundle(
-    input: BoolTensor, other: BoolTensor, tiebreaker: BoolTensor, *, out=None
-) -> BoolTensor:
-    ...
-
-
-def bundle(*args, out=None) -> Tensor:
+def bundle(input: Tensor, other: Tensor, *, tie: BoolTensor = None) -> Tensor:
     r"""Bundles two hypervectors which produces a hypervector maximally similar to both.
 
     The bundling operation is used to aggregate information into a single hypervector.
@@ -448,7 +435,7 @@ def bundle(*args, out=None) -> Tensor:
     Args:
         input (Tensor): input hypervector
         other (Tensor): other input hypervector
-        out (Tensor, optional): the output tensor.
+        tie (BoolTensor, optional): specifies how to break a tie while bundling boolean hypervectors. Default: only set bit if both ``input`` and ``other`` are ``True``.
 
     Shapes:
         - Input: :math:`(*)`
@@ -465,16 +452,21 @@ def bundle(*args, out=None) -> Tensor:
         tensor([0., 2., 0.])
 
     """
-    if args[0].dtype in {torch.complex64, torch.complex128}:
+    dtype = input.dtype
+
+    if torch.is_complex(input):
         raise NotImplementedError("Complex hypervectors are not supported yet.")
 
-    if args[0].dtype == torch.uint8:
+    if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
 
-    if args[0].dtype == torch.bool:
-        return torch.where(args[0] == args[1], args[0], args[2])
+    if dtype == torch.bool:
+        if tie is not None:
+            return torch.where(input == other, input, tie)
+        else:
+            return torch.logical_and(input, other)
 
-    return torch.add(args[0], args[1], out=out)
+    return torch.add(input, other)
 
 
 def permute(input: Tensor, *, shifts=1, dims=-1) -> Tensor:
