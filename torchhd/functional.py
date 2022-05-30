@@ -730,7 +730,7 @@ def multibind(input: Tensor) -> Tensor:
 
         for i in range(1, len(hvs)):
             result = torch.logical_xor(result, hvs[i])
-            
+
         return result
 
     return torch.prod(input, dim=-2, dtype=input.dtype)
