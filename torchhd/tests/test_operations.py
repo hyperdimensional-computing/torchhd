@@ -20,23 +20,10 @@ class TestBind:
         expect = torch.tensor([+1, -1, -1, +1])
         assert torch.all(res == expect).item()
 
-    def test_out(self):
-        hv = functional.random_hv(2, 100)
-        buffer = torch.empty(100)
-        res = functional.bind(hv[0], hv[1], out=buffer)
-
-        assert res.data_ptr() == buffer.data_ptr()
-        assert res.dtype == hv.dtype
-        assert res.dim() == 1
-        assert res.size(0) == 100
-        assert torch.all((hv == -1) | (hv == 1)).item(), "values are either -1 or +1"
-
     def test_dtype(self):
         hv = functional.random_hv(2, 100, dtype=torch.long)
-        buffer = torch.empty(100, dtype=torch.long)
-        res = functional.bind(hv[0], hv[1], out=buffer)
+        res = functional.bind(hv[0], hv[1])
 
-        assert res.data_ptr() == buffer.data_ptr()
         assert res.dtype == hv.dtype
         assert res.dim() == 1
         assert res.size(0) == 100
@@ -83,23 +70,10 @@ class TestBundle:
         expect = torch.tensor([-2, 0, 0, +2])
         assert torch.all(res == expect).item()
 
-    def test_out(self):
-        hv = functional.random_hv(2, 100)
-        buffer = torch.empty(100)
-        res = functional.bundle(hv[0], hv[1], out=buffer)
-
-        assert res.data_ptr() == buffer.data_ptr()
-        assert res.dtype == hv.dtype
-        assert res.dim() == 1
-        assert res.size(0) == 100
-        assert torch.all((hv <= 2) & (hv >= -2)).item(), "values are between -2 and +2"
-
     def test_dtype(self):
         hv = functional.random_hv(2, 100, dtype=torch.long)
-        buffer = torch.empty(100, dtype=torch.long)
-        res = functional.bundle(hv[0], hv[1], out=buffer)
+        res = functional.bundle(hv[0], hv[1])
 
-        assert res.data_ptr() == buffer.data_ptr()
         assert res.dtype == hv.dtype
         assert res.dim() == 1
         assert res.size(0) == 100

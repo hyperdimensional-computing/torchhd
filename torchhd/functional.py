@@ -378,7 +378,7 @@ def circular_hv(
     return hv
 
 
-def bind(input: Tensor, other: Tensor, *, out=None) -> Tensor:
+def bind(input: Tensor, other: Tensor) -> Tensor:
     r"""Binds two hypervectors which produces a hypervector dissimilar to both.
 
     Binding is used to associate information, for instance, to assign values to variables.
@@ -392,7 +392,6 @@ def bind(input: Tensor, other: Tensor, *, out=None) -> Tensor:
     Args:
         input (Tensor): input hypervector
         other (Tensor): other input hypervector
-        out (Tensor, optional): the output tensor.
 
     Shapes:
         - Input: :math:`(*)`
@@ -409,16 +408,18 @@ def bind(input: Tensor, other: Tensor, *, out=None) -> Tensor:
         tensor([ 1., -1., -1.])
 
     """
-    if input.dtype in {torch.complex64, torch.complex128}:
+    dtype = input.dtype
+
+    if torch.is_complex(dtype):
         raise NotImplementedError("Complex hypervectors are not supported yet.")
 
-    if input.dtype == torch.uint8:
+    if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
 
-    if input.dtype == torch.bool:
-        return torch.logical_xor(input, other, out=out)
+    if dtype == torch.bool:
+        return torch.logical_xor(input, other)
 
-    return torch.mul(input, other, out=out)
+    return torch.mul(input, other)
 
 
 @overload
@@ -508,12 +509,11 @@ def permute(input: Tensor, *, shifts=1, dims=-1) -> Tensor:
     return torch.roll(input, shifts=shifts, dims=dims)
 
 
-def soft_quantize(input: Tensor, *, out=None):
+def soft_quantize(input: Tensor):
     """Applies the hyperbolic tanh function to all elements of the input tensor.
 
     Args:
         input (Tensor): input tensor.
-        out (Tensor, optional): output tensor. Defaults to None.
 
     Shapes:
         - Input: :math:`(*)`
@@ -529,15 +529,14 @@ def soft_quantize(input: Tensor, *, out=None):
         tensor([0.0000, 0.9640, 0.0000])
 
     """
-    return torch.tanh(input, out=out)
+    return torch.tanh(input)
 
 
-def hard_quantize(input: Tensor, *, out=None):
+def hard_quantize(input: Tensor):
     """Applies binary quantization to all elements of the input tensor.
 
     Args:
         input (Tensor): input tensor
-        out (Tensor, optional): output tensor. Defaults to None.
 
     Shapes:
         - Input: :math:`(*)`
@@ -558,13 +557,7 @@ def hard_quantize(input: Tensor, *, out=None):
     positive = torch.tensor(1.0, dtype=input.dtype, device=input.device)
     negative = torch.tensor(-1.0, dtype=input.dtype, device=input.device)
 
-    if out != None:
-        out[:] = torch.where(input > 0, positive, negative)
-        result = out
-    else:
-        result = torch.where(input > 0, positive, negative)
-
-    return result
+    return torch.where(input > 0, positive, negative)
 
 
 def cosine_similarity(input: Tensor, others: Tensor) -> Tensor:
