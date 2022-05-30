@@ -498,6 +498,11 @@ def permute(input: Tensor, *, shifts=1, dims=-1) -> Tensor:
         tensor([ -1.,  1.,  -1.])
 
     """
+    dtype = input.dtype
+
+    if dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
     return torch.roll(input, shifts=shifts, dims=dims)
 
 
@@ -691,6 +696,10 @@ def multibind(input: Tensor) -> Tensor:
     Shapes:
         - Input: :math:`(*, n, d)`
         - Output: :math:`(*, d)`
+
+    .. note::
+
+        This method is not supported for ``torch.float16`` and ``torch.bfloat16`` input data types on a CPU device.
 
     Examples::
 
@@ -887,6 +896,10 @@ def bind_sequence(input: Tensor) -> Tensor:
     Shapes:
         - Input: :math:`(*, n, d)`
         - Output: :math:`(*, d)`
+
+    .. note::
+
+        This method is not supported for ``torch.float16`` and ``torch.bfloat16`` input data types on a CPU device.
 
     Examples::
 
