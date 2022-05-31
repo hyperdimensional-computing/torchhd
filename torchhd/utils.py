@@ -1,18 +1,19 @@
+from torch import Tensor
 import torchhd.functional as functional
 
-def plot_basis_set(memory, ax=None, **kwargs):
+def plot_basis_set(memory:Tensor, ax=None, **kwargs):
     """Displays a similarity map for the provided set of hypervectors as a 
     matrix map
 
     Args:
-        memory: 2D array-like
+        memory (torch.Tensor): 2D array-like
             The set of hypervectors whose similarity map is to be displayed
         
-        ax: matplotlib Axes, optional
-        Axes in which to draw the plot
+        ax (matplotlib.axes, optional):
+            Axes in which to draw the plot
         
     Other Parameters:
-        **kwargs: `~matplotlib.pyplot.matshow` arguments
+        **kwargs: `~matplotlib.axes.Axes.matshow <https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.matshow.html>` arguments
 
     Returns:
         ax: matplotlib.axes
@@ -38,21 +39,21 @@ def plot_basis_set(memory, ax=None, **kwargs):
     axes = ax.matshow(sim, **kwargs)
     return axes
 
-def plot_similarity(vector, memory, ax=None, **kwargs):
+def plot_similarity(vector:Tensor, memory:Tensor, ax=None, **kwargs):
     """Displays a stem graph showing the similarity of input vector vec
     with hypervectors in input set A
 
     Args:
-        vector:    1D array-like
+        vector (torch.Tensor):  1D array-like
 
-        memory:  2D array-like
-                Set of Hypervectors
+        memory (torch.Tensor):  2D array-like
+                                Set of Hypervectors
         
-        ax: matplotlib Axes, optional
-        Axes in which to draw the plot
+        ax (matplotlib.axes, optional):
+            Axes in which to draw the plot
     
     Other Parameters:
-        **kwargs: `~matplotlib.pyplot.stem` arguments
+        **kwargs: `~matplotlib.pyplot.stem <https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.stem.html?highlight=stem#matplotlib.axes.Axes.stem>` arguments
 
     Returns:
         axes: matplotlib.axes
