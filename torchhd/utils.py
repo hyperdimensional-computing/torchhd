@@ -1,80 +1,91 @@
+import torch
 from torch import Tensor
+
 import torchhd.functional as functional
 
-def plot_basis_set(memory:Tensor, ax=None, **kwargs):
-    """Displays a similarity map for the provided set of hypervectors as a 
-    matrix map
+
+def plot_pair_similarity(memory: Tensor, ax=None, **kwargs):
+    """Plots the pair-wise similarity of a hypervector set.
 
     Args:
-        memory (torch.Tensor): 2D array-like
-            The set of hypervectors whose similarity map is to be displayed
-        
-        ax (matplotlib.axes, optional):
-            Axes in which to draw the plot
-        
+        memory (Tensor): The set of :math:`n` hypervectors whose pair-wise similarity is to be displayed.
+        ax (matplotlib.axes, optional): Axes in which to draw the plot.
+
     Other Parameters:
-        **kwargs: `~matplotlib.axes.Axes.matshow <https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.matshow.html>` arguments
+        **kwargs: `matplotlib.axes.Axes.pcolormesh <https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.pcolormesh.html>`_ arguments.
 
     Returns:
-        ax: matplotlib.axes
+        matplotlib.collections.QuadMesh: `matplotlib.collections.QuadMesh <https://matplotlib.org/stable/api/collections_api.html#matplotlib.collections.QuadMesh>`_.
+
+    Shapes:
+        - Memory: :math:`(n, d)`
 
     Examples::
-        
-        >>>  import matplotlib as plt
-        >>>  memory = torchhd.random_hvs(10, 10000)
-        >>>  utils.plot_basis_set(memory)
+
+        >>>  import matplotlib.pyplot as plt
+        >>>  hv = torchhd.level_hv(10, 10000)
+        >>>  utils.plot_pair_similarity(hv)
         >>>  plt.show()
     """
     try:
         import matplotlib.pyplot as plt
     except ImportError:
-        raise ImportError("Install matplotlib to use plotting functionality. \
-        See https://matplotlib.org/stable/users/installing/index.html for more information.")
+        raise ImportError(
+            "Install matplotlib to use plotting functionality. \
+        See https://matplotlib.org/stable/users/installing/index.html for more information."
+        )
 
-    sim = []
+    similarity = []
     for vector in memory:
-        sim.append(functional.cosine_similarity(vector, memory).tolist())
+        similarity.append(functional.cosine_similarity(vector, memory).tolist())
+
     if ax is None:
         ax = plt.gca()
-    axes = ax.matshow(sim, **kwargs)
-    return axes
 
-def plot_similarity(vector:Tensor, memory:Tensor, ax=None, **kwargs):
-    """Displays a stem graph showing the similarity of input vector vec
-    with hypervectors in input set A
+    xy = torch.arange(memory.size(-2))
+    x, y = torch.meshgrid(xy, xy)
+
+    ax.set_aspect("equal", adjustable="box")
+    return ax.pcolormesh(x, y, similarity, **kwargs)
+
+
+def plot_similarity(input: Tensor, memory: Tensor, ax=None, **kwargs):
+    """Plots the similarity of an one hypervector with a set of hypervectors.
 
     Args:
-        vector (torch.Tensor):  1D array-like
+        input (torch.Tensor): Hypervector to compare against the memory.
+        memory (torch.Tensor): Set of :math:`n` hypervectors.
+        ax (matplotlib.axes, optional): Axes in which to draw the plot.
 
-        memory (torch.Tensor):  2D array-like
-                                Set of Hypervectors
-        
-        ax (matplotlib.axes, optional):
-            Axes in which to draw the plot
-    
     Other Parameters:
-        **kwargs: `~matplotlib.pyplot.stem <https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.stem.html?highlight=stem#matplotlib.axes.Axes.stem>` arguments
+        **kwargs: `matplotlib.axes.Axes.stem <https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.stem.html?highlight=stem#matplotlib.axes.Axes.stem>`_ arguments.
 
     Returns:
-        axes: matplotlib.axes
+        StemContainer: `matplotlib.container.StemContainer <https://matplotlib.org/stable/api/container_api.html#matplotlib.container.StemContainer>`_.
+
+    Shapes:
+        - Input: :math:`(d)`
+        - Memory: :math:`(n, d)`
 
     Examples::
-        
-        >>>  import matplotlib as plt
-        >>>  memory = torchhd.level_hvs(10, 10000)
-        >>>  vector = torchhd.random_hv(1, 10000)
-        >>>  utils.plot_similarity(memory, vector)
+
+        >>>  import matplotlib.pyplot as plt
+        >>>  hv = torchhd.level_hv(10, 10000)
+        >>>  utils.plot_similarity(hv[4], hv)
         >>>  plt.show()
 
     """
     try:
         import matplotlib.pyplot as plt
     except ImportError:
-        raise ImportError("Install matplotlib to use plotting functionality. \
-        See https://matplotlib.org/stable/users/installing/index.html for more information.")
-    
-    final = functional.cosine_similarity(vector, memory).tolist()
+        raise ImportError(
+            "Install matplotlib to use plotting functionality. \
+        See https://matplotlib.org/stable/users/installing/index.html for more information."
+        )
+
+    similarity = functional.cosine_similarity(input, memory).tolist()
+
     if ax is None:
-        ax  = plt.gca()
-    axes = ax.stem(final, **kwargs)
-    return axes
+        ax = plt.gca()
+
+    return ax.stem(similarity, **kwargs)
