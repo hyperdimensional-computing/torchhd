@@ -3,58 +3,42 @@ import torch
 
 from torchhd import functional
 
-from .utils import between, torch_dtypes, torch_float_dtypes, torch_complex_dtypes
+from .utils import (
+    between,
+    within,
+    torch_dtypes,
+    torch_float_dtypes,
+    torch_int_dtypes,
+    torch_complex_dtypes,
+    supported_dtype,
+)
+
+seed = 2147483644
 
 
 class TestIdentity_hv:
-    @pytest.mark.parametrize("dtype", list(torch_dtypes))
-    @pytest.mark.parametrize("n", [1, 29, 1940])
-    @pytest.mark.parametrize("d", [1, 29, 1940, 10000])
-    @pytest.mark.parametrize("device", ["cpu", "cuda"])
-    @pytest.mark.parametrize("requires_grad", [True, False])
-    def test_shape(self, dtype, n, d, device, requires_grad):
-        device = torch.device(device if torch.cuda.is_available() else "cpu")
+    @pytest.mark.parametrize("n", [1, 5564])
+    @pytest.mark.parametrize("d", [8425, 10])
+    def test_shape(self, n, d):
+        hv = functional.identity_hv(n, d)
 
-        if dtype == torch.uint8:
-            with pytest.raises(ValueError):
-                hv = functional.identity_hv(
-                    n, d, dtype=dtype, device=device, requires_grad=requires_grad
-                )
-
-            return
-
-        if dtype in {torch.complex64, torch.complex128}:
-            with pytest.raises(NotImplementedError):
-                hv = functional.identity_hv(
-                    n, d, dtype=dtype, device=device, requires_grad=requires_grad
-                )
-
-            return
-
-        if dtype not in torch_float_dtypes and requires_grad:
-            # Only floating tensors can require gradients
-            with pytest.raises(RuntimeError):
-                hv = functional.identity_hv(
-                    n, d, dtype=dtype, device=device, requires_grad=requires_grad
-                )
-
-            return
-
-        hv = functional.identity_hv(
-            n, d, dtype=dtype, device=device, requires_grad=requires_grad
-        )
         assert hv.dim() == 2
         assert hv.size(0) == n
         assert hv.size(1) == d
-        assert hv.device == device
-        assert hv.requires_grad == requires_grad
 
-    def test_value(self):
-        hv = functional.identity_hv(100, 10000)
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_value(self, dtype):
+        if not supported_dtype(dtype):
+            return
+
+        if dtype == torch.bool:
+            hv = functional.identity_hv(100, 10000, dtype=dtype)
+            assert torch.all(hv == False).item()
+
+            return
+
+        hv = functional.identity_hv(100, 10000, dtype=dtype)
         assert torch.all(hv == 1.0).item()
-
-        hv = functional.identity_hv(100, 10000, dtype=torch.bool)
-        assert torch.all(hv == False).item()
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -133,61 +117,82 @@ class TestIdentity_hv:
 
 
 class TestRandom_hv:
-    def test_shape(self):
-        hv = functional.random_hv(13, 2556)
-        assert hv.dim() == 2
-        assert hv.size(0) == 13
-        assert hv.size(1) == 2556
+    @pytest.mark.parametrize("n", [1, 5564])
+    @pytest.mark.parametrize("d", [8425, 10])
+    def test_shape(self, n, d):
+        hv = functional.random_hv(n, d)
 
-        hv = functional.random_hv(13, 2556)
         assert hv.dim() == 2
-        assert hv.size(0) == 13
-        assert hv.size(1) == 2556
+        assert hv.size(0) == n
+        assert hv.size(1) == d
 
     def test_generator(self):
         generator = torch.Generator()
-        generator.manual_seed(2147483644)
+        generator.manual_seed(seed)
         hv1 = functional.random_hv(20, 10000, generator=generator)
 
         generator = torch.Generator()
-        generator.manual_seed(2147483644)
+        generator.manual_seed(seed)
 
         hv2 = functional.random_hv(20, 10000, generator=generator)
         assert torch.all(hv1 == hv2).item()
 
-    def test_value(self):
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_value(self, dtype):
+        if not supported_dtype(dtype):
+            return
+
         generator = torch.Generator()
-        generator.manual_seed(2147483644)
+        generator.manual_seed(seed)
+
+        if dtype == torch.bool:
+            hv = functional.random_hv(100, 10000, dtype=dtype)
+            assert torch.all((hv == False) | (hv == True)).item()
+
+            return
 
         hv = functional.random_hv(100, 10000, generator=generator)
         assert torch.all((hv == -1) | (hv == 1)).item()
 
-    def test_sparsity(self):
+    @pytest.mark.parametrize("sparsity", [0.0, 0.1, 0.5, 0.756, 1.0])
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_sparsity(self, sparsity, dtype):
+        if not supported_dtype(dtype):
+            return
+
         generator = torch.Generator()
-        generator.manual_seed(2147483644)
+        generator.manual_seed(seed)
 
-        hv = functional.random_hv(1000, 10000, generator=generator, sparsity=1)
-        assert torch.all(hv == 1).item()
+        if dtype == torch.bool:
+            hv = functional.random_hv(
+                1000, 10000, generator=generator, dtype=dtype, sparsity=sparsity
+            )
+            calc_sparsity = torch.sum(hv == False).div(10000 * 1000).item()
+            assert within(calc_sparsity, sparsity, 0.001)
 
-        hv = functional.random_hv(1000, 10000, generator=generator, sparsity=0)
-        assert torch.all(hv == -1).item()
+            return
 
-        hv = functional.random_hv(1000, 10000, generator=generator, sparsity=0.5)
-        assert between(torch.sum(hv == -1).div(10000 * 1000).item(), 0.499, 0.501)
+        hv = functional.random_hv(
+            1000, 10000, generator=generator, dtype=dtype, sparsity=sparsity
+        )
+        calc_sparsity = torch.sum(hv == 1).div(10000 * 1000).item()
+        assert within(calc_sparsity, sparsity, 0.001)
 
-    def test_orthogonality(self):
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_orthogonality(self, dtype):
+        if not supported_dtype(dtype):
+            return
+
         generator = torch.Generator()
-        generator.manual_seed(2147483644)
+        generator.manual_seed(seed)
 
-        sims = [None] * 1000
-        for i in range(1000):
+        sims = [None] * 100
+        for i in range(100):
             hv = functional.random_hv(2, 10000, generator=generator)
             sims[i] = functional.cosine_similarity(hv[0], hv[1].unsqueeze(0))
 
         sims = torch.cat(sims)
-        assert between(
-            sims.mean().item(), -0.001, 0.001
-        ), "similarity is approximately 0"
+        assert within(sims.mean().item(), 0, 0.001)
         assert sims.std().item() < 0.01
 
     def test_device(self):
@@ -265,31 +270,29 @@ class TestRandom_hv:
 
 
 class TestLevel_hv:
-    def test_shape(self):
-        hv = functional.level_hv(13, 2556)
-        assert hv.dim() == 2
-        assert hv.size(0) == 13
-        assert hv.size(1) == 2556
+    @pytest.mark.parametrize("n", [1, 2, 3, 5564])
+    @pytest.mark.parametrize("d", [8425, 10])
+    def test_shape(self, n, d):
+        hv = functional.level_hv(n, d)
 
-        hv = functional.level_hv(130, 3530)
         assert hv.dim() == 2
-        assert hv.size(0) == 130
-        assert hv.size(1) == 3530
+        assert hv.size(0) == n
+        assert hv.size(1) == d
 
     def test_generator(self):
         generator = torch.Generator()
-        generator.manual_seed(2147483644)
+        generator.manual_seed(seed)
         hv1 = functional.level_hv(60, 10000, generator=generator)
 
         generator = torch.Generator()
-        generator.manual_seed(2147483644)
+        generator.manual_seed(seed)
         hv2 = functional.level_hv(60, 10000, generator=generator)
 
         assert torch.all(hv1 == hv2).item()
 
     def test_value(self):
         generator = torch.Generator()
-        generator.manual_seed(2147483644)
+        generator.manual_seed(seed)
 
         hv = functional.level_hv(50, 10000, generator=generator)
         assert torch.all((hv == -1) | (hv == 1)).item(), "values are either -1 or +1"
@@ -396,31 +399,29 @@ class TestLevel_hv:
 
 
 class TestCircular_hv:
-    def test_shape(self):
-        hv = functional.circular_hv(13, 2556)
-        assert hv.dim() == 2
-        assert hv.size(0) == 13
-        assert hv.size(1) == 2556
+    @pytest.mark.parametrize("n", [1, 2, 3, 5564])
+    @pytest.mark.parametrize("d", [8425, 10])
+    def test_shape(self, n, d):
+        hv = functional.circular_hv(n, d)
 
-        hv = functional.circular_hv(724, 9345)
         assert hv.dim() == 2
-        assert hv.size(0) == 724
-        assert hv.size(1) == 9345
+        assert hv.size(0) == n
+        assert hv.size(1) == d
 
     def test_generator(self):
         generator = torch.Generator()
-        generator.manual_seed(2147483644)
+        generator.manual_seed(seed)
         hv1 = functional.circular_hv(60, 10000, generator=generator)
 
         generator = torch.Generator()
-        generator.manual_seed(2147483644)
+        generator.manual_seed(seed)
         hv2 = functional.circular_hv(60, 10000, generator=generator)
 
         assert torch.all(hv1 == hv2).item()
 
     def test_value(self):
         generator = torch.Generator()
-        generator.manual_seed(2147483644)
+        generator.manual_seed(seed)
 
         hv = functional.circular_hv(50, 10000, generator=generator)
         assert torch.all((hv == -1) | (hv == 1)).item(), "values are either -1 or +1"

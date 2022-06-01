@@ -208,6 +208,8 @@ def level_hv(
 
     # convert from normalized "randomness" variable r to number of orthogonal vectors sets "span"
     levels_per_span = (1 - randomness) * (num_embeddings - 1) + randomness * 1
+    # must be at least one to deal with the case that num_embeddings is less than 2
+    levels_per_span = max(levels_per_span, 1)
     span = (num_embeddings - 1) / levels_per_span
     # generate the set of orthogonal vectors within the level vector set
     span_hv = random_hv(

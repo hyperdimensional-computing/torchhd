@@ -76,7 +76,7 @@ class TestMultibind:
             with pytest.raises(RuntimeError):
                 functional.multibind(hv)
 
-            return         
+            return
 
         res = functional.multibind(hv)
         assert res.dtype == dtype
@@ -281,7 +281,7 @@ class TestBindSequence:
             with pytest.raises(RuntimeError):
                 functional.multibind(hv)
 
-            return  
+            return
 
         res = functional.bind_sequence(hv)
         assert res.dtype == dtype
