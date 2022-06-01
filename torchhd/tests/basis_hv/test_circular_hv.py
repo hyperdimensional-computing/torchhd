@@ -4,11 +4,8 @@ import torch
 from torchhd import functional
 
 from ..utils import (
-    between,
     within,
     torch_dtypes,
-    torch_float_dtypes,
-    torch_int_dtypes,
     torch_complex_dtypes,
     supported_dtype,
 )
@@ -47,9 +44,13 @@ class TestCircular_hv:
 
         hv = functional.circular_hv(50, 10000, generator=generator, dtype=dtype)
         if dtype == torch.bool:
-            assert torch.all((hv == True) | (hv == False)).item(), "values are either 1 or 0"
+            assert torch.all(
+                (hv == True) | (hv == False)
+            ).item(), "values are either 1 or 0"
         else:
-            assert torch.all((hv == -1) | (hv == 1)).item(), "values are either -1 or +1"
+            assert torch.all(
+                (hv == -1) | (hv == 1)
+            ).item(), "values are either -1 or +1"
 
         hv = functional.circular_hv(8, 1000000, generator=generator, dtype=dtype)
         sims = functional.hamming_similarity(hv[0], hv).float() / 1000000
@@ -74,8 +75,8 @@ class TestCircular_hv:
         generator.manual_seed(seed)
 
         hv = functional.circular_hv(
-                1000, 10000, generator=generator, dtype=dtype, sparsity=sparsity
-            )
+            1000, 10000, generator=generator, dtype=dtype, sparsity=sparsity
+        )
 
         if dtype == torch.bool:
             calc_sparsity = torch.sum(hv == False).div(10000 * 1000).item()
@@ -83,7 +84,6 @@ class TestCircular_hv:
             calc_sparsity = torch.sum(hv == 1).div(10000 * 1000).item()
 
         assert within(calc_sparsity, sparsity, 0.01)
-
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_device(self, dtype):

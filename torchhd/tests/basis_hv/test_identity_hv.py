@@ -4,11 +4,7 @@ import torch
 from torchhd import functional
 
 from ..utils import (
-    between,
-    within,
     torch_dtypes,
-    torch_float_dtypes,
-    torch_int_dtypes,
     torch_complex_dtypes,
     supported_dtype,
 )

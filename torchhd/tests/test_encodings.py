@@ -4,18 +4,77 @@ import torch
 
 from torchhd import functional
 
-from .utils import between, torch_dtypes, torch_float_dtypes, torch_complex_dtypes
+from .utils import (
+    between,
+    torch_dtypes,
+    torch_float_dtypes,
+    torch_complex_dtypes,
+    supported_dtype,
+)
 
 
 class TestMultiset:
-    def test_value(self):
-        hv = torch.zeros(4, 1000)
-        res = functional.multiset(hv)
-        assert torch.all(res == 0).item()
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_value(self, dtype):
+        if not supported_dtype(dtype):
+            return
 
-        hv = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, -1, 1]])
-        res = functional.multiset(hv)
-        assert torch.all(res == torch.tensor([-1, -1, -1, 3])).item()
+        if dtype == torch.bool:
+            hv = torch.tensor(
+                [
+                    [
+                        True,
+                        False,
+                        False,
+                        True,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                    ],
+                    [True, False, False, True, False, False, True, False, True, True],
+                    [True, False, False, False, True, False, True, False, True, True],
+                    [
+                        False,
+                        False,
+                        False,
+                        False,
+                        True,
+                        False,
+                        False,
+                        True,
+                        False,
+                        False,
+                    ],
+                    [True, True, False, True, True, False, True, True, False, False],
+                ]
+            )
+            res = functional.multiset(hv)
+            assert torch.all(
+                res
+                == torch.tensor(
+                    [True, False, False, True, True, False, True, False, False, False],
+                    dtype=dtype,
+                )
+            ).item()
+
+        else:
+            hv = torch.tensor(
+                [
+                    [1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
+                    [1, -1, -1, 1, 1, -1, 1, -1, 1, -1],
+                    [-1, 1, -1, 1, 1, 1, 1, -1, -1, -1],
+                    [1, 1, -1, -1, 1, -1, 1, 1, 1, 1],
+                    [1, 1, -1, -1, -1, 1, -1, 1, -1, 1],
+                ],
+                dtype=dtype,
+            )
+            res = functional.multiset(hv)
+            assert torch.all(
+                res == torch.tensor([3, 3, -5, 1, 1, 1, 1, 1, -1, 1], dtype=dtype)
+            ).item()
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
@@ -45,15 +104,71 @@ class TestMultiset:
 
 
 class TestMultibind:
-    def test_value(self):
-        hv = torch.zeros(4, 1000)
-        res = functional.multibind(hv)
-        assert torch.all(res == 0).item()
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_value(self, dtype):
+        if not supported_dtype(dtype):
+            return
 
-        hv = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1]])
-        res = functional.multibind(hv)
-        assert torch.all(res == torch.tensor([1, 1, -1, 1])).item()
-        assert res.dtype == hv.dtype
+        if dtype == torch.float16 or dtype == torch.bfloat16:
+            # Half precision is not supported by Torch on a CPU device
+            return
+
+        if dtype == torch.bool:
+            hv = torch.tensor(
+                [
+                    [
+                        True,
+                        False,
+                        False,
+                        True,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                    ],
+                    [True, False, False, True, False, False, True, False, True, True],
+                    [True, False, False, False, True, False, True, False, True, True],
+                    [
+                        False,
+                        False,
+                        False,
+                        False,
+                        True,
+                        False,
+                        False,
+                        True,
+                        False,
+                        False,
+                    ],
+                    [True, True, False, True, True, False, True, True, False, False],
+                ]
+            )
+            res = functional.multibind(hv)
+            assert torch.all(
+                res
+                == torch.tensor(
+                    [False, True, False, True, True, False, True, False, False, False],
+                    dtype=dtype,
+                )
+            ).item()
+
+        else:
+            hv = torch.tensor(
+                [
+                    [1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
+                    [1, -1, -1, 1, 1, -1, 1, -1, 1, -1],
+                    [-1, 1, -1, 1, 1, 1, 1, -1, -1, -1],
+                    [1, 1, -1, -1, 1, -1, 1, 1, 1, 1],
+                    [1, 1, -1, -1, -1, 1, -1, 1, -1, 1],
+                ],
+                dtype=dtype,
+            )
+            res = functional.multibind(hv)
+            assert torch.all(
+                res == torch.tensor([-1, -1, -1, 1, 1, 1, 1, 1, -1, 1], dtype=dtype)
+            ).item()
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):

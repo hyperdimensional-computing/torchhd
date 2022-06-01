@@ -4,11 +4,8 @@ import torch
 from torchhd import functional
 
 from ..utils import (
-    between,
     within,
     torch_dtypes,
-    torch_float_dtypes,
-    torch_int_dtypes,
     torch_complex_dtypes,
     supported_dtype,
 )
@@ -47,9 +44,13 @@ class TestLevel_hv:
 
         hv = functional.level_hv(50, 10000, generator=generator, dtype=dtype)
         if dtype == torch.bool:
-            assert torch.all((hv == True) | (hv == False)).item(), "values are either 1 or 0"
+            assert torch.all(
+                (hv == True) | (hv == False)
+            ).item(), "values are either 1 or 0"
         else:
-            assert torch.all((hv == -1) | (hv == 1)).item(), "values are either -1 or +1"
+            assert torch.all(
+                (hv == -1) | (hv == 1)
+            ).item(), "values are either -1 or +1"
 
         # look at the similarity profile w.r.t. the first hypervector
         sims = functional.hamming_similarity(hv[0], hv).float() / 10000
@@ -73,8 +74,8 @@ class TestLevel_hv:
         generator.manual_seed(seed)
 
         hv = functional.level_hv(
-                1000, 10000, generator=generator, dtype=dtype, sparsity=sparsity
-            )
+            1000, 10000, generator=generator, dtype=dtype, sparsity=sparsity
+        )
 
         if dtype == torch.bool:
             calc_sparsity = torch.sum(hv == False).div(10000 * 1000).item()

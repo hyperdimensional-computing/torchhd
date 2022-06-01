@@ -3,24 +3,48 @@ import torch
 
 from torchhd import functional
 
-from .utils import between, torch_dtypes, torch_float_dtypes, torch_complex_dtypes
+from .utils import (
+    between,
+    torch_dtypes,
+    torch_float_dtypes,
+    torch_complex_dtypes,
+    supported_dtype,
+)
 
 
 class TestBind:
-    def test_value(self):
-        hv = functional.random_hv(2, 100)
-        res = functional.bind(hv[0], hv[1])
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_value(self, dtype):
+        if not supported_dtype(dtype):
+            return
 
-        assert res.dtype == hv.dtype
-        assert res.dim() == 1
-        assert res.size(0) == 100
-        assert torch.all((hv == -1) | (hv == 1)).item(), "values are either -1 or +1"
-
-        a = torch.tensor([-1, -1, +1, +1])
-        b = torch.tensor([-1, +1, -1, +1])
-        res = functional.bind(a, b)
-        expect = torch.tensor([+1, -1, -1, +1])
-        assert torch.all(res == expect).item()
+        if dtype == torch.bool:
+            hv = torch.tensor(
+                [
+                    [False, False, True, False, False, True, True, True, False, False],
+                    [True, False, True, False, False, True, False, False, True, False],
+                ],
+                dtype=dtype,
+            )
+            res = functional.bind(hv[0], hv[1])
+            assert torch.all(
+                res
+                == torch.tensor(
+                    [True, False, False, False, False, False, True, True, True, False]
+                )
+            ).item()
+        else:
+            hv = torch.tensor(
+                [
+                    [-1, 1, 1, -1, -1, -1, -1, 1, -1, 1],
+                    [1, 1, -1, 1, -1, 1, -1, -1, 1, -1],
+                ],
+                dtype=dtype,
+            )
+            res = functional.bind(hv[0], hv[1])
+            assert torch.all(
+                res == torch.tensor([-1, 1, -1, -1, 1, -1, 1, -1, -1, -1])
+            ).item()
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
@@ -55,20 +79,63 @@ class TestBind:
 
 
 class TestBundle:
-    def test_value(self):
-        hv = functional.random_hv(2, 100)
-        res = functional.bundle(hv[0], hv[1])
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_value(self, dtype):
+        if not supported_dtype(dtype):
+            return
 
-        assert res.dtype == hv.dtype
-        assert res.dim() == 1
-        assert res.size(0) == 100
-        assert torch.all((hv <= 2) & (hv >= -2)).item(), "values are between -2 and +2"
+        if dtype == torch.bool:
+            hv = torch.tensor(
+                [
+                    [False, False, True, False, False, True, True, True, False, False],
+                    [True, False, True, False, False, True, False, False, True, False],
+                ],
+                dtype=dtype,
+            )
+            res = functional.bundle(hv[0], hv[1])
+            assert torch.all(
+                res
+                == torch.tensor(
+                    [
+                        False,
+                        False,
+                        True,
+                        False,
+                        False,
+                        True,
+                        False,
+                        False,
+                        False,
+                        False,
+                    ],
+                    dtype=dtype,
+                )
+            ).item()
 
-        a = torch.tensor([-1, -1, +1, +1])
-        b = torch.tensor([-1, +1, -1, +1])
-        res = functional.bundle(a, b)
-        expect = torch.tensor([-2, 0, 0, +2])
-        assert torch.all(res == expect).item()
+            tie = torch.tensor(
+                [[False, True, False, False, False, True, False, True, True, False]],
+                dtype=dtype,
+            )
+            res = functional.bundle(hv[0], hv[1], tie=tie)
+            assert torch.all(
+                res
+                == torch.tensor(
+                    [False, False, True, False, False, True, False, True, True, False],
+                    dtype=dtype,
+                )
+            ).item()
+        else:
+            hv = torch.tensor(
+                [
+                    [1, 1, -1, -1, 1, 1, 1, 1, -1, -1],
+                    [1, 1, -1, -1, -1, -1, -1, -1, 1, -1],
+                ],
+                dtype=dtype,
+            )
+            res = functional.bundle(hv[0], hv[1])
+            assert torch.all(
+                res == torch.tensor([2, 2, -2, -2, 0, 0, 0, 0, 0, -2], dtype=dtype)
+            ).item()
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
