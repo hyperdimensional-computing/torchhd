@@ -1,54 +1,75 @@
-from re import A
 import pytest
 import torch
 
 from torchhd import functional
 
-from .utils import between
+from .utils import (
+    torch_dtypes,
+    torch_complex_dtypes,
+    supported_dtype,
+)
 
 
 class TestMultiset:
-    def test_value(self):
-        hv = torch.zeros(4, 1000)
-        res = functional.multiset(hv)
-        assert torch.all(res == 0).item()
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_value(self, dtype):
+        if not supported_dtype(dtype):
+            return
 
-        hv = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, -1, 1]])
-        res = functional.multiset(hv)
-        assert torch.all(res == torch.tensor([-1, -1, -1, 3])).item()
-
-    def test_dtype(self):
-        hv = functional.random_hv(11, 10000)
-        res = functional.multiset(hv)
-        assert res.dtype == torch.get_default_dtype()
-
-        hv = functional.random_hv(11, 10000, dtype=torch.float)
-        res = functional.multiset(hv)
-        assert res.dtype == torch.float
-
-        hv = functional.random_hv(11, 10000, dtype=torch.int)
-        res = functional.multiset(hv)
-        assert res.dtype == torch.int
-
-        hv = functional.random_hv(11, 10000, dtype=torch.long)
-        res = functional.multiset(hv)
-        assert res.dtype == torch.long
-
-        hv = functional.random_hv(11, 10000, dtype=torch.float64)
-        res = functional.multiset(hv)
-        assert res.dtype == torch.float64
-
-        hv = torch.zeros(4, 1000, dtype=torch.bool)
-        with pytest.raises(NotImplementedError):
+        if dtype == torch.bool:
+            hv = torch.tensor(
+                [
+                    [1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 1, 0, 0, 1, 0, 1, 1],
+                    [1, 0, 0, 0, 1, 0, 1, 0, 1, 1],
+                    [0, 0, 0, 0, 1, 0, 0, 1, 0, 0],
+                    [1, 1, 0, 1, 1, 0, 1, 1, 0, 0],
+                ],
+                dtype=dtype,
+            )
             res = functional.multiset(hv)
+            assert torch.all(
+                res
+                == torch.tensor(
+                    [1, 0, 0, 1, 1, 0, 1, 0, 0, 0],
+                    dtype=dtype,
+                )
+            ).item()
 
-        hv = torch.zeros(4, 1000, dtype=torch.complex128)
-        with pytest.raises(NotImplementedError):
+        else:
+            hv = torch.tensor(
+                [
+                    [1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
+                    [1, -1, -1, 1, 1, -1, 1, -1, 1, -1],
+                    [-1, 1, -1, 1, 1, 1, 1, -1, -1, -1],
+                    [1, 1, -1, -1, 1, -1, 1, 1, 1, 1],
+                    [1, 1, -1, -1, -1, 1, -1, 1, -1, 1],
+                ],
+                dtype=dtype,
+            )
             res = functional.multiset(hv)
+            assert torch.all(
+                res == torch.tensor([3, 3, -5, 1, 1, 1, 1, 1, -1, 1], dtype=dtype)
+            ).item()
 
-        hv = torch.zeros(4, 1000, dtype=torch.uint8)
-        with pytest.raises(ValueError):
-            res = functional.multiset(hv)
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_dtype(self, dtype):
+        hv = torch.zeros(23, 1000, dtype=dtype)
+
+        if dtype in torch_complex_dtypes:
+            with pytest.raises(NotImplementedError):
+                functional.multiset(hv)
+
+            return
+
+        if dtype == torch.uint8:
+            with pytest.raises(ValueError):
+                functional.multiset(hv)
+
+            return
+
+        res = functional.multiset(hv)
+        assert res.dtype == dtype
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -59,48 +80,76 @@ class TestMultiset:
 
 
 class TestMultibind:
-    def test_value(self):
-        hv = torch.zeros(4, 1000)
-        res = functional.multibind(hv)
-        assert torch.all(res == 0).item()
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_value(self, dtype):
+        if not supported_dtype(dtype):
+            return
 
-        hv = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1]])
-        res = functional.multibind(hv)
-        assert torch.all(res == torch.tensor([1, 1, -1, 1])).item()
-        assert res.dtype == hv.dtype
+        if dtype == torch.float16 or dtype == torch.bfloat16:
+            # Half precision is not supported by Torch on a CPU device
+            return
 
-    def test_dtype(self):
-        hv = functional.random_hv(11, 10000)
-        res = functional.multibind(hv)
-        assert res.dtype == torch.get_default_dtype()
-
-        hv = functional.random_hv(11, 10000, dtype=torch.float)
-        res = functional.multibind(hv)
-        assert res.dtype == torch.float
-
-        hv = functional.random_hv(11, 10000, dtype=torch.int)
-        res = functional.multibind(hv)
-        assert res.dtype == torch.int
-
-        hv = functional.random_hv(11, 10000, dtype=torch.long)
-        res = functional.multibind(hv)
-        assert res.dtype == torch.long
-
-        hv = functional.random_hv(11, 10000, dtype=torch.float64)
-        res = functional.multibind(hv)
-        assert res.dtype == torch.float64
-
-        hv = torch.zeros(4, 1000, dtype=torch.bool)
-        with pytest.raises(NotImplementedError):
+        if dtype == torch.bool:
+            hv = torch.tensor(
+                [
+                    [1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 1, 0, 0, 1, 0, 1, 1],
+                    [1, 0, 0, 0, 1, 0, 1, 0, 1, 1],
+                    [0, 0, 0, 0, 1, 0, 0, 1, 0, 0],
+                    [1, 1, 0, 1, 1, 0, 1, 1, 0, 0],
+                ],
+                dtype=dtype,
+            )
             res = functional.multibind(hv)
+            assert torch.all(
+                res
+                == torch.tensor(
+                    [0, 1, 0, 1, 1, 0, 1, 0, 0, 0],
+                    dtype=dtype,
+                )
+            ).item()
 
-        hv = torch.zeros(4, 1000, dtype=torch.complex128)
-        with pytest.raises(NotImplementedError):
+        else:
+            hv = torch.tensor(
+                [
+                    [1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
+                    [1, -1, -1, 1, 1, -1, 1, -1, 1, -1],
+                    [-1, 1, -1, 1, 1, 1, 1, -1, -1, -1],
+                    [1, 1, -1, -1, 1, -1, 1, 1, 1, 1],
+                    [1, 1, -1, -1, -1, 1, -1, 1, -1, 1],
+                ],
+                dtype=dtype,
+            )
             res = functional.multibind(hv)
+            assert torch.all(
+                res == torch.tensor([-1, -1, -1, 1, 1, 1, 1, 1, -1, 1], dtype=dtype)
+            ).item()
 
-        hv = torch.zeros(4, 1000, dtype=torch.uint8)
-        with pytest.raises(ValueError):
-            res = functional.multibind(hv)
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_dtype(self, dtype):
+        hv = torch.zeros(23, 1000, dtype=dtype)
+
+        if dtype in torch_complex_dtypes:
+            with pytest.raises(NotImplementedError):
+                functional.multibind(hv)
+
+            return
+
+        if dtype == torch.uint8:
+            with pytest.raises(ValueError):
+                functional.multibind(hv)
+
+            return
+
+        if dtype in {torch.float16, torch.bfloat16}:
+            # torch.product is not implemented on CPU for these dtypes
+            with pytest.raises(RuntimeError):
+                functional.multibind(hv)
+
+            return
+
+        res = functional.multibind(hv)
+        assert res.dtype == dtype
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -122,38 +171,24 @@ class TestCrossProduct:
         assert torch.all(res == torch.tensor([0, 2, 0, 6])).item()
         assert res.dtype == a.dtype
 
-    def test_dtype(self):
-        hv = functional.random_hv(11, 10000)
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_dtype(self, dtype):
+        hv = torch.zeros(23, 1000, dtype=dtype)
+
+        if dtype in torch_complex_dtypes:
+            with pytest.raises(NotImplementedError):
+                functional.cross_product(hv, hv)
+
+            return
+
+        if dtype == torch.uint8:
+            with pytest.raises(ValueError):
+                functional.cross_product(hv, hv)
+
+            return
+
         res = functional.cross_product(hv, hv)
-        assert res.dtype == torch.get_default_dtype()
-
-        hv = functional.random_hv(11, 10000, dtype=torch.float)
-        res = functional.cross_product(hv, hv)
-        assert res.dtype == torch.float
-
-        hv = functional.random_hv(11, 10000, dtype=torch.int)
-        res = functional.cross_product(hv, hv)
-        assert res.dtype == torch.int
-
-        hv = functional.random_hv(11, 10000, dtype=torch.long)
-        res = functional.cross_product(hv, hv)
-        assert res.dtype == torch.long
-
-        hv = functional.random_hv(11, 10000, dtype=torch.float64)
-        res = functional.cross_product(hv, hv)
-        assert res.dtype == torch.float64
-
-        hv = torch.zeros(4, 1000, dtype=torch.bool)
-        with pytest.raises(NotImplementedError):
-            res = functional.cross_product(hv, hv)
-
-        hv = torch.zeros(4, 1000, dtype=torch.complex128)
-        with pytest.raises(NotImplementedError):
-            res = functional.cross_product(hv, hv)
-
-        hv = torch.zeros(4, 1000, dtype=torch.uint8)
-        with pytest.raises(ValueError):
-            res = functional.cross_product(hv, hv)
+        assert res.dtype == dtype
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -176,38 +211,24 @@ class TestNgrams:
         assert torch.all(res == torch.tensor([0, -2, -2, 0])).item()
         assert res.dtype == hv.dtype
 
-    def test_dtype(self):
-        hv = functional.random_hv(11, 10000)
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_dtype(self, dtype):
+        hv = torch.zeros(23, 1000, dtype=dtype)
+
+        if dtype in torch_complex_dtypes:
+            with pytest.raises(NotImplementedError):
+                functional.ngrams(hv)
+
+            return
+
+        if dtype == torch.uint8:
+            with pytest.raises(ValueError):
+                functional.ngrams(hv)
+
+            return
+
         res = functional.ngrams(hv)
-        assert res.dtype == torch.get_default_dtype()
-
-        hv = functional.random_hv(11, 10000, dtype=torch.float)
-        res = functional.ngrams(hv)
-        assert res.dtype == torch.float
-
-        hv = functional.random_hv(11, 10000, dtype=torch.int)
-        res = functional.ngrams(hv)
-        assert res.dtype == torch.int
-
-        hv = functional.random_hv(11, 10000, dtype=torch.long)
-        res = functional.ngrams(hv)
-        assert res.dtype == torch.long
-
-        hv = functional.random_hv(11, 10000, dtype=torch.float64)
-        res = functional.ngrams(hv)
-        assert res.dtype == torch.float64
-
-        hv = torch.zeros(4, 1000, dtype=torch.bool)
-        with pytest.raises(NotImplementedError):
-            res = functional.ngrams(hv)
-
-        hv = torch.zeros(4, 1000, dtype=torch.complex128)
-        with pytest.raises(NotImplementedError):
-            res = functional.ngrams(hv)
-
-        hv = torch.zeros(4, 1000, dtype=torch.uint8)
-        with pytest.raises(ValueError):
-            res = functional.ngrams(hv)
+        assert res.dtype == dtype
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -229,38 +250,24 @@ class TestHashTable:
         assert torch.all(res == torch.tensor([0, -2, 0, 0])).item()
         assert res.dtype == a.dtype
 
-    def test_dtype(self):
-        hv = functional.random_hv(11, 10000)
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_dtype(self, dtype):
+        hv = torch.zeros(23, 1000, dtype=dtype)
+
+        if dtype in torch_complex_dtypes:
+            with pytest.raises(NotImplementedError):
+                functional.hash_table(hv, hv)
+
+            return
+
+        if dtype == torch.uint8:
+            with pytest.raises(ValueError):
+                functional.hash_table(hv, hv)
+
+            return
+
         res = functional.hash_table(hv, hv)
-        assert res.dtype == torch.get_default_dtype()
-
-        hv = functional.random_hv(11, 10000, dtype=torch.float)
-        res = functional.hash_table(hv, hv)
-        assert res.dtype == torch.float
-
-        hv = functional.random_hv(11, 10000, dtype=torch.int)
-        res = functional.hash_table(hv, hv)
-        assert res.dtype == torch.int
-
-        hv = functional.random_hv(11, 10000, dtype=torch.long)
-        res = functional.hash_table(hv, hv)
-        assert res.dtype == torch.long
-
-        hv = functional.random_hv(11, 10000, dtype=torch.float64)
-        res = functional.hash_table(hv, hv)
-        assert res.dtype == torch.float64
-
-        hv = torch.zeros(4, 1000, dtype=torch.bool)
-        with pytest.raises(NotImplementedError):
-            res = functional.hash_table(hv, hv)
-
-        hv = torch.zeros(4, 1000, dtype=torch.complex128)
-        with pytest.raises(NotImplementedError):
-            res = functional.hash_table(hv, hv)
-
-        hv = torch.zeros(4, 1000, dtype=torch.uint8)
-        with pytest.raises(ValueError):
-            res = functional.hash_table(hv, hv)
+        assert res.dtype == dtype
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -283,38 +290,24 @@ class TestBundleSequence:
         assert torch.all(res == torch.tensor([0, 0, 2, 0])).item()
         assert res.dtype == hv.dtype
 
-    def test_dtype(self):
-        hv = functional.random_hv(11, 10000)
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_dtype(self, dtype):
+        hv = torch.zeros(23, 1000, dtype=dtype)
+
+        if dtype in torch_complex_dtypes:
+            with pytest.raises(NotImplementedError):
+                functional.bundle_sequence(hv)
+
+            return
+
+        if dtype == torch.uint8:
+            with pytest.raises(ValueError):
+                functional.bundle_sequence(hv)
+
+            return
+
         res = functional.bundle_sequence(hv)
-        assert res.dtype == torch.get_default_dtype()
-
-        hv = functional.random_hv(11, 10000, dtype=torch.float)
-        res = functional.bundle_sequence(hv)
-        assert res.dtype == torch.float
-
-        hv = functional.random_hv(11, 10000, dtype=torch.int)
-        res = functional.bundle_sequence(hv)
-        assert res.dtype == torch.int
-
-        hv = functional.random_hv(11, 10000, dtype=torch.long)
-        res = functional.bundle_sequence(hv)
-        assert res.dtype == torch.long
-
-        hv = functional.random_hv(11, 10000, dtype=torch.float64)
-        res = functional.bundle_sequence(hv)
-        assert res.dtype == torch.float64
-
-        hv = torch.zeros(4, 1000, dtype=torch.bool)
-        with pytest.raises(NotImplementedError):
-            res = functional.bundle_sequence(hv)
-
-        hv = torch.zeros(4, 1000, dtype=torch.complex128)
-        with pytest.raises(NotImplementedError):
-            res = functional.bundle_sequence(hv)
-
-        hv = torch.zeros(4, 1000, dtype=torch.uint8)
-        with pytest.raises(ValueError):
-            res = functional.bundle_sequence(hv)
+        assert res.dtype == dtype
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -337,38 +330,31 @@ class TestBindSequence:
         assert torch.all(res == torch.tensor([1, 1, -1, 1])).item()
         assert res.dtype == hv.dtype
 
-    def test_dtype(self):
-        hv = functional.random_hv(11, 10000)
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_dtype(self, dtype):
+        hv = torch.zeros(23, 1000, dtype=dtype)
+
+        if dtype in torch_complex_dtypes:
+            with pytest.raises(NotImplementedError):
+                functional.bind_sequence(hv)
+
+            return
+
+        if dtype == torch.uint8:
+            with pytest.raises(ValueError):
+                functional.bind_sequence(hv)
+
+            return
+
+        if dtype in {torch.float16, torch.bfloat16}:
+            # torch.product is not implemented on CPU for these dtypes
+            with pytest.raises(RuntimeError):
+                functional.multibind(hv)
+
+            return
+
         res = functional.bind_sequence(hv)
-        assert res.dtype == torch.get_default_dtype()
-
-        hv = functional.random_hv(11, 10000, dtype=torch.float)
-        res = functional.bind_sequence(hv)
-        assert res.dtype == torch.float
-
-        hv = functional.random_hv(11, 10000, dtype=torch.int)
-        res = functional.bind_sequence(hv)
-        assert res.dtype == torch.int
-
-        hv = functional.random_hv(11, 10000, dtype=torch.long)
-        res = functional.bind_sequence(hv)
-        assert res.dtype == torch.long
-
-        hv = functional.random_hv(11, 10000, dtype=torch.float64)
-        res = functional.bind_sequence(hv)
-        assert res.dtype == torch.float64
-
-        hv = torch.zeros(4, 1000, dtype=torch.bool)
-        with pytest.raises(NotImplementedError):
-            res = functional.bind_sequence(hv)
-
-        hv = torch.zeros(4, 1000, dtype=torch.complex128)
-        with pytest.raises(NotImplementedError):
-            res = functional.bind_sequence(hv)
-
-        hv = torch.zeros(4, 1000, dtype=torch.uint8)
-        with pytest.raises(ValueError):
-            res = functional.bind_sequence(hv)
+        assert res.dtype == dtype
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
