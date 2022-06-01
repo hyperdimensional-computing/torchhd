@@ -1,13 +1,10 @@
-from re import A, L
 import pytest
 import torch
 
 from torchhd import functional
 
 from .utils import (
-    between,
     torch_dtypes,
-    torch_float_dtypes,
     torch_complex_dtypes,
     supported_dtype,
 )
@@ -22,40 +19,19 @@ class TestMultiset:
         if dtype == torch.bool:
             hv = torch.tensor(
                 [
-                    [
-                        True,
-                        False,
-                        False,
-                        True,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                    ],
-                    [True, False, False, True, False, False, True, False, True, True],
-                    [True, False, False, False, True, False, True, False, True, True],
-                    [
-                        False,
-                        False,
-                        False,
-                        False,
-                        True,
-                        False,
-                        False,
-                        True,
-                        False,
-                        False,
-                    ],
-                    [True, True, False, True, True, False, True, True, False, False],
-                ]
+                    [1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 1, 0, 0, 1, 0, 1, 1],
+                    [1, 0, 0, 0, 1, 0, 1, 0, 1, 1],
+                    [0, 0, 0, 0, 1, 0, 0, 1, 0, 0],
+                    [1, 1, 0, 1, 1, 0, 1, 1, 0, 0],
+                ],
+                dtype=dtype,
             )
             res = functional.multiset(hv)
             assert torch.all(
                 res
                 == torch.tensor(
-                    [True, False, False, True, True, False, True, False, False, False],
+                    [1, 0, 0, 1, 1, 0, 1, 0, 0, 0],
                     dtype=dtype,
                 )
             ).item()
@@ -116,40 +92,19 @@ class TestMultibind:
         if dtype == torch.bool:
             hv = torch.tensor(
                 [
-                    [
-                        True,
-                        False,
-                        False,
-                        True,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                        False,
-                    ],
-                    [True, False, False, True, False, False, True, False, True, True],
-                    [True, False, False, False, True, False, True, False, True, True],
-                    [
-                        False,
-                        False,
-                        False,
-                        False,
-                        True,
-                        False,
-                        False,
-                        True,
-                        False,
-                        False,
-                    ],
-                    [True, True, False, True, True, False, True, True, False, False],
-                ]
+                    [1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 1, 0, 0, 1, 0, 1, 1],
+                    [1, 0, 0, 0, 1, 0, 1, 0, 1, 1],
+                    [0, 0, 0, 0, 1, 0, 0, 1, 0, 0],
+                    [1, 1, 0, 1, 1, 0, 1, 1, 0, 0],
+                ],
+                dtype=dtype,
             )
             res = functional.multibind(hv)
             assert torch.all(
                 res
                 == torch.tensor(
-                    [False, True, False, True, True, False, True, False, False, False],
+                    [0, 1, 0, 1, 1, 0, 1, 0, 0, 0],
                     dtype=dtype,
                 )
             ).item()
