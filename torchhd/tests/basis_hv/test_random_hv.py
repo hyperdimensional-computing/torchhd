@@ -42,19 +42,24 @@ class TestRandom_hv:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        if dtype == torch.bool:
-            hv = functional.random_hv(100, 10000, dtype=dtype, generator=generator)
-            assert torch.all((hv == False) | (hv == True)).item()
-
-            return
-
         hv = functional.random_hv(100, 10000, dtype=dtype, generator=generator)
-        assert torch.all((hv == -1) | (hv == 1)).item()
+
+        if dtype == torch.bool:
+            assert torch.all((hv == False) | (hv == True)).item()
+        elif dtype in torch_complex_dtypes:
+            magnitudes= hv.abs()
+            assert torch.allclose(magnitudes, torch.tensor(1.0, dtype=magnitudes.dtype)), "magnitude must be 1"
+        else:
+            assert torch.all((hv == -1) | (hv == 1)).item()
 
     @pytest.mark.parametrize("sparsity", [0.0, 0.1, 0.756, 1.0])
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_sparsity(self, sparsity, dtype):
         if not supported_dtype(dtype):
+            return
+
+        if dtype in torch_complex_dtypes:
+            # Complex hypervectors don't support sparsity.
             return
 
         generator = torch.Generator()
@@ -83,14 +88,24 @@ class TestRandom_hv:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        sims = [None] * 100
-        for i in range(100):
-            hv = functional.random_hv(2, 10000, dtype=dtype, generator=generator)
-            sims[i] = functional.hamming_similarity(hv[0], hv[1].unsqueeze(0))
+        if dtype in torch_complex_dtypes:
+            sims = [None] * 100
+            for i in range(100):
+                hv = functional.random_hv(2, 10000, dtype=dtype, generator=generator)
+                sims[i] = functional.cosine_similarity(hv[0], hv[1])
 
-        sims = torch.cat(sims).float() / 10000
-        assert within(sims.mean().item(), 0.5, 0.001)
-        assert sims.std().item() < 0.01
+            sims = torch.stack(sims).float() / 10000
+            assert within(sims.mean().item(), 0.0, 0.001)
+            assert sims.std().item() < 0.01
+        else:
+            sims = [None] * 100
+            for i in range(100):
+                hv = functional.random_hv(2, 10000, dtype=dtype, generator=generator)
+                sims[i] = functional.hamming_similarity(hv[0], hv[1].unsqueeze(0))
+
+            sims = torch.stack(sims).float() / 10000
+            assert within(sims.mean().item(), 0.5, 0.001)
+            assert sims.std().item() < 0.01
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_device(self, dtype):
@@ -103,12 +118,6 @@ class TestRandom_hv:
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
-        if dtype in torch_complex_dtypes:
-            with pytest.raises(NotImplementedError):
-                functional.random_hv(3, 26, dtype=dtype)
-
-            return
-
         if dtype == torch.uint8:
             with pytest.raises(ValueError):
                 functional.random_hv(3, 26, dtype=dtype)

@@ -179,11 +179,11 @@ def random_hv(
         dtype = torch.float if dtype == torch.complex64 else torch.double
 
         angle = torch.empty(
-            num_embeddings, embedding_dim, dtype=torch.float, device=device
+            num_embeddings, embedding_dim, dtype=dtype, device=device
         )
         angle.uniform_(-math.pi, math.pi)
         magnitude = torch.ones(
-            num_embeddings, embedding_dim, dtype=torch.float, device=device
+            num_embeddings, embedding_dim, dtype=dtype, device=device
         )
 
         result = torch.polar(magnitude, angle)
@@ -728,7 +728,7 @@ def dot_similarity(input: Tensor, others: Tensor) -> Tensor:
     return F.linear(input, others)
 
 
-def cosine_similarity(input: Tensor, others: Tensor) -> Tensor:
+def cosine_similarity(input: Tensor, others: Tensor, *, eps=1e-08) -> Tensor:
     """Cosine similarity between the input vector and each vector in others.
 
     Args:
@@ -775,7 +775,7 @@ def cosine_similarity(input: Tensor, others: Tensor) -> Tensor:
     else:
         magnitude = input_mag * others_mag
 
-    return dot_similarity(input, others) / magnitude
+    return dot_similarity(input, others) / (magnitude + eps)
 
 
 def hamming_similarity(input: Tensor, others: Tensor) -> LongTensor:

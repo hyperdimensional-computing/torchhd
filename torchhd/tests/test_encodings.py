@@ -56,12 +56,6 @@ class TestMultiset:
     def test_dtype(self, dtype):
         hv = torch.zeros(23, 1000, dtype=dtype)
 
-        if dtype in torch_complex_dtypes:
-            with pytest.raises(NotImplementedError):
-                functional.multiset(hv)
-
-            return
-
         if dtype == torch.uint8:
             with pytest.raises(ValueError):
                 functional.multiset(hv)
@@ -128,13 +122,7 @@ class TestMultibind:
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
         hv = torch.zeros(23, 1000, dtype=dtype)
-
-        if dtype in torch_complex_dtypes:
-            with pytest.raises(NotImplementedError):
-                functional.multibind(hv)
-
-            return
-
+        
         if dtype == torch.uint8:
             with pytest.raises(ValueError):
                 functional.multibind(hv)
@@ -175,12 +163,6 @@ class TestCrossProduct:
     def test_dtype(self, dtype):
         hv = torch.zeros(23, 1000, dtype=dtype)
 
-        if dtype in torch_complex_dtypes:
-            with pytest.raises(NotImplementedError):
-                functional.cross_product(hv, hv)
-
-            return
-
         if dtype == torch.uint8:
             with pytest.raises(ValueError):
                 functional.cross_product(hv, hv)
@@ -215,12 +197,6 @@ class TestNgrams:
     def test_dtype(self, dtype):
         hv = torch.zeros(23, 1000, dtype=dtype)
 
-        if dtype in torch_complex_dtypes:
-            with pytest.raises(NotImplementedError):
-                functional.ngrams(hv)
-
-            return
-
         if dtype == torch.uint8:
             with pytest.raises(ValueError):
                 functional.ngrams(hv)
@@ -253,12 +229,6 @@ class TestHashTable:
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
         hv = torch.zeros(23, 1000, dtype=dtype)
-
-        if dtype in torch_complex_dtypes:
-            with pytest.raises(NotImplementedError):
-                functional.hash_table(hv, hv)
-
-            return
 
         if dtype == torch.uint8:
             with pytest.raises(ValueError):
@@ -294,12 +264,6 @@ class TestBundleSequence:
     def test_dtype(self, dtype):
         hv = torch.zeros(23, 1000, dtype=dtype)
 
-        if dtype in torch_complex_dtypes:
-            with pytest.raises(NotImplementedError):
-                functional.bundle_sequence(hv)
-
-            return
-
         if dtype == torch.uint8:
             with pytest.raises(ValueError):
                 functional.bundle_sequence(hv)
@@ -333,12 +297,6 @@ class TestBindSequence:
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
         hv = torch.zeros(23, 1000, dtype=dtype)
-
-        if dtype in torch_complex_dtypes:
-            with pytest.raises(NotImplementedError):
-                functional.bind_sequence(hv)
-
-            return
 
         if dtype == torch.uint8:
             with pytest.raises(ValueError):

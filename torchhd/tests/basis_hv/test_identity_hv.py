@@ -47,12 +47,6 @@ class TestIdentity_hv:
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
-        if dtype in torch_complex_dtypes:
-            with pytest.raises(NotImplementedError):
-                functional.identity_hv(3, 26, dtype=dtype)
-
-            return
-
         if dtype == torch.uint8:
             with pytest.raises(ValueError):
                 functional.identity_hv(3, 26, dtype=dtype)
