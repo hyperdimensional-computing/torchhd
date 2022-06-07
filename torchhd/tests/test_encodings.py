@@ -122,7 +122,7 @@ class TestMultibind:
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
         hv = torch.zeros(23, 1000, dtype=dtype)
-        
+
         if dtype == torch.uint8:
             with pytest.raises(ValueError):
                 functional.multibind(hv)

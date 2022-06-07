@@ -178,9 +178,7 @@ def random_hv(
     if dtype in {torch.complex64, torch.complex128}:
         dtype = torch.float if dtype == torch.complex64 else torch.double
 
-        angle = torch.empty(
-            num_embeddings, embedding_dim, dtype=dtype, device=device
-        )
+        angle = torch.empty(num_embeddings, embedding_dim, dtype=dtype, device=device)
         angle.uniform_(-math.pi, math.pi)
         magnitude = torch.ones(
             num_embeddings, embedding_dim, dtype=dtype, device=device

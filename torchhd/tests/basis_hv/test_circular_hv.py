@@ -48,13 +48,14 @@ class TestCircular_hv:
                 (hv == True) | (hv == False)
             ).item(), "values are either 1 or 0"
         elif dtype in torch_complex_dtypes:
-            magnitudes= hv.abs()
-            assert torch.allclose(magnitudes, torch.tensor(1.0, dtype=magnitudes.dtype)), "magnitude must be 1"
+            magnitudes = hv.abs()
+            assert torch.allclose(
+                magnitudes, torch.tensor(1.0, dtype=magnitudes.dtype)
+            ), "magnitude must be 1"
         else:
             assert torch.all(
                 (hv == -1) | (hv == 1)
             ).item(), "values are either -1 or +1"
-
 
         hv = functional.circular_hv(8, 1000000, generator=generator, dtype=dtype)
         if dtype in torch_complex_dtypes:

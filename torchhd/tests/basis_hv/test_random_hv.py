@@ -47,8 +47,10 @@ class TestRandom_hv:
         if dtype == torch.bool:
             assert torch.all((hv == False) | (hv == True)).item()
         elif dtype in torch_complex_dtypes:
-            magnitudes= hv.abs()
-            assert torch.allclose(magnitudes, torch.tensor(1.0, dtype=magnitudes.dtype)), "magnitude must be 1"
+            magnitudes = hv.abs()
+            assert torch.allclose(
+                magnitudes, torch.tensor(1.0, dtype=magnitudes.dtype)
+            ), "magnitude must be 1"
         else:
             assert torch.all((hv == -1) | (hv == 1)).item()
 

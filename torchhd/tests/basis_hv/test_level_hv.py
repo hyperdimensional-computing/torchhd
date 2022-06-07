@@ -48,8 +48,10 @@ class TestLevel_hv:
                 (hv == True) | (hv == False)
             ).item(), "values are either 1 or 0"
         elif dtype in torch_complex_dtypes:
-            magnitudes= hv.abs()
-            assert torch.allclose(magnitudes, torch.tensor(1.0, dtype=magnitudes.dtype)), "magnitude must be 1"
+            magnitudes = hv.abs()
+            assert torch.allclose(
+                magnitudes, torch.tensor(1.0, dtype=magnitudes.dtype)
+            ), "magnitude must be 1"
         else:
             assert torch.all(
                 (hv == -1) | (hv == 1)
