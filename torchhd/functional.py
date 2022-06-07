@@ -244,6 +244,19 @@ def level_hv(
                 [ 1., -1.,  1., -1., -1., -1.,  1., -1., -1.,  1.],
                 [ 1., -1.,  1., -1., -1.,  1.,  1.,  1., -1.,  1.]])
 
+        >>> functional.level_hv(5, 8, dtype=torch.bool)
+        tensor([[ True, False, False,  True, False, False, False,  True],
+                [ True,  True, False,  True,  True, False, False,  True],
+                [ True,  True, False,  True,  True, False, False, False],
+                [ True,  True, False,  True,  True, False,  True, False],
+                [ True,  True, False,  True,  True, False,  True, False]])
+
+        >>> functional.level_hv(5, 6, dtype=torch.complex64)
+        tensor([[ 9.4413e-01+0.3296j, -9.5562e-01-0.2946j,  7.9306e-04+1.0000j, -8.8154e-01-0.4721j, -6.6328e-01+0.7484j, -8.6131e-01-0.5081j],
+                [ 9.4413e-01+0.3296j, -9.5562e-01-0.2946j,  7.9306e-04+1.0000j, -8.8154e-01-0.4721j, -6.6328e-01+0.7484j, -8.6131e-01-0.5081j],
+                [ 9.4413e-01+0.3296j, -9.5562e-01-0.2946j,  7.9306e-04+1.0000j, -8.8154e-01-0.4721j, -6.6328e-01+0.7484j, -8.6131e-01-0.5081j],
+                [-9.9803e-01+0.0627j, -9.5562e-01-0.2946j,  7.9306e-04+1.0000j,  9.9992e-01+0.0126j, -6.6328e-01+0.7484j, -8.6131e-01-0.5081j],
+                [-9.9803e-01+0.0627j, -8.5366e-01+0.5208j,  6.5232e-01-0.7579j,  9.9992e-01+0.0126j,  3.6519e-01+0.9309j,  9.7333e-01-0.2294j]])
     """
     if dtype is None:
         dtype = torch.get_default_dtype()
@@ -256,21 +269,6 @@ def level_hv(
     # must be at least one to deal with the case that num_embeddings is less than 2
     levels_per_span = max(levels_per_span, 1)
     span = (num_embeddings - 1) / levels_per_span
-
-    if dtype in {torch.complex64, torch.complex128}:
-        fraction = torch.linspace(1, span + 1, num_embeddings, device=device)
-        base_hv = random_hv(
-            1,
-            embedding_dim,
-            generator=generator,
-            sparsity=sparsity,
-            dtype=dtype,
-            device=device,
-        )
-
-        hv = torch.pow(base_hv, fraction.unsqueeze(-1))
-        hv.requires_grad = requires_grad
-        return hv
 
     hv = torch.empty(
         num_embeddings,
@@ -361,12 +359,33 @@ def circular_hv(
                 [ 1.,  1.,  1., -1.,  1.,  1., -1.,  1., -1., -1.],
                 [ 1.,  1., -1., -1.,  1.,  1., -1.,  1., -1., -1.]])
 
+        >>> functional.circular_hv(10, 8, dtype=torch.bool)
+        tensor([[False,  True, False, False,  True, False,  True,  True],
+                [False,  True, False, False,  True, False,  True,  True],
+                [False,  True, False, False,  True, False,  True,  True],
+                [False,  True, False, False,  True, False,  True, False],
+                [False,  True, False, False, False, False, False, False],
+                [ True,  True, False,  True, False, False, False, False],
+                [ True,  True, False,  True, False, False, False, False],
+                [ True,  True, False,  True, False, False, False, False],
+                [ True,  True, False,  True, False, False, False,  True],
+                [ True,  True, False,  True,  True, False,  True,  True]])
+
+        >>> functional.circular_hv(10, 6, dtype=torch.complex64)
+        tensor([[ 0.0691+0.9976j, -0.1847+0.9828j, -0.4434-0.8963j, -0.8287+0.5596j, -0.8357-0.5493j, -0.5358+0.8443j],
+                [ 0.0691+0.9976j, -0.1847+0.9828j, -0.4434-0.8963j, -0.8287+0.5596j,  0.9427-0.3336j, -0.5358+0.8443j],
+                [ 0.0691+0.9976j, -0.1847+0.9828j, -0.4434-0.8963j, -0.0339-0.9994j,  0.9427-0.3336j, -0.6510-0.7591j],
+                [ 0.0691+0.9976j, -0.3881+0.9216j, -0.4434-0.8963j, -0.0339-0.9994j,  0.9427-0.3336j, -0.6510-0.7591j],
+                [-0.6866-0.7271j, -0.3881+0.9216j, -0.4434-0.8963j, -0.0339-0.9994j,  0.9427-0.3336j, -0.6510-0.7591j],
+                [-0.6866-0.7271j, -0.3881+0.9216j, -0.7324+0.6809j, -0.0339-0.9994j,  0.9427-0.3336j, -0.6510-0.7591j],
+                [-0.6866-0.7271j, -0.3881+0.9216j, -0.7324+0.6809j, -0.0339-0.9994j, -0.8357-0.5493j, -0.6510-0.7591j],
+                [-0.6866-0.7271j, -0.3881+0.9216j, -0.7324+0.6809j, -0.8287+0.5596j, -0.8357-0.5493j, -0.5358+0.8443j],
+                [-0.6866-0.7271j, -0.1847+0.9828j, -0.7324+0.6809j, -0.8287+0.5596j, -0.8357-0.5493j, -0.5358+0.8443j],
+                [ 0.0691+0.9976j, -0.1847+0.9828j, -0.7324+0.6809j, -0.8287+0.5596j, -0.8357-0.5493j, -0.5358+0.8443j]])
+
     """
     if dtype is None:
         dtype = torch.get_default_dtype()
-
-    if dtype in {torch.complex64, torch.complex128}:
-        raise NotImplementedError("Complex hypervectors are not supported yet.")
 
     if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
@@ -430,7 +449,7 @@ def circular_hv(
 
             temp_hv = torch.where(threshold_v[span_idx] < t, span_start_hv, span_end_hv)
 
-        mutation_history.append(bind(temp_hv, mutation_hv))
+        mutation_history.append(unbind(temp_hv, mutation_hv))
         mutation_hv = temp_hv
 
         if i % 2 == 0:
@@ -438,7 +457,7 @@ def circular_hv(
 
     for i in range(num_embeddings + 1, num_embeddings * 2 - 1):
         mut = mutation_history.popleft()
-        mutation_hv = bind(mutation_hv, mut)
+        mutation_hv = unbind(mutation_hv, mut)
 
         if i % 2 == 0:
             hv[i // 2] = mutation_hv
