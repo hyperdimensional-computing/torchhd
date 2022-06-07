@@ -898,9 +898,9 @@ class Graph:
 
             >>> e = G.encode_edge(letters_hv[0], letters_hv[1])
             >>> G.contains(e)
-            tensor([1.])
+            tensor(1.)
         """
-        return functional.cosine_similarity(input, self.value.unsqueeze(0))
+        return functional.cosine_similarity(input, self.value)
 
     def clear(self) -> None:
         """Empties the graph.
