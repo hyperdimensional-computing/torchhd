@@ -212,10 +212,10 @@ class Multiset:
         Examples::
 
             >>> M.contains(letters_hv[0])
-            tensor([0.4575])
+            tensor(0.4575)
 
         """
-        return functional.cosine_similarity(input, self.value.unsqueeze(0))
+        return functional.cosine_similarity(input, self.value)
 
     def __len__(self) -> int:
         """Returns the size of the multiset.
@@ -363,7 +363,7 @@ class HashTable:
             tensor([ 1., -1.,  1.,  ..., -1.,  1., -1.])
 
         """
-        return functional.bind(self.value, key)
+        return functional.unbind(self.value, key)
 
     def replace(self, key: Tensor, old: Tensor, new: Tensor) -> None:
         """Replace the value from key-value pair in the hash table.
@@ -711,7 +711,7 @@ class BindSequence:
 
         """
         self.size -= 1
-        self.value = functional.bind(self.value, input)
+        self.value = functional.unbind(self.value, input)
         self.value = functional.permute(self.value, shifts=-1)
 
     def popleft(self, input: Tensor) -> None:
@@ -727,7 +727,7 @@ class BindSequence:
         """
         self.size -= 1
         rotated_input = functional.permute(input, shifts=len(self))
-        self.value = functional.bind(self.value, rotated_input)
+        self.value = functional.unbind(self.value, rotated_input)
 
     def replace(self, index: int, old: Tensor, new: Tensor) -> None:
         """Replace the old hypervector value from the given index, for the new hypervector value.
@@ -744,7 +744,7 @@ class BindSequence:
 
         """
         rotated_old = functional.permute(old, shifts=self.size - index - 1)
-        self.value = functional.bind(self.value, rotated_old)
+        self.value = functional.unbind(self.value, rotated_old)
 
         rotated_new = functional.permute(new, shifts=self.size - index - 1)
         self.value = functional.bind(self.value, rotated_new)
@@ -880,13 +880,13 @@ class Graph:
         """
         if self.is_directed:
             if outgoing:
-                permuted_neighbors = functional.bind(self.value, input)
+                permuted_neighbors = functional.unbind(self.value, input)
                 return functional.permute(permuted_neighbors, shifts=-1)
             else:
                 permuted_node = functional.permute(input, shifts=1)
-                return functional.bind(self.value, permuted_node)
+                return functional.unbind(self.value, permuted_node)
         else:
-            return functional.bind(self.value, input)
+            return functional.unbind(self.value, input)
 
     def contains(self, input: Tensor) -> Tensor:
         """Returns the cosine similarity of the input vector against the graph.
@@ -1012,7 +1012,7 @@ class Tree:
                         hv_path, functional.permute(self.right, shifts=idx)
                     )
 
-        return functional.bind(hv_path, self.value)
+        return functional.unbind(self.value, hv_path)
 
     def clear(self) -> None:
         """Empties the tree.
@@ -1084,8 +1084,8 @@ class FiniteStateAutomata:
             tensor([ 1.,  1., -1.,  ..., -1., -1.,  1.])
 
         """
-        next_state = functional.bind(self.value, state)
-        next_state = functional.bind(next_state, action)
+        next_state = functional.unbind(self.value, state)
+        next_state = functional.unbind(next_state, action)
         return functional.permute(next_state, shifts=-1)
 
     def clear(self) -> None:
