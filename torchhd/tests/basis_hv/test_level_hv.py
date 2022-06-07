@@ -47,27 +47,46 @@ class TestLevel_hv:
             assert torch.all(
                 (hv == True) | (hv == False)
             ).item(), "values are either 1 or 0"
+        elif dtype in torch_complex_dtypes:
+            magnitudes= hv.abs()
+            assert torch.allclose(magnitudes, torch.tensor(1.0, dtype=magnitudes.dtype)), "magnitude must be 1"
         else:
             assert torch.all(
                 (hv == -1) | (hv == 1)
             ).item(), "values are either -1 or +1"
 
         # look at the similarity profile w.r.t. the first hypervector
-        sims = functional.hamming_similarity(hv[0], hv).float() / 10000
-        sims_diff = sims[:-1] - sims[1:]
-        assert torch.all(sims_diff > 0).item(), "similarity must be decreasing"
+        if dtype in torch_complex_dtypes:
+            sims = functional.cosine_similarity(hv[0], hv)
+            sims_diff = sims[:-1] - sims[1:]
+            assert torch.all(sims_diff > 0).item(), "similarity must be decreasing"
 
-        hv = functional.level_hv(5, 1000000, generator=generator, dtype=dtype)
-        sims = functional.hamming_similarity(hv[0], hv).float() / 1000000
-        sims_diff = sims[:-1] - sims[1:]
-        assert torch.all(
-            (0.124 < sims_diff) & (sims_diff < 0.126)
-        ).item(), "similarity decreases linearly"
+            hv = functional.level_hv(5, 1000000, generator=generator, dtype=dtype)
+            sims = functional.cosine_similarity(hv[0], hv)
+            sims_diff = sims[:-1] - sims[1:]
+            assert torch.all(
+                (0.248 < sims_diff) & (sims_diff < 0.252)
+            ).item(), "similarity decreases linearly"
+        else:
+            sims = functional.hamming_similarity(hv[0], hv).float() / 10000
+            sims_diff = sims[:-1] - sims[1:]
+            assert torch.all(sims_diff > 0).item(), "similarity must be decreasing"
+
+            hv = functional.level_hv(5, 1000000, generator=generator, dtype=dtype)
+            sims = functional.hamming_similarity(hv[0], hv).float() / 1000000
+            sims_diff = sims[:-1] - sims[1:]
+            assert torch.all(
+                (0.124 < sims_diff) & (sims_diff < 0.126)
+            ).item(), "similarity decreases linearly"
 
     @pytest.mark.parametrize("sparsity", [0.0, 0.1, 0.756, 1.0])
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_sparsity(self, sparsity, dtype):
         if not supported_dtype(dtype):
+            return
+
+        if dtype in torch_complex_dtypes:
+            # Complex hypervectors don't support sparsity.
             return
 
         generator = torch.Generator()
@@ -95,12 +114,6 @@ class TestLevel_hv:
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
-        if dtype in torch_complex_dtypes:
-            with pytest.raises(NotImplementedError):
-                functional.level_hv(3, 26, dtype=dtype)
-
-            return
-
         if dtype == torch.uint8:
             with pytest.raises(ValueError):
                 functional.level_hv(3, 26, dtype=dtype)

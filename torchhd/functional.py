@@ -12,6 +12,7 @@ __all__ = [
     "level_hv",
     "circular_hv",
     "bind",
+    "unbind",
     "bundle",
     "permute",
     "cleanup",
@@ -56,19 +57,41 @@ def identity_hv(
 
     Examples::
 
-        >>> functional.identity_hv(2, 3)
-        tensor([[ 1.,  1.,  1.],
-                [ 1.,  1.,  1.]])
+        >>> functional.identity_hv(3, 6)
+        tensor([[1., 1., 1., 1., 1., 1.],
+                [1., 1., 1., 1., 1., 1.],
+                [1., 1., 1., 1., 1., 1.]])
+
+        >>> functional.identity_hv(3, 6, dtype=torch.bool)
+        tensor([[False, False, False, False, False, False],
+                [False, False, False, False, False, False],
+                [False, False, False, False, False, False]])
+
+        >>> functional.identity_hv(3, 6, dtype=torch.long)
+        tensor([[1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1]])
+
+        >>> functional.identity_hv(3, 6, dtype=torch.complex64)
+        tensor([[1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
+                [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
+                [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j]])
 
     """
     if dtype is None:
         dtype = torch.get_default_dtype()
 
-    if dtype in {torch.complex64, torch.complex128}:
-        raise NotImplementedError("Complex hypervectors are not supported yet.")
-
     if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
+
+    if dtype in {torch.complex64, torch.complex128}:
+        return torch.full(
+            (num_embeddings, embedding_dim),
+            1 + 0j,
+            dtype=dtype,
+            device=device,
+            requires_grad=requires_grad,
+        )
 
     if dtype == torch.bool:
         return torch.zeros(
@@ -107,7 +130,7 @@ def random_hv(
     Args:
         num_embeddings (int): the number of hypervectors to generate.
         embedding_dim (int): the dimensionality of the hypervectors.
-        sparsity (float, optional): the expected fraction of elements to be +1. Default: ``0.5``.
+        sparsity (float, optional): the expected fraction of elements to be in-active. Has no effect on complex hypervectors. Default: ``0.5``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
@@ -116,24 +139,56 @@ def random_hv(
     Examples::
 
         >>> functional.random_hv(2, 5)
-        tensor([[-1.,  1., -1., -1.,  1.],
-                [ 1., -1., -1., -1., -1.]])
+        tensor([[ 1., -1., -1.,  1., -1.,  1.],
+                [-1.,  1.,  1.,  1.,  1.,  1.],
+                [-1.,  1.,  1.,  1.,  1., -1.]])
+
         >>> functional.random_hv(2, 5, sparsity=0.9)
-        tensor([[ 1.,  1.,  1., -1.,  1.],
-                [ 1.,  1.,  1.,  1.,  1.]])
-        >>> functional.random_hv(2, 5, dtype=torch.long)
-        tensor([[ 1, -1,  1,  1,  1],
-                [ 1,  1, -1, -1,  1]])
+        tensor([[ 1.,  1.,  1., -1., -1.,  1.],
+                [-1.,  1.,  1.,  1.,  1.,  1.],
+                [ 1.,  1.,  1., -1.,  1.,  1.]])
+
+        >>> functional.random_hv(3, 6, dtype=torch.long)
+        tensor([[ 1,  1,  1,  1,  1, -1],
+                [ 1, -1,  1,  1, -1,  1],
+                [ 1,  1, -1,  1,  1, -1]])
+
+        >>> functional.random_hv(3, 6, dtype=torch.bool)
+        tensor([[ True, False, False, False, False,  True],
+                [ True,  True, False,  True,  True, False],
+                [False, False, False,  True, False,  True]])
+
+        >>> functional.random_hv(3, 6, dtype=torch.bool)
+        tensor([[ True, False, False, False, False,  True],
+                [ True,  True, False,  True,  True, False],
+                [False, False, False,  True, False,  True]])
+
+        >>> functional.random_hv(3, 6, dtype=torch.complex64)
+        tensor([[-0.9849-0.1734j,  0.1267+0.9919j, -0.9160+0.4012j,  0.5063-0.8624j, 0.9898-0.1424j, -0.4378+0.8991j],
+                [-0.4516+0.8922j,  0.7086-0.7056j,  0.8579+0.5138j,  0.9629-0.2699j, -0.2023+0.9793j, -0.9787-0.2052j],
+                [-0.2974+0.9548j, -0.9936+0.1127j, -0.9740+0.2264j, -0.9999+0.0113j, 0.4434-0.8963j,  0.3888+0.9213j]])
 
     """
     if dtype is None:
         dtype = torch.get_default_dtype()
 
-    if dtype in {torch.complex64, torch.complex128}:
-        raise NotImplementedError("Complex hypervectors are not supported yet.")
-
     if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
+
+    if dtype in {torch.complex64, torch.complex128}:
+        dtype = torch.float if dtype == torch.complex64 else torch.double
+
+        angle = torch.empty(
+            num_embeddings, embedding_dim, dtype=dtype, device=device
+        )
+        angle.uniform_(-math.pi, math.pi)
+        magnitude = torch.ones(
+            num_embeddings, embedding_dim, dtype=dtype, device=device
+        )
+
+        result = torch.polar(magnitude, angle)
+        result.requires_grad = requires_grad
+        return result
 
     select = torch.empty(
         (
@@ -173,7 +228,7 @@ def level_hv(
     Args:
         num_embeddings (int): the number of hypervectors to generate.
         embedding_dim (int): the dimensionality of the hypervectors.
-        sparsity (float, optional): the expected fraction of elements to be +1. Default: ``0.5``.
+        sparsity (float, optional): the expected fraction of elements to be in-active. Has no effect on complex hypervectors. Default: ``0.5``.
         randomness (float, optional): r-value to interpolate between level at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
@@ -189,15 +244,31 @@ def level_hv(
                 [ 1., -1.,  1., -1., -1., -1.,  1., -1., -1.,  1.],
                 [ 1., -1.,  1., -1., -1.,  1.,  1.,  1., -1.,  1.]])
 
+        >>> functional.level_hv(5, 8, dtype=torch.bool)
+        tensor([[ True, False, False,  True, False, False, False,  True],
+                [ True,  True, False,  True,  True, False, False,  True],
+                [ True,  True, False,  True,  True, False, False, False],
+                [ True,  True, False,  True,  True, False,  True, False],
+                [ True,  True, False,  True,  True, False,  True, False]])
+
+        >>> functional.level_hv(5, 6, dtype=torch.complex64)
+        tensor([[ 9.4413e-01+0.3296j, -9.5562e-01-0.2946j,  7.9306e-04+1.0000j, -8.8154e-01-0.4721j, -6.6328e-01+0.7484j, -8.6131e-01-0.5081j],
+                [ 9.4413e-01+0.3296j, -9.5562e-01-0.2946j,  7.9306e-04+1.0000j, -8.8154e-01-0.4721j, -6.6328e-01+0.7484j, -8.6131e-01-0.5081j],
+                [ 9.4413e-01+0.3296j, -9.5562e-01-0.2946j,  7.9306e-04+1.0000j, -8.8154e-01-0.4721j, -6.6328e-01+0.7484j, -8.6131e-01-0.5081j],
+                [-9.9803e-01+0.0627j, -9.5562e-01-0.2946j,  7.9306e-04+1.0000j,  9.9992e-01+0.0126j, -6.6328e-01+0.7484j, -8.6131e-01-0.5081j],
+                [-9.9803e-01+0.0627j, -8.5366e-01+0.5208j,  6.5232e-01-0.7579j,  9.9992e-01+0.0126j,  3.6519e-01+0.9309j,  9.7333e-01-0.2294j]])
     """
     if dtype is None:
         dtype = torch.get_default_dtype()
 
-    if dtype in {torch.complex64, torch.complex128}:
-        raise NotImplementedError("Complex hypervectors are not supported yet.")
-
     if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
+
+    # convert from normalized "randomness" variable r to number of orthogonal vectors sets "span"
+    levels_per_span = (1 - randomness) * (num_embeddings - 1) + randomness * 1
+    # must be at least one to deal with the case that num_embeddings is less than 2
+    levels_per_span = max(levels_per_span, 1)
+    span = (num_embeddings - 1) / levels_per_span
 
     hv = torch.empty(
         num_embeddings,
@@ -206,11 +277,6 @@ def level_hv(
         device=device,
     )
 
-    # convert from normalized "randomness" variable r to number of orthogonal vectors sets "span"
-    levels_per_span = (1 - randomness) * (num_embeddings - 1) + randomness * 1
-    # must be at least one to deal with the case that num_embeddings is less than 2
-    levels_per_span = max(levels_per_span, 1)
-    span = (num_embeddings - 1) / levels_per_span
     # generate the set of orthogonal vectors within the level vector set
     span_hv = random_hv(
         int(math.ceil(span + 1)),
@@ -274,7 +340,7 @@ def circular_hv(
     Args:
         num_embeddings (int): the number of hypervectors to generate.
         embedding_dim (int): the dimensionality of the hypervectors.
-        sparsity (float, optional): the expected fraction of elements to be +1. Default: ``0.5``.
+        sparsity (float, optional): the expected fraction of elements to be in-active. Has no effect on complex hypervectors. Default: ``0.5``.
         randomness (float, optional): r-value to interpolate between circular at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
@@ -293,12 +359,33 @@ def circular_hv(
                 [ 1.,  1.,  1., -1.,  1.,  1., -1.,  1., -1., -1.],
                 [ 1.,  1., -1., -1.,  1.,  1., -1.,  1., -1., -1.]])
 
+        >>> functional.circular_hv(10, 8, dtype=torch.bool)
+        tensor([[False,  True, False, False,  True, False,  True,  True],
+                [False,  True, False, False,  True, False,  True,  True],
+                [False,  True, False, False,  True, False,  True,  True],
+                [False,  True, False, False,  True, False,  True, False],
+                [False,  True, False, False, False, False, False, False],
+                [ True,  True, False,  True, False, False, False, False],
+                [ True,  True, False,  True, False, False, False, False],
+                [ True,  True, False,  True, False, False, False, False],
+                [ True,  True, False,  True, False, False, False,  True],
+                [ True,  True, False,  True,  True, False,  True,  True]])
+
+        >>> functional.circular_hv(10, 6, dtype=torch.complex64)
+        tensor([[ 0.0691+0.9976j, -0.1847+0.9828j, -0.4434-0.8963j, -0.8287+0.5596j, -0.8357-0.5493j, -0.5358+0.8443j],
+                [ 0.0691+0.9976j, -0.1847+0.9828j, -0.4434-0.8963j, -0.8287+0.5596j,  0.9427-0.3336j, -0.5358+0.8443j],
+                [ 0.0691+0.9976j, -0.1847+0.9828j, -0.4434-0.8963j, -0.0339-0.9994j,  0.9427-0.3336j, -0.6510-0.7591j],
+                [ 0.0691+0.9976j, -0.3881+0.9216j, -0.4434-0.8963j, -0.0339-0.9994j,  0.9427-0.3336j, -0.6510-0.7591j],
+                [-0.6866-0.7271j, -0.3881+0.9216j, -0.4434-0.8963j, -0.0339-0.9994j,  0.9427-0.3336j, -0.6510-0.7591j],
+                [-0.6866-0.7271j, -0.3881+0.9216j, -0.7324+0.6809j, -0.0339-0.9994j,  0.9427-0.3336j, -0.6510-0.7591j],
+                [-0.6866-0.7271j, -0.3881+0.9216j, -0.7324+0.6809j, -0.0339-0.9994j, -0.8357-0.5493j, -0.6510-0.7591j],
+                [-0.6866-0.7271j, -0.3881+0.9216j, -0.7324+0.6809j, -0.8287+0.5596j, -0.8357-0.5493j, -0.5358+0.8443j],
+                [-0.6866-0.7271j, -0.1847+0.9828j, -0.7324+0.6809j, -0.8287+0.5596j, -0.8357-0.5493j, -0.5358+0.8443j],
+                [ 0.0691+0.9976j, -0.1847+0.9828j, -0.7324+0.6809j, -0.8287+0.5596j, -0.8357-0.5493j, -0.5358+0.8443j]])
+
     """
     if dtype is None:
         dtype = torch.get_default_dtype()
-
-    if dtype in {torch.complex64, torch.complex128}:
-        raise NotImplementedError("Complex hypervectors are not supported yet.")
 
     if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
@@ -362,7 +449,7 @@ def circular_hv(
 
             temp_hv = torch.where(threshold_v[span_idx] < t, span_start_hv, span_end_hv)
 
-        mutation_history.append(bind(temp_hv, mutation_hv))
+        mutation_history.append(unbind(temp_hv, mutation_hv))
         mutation_hv = temp_hv
 
         if i % 2 == 0:
@@ -370,7 +457,7 @@ def circular_hv(
 
     for i in range(num_embeddings + 1, num_embeddings * 2 - 1):
         mut = mutation_history.popleft()
-        mutation_hv = bind(mutation_hv, mut)
+        mutation_hv = unbind(mutation_hv, mut)
 
         if i % 2 == 0:
             hv[i // 2] = mutation_hv
@@ -411,14 +498,58 @@ def bind(input: Tensor, other: Tensor) -> Tensor:
     """
     dtype = input.dtype
 
-    if torch.is_complex(input):
-        raise NotImplementedError("Complex hypervectors are not supported yet.")
+    if dtype == torch.uint8:
+        raise ValueError("Unsigned integer hypervectors are not supported.")
+
+    if dtype == torch.bool:
+        return torch.logical_xor(input, other)
+
+    return torch.mul(input, other)
+
+
+def unbind(input: Tensor, other: Tensor) -> Tensor:
+    r"""Inverse of the binding operation.
+
+    See :func:`~torchhd.functional.bind`.
+
+    Aliased as ``torchhd.unbind``.
+
+    Args:
+        input (Tensor): input hypervector
+        other (Tensor): other input hypervector
+
+    Shapes:
+        - Input: :math:`(*)`
+        - Other: :math:`(*)`
+        - Output: :math:`(*)`
+
+    Examples::
+
+        >>> x = functional.random_hv(2, 6)
+        >>> x
+        tensor([[-1.,  1.,  1., -1., -1.,  1.],
+                [-1., -1.,  1.,  1.,  1., -1.]])
+        >>> functional.unbind(functional.bind(x[0], x[1]), x[1])
+        tensor([-1.,  1.,  1., -1., -1.,  1.])
+
+        >>> x = functional.random_hv(2, 6, dtype=torch.complex64)
+        >>> x
+        tensor([[-0.6510+0.7591j, -0.9675+0.2528j,  0.7358-0.6772j, -0.1791-0.9838j, -0.9874-0.1585j, -0.3726+0.9280j],
+                [ 0.1429+0.9897j, -0.9173+0.3983j, -0.4906+0.8714j,  0.4710-0.8821j, 0.6478+0.7618j,  0.8753+0.4836j]])
+        >>> functional.unbind(functional.bind(x[0], x[1]), x[1])
+        tensor([-0.6510+0.7591j, -0.9675+0.2528j,  0.7358-0.6772j, -0.1791-0.9838j, -0.9874-0.1585j, -0.3726+0.9280j])
+
+    """
+    dtype = input.dtype
 
     if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
 
     if dtype == torch.bool:
         return torch.logical_xor(input, other)
+
+    if torch.is_complex(input):
+        return torch.mul(input, other.conj())
 
     return torch.mul(input, other)
 
@@ -455,9 +586,6 @@ def bundle(input: Tensor, other: Tensor, *, tie: BoolTensor = None) -> Tensor:
 
     """
     dtype = input.dtype
-
-    if torch.is_complex(input):
-        raise NotImplementedError("Complex hypervectors are not supported yet.")
 
     if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
@@ -559,54 +687,95 @@ def hard_quantize(input: Tensor):
     return torch.where(input > 0, positive, negative)
 
 
-def cosine_similarity(input: Tensor, others: Tensor) -> Tensor:
-    """Cosine similarity between the input vector and each vector in others.
-
-    Args:
-        input (Tensor): one-dimensional tensor
-        others (Tensor): two-dimensional tensor
-
-    Shapes:
-        - Input: :math:`(d)`
-        - Others: :math:`(n, d)`
-        - Output: :math:`(n)`
-
-    Examples::
-
-        >>> x = functional.random_hv(2, 3)
-        >>> x
-        tensor([[-1., -1.,  1.],
-                [ 1.,  1., -1.]])
-        >>> functional.cosine_similarity(x[0], x)
-        tensor([ 1., -1.])
-
-    """
-    return F.cosine_similarity(input, others)
-
-
 def dot_similarity(input: Tensor, others: Tensor) -> Tensor:
     """Dot product between the input vector and each vector in others.
 
     Args:
-        input (Tensor): one-dimensional tensor
-        others (Tensor): two-dimensional tensor
+        input (Tensor): hypervectors to compare against others
+        others (Tensor): hypervectors to compare with
 
     Shapes:
-        - Input: :math:`(d)`
-        - Others: :math:`(n, d)`
-        - Output: :math:`(n)`
+        - Input: :math:`(*, d)`
+        - Others: :math:`(n, d)` or :math:`(d)`
+        - Output: :math:`(*, n)` or :math:`(*)`, depends on shape of others
 
     Examples::
 
-        >>> x = functional.random_hv(2, 3)
+        >>> x = functional.random_hv(3, 6)
         >>> x
-        tensor([[ 1., -1.,  1.],
-                [ 1.,  1.,  1.]])
-        >>> functional.dot_similarity(x[0], x)
-        tensor([3., 1.])
+        tensor([[ 1., -1., -1.,  1., -1., -1.],
+                [ 1., -1., -1., -1.,  1., -1.],
+                [-1.,  1.,  1., -1.,  1., -1.]])
+        >>> functional.dot_similarity(x, x)
+        tensor([[ 6.,  2., -4.],
+                [ 2.,  6.,  0.],
+                [-4.,  0.,  6.]])
+
+        >>> x = functional.random_hv(3, 6, dtype=torch.complex64)
+        >>> x
+        tensor([[ 0.5931+0.8051j, -0.7391+0.6736j, -0.9725+0.2328j, -0.9290+0.3701j, -0.8220+0.5696j,  0.9757-0.2190j],
+                [-0.1053+0.9944j,  0.6918-0.7221j, -0.6242+0.7813j, -0.9580-0.2869j, 0.4799+0.8773j, -0.4127+0.9109j],
+                [ 0.4230-0.9061j, -0.9658+0.2592j,  0.9961-0.0883j, -0.3829+0.9238j, -0.2551-0.9669j,  0.7827-0.6224j]])
+        >>> functional.dot_similarity(x, x)
+        tensor([[ 6.0000,  0.8164,  0.6771],
+                [ 0.8164,  6.0000, -4.2506],
+                [ 0.6771, -4.2506,  6.0000]])
 
     """
+    if torch.is_complex(input):
+        return F.linear(input, others.conj()).real
+
     return F.linear(input, others)
+
+
+def cosine_similarity(input: Tensor, others: Tensor, *, eps=1e-08) -> Tensor:
+    """Cosine similarity between the input vector and each vector in others.
+
+    Args:
+        input (Tensor): hypervectors to compare against others
+        others (Tensor): hypervectors to compare with
+
+    Shapes:
+        - Input: :math:`(*, d)`
+        - Others: :math:`(n, d)` or :math:`(d)`
+        - Output: :math:`(*, n)` or :math:`(*)`, depends on shape of others
+
+    Examples::
+
+        >>> x = functional.random_hv(3, 6)
+        >>> x
+        tensor([[-1.,  1.,  1., -1.,  1., -1.],
+                [ 1.,  1.,  1.,  1.,  1.,  1.],
+                [ 1.,  1.,  1., -1.,  1., -1.]])
+        >>> functional.cosine_similarity(x, x)
+        tensor([[1.0000, 0.0000, 0.6667],
+                [0.0000, 1.0000, 0.3333],
+                [0.6667, 0.3333, 1.0000]])
+
+        >>> x = functional.random_hv(3, 6, dtype=torch.complex64)
+        >>> x
+        tensor([[-0.5578-0.8299j, -0.0043-1.0000j, -0.0181+0.9998j,  0.1107+0.9939j, -0.8215-0.5702j, -0.4585+0.8887j],
+                [-0.7400-0.6726j,  0.6895-0.7243j, -0.8760+0.4823j, -0.4582-0.8889j, -0.6128+0.7903j, -0.4839-0.8751j],
+                [-0.7839+0.6209j, -0.9239-0.3827j, -0.9961-0.0884j,  0.4614+0.8872j, -0.8546+0.5193j, -0.5468-0.8372j]])
+        >>> functional.cosine_similarity(x, x)
+        tensor([[1.0000, 0.1255, 0.1806],
+                [0.1255, 1.0000, 0.2607],
+                [0.1806, 0.2607, 1.0000]])
+
+    """
+    if torch.is_complex(input):
+        input_mag = torch.real(input * input.conj()).sum(dim=-1).sqrt()
+        others_mag = torch.real(others * others.conj()).sum(dim=-1).sqrt()
+    else:
+        input_mag = torch.sum(input * input, dim=-1).sqrt()
+        others_mag = torch.sum(others * others, dim=-1).sqrt()
+
+    if input.dim() > 1:
+        magnitude = input_mag.unsqueeze(-1) * others_mag.unsqueeze(0)
+    else:
+        magnitude = input_mag * others_mag
+
+    return dot_similarity(input, others) / (magnitude + eps)
 
 
 def hamming_similarity(input: Tensor, others: Tensor) -> LongTensor:
@@ -666,9 +835,6 @@ def multiset(input: Tensor) -> Tensor:
     dim = -2
     dtype = input.dtype
 
-    if dtype in {torch.complex64, torch.complex128}:
-        raise NotImplementedError("Complex hypervectors are not supported yet.")
-
     if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
 
@@ -714,14 +880,14 @@ def multibind(input: Tensor) -> Tensor:
         tensor([ 1.,  1., -1.])
 
     """
-    if input.dtype in {torch.complex64, torch.complex128}:
-        raise NotImplementedError("Complex hypervectors are not supported yet.")
+    dtype = input.dtype
+    dim = -2
 
-    if input.dtype == torch.uint8:
+    if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
 
-    if input.dtype == torch.bool:
-        hvs = torch.unbind(input, -2)
+    if dtype == torch.bool:
+        hvs = torch.unbind(input, dim)
         result = hvs[0]
 
         for i in range(1, len(hvs)):
@@ -729,7 +895,7 @@ def multibind(input: Tensor) -> Tensor:
 
         return result
 
-    return torch.prod(input, dim=-2, dtype=input.dtype)
+    return torch.prod(input, dim=dim, dtype=dtype)
 
 
 def cross_product(input: Tensor, other: Tensor) -> Tensor:

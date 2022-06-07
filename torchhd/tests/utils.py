@@ -49,5 +49,5 @@ torch_dtypes = {
 
 
 def supported_dtype(dtype: torch.dtype) -> bool:
-    not_supported = dtype in torch_complex_dtypes or dtype == torch.uint8
+    not_supported = dtype == torch.uint8
     return not not_supported

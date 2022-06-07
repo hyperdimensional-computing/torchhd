@@ -10,6 +10,7 @@ from torchhd.functional import (
     level_hv,
     circular_hv,
     bind,
+    unbind,
     bundle,
     permute,
 )
@@ -27,6 +28,7 @@ __all__ = [
     "level_hv",
     "circular_hv",
     "bind",
+    "unbind",
     "bundle",
     "permute",
 ]

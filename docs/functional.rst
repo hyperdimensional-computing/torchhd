@@ -28,6 +28,7 @@ Operations
     :template: function.rst
 
     bind
+    unbind
     bundle
     permute
     cleanup

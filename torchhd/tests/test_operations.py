@@ -50,12 +50,6 @@ class TestBind:
     def test_dtype(self, dtype):
         hv = torch.zeros(23, 1000, dtype=dtype)
 
-        if dtype in torch_complex_dtypes:
-            with pytest.raises(NotImplementedError):
-                functional.bind(hv[0], hv[1])
-
-            return
-
         if dtype == torch.uint8:
             with pytest.raises(ValueError):
                 functional.bind(hv[0], hv[1])
@@ -140,12 +134,6 @@ class TestBundle:
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
         hv = torch.zeros(23, 1000, dtype=dtype)
-
-        if dtype in torch_complex_dtypes:
-            with pytest.raises(NotImplementedError):
-                functional.bundle(hv[0], hv[1])
-
-            return
 
         if dtype == torch.uint8:
             with pytest.raises(ValueError):
@@ -255,12 +243,6 @@ class TestCleanup:
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
         hv = torch.zeros(23, 1000, dtype=dtype)
-
-        if dtype in torch_complex_dtypes:
-            with pytest.raises(NotImplementedError):
-                functional.cleanup(hv[0], hv, threshold=-1)
-
-            return
 
         if dtype == torch.uint8:
             with pytest.raises(ValueError):
