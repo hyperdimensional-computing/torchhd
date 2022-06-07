@@ -9,9 +9,9 @@ source:
   sha256: {{ TORCHHD_HASH }}
 
 build:
-  noarch: generic
+  noarch: python
   number: 0
-  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv "
+  script: "{{ PYTHON }} -m pip install . -vv"
 
 requirements:
   host:
