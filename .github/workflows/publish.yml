@@ -50,6 +50,8 @@ jobs:
       env:
         ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
       run: |
+        sleep 5m  # wait for all the PyPi servers to be updated with the latest version of torch-hd
+
         mkdir ./conda-build  # create the artifact dir
 
         # Get the version of the library

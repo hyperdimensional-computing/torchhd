@@ -120,12 +120,11 @@ class TestBundleSequence:
         assert functional.cosine_similarity(S[2], hv)[2] < 0.35
         assert functional.cosine_similarity(S[2], hv)[6] > 0.35
 
-        hv1 = functional.random_hv(10, 10000)
-        S2 = structures.BundleSequence.from_tensor(hv1)
-        assert functional.cosine_similarity(S2[2], hv1)[2] > 0.3
-        S2.replace(2, hv1[2], hv1[6])
-        assert functional.cosine_similarity(S2[2], hv1)[2] < 0.3
-        assert functional.cosine_similarity(S2[2], hv1)[6] > 0.3
+        S2 = structures.BundleSequence.from_tensor(hv[:7])
+        assert functional.cosine_similarity(S2[2], hv)[2] > 0.35
+        S2.replace(2, hv[2], hv[6])
+        assert functional.cosine_similarity(S2[2], hv)[2] < 0.35
+        assert functional.cosine_similarity(S2[2], hv)[6] > 0.35
 
     def test_concat(self):
         generator = torch.Generator()
