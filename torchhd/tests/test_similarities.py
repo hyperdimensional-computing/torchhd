@@ -132,6 +132,23 @@ class TestDotSimilarity:
         else:
             assert similarity.dtype == dtype
 
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_device(self, dtype):
+        if not supported_dtype(dtype):
+            return
+
+        generator = torch.Generator()
+        generator.manual_seed(seed)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        hv = functional.random_hv(
+            3, 100, generator=generator, dtype=dtype, device=device
+        )
+
+        similarity = functional.dot_similarity(hv, hv)
+
+        assert similarity.device == device
+
 
 class TestCosSimilarity:
     @pytest.mark.parametrize("dtype", torch_dtypes)
@@ -244,3 +261,20 @@ class TestCosSimilarity:
         similarity = functional.cosine_similarity(hv, hv)
 
         assert similarity.dtype == torch.float
+
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_device(self, dtype):
+        if not supported_dtype(dtype):
+            return
+
+        generator = torch.Generator()
+        generator.manual_seed(seed)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        hv = functional.random_hv(
+            3, 100, generator=generator, dtype=dtype, device=device
+        )
+
+        similarity = functional.cosine_similarity(hv, hv)
+
+        assert similarity.device == device
