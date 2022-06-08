@@ -697,6 +697,12 @@ def dot_similarity(input: Tensor, others: Tensor) -> Tensor:
         - Others: :math:`(n, d)` or :math:`(d)`
         - Output: :math:`(*, n)` or :math:`(*)`, depends on shape of others
 
+    .. note::
+
+        Output ``dtype`` for ``torch.bool`` is ``torch.long``,
+        for ``torch.complex64`` is ``torch.float``,
+        for ``torch.complex128`` is ``torch.double``, otherwise same as input ``dtype``.
+
     Examples::
 
         >>> x = functional.random_hv(3, 6)
@@ -720,6 +726,12 @@ def dot_similarity(input: Tensor, others: Tensor) -> Tensor:
                 [ 0.6771, -4.2506,  6.0000]])
 
     """
+    if input.dtype == torch.bool:
+        input_as_bipolar = torch.where(input, -1, 1)
+        others_as_bipolar = torch.where(others, -1, 1)
+
+        return F.linear(input_as_bipolar, others_as_bipolar)
+
     if torch.is_complex(input):
         return F.linear(input, others.conj()).real
 
@@ -737,6 +749,10 @@ def cosine_similarity(input: Tensor, others: Tensor, *, eps=1e-08) -> Tensor:
         - Input: :math:`(*, d)`
         - Others: :math:`(n, d)` or :math:`(d)`
         - Output: :math:`(*, n)` or :math:`(*)`, depends on shape of others
+
+    .. note::
+
+        Output ``dtype`` is ``torch.get_default_dtype()``.
 
     Examples::
 
@@ -761,19 +777,43 @@ def cosine_similarity(input: Tensor, others: Tensor, *, eps=1e-08) -> Tensor:
                 [0.1806, 0.2607, 1.0000]])
 
     """
-    if torch.is_complex(input):
-        input_mag = torch.real(input * input.conj()).sum(dim=-1).sqrt()
-        others_mag = torch.real(others * others.conj()).sum(dim=-1).sqrt()
+    out_dtype = torch.get_default_dtype()
+
+    # calculate vector magnitude
+    if input.dtype == torch.bool:
+        input_mag = torch.full(
+            input.shape[:-1],
+            math.sqrt(input.size(-1)),
+            dtype=out_dtype,
+            device=input.device,
+        )
+        others_mag = torch.full(
+            others.shape[:-1],
+            math.sqrt(others.size(-1)),
+            dtype=out_dtype,
+            device=others.device,
+        )
+
+    elif torch.is_complex(input):
+        input_dot = torch.real(input * input.conj()).sum(dim=-1, dtype=out_dtype)
+        input_mag = input_dot.sqrt()
+
+        others_dot = torch.real(others * others.conj()).sum(dim=-1, dtype=out_dtype)
+        others_mag = others_dot.sqrt()
+
     else:
-        input_mag = torch.sum(input * input, dim=-1).sqrt()
-        others_mag = torch.sum(others * others, dim=-1).sqrt()
+        input_dot = torch.sum(input * input, dim=-1, dtype=out_dtype)
+        input_mag = input_dot.sqrt()
+
+        others_dot = torch.sum(others * others, dim=-1, dtype=out_dtype)
+        others_mag = others_dot.sqrt()
 
     if input.dim() > 1:
         magnitude = input_mag.unsqueeze(-1) * others_mag.unsqueeze(0)
     else:
         magnitude = input_mag * others_mag
 
-    return dot_similarity(input, others) / (magnitude + eps)
+    return dot_similarity(input, others).to(out_dtype) / (magnitude + eps)
 
 
 def hamming_similarity(input: Tensor, others: Tensor) -> LongTensor:
