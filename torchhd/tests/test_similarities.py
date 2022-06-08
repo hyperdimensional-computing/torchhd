@@ -279,6 +279,7 @@ class TestCosSimilarity:
 
         assert similarity.device == device
 
+
 class TestHammingSimilarity:
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_shape(self, dtype):
