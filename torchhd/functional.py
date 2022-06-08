@@ -2,7 +2,6 @@ import math
 import torch
 from torch import BoolTensor, LongTensor, Tensor
 import torch.nn.functional as F
-
 from collections import deque
 
 
@@ -688,6 +687,8 @@ def hard_quantize(input: Tensor):
 def dot_similarity(input: Tensor, others: Tensor) -> Tensor:
     """Dot product between the input vector and each vector in others.
 
+    Aliased as ``torchhd.dot_similarity``.
+
     Args:
         input (Tensor): hypervectors to compare against others
         others (Tensor): hypervectors to compare with
@@ -740,6 +741,8 @@ def dot_similarity(input: Tensor, others: Tensor) -> Tensor:
 
 def cosine_similarity(input: Tensor, others: Tensor, *, eps=1e-08) -> Tensor:
     """Cosine similarity between the input vector and each vector in others.
+
+    Aliased as ``torchhd.cosine_similarity``.
 
     Args:
         input (Tensor): hypervectors to compare against others
@@ -817,27 +820,35 @@ def cosine_similarity(input: Tensor, others: Tensor, *, eps=1e-08) -> Tensor:
 
 
 def hamming_similarity(input: Tensor, others: Tensor) -> LongTensor:
-    """Number of equal elements between the input vector and each vector in others.
+    """Number of equal elements between the input vectors and each vector in others.
 
     Args:
-        input (Tensor): one-dimensional tensor
-        others (Tensor): two-dimensional tensor
+        input (Tensor): hypervectors to compare against others
+        others (Tensor): hypervectors to compare with
 
     Shapes:
-        - Input: :math:`(d)`
-        - Others: :math:`(n, d)`
-        - Output: :math:`(n)`
+        - Input: :math:`(*, d)`
+        - Others: :math:`(n, d)` or :math:`(d)`
+        - Output: :math:`(*, n)` or :math:`(*)`, depends on shape of others
 
     Examples::
 
-        >>> x = functional.random_hv(2, 3)
+        >>> x = functional.random_hv(3, 6)
         >>> x
-        tensor([[ 1.,  1., -1.],
-                [-1., -1., -1.]])
-        >>> functional.hamming_similarity(x[0], x)
-        tensor([3., 1.])
+        tensor([[ 1.,  1., -1., -1.,  1.,  1.],
+                [ 1.,  1.,  1.,  1., -1., -1.],
+                [ 1.,  1., -1., -1., -1.,  1.]])
+        >>> functional.hamming_similarity(x, x)
+        tensor([[6, 2, 5],
+                [2, 6, 3],
+                [5, 3, 6]])
 
     """
+    if input.dim() > 1 and others.dim() > 1:
+        return torch.sum(
+            input.unsqueeze(-2) == others.unsqueeze(-3), dim=-1, dtype=torch.long
+        )
+
     return torch.sum(input == others, dim=-1, dtype=torch.long)
 
 
