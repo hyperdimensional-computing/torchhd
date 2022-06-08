@@ -67,7 +67,7 @@ class TestLevel_hv:
             sims = functional.cosine_similarity(hv[0], hv)
             sims_diff = sims[:-1] - sims[1:]
             assert torch.all(
-                (0.248 < sims_diff) & (sims_diff < 0.252)
+                (0.247 < sims_diff) & (sims_diff < 0.253)
             ).item(), "similarity decreases linearly"
         else:
             sims = functional.hamming_similarity(hv[0], hv).float() / 10000

@@ -68,7 +68,7 @@ class TestCircular_hv:
 
             abs_sims_diff = sims_diff.abs()
             assert torch.all(
-                (0.248 < abs_sims_diff) & (abs_sims_diff < 0.252)
+                (0.247 < abs_sims_diff) & (abs_sims_diff < 0.253)
             ).item(), "similarity changes linearly"
         else:
             sims = functional.hamming_similarity(hv[0], hv).float() / 1000000
