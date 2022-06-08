@@ -2,7 +2,6 @@ import math
 import torch
 from torch import BoolTensor, LongTensor, Tensor
 import torch.nn.functional as F
-
 from collections import deque
 
 
@@ -688,6 +687,8 @@ def hard_quantize(input: Tensor):
 def dot_similarity(input: Tensor, others: Tensor) -> Tensor:
     """Dot product between the input vector and each vector in others.
 
+    Aliased as ``torchhd.dot_similarity``.
+
     Args:
         input (Tensor): hypervectors to compare against others
         others (Tensor): hypervectors to compare with
@@ -696,6 +697,12 @@ def dot_similarity(input: Tensor, others: Tensor) -> Tensor:
         - Input: :math:`(*, d)`
         - Others: :math:`(n, d)` or :math:`(d)`
         - Output: :math:`(*, n)` or :math:`(*)`, depends on shape of others
+
+    .. note::
+
+        Output ``dtype`` for ``torch.bool`` is ``torch.long``,
+        for ``torch.complex64`` is ``torch.float``,
+        for ``torch.complex128`` is ``torch.double``, otherwise same as input ``dtype``.
 
     Examples::
 
@@ -720,6 +727,12 @@ def dot_similarity(input: Tensor, others: Tensor) -> Tensor:
                 [ 0.6771, -4.2506,  6.0000]])
 
     """
+    if input.dtype == torch.bool:
+        input_as_bipolar = torch.where(input, -1, 1)
+        others_as_bipolar = torch.where(others, -1, 1)
+
+        return F.linear(input_as_bipolar, others_as_bipolar)
+
     if torch.is_complex(input):
         return F.linear(input, others.conj()).real
 
@@ -729,6 +742,8 @@ def dot_similarity(input: Tensor, others: Tensor) -> Tensor:
 def cosine_similarity(input: Tensor, others: Tensor, *, eps=1e-08) -> Tensor:
     """Cosine similarity between the input vector and each vector in others.
 
+    Aliased as ``torchhd.cosine_similarity``.
+
     Args:
         input (Tensor): hypervectors to compare against others
         others (Tensor): hypervectors to compare with
@@ -737,6 +752,10 @@ def cosine_similarity(input: Tensor, others: Tensor, *, eps=1e-08) -> Tensor:
         - Input: :math:`(*, d)`
         - Others: :math:`(n, d)` or :math:`(d)`
         - Output: :math:`(*, n)` or :math:`(*)`, depends on shape of others
+
+    .. note::
+
+        Output ``dtype`` is ``torch.get_default_dtype()``.
 
     Examples::
 
@@ -761,43 +780,75 @@ def cosine_similarity(input: Tensor, others: Tensor, *, eps=1e-08) -> Tensor:
                 [0.1806, 0.2607, 1.0000]])
 
     """
-    if torch.is_complex(input):
-        input_mag = torch.real(input * input.conj()).sum(dim=-1).sqrt()
-        others_mag = torch.real(others * others.conj()).sum(dim=-1).sqrt()
+    out_dtype = torch.get_default_dtype()
+
+    # calculate vector magnitude
+    if input.dtype == torch.bool:
+        input_mag = torch.full(
+            input.shape[:-1],
+            math.sqrt(input.size(-1)),
+            dtype=out_dtype,
+            device=input.device,
+        )
+        others_mag = torch.full(
+            others.shape[:-1],
+            math.sqrt(others.size(-1)),
+            dtype=out_dtype,
+            device=others.device,
+        )
+
+    elif torch.is_complex(input):
+        input_dot = torch.real(input * input.conj()).sum(dim=-1, dtype=out_dtype)
+        input_mag = input_dot.sqrt()
+
+        others_dot = torch.real(others * others.conj()).sum(dim=-1, dtype=out_dtype)
+        others_mag = others_dot.sqrt()
+
     else:
-        input_mag = torch.sum(input * input, dim=-1).sqrt()
-        others_mag = torch.sum(others * others, dim=-1).sqrt()
+        input_dot = torch.sum(input * input, dim=-1, dtype=out_dtype)
+        input_mag = input_dot.sqrt()
+
+        others_dot = torch.sum(others * others, dim=-1, dtype=out_dtype)
+        others_mag = others_dot.sqrt()
 
     if input.dim() > 1:
         magnitude = input_mag.unsqueeze(-1) * others_mag.unsqueeze(0)
     else:
         magnitude = input_mag * others_mag
 
-    return dot_similarity(input, others) / (magnitude + eps)
+    return dot_similarity(input, others).to(out_dtype) / (magnitude + eps)
 
 
 def hamming_similarity(input: Tensor, others: Tensor) -> LongTensor:
-    """Number of equal elements between the input vector and each vector in others.
+    """Number of equal elements between the input vectors and each vector in others.
 
     Args:
-        input (Tensor): one-dimensional tensor
-        others (Tensor): two-dimensional tensor
+        input (Tensor): hypervectors to compare against others
+        others (Tensor): hypervectors to compare with
 
     Shapes:
-        - Input: :math:`(d)`
-        - Others: :math:`(n, d)`
-        - Output: :math:`(n)`
+        - Input: :math:`(*, d)`
+        - Others: :math:`(n, d)` or :math:`(d)`
+        - Output: :math:`(*, n)` or :math:`(*)`, depends on shape of others
 
     Examples::
 
-        >>> x = functional.random_hv(2, 3)
+        >>> x = functional.random_hv(3, 6)
         >>> x
-        tensor([[ 1.,  1., -1.],
-                [-1., -1., -1.]])
-        >>> functional.hamming_similarity(x[0], x)
-        tensor([3., 1.])
+        tensor([[ 1.,  1., -1., -1.,  1.,  1.],
+                [ 1.,  1.,  1.,  1., -1., -1.],
+                [ 1.,  1., -1., -1., -1.,  1.]])
+        >>> functional.hamming_similarity(x, x)
+        tensor([[6, 2, 5],
+                [2, 6, 3],
+                [5, 3, 6]])
 
     """
+    if input.dim() > 1 and others.dim() > 1:
+        return torch.sum(
+            input.unsqueeze(-2) == others.unsqueeze(-3), dim=-1, dtype=torch.long
+        )
+
     return torch.sum(input == others, dim=-1, dtype=torch.long)
 
 

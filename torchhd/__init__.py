@@ -13,6 +13,8 @@ from torchhd.functional import (
     unbind,
     bundle,
     permute,
+    cosine_similarity,
+    dot_similarity,
 )
 
 from torchhd.version import __version__
@@ -31,4 +33,6 @@ __all__ = [
     "unbind",
     "bundle",
     "permute",
+    "cosine_similarity",
+    "dot_similarity",
 ]
