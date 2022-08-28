@@ -320,3 +320,44 @@ class TestBindSequence:
         hv = functional.random_hv(11, 10000, device=device)
         res = functional.bind_sequence(hv)
         assert res.device == device
+
+
+class TestGraph:
+    def test_value(self):
+        hv = torch.zeros(2, 4, 1000)
+        res = functional.graph(hv)
+        assert torch.all(res == 0).item()
+
+        g = torch.tensor(
+            [
+                [[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1]],
+                [[-1, -1, 1, 1], [-1, 1, 1, 1], [1, -1, -1, 1]],
+            ]
+        )
+        res = functional.graph(g)
+        assert torch.all(res == torch.tensor([-1, -1, -1, 3])).item()
+        assert res.dtype == g.dtype
+
+        res = functional.graph(g, directed=True)
+        assert torch.all(res == torch.tensor([-1, 3, 1, 1])).item()
+        assert res.dtype == g.dtype
+
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_dtype(self, dtype):
+        hv = torch.zeros(5, 2, 23, 1000, dtype=dtype)
+
+        if dtype == torch.uint8:
+            with pytest.raises(ValueError):
+                functional.graph(hv)
+
+            return
+
+        res = functional.graph(hv)
+        assert res.dtype == dtype
+
+    def test_device(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        hv = torch.zeros(5, 2, 23, 1000, device=device)
+        res = functional.graph(hv)
+        assert res.device == device

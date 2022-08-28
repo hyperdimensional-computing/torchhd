@@ -911,6 +911,26 @@ class Graph:
         """
         self.value.fill_(0.0)
 
+    @classmethod
+    def from_edges(cls, input: Tensor, directed=False):
+        """Creates a graph from a tensor
+
+        See: :func:`~torchhd.functional.graph`.
+
+        Args:
+            input (Tensor): tensor containing pairs of node hypervectors that share an edge.
+            directed (bool, optional): specify if the graph is directed or not. Default: ``False``.
+
+        Examples::
+            >>> edges = torch.tensor([[0, 0, 1, 2], [1, 2, 2, 3]])
+            >>> node_embedding = embeddings.Random(4, 10000)
+            >>> edges_hv = node_embedding(edges)
+            >>> graph = structures.Graph.from_edges(edges_hv)
+
+        """
+        value = functional.graph(input, directed=directed)
+        return cls(value, directed=directed)
+
 
 class Tree:
     """Hypervector-based tree data structure.

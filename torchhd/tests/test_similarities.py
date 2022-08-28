@@ -15,7 +15,7 @@ seed = 2147483644
 class TestDotSimilarity:
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_shape(self, dtype):
-        if not supported_dtype(dtype):
+        if not supported_dtype(dtype) or dtype == torch.half:
             return
 
         generator = torch.Generator()
@@ -43,7 +43,7 @@ class TestDotSimilarity:
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_value(self, dtype):
-        if not supported_dtype(dtype):
+        if not supported_dtype(dtype) or dtype == torch.half:
             return
 
         generator = torch.Generator()
@@ -113,7 +113,7 @@ class TestDotSimilarity:
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
-        if not supported_dtype(dtype):
+        if not supported_dtype(dtype) or dtype == torch.half:
             return
 
         generator = torch.Generator()
@@ -134,7 +134,7 @@ class TestDotSimilarity:
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_device(self, dtype):
-        if not supported_dtype(dtype):
+        if not supported_dtype(dtype) or dtype == torch.half:
             return
 
         generator = torch.Generator()
@@ -153,7 +153,7 @@ class TestDotSimilarity:
 class TestCosSimilarity:
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_shape(self, dtype):
-        if not supported_dtype(dtype):
+        if not supported_dtype(dtype) or dtype == torch.half:
             return
 
         generator = torch.Generator()
@@ -181,7 +181,7 @@ class TestCosSimilarity:
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_value(self, dtype):
-        if not supported_dtype(dtype):
+        if not supported_dtype(dtype) or dtype == torch.half:
             return
 
         generator = torch.Generator()
@@ -250,7 +250,7 @@ class TestCosSimilarity:
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
-        if not supported_dtype(dtype):
+        if not supported_dtype(dtype) or dtype == torch.half:
             return
 
         generator = torch.Generator()
@@ -264,7 +264,7 @@ class TestCosSimilarity:
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_device(self, dtype):
-        if not supported_dtype(dtype):
+        if not supported_dtype(dtype) or dtype == torch.half:
             return
 
         generator = torch.Generator()
