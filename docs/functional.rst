@@ -63,6 +63,7 @@ Encodings
     hash_table
     cross_product
     ngrams
+    graph
 
 
 Utilities

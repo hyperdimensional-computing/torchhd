@@ -27,6 +27,7 @@ __all__ = [
     "bind_sequence",
     "ngrams",
     "hash_table",
+    "graph",
     "map_range",
     "value_to_index",
     "index_to_value",
@@ -41,7 +42,7 @@ def identity_hv(
     device=None,
     requires_grad=False,
 ) -> Tensor:
-    """Creates a set of identity hypervector.
+    """Creates a set of identity hypervectors.
 
     When bound with a random-hypervector :math:`x`, the result is :math:`x`.
 
@@ -174,24 +175,20 @@ def random_hv(
     if dtype == torch.uint8:
         raise ValueError("Unsigned integer hypervectors are not supported.")
 
+    size = (num_embeddings, embedding_dim)
     if dtype in {torch.complex64, torch.complex128}:
         dtype = torch.float if dtype == torch.complex64 else torch.double
 
-        angle = torch.empty(num_embeddings, embedding_dim, dtype=dtype, device=device)
+        angle = torch.empty(size, dtype=dtype, device=device)
         angle.uniform_(-math.pi, math.pi)
-        magnitude = torch.ones(
-            num_embeddings, embedding_dim, dtype=dtype, device=device
-        )
+        magnitude = torch.ones(size, dtype=dtype, device=device)
 
         result = torch.polar(magnitude, angle)
         result.requires_grad = requires_grad
         return result
 
     select = torch.empty(
-        (
-            num_embeddings,
-            embedding_dim,
-        ),
+        size,
         dtype=torch.bool,
     ).bernoulli_(1.0 - sparsity, generator=generator)
 
@@ -1031,7 +1028,7 @@ def hash_table(keys: Tensor, values: Tensor) -> Tensor:
 
     .. math::
 
-        \bigoplus_{i = 0}^{m - 1} K_i \otimes V_i
+        \bigoplus_{i = 0}^{n - 1} K_i \otimes V_i
 
     Args:
         keys (Tensor): The keys hypervectors, must be the same shape as values.
@@ -1066,7 +1063,7 @@ def bundle_sequence(input: Tensor) -> Tensor:
 
     .. math::
 
-        \bigoplus_{i=0}^{m-1} \Pi^{m - i - 1}(V_i)
+        \bigoplus_{i=0}^{n-1} \Pi^{n - i - 1}(V_i)
 
     Args:
         input (Tensor): The hypervector values.
@@ -1105,7 +1102,7 @@ def bind_sequence(input: Tensor) -> Tensor:
 
     .. math::
 
-        \bigotimes_{i=0}^{m-1} \Pi^{m - i - 1}(V_i)
+        \bigotimes_{i=0}^{n-1} \Pi^{n - i - 1}(V_i)
 
     Args:
         input (Tensor): The hypervector values.
@@ -1139,6 +1136,48 @@ def bind_sequence(input: Tensor) -> Tensor:
     permuted = torch.stack(permuted, dim)
 
     return multibind(permuted)
+
+
+def graph(input: Tensor, *, directed=False) -> Tensor:
+    r"""Graph from node hypervector pairs.
+
+    If ``directed=False`` this computes:
+
+    .. math::
+
+        \bigoplus_{i = 0}^{n - 1} V_{0,i} \otimes V_{1,i}
+
+    If ``directed=True`` this computes:
+
+    .. math::
+
+        \bigoplus_{i = 0}^{n - 1} V_{0,i} \otimes \Pi(V_{1,i})
+
+    Args:
+        input (Tensor): tensor containing pairs of node hypervectors that share an edge.
+        directed (bool, optional): specify if the graph is directed or not. Default: ``False``.
+
+    Shapes:
+        - Input: :math:`(*, 2, n, d)`
+        - Output: :math:`(*, d)`
+
+    Examples::
+            >>> edges = torch.tensor([[0, 0, 1, 2], [1, 2, 2, 3]])
+            >>> node_embedding = embeddings.Random(4, 10000)
+            >>> edges_hv = node_embedding(edges)
+            >>> graph = functional.graph(edges_hv)
+            >>> neighbors = unbind(graph, node_embedding.weight[0])
+            >>> cosine_similarity(neighbors, node_embedding.weight)
+            tensor([0.0006, 0.5017, 0.4997, 0.0048])
+
+    """
+    to_nodes = input[..., 0, :, :]
+    from_nodes = input[..., 1, :, :]
+
+    if directed:
+        from_nodes = permute(from_nodes)
+
+    return multiset(bind(to_nodes, from_nodes))
 
 
 def map_range(

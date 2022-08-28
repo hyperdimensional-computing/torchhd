@@ -179,3 +179,25 @@ class TestGraph:
         assert torch.equal(
             G.value, torch.tensor([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         )
+
+    def test_from_edges(self):
+        generator = torch.Generator()
+        generator.manual_seed(seed)
+
+        hv = functional.random_hv(4, 8, generator=generator)
+        edges = torch.empty(2, 3, 8)
+        edges[0, 0] = hv[0]
+        edges[1, 0] = hv[1]
+        edges[0, 1] = hv[0]
+        edges[1, 1] = hv[2]
+        edges[0, 2] = hv[1]
+        edges[1, 2] = hv[2]
+
+        G = structures.Graph.from_edges(edges)
+        neighbors = G.node_neighbors(hv[0])
+        neighbor_similarity = functional.cosine_similarity(neighbors, hv)
+
+        assert neighbor_similarity[0] < torch.tensor(0.5)
+        assert neighbor_similarity[1] > torch.tensor(0.5)
+        assert neighbor_similarity[2] > torch.tensor(0.5)
+        assert neighbor_similarity[3] < torch.tensor(0.5)
