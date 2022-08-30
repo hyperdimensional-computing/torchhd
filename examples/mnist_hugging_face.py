@@ -57,9 +57,7 @@ class Model(nn.Module):
 model = Model(len(train_ds.classes), IMG_SIZE)
 model.to(device)
 
-model, train_ld, test_ld = accelerator.prepare(
-    model, train_ld, test_ld
-)
+model, train_ld, test_ld = accelerator.prepare(model, train_ld, test_ld)
 
 with torch.no_grad():
     for samples, labels in tqdm(train_ld, desc="Training"):
