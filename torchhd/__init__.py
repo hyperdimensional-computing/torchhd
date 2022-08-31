@@ -13,6 +13,7 @@ from torchhd.functional import (
     unbind,
     bundle,
     permute,
+    randsel,
     cosine_similarity,
     dot_similarity,
 )
@@ -33,6 +34,7 @@ __all__ = [
     "unbind",
     "bundle",
     "permute",
+    "randsel",
     "cosine_similarity",
     "dot_similarity",
 ]
