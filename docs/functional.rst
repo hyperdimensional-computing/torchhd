@@ -32,6 +32,8 @@ Operations
     bundle
     permute
     cleanup
+    randsel
+    multirandsel
     soft_quantize
     hard_quantize
 

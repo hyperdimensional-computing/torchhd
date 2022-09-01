@@ -256,3 +256,73 @@ class TestCleanup:
         hv = functional.random_hv(5, 100, device=device)
         res = functional.cleanup(hv[0], hv)
         assert res.device == device
+
+
+class TestRandsel:
+    def test_value(self):
+        generator = torch.Generator()
+        generator.manual_seed(2147483644)
+
+        a, b = functional.random_hv(2, 1000, generator=generator)
+        res = functional.randsel(a, b, p=0, generator=generator)
+        assert torch.all(a == res)
+
+        a, b = functional.random_hv(2, 1000, generator=generator)
+        res = functional.randsel(a, b, p=1, generator=generator)
+        assert torch.all(b == res)
+
+        a, b = functional.random_hv(2, 1000, generator=generator)
+        res = functional.randsel(a, b, generator=generator)
+        assert torch.all((b == res) | (a == res))
+
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_dtype(self, dtype):
+        a, b = torch.zeros(2, 1000, dtype=dtype)
+        res = functional.randsel(a, b)
+        assert res.dtype == dtype
+
+    def test_device(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        a, b = functional.random_hv(2, 100, device=device)
+        res = functional.randsel(a, b)
+
+        assert res.dtype == a.dtype
+        assert res.dim() == 1
+        assert res.size(0) == 100
+        assert res.device == device
+
+
+class TestMultiRandsel:
+    def test_value(self):
+        generator = torch.Generator()
+        generator.manual_seed(2147483644)
+
+        x = functional.random_hv(4, 1000, generator=generator)
+        res = functional.multirandsel(x, p=torch.tensor([0.0,0.0,1.0,0.0]), generator=generator)
+        assert torch.all(x[2] == res)
+
+        x = functional.random_hv(4, 1000, generator=generator)
+        res = functional.multirandsel(x, p=torch.tensor([0.5,0.0,0.5,0.0]), generator=generator)
+        assert torch.all((x[0] == res) | (x[2] == res))
+
+        x = functional.random_hv(4, 1000, generator=generator)
+        res = functional.multirandsel(x, generator=generator)
+        assert torch.all((x[0] == res) | (x[1] == res) | (x[2] == res) | (x[3] == res))
+
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_dtype(self, dtype):
+        x = torch.zeros(4, 1000, dtype=dtype)
+        res = functional.multirandsel(x)
+        assert res.dtype == dtype
+
+    def test_device(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        x = functional.random_hv(4, 100, device=device)
+        res = functional.multirandsel(x)
+
+        assert res.dtype == x.dtype
+        assert res.dim() == 1
+        assert res.size(0) == 100
+        assert res.device == device

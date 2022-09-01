@@ -1,6 +1,6 @@
 import math
 import torch
-from torch import BoolTensor, LongTensor, Tensor
+from torch import BoolTensor, LongTensor, FloatTensor, Tensor
 import torch.nn.functional as F
 from collections import deque
 
@@ -482,12 +482,13 @@ def bind(input: Tensor, other: Tensor) -> Tensor:
 
     Examples::
 
-        >>> x = functional.random_hv(2, 3)
-        >>> x
-        tensor([[ 1., -1., -1.],
-                [ 1.,  1.,  1.]])
-        >>> functional.bind(x[0], x[1])
-        tensor([ 1., -1., -1.])
+        >>> a, b = functional.random_hv(2, 10)
+        >>> a
+        tensor([-1.,  1., -1., -1.,  1.,  1., -1.,  1.,  1., -1.])
+        >>> b
+        tensor([-1., -1.,  1.,  1., -1., -1.,  1.,  1.,  1.,  1.])
+        >>> functional.bind(a, b)
+        tensor([ 1., -1., -1., -1., -1., -1., -1.,  1.,  1., -1.])
 
     """
     dtype = input.dtype
@@ -571,12 +572,13 @@ def bundle(input: Tensor, other: Tensor, *, tie: BoolTensor = None) -> Tensor:
 
     Examples::
 
-        >>> x = functional.random_hv(2, 3)
-        >>> x
-        tensor([[ 1.,  1.,  1.],
-                [-1.,  1., -1.]])
-        >>> functional.bundle(x[0], x[1])
-        tensor([0., 2., 0.])
+        >>> a, b = functional.random_hv(2, 10)
+        >>> a
+        tensor([ 1., -1.,  1., -1., -1.,  1., -1., -1.,  1., -1.])
+        >>> b
+        tensor([ 1., -1., -1.,  1.,  1.,  1., -1.,  1., -1.,  1.])
+        >>> functional.bundle(a, b)
+        tensor([ 2., -2.,  0.,  0.,  0.,  2., -2.,  0.,  0.,  0.])
 
     """
     dtype = input.dtype
@@ -891,6 +893,91 @@ def multiset(input: Tensor) -> Tensor:
 
     return torch.sum(input, dim=dim, dtype=dtype)
 
+def randsel(
+    input: Tensor, other: Tensor, *, p: float = 0.5, generator: torch.Generator = None
+) -> Tensor:
+    r"""Bundles two hypervectors by selecting random elements.
+
+    A bundling operation is used to aggregate information into a single hypervector. 
+    The resulting hypervector has elements selected at random from input or other.
+
+    .. math::
+
+        \oplus: \mathcal{H} \times \mathcal{H} \to \mathcal{H}
+
+    Aliased as ``torchhd.randsel``.
+
+    Args:
+        input (Tensor): input hypervector
+        other (Tensor): other input hypervector
+        p (float, optional): probability of selecting elements from the input hypervector. Default: 0.5.
+        generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
+
+    Shapes:
+        - Input: :math:`(*)`
+        - Other: :math:`(*)`
+        - Output: :math:`(*)`
+
+    Examples::
+
+        >>> a, b = functional.random_hv(2, 10)
+        >>> a
+        tensor([ 1., -1.,  1., -1.,  1., -1., -1., -1., -1.,  1.])
+        >>> b
+        tensor([ 1., -1.,  1., -1.,  1.,  1., -1.,  1., -1.,  1.])
+        >>> functional.randsel(a, b)
+        tensor([ 1., -1.,  1., -1.,  1.,  1., -1.,  1., -1.,  1.])
+
+    """
+    select = torch.empty_like(input, dtype=torch.bool)
+    select.bernoulli_(1 - p, generator=generator)
+    return input.where(select, other)
+
+
+def multirandsel(
+    input: Tensor, *, p: FloatTensor = None, generator: torch.Generator = None
+) -> Tensor:
+    r"""Bundling multiple hypervectors by sampling random elements.
+
+    Bundles all the input hypervectors together.
+    The resulting hypervector has elements selected at random from the input tensor of hypervectors.
+
+    .. math::
+
+        \bigoplus_{i=0}^{n-1} V_i
+
+    Args:
+        input (Tensor): input hypervector tensor
+        p (FloatTensor, optional): probability of selecting elements from the input hypervector. Default: uniform.
+        generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
+
+    Shapes:
+        - Input: :math:`(*, n, d)`
+        - Probability (p): :math:`(*, n)`
+        - Output: :math:`(*, d)`
+
+    Examples::
+
+        >>> x = functional.random_hv(5, 10)
+        >>> x
+        tensor([[-1.,  1.,  1.,  1., -1.,  1.,  1., -1.,  1., -1.],
+                [-1.,  1.,  1.,  1., -1.,  1., -1., -1., -1., -1.],
+                [-1., -1.,  1., -1., -1.,  1., -1.,  1.,  1., -1.],
+                [ 1.,  1., -1.,  1., -1., -1.,  1., -1.,  1.,  1.],
+                [ 1., -1., -1.,  1.,  1.,  1.,  1., -1., -1., -1.]])
+        >>> functional.multirandsel(x)
+        tensor([ 1., -1., -1.,  1., -1.,  1.,  1.,  1.,  1., -1.])
+
+    """
+    d = input.size(-1)
+    device = input.device
+
+    if p is None:
+        p = torch.ones(input.shape[:-1], dtype=torch.float, device=device)
+
+    select = torch.multinomial(p, d, replacement=True, generator=generator)
+    select.unsqueeze_(-2)
+    return input.gather(-2, select).squeeze(-2)
 
 multibundle = multiset
 
@@ -917,13 +1004,15 @@ def multibind(input: Tensor) -> Tensor:
 
     Examples::
 
-        >>> x = functional.random_hv(3, 3)
+        >>> x = functional.random_hv(5, 10)
         >>> x
-        tensor([[ 1.,  1.,  1.],
-                [-1.,  1.,  1.],
-                [-1.,  1., -1.]])
+        tensor([[ 1., -1., -1., -1., -1.,  1.,  1.,  1., -1.,  1.],
+                [ 1.,  1., -1., -1.,  1.,  1., -1., -1.,  1., -1.],
+                [-1., -1.,  1., -1., -1., -1., -1.,  1., -1., -1.],
+                [-1.,  1., -1.,  1.,  1., -1., -1., -1.,  1.,  1.],
+                [-1., -1.,  1., -1.,  1., -1.,  1.,  1., -1.,  1.]])
         >>> functional.multibind(x)
-        tensor([ 1.,  1., -1.])
+        tensor([-1., -1., -1.,  1.,  1., -1., -1.,  1., -1.,  1.])
 
     """
     dtype = input.dtype
