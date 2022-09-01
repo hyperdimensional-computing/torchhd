@@ -898,7 +898,8 @@ def randsel(
 ) -> Tensor:
     r"""Bundles two hypervectors by selecting random elements.
 
-    A bundling operation is used to aggregate information into a single hypervector.
+    A bundling operation is used to aggregate information into a single hypervector. 
+    The resulting hypervector has elements selected at random from input or other.
 
     .. math::
 
@@ -929,7 +930,7 @@ def randsel(
 
     """
     select = torch.empty_like(input, dtype=torch.bool)
-    select.bernoulli_(p, generator=generator)
+    select.bernoulli_(1 - p, generator=generator)
     return input.where(select, other)
 
 
@@ -939,6 +940,7 @@ def multirandsel(
     r"""Bundling multiple hypervectors by sampling random elements.
 
     Bundles all the input hypervectors together.
+    The resulting hypervector has elements selected at random from the input tensor of hypervectors.
 
     .. math::
 
