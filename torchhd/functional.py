@@ -482,12 +482,13 @@ def bind(input: Tensor, other: Tensor) -> Tensor:
 
     Examples::
 
-        >>> x = functional.random_hv(2, 3)
-        >>> x
-        tensor([[ 1., -1., -1.],
-                [ 1.,  1.,  1.]])
-        >>> functional.bind(x[0], x[1])
-        tensor([ 1., -1., -1.])
+        >>> a, b = functional.random_hv(2, 10)
+        >>> a
+        tensor([-1.,  1., -1., -1.,  1.,  1., -1.,  1.,  1., -1.])
+        >>> b
+        tensor([-1., -1.,  1.,  1., -1., -1.,  1.,  1.,  1.,  1.])
+        >>> functional.bind(a, b)
+        tensor([ 1., -1., -1., -1., -1., -1., -1.,  1.,  1., -1.])
 
     """
     dtype = input.dtype
