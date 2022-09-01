@@ -893,12 +893,13 @@ def multiset(input: Tensor) -> Tensor:
 
     return torch.sum(input, dim=dim, dtype=dtype)
 
+
 def randsel(
     input: Tensor, other: Tensor, *, p: float = 0.5, generator: torch.Generator = None
 ) -> Tensor:
     r"""Bundles two hypervectors by selecting random elements.
 
-    A bundling operation is used to aggregate information into a single hypervector. 
+    A bundling operation is used to aggregate information into a single hypervector.
     The resulting hypervector has elements selected at random from input or other.
 
     .. math::
@@ -978,6 +979,7 @@ def multirandsel(
     select = torch.multinomial(p, d, replacement=True, generator=generator)
     select.unsqueeze_(-2)
     return input.gather(-2, select).squeeze(-2)
+
 
 multibundle = multiset
 

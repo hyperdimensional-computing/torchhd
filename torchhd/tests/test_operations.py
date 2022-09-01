@@ -299,11 +299,15 @@ class TestMultiRandsel:
         generator.manual_seed(2147483644)
 
         x = functional.random_hv(4, 1000, generator=generator)
-        res = functional.multirandsel(x, p=torch.tensor([0.0,0.0,1.0,0.0]), generator=generator)
+        res = functional.multirandsel(
+            x, p=torch.tensor([0.0, 0.0, 1.0, 0.0]), generator=generator
+        )
         assert torch.all(x[2] == res)
 
         x = functional.random_hv(4, 1000, generator=generator)
-        res = functional.multirandsel(x, p=torch.tensor([0.5,0.0,0.5,0.0]), generator=generator)
+        res = functional.multirandsel(
+            x, p=torch.tensor([0.5, 0.0, 0.5, 0.0]), generator=generator
+        )
         assert torch.all((x[0] == res) | (x[2] == res))
 
         x = functional.random_hv(4, 1000, generator=generator)
