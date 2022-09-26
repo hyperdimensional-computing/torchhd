@@ -270,8 +270,66 @@ class Projection(nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
-        nn.init.uniform_(self.weight, -1, 1)
-        self.weight.data[:] = F.normalize(self.weight.data)
+        nn.init.normal_(self.weight, 0, 1)
+        self.weight.data.copy_(F.normalize(self.weight.data))
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         return F.linear(input, self.weight)
+
+
+class Cosine(nn.Module):
+    r"""Embedding using a some shit
+
+    Implemented based on `RegHD: Robust and Efficient Regression in Hyper-Dimensional Learning System <https://arxiv.org/abs/2010.07426>`_.
+    :math:`\Phi x` where :math:`\Phi \in \mathbb{R}^{d \times m}` is a matrix whose rows are uniformly sampled at random from the surface of an :math:`m`-dimensional unit sphere.
+    This encoding ensures that similarities in the input space are preserved in the hyperspace.
+
+    Args:
+        in_features (int): the dimensionality of the input feature vector.
+        out_features (int): the dimensionality of the hypervectors.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+
+    Examples::
+
+        >>> emb = embeddings.Projection(5, 3)
+        >>> x = torch.rand(2, 5)
+        >>> emb(x)
+        tensor([[ 0.2747, -0.8804, -0.6810],
+                [ 0.5610, -0.9227,  0.1671]])
+
+    """
+
+    __constants__ = ["in_features", "out_features"]
+    in_features: int
+    out_features: int
+    weight: torch.Tensor
+    bias: torch.Tensor
+
+    def __init__(
+        self, in_features, out_features, requires_grad=False, device=None, dtype=None
+    ):
+        factory_kwargs = {"device": device, "dtype": dtype}
+        super(Projection, self).__init__()
+        self.in_features = in_features
+        self.out_features = out_features
+
+        self.weight = nn.parameter.Parameter(
+            torch.empty((1, out_features), **factory_kwargs),
+            requires_grad=requires_grad,
+        )
+
+        self.bias = nn.parameter.Parameter(
+            torch.empty((1, out_features), **factory_kwargs),
+            requires_grad=requires_grad,
+        )
+        self.reset_parameters()
+
+    def reset_parameters(self) -> None:
+        nn.init.normal_(self.weight, 0, 1)
+        nn.init.uniform_(self.bias, 0, 2*math.pi)
+
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
+        matmul = F.linear(input, self.weight)
+        return torch.cos(_ + self.bias) * torch.sin(_)
