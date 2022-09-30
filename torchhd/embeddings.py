@@ -11,6 +11,7 @@ __all__ = [
     "Level",
     "Circular",
     "Projection",
+    "Sinusoid",
 ]
 
 
@@ -230,7 +231,7 @@ class Projection(nn.Module):
     r"""Embedding using a random projection matrix.
 
     Implemented based on `A Theoretical Perspective on Hyperdimensional Computing <https://arxiv.org/abs/2010.07426>`_.
-    :math:`\Phi x` where :math:`\Phi \in \mathbb{R}^{d \times m}` is a matrix whose rows are uniformly sampled at random from the surface of an :math:`m`-dimensional unit sphere.
+    It computes :math:`x \Phi^{\mathsf{T}}` where :math:`\Phi \in \mathbb{R}^{d \times m}` is a matrix whose rows are uniformly sampled at random from the surface of an :math:`d`-dimensional unit sphere.
     This encoding ensures that similarities in the input space are preserved in the hyperspace.
 
     Args:
@@ -242,11 +243,16 @@ class Projection(nn.Module):
 
     Examples::
 
-        >>> emb = embeddings.Projection(5, 3)
-        >>> x = torch.rand(2, 5)
-        >>> emb(x)
-        tensor([[ 0.2747, -0.8804, -0.6810],
-                [ 0.5610, -0.9227,  0.1671]])
+        >>> embed = embeddings.Projection(6, 5)
+        >>> x = torch.randn(3, 6)
+        >>> x
+        tensor([[ 0.4119, -0.4284,  1.8022,  0.3715, -1.4563, -0.2842],
+                [-0.3772, -1.2664, -1.5173,  1.3317,  0.4707, -1.3362],
+                [-1.8142,  0.0274, -1.0989,  0.8193,  0.7619,  0.9181]])
+        >>> embed(x).sign()
+        tensor([[-1.,  1.,  1.,  1.,  1.],
+                [ 1.,  1.,  1.,  1.,  1.],
+                [ 1., -1., -1., -1., -1.]])
 
     """
 
@@ -277,12 +283,11 @@ class Projection(nn.Module):
         return F.linear(input, self.weight)
 
 
-class Cosine(nn.Module):
-    r"""Embedding using a some shit
+class Sinusoid(nn.Module):
+    r"""Embedding using a nonlinear random projection
 
-    Implemented based on `RegHD: Robust and Efficient Regression in Hyper-Dimensional Learning System <https://arxiv.org/abs/2010.07426>`_.
-    :math:`\Phi x` where :math:`\Phi \in \mathbb{R}^{d \times m}` is a matrix whose rows are uniformly sampled at random from the surface of an :math:`m`-dimensional unit sphere.
-    This encoding ensures that similarities in the input space are preserved in the hyperspace.
+    Implemented based on `Scalable Edge-Based Hyperdimensional Learning System with Brain-Like Neural Adaptation <https://dl.acm.org/doi/abs/10.1145/3458817.3480958>`_.
+    It computes :math:`\cos(x \Phi^{\mathsf{T}} + b) \odot \sin(x \Phi^{\mathsf{T}})` where :math:`\Phi \in \mathbb{R}^{d \times m}` is a matrix whose elements are sampled at random from a standard normal distribution and :math:`b \in \mathbb{R}^{d}` is a vectors whose elements are sampled uniformly at random between 0 and :math:`2\pi`.
 
     Args:
         in_features (int): the dimensionality of the input feature vector.
@@ -293,11 +298,16 @@ class Cosine(nn.Module):
 
     Examples::
 
-        >>> emb = embeddings.Projection(5, 3)
-        >>> x = torch.rand(2, 5)
-        >>> emb(x)
-        tensor([[ 0.2747, -0.8804, -0.6810],
-                [ 0.5610, -0.9227,  0.1671]])
+        >>> embed = embeddings.Sinusoid(6, 5)
+        >>> x = torch.randn(3, 6)
+        >>> x
+        tensor([[ 0.5043,  0.3161, -0.0938,  0.6134, -0.1280,  0.3647],
+                [-0.1907,  1.6468, -0.3242,  0.8614,  0.3332, -0.2055],
+                [-0.8662, -1.3861, -0.1577,  0.1321, -0.1157, -2.8928]])
+        >>> embed(x)
+        tensor([[-0.0555,  0.2292, -0.1833,  0.0301, -0.2416],
+                [-0.0725,  0.7042, -0.5644,  0.2235,  0.3603],
+                [-0.9021,  0.8899, -0.9802,  0.3565,  0.2367]])
 
     """
 
@@ -311,12 +321,12 @@ class Cosine(nn.Module):
         self, in_features, out_features, requires_grad=False, device=None, dtype=None
     ):
         factory_kwargs = {"device": device, "dtype": dtype}
-        super(Projection, self).__init__()
+        super(Sinusoid, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
 
         self.weight = nn.parameter.Parameter(
-            torch.empty((1, out_features), **factory_kwargs),
+            torch.empty((out_features, in_features), **factory_kwargs),
             requires_grad=requires_grad,
         )
 
@@ -331,5 +341,5 @@ class Cosine(nn.Module):
         nn.init.uniform_(self.bias, 0, 2*math.pi)
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
-        matmul = F.linear(input, self.weight)
-        return torch.cos(_ + self.bias) * torch.sin(_)
+        projected = F.linear(input, self.weight)
+        return torch.cos(projected + self.bias) * torch.sin(projected)

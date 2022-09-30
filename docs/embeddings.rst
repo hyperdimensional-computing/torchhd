@@ -14,3 +14,4 @@ torchhd.embeddings
     Level
     Circular
     Projection
+    Sinusoid
