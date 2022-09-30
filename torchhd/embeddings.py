@@ -338,7 +338,7 @@ class Sinusoid(nn.Module):
 
     def reset_parameters(self) -> None:
         nn.init.normal_(self.weight, 0, 1)
-        nn.init.uniform_(self.bias, 0, 2*math.pi)
+        nn.init.uniform_(self.bias, 0, 2 * math.pi)
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         projected = F.linear(input, self.weight)

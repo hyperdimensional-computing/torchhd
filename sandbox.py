@@ -28,4 +28,4 @@ for i in range(5, 20):
     idx = torch.LongTensor([0, 1, 4])
     res = emb(idx)
 
-    print("{0},{1}".format(res.size(dim=0),res.size(dim=1)))
+    print("{0},{1}".format(res.size(dim=0), res.size(dim=1)))
