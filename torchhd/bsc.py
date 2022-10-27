@@ -152,8 +152,13 @@ class BSC(VSA_Model):
         return self.roll(shifts=n, dim=-1)
 
     def dot_similarity(self, others: "BSC") -> Tensor:
-        self_as_bipolar = torch.where(self.bool(), -1, 1)
-        others_as_bipolar = torch.where(others.bool(), -1, 1)
+        dtype = torch.get_default_dtype()
+        
+        min_one = torch.tensor(-1.0, dtype=dtype)
+        plus_one = torch.tensor(1.0, dtype=dtype)
+
+        self_as_bipolar = torch.where(self.bool(), min_one, plus_one)
+        others_as_bipolar = torch.where(others.bool(), min_one, plus_one)
 
         return F.linear(self_as_bipolar, others_as_bipolar)
 

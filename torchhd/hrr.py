@@ -88,9 +88,10 @@ class HRR(VSA_Model):
         result = torch.empty(size, dtype=dtype, device=device)
         result.normal_(0, 1.0 / dimensions, generator=generator)
 
-        f = torch.abs(fft(result))
-        p = ifft(fft(result) / f).real
-        result = torch.nan_to_num(p)
+        # projection
+        # f = torch.abs(fft(result))
+        # p = ifft(fft(result) / f).real
+        # result = torch.nan_to_num(p)
         result.requires_grad = requires_grad
         return result.as_subclass(cls)
 

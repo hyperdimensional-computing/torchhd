@@ -176,6 +176,7 @@ def level_hv(
     model: Type[VSA_Model] = MAP,
     *,
     randomness: float = 0.0,
+    requires_grad = False,
     **kwargs,
 ) -> VSA_Model:
     """Creates a set of level-hypervectors.
@@ -267,8 +268,8 @@ def level_hv(
             span_end_hv = span_hv[span_idx + 1]
             hv[i] = torch.where(threshold_v[span_idx] < t, span_start_hv, span_end_hv)
 
-    hv.requires_grad = kwargs.get("requires_grad", False)
-    return hv
+    hv.requires_grad = requires_grad
+    return hv.as_subclass(model)
 
 
 def circular_hv(
@@ -277,6 +278,7 @@ def circular_hv(
     model: Type[VSA_Model] = MAP,
     *,
     randomness: float = 0.0,
+    requires_grad = False,
     **kwargs,
 ) -> VSA_Model:
     """Creates a set of circular-hypervectors.
@@ -389,7 +391,7 @@ def circular_hv(
 
             temp_hv = torch.where(threshold_v[span_idx] < t, span_start_hv, span_end_hv)
 
-        mutation_history.append(bind(mutation_hv, inverse(temp_hv)))
+        mutation_history.append(bind(temp_hv, inverse(mutation_hv)))
         mutation_hv = temp_hv
 
         if i % 2 == 0:
@@ -402,8 +404,8 @@ def circular_hv(
         if i % 2 == 0:
             hv[i // 2] = mutation_hv
 
-    hv.requires_grad = kwargs.get("requires_grad", False)
-    return hv
+    hv.requires_grad = requires_grad
+    return hv.as_subclass(model)
 
 
 def bind(input: VSA_Model, other: VSA_Model) -> VSA_Model:

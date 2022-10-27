@@ -18,7 +18,7 @@ class MAP(VSA_Model):
     ) -> "MAP":
         if dtype in {torch.uint8, torch.bool}:
             name = cls.__name__
-            raise ValueError(f"{name} cannot be of dtype uint8 or bool.")
+            raise ValueError(f"{name} vectors cannot be of dtype uint8 or bool.")
 
         result = torch.zeros(
             num_vectors,
@@ -42,7 +42,7 @@ class MAP(VSA_Model):
 
         if dtype in {torch.uint8, torch.bool}:
             name = cls.__name__
-            raise ValueError(f"{name} cannot be of dtype uint8 or bool.")
+            raise ValueError(f"{name} vectors cannot be of dtype uint8 or bool.")
 
         result = torch.ones(
             num_vectors,
@@ -98,7 +98,8 @@ class MAP(VSA_Model):
         return self.roll(shifts=n, dim=-1)
 
     def dot_similarity(self, others: "MAP") -> Tensor:
-        return F.linear(self, others)
+        dtype = torch.get_default_dtype()
+        return F.linear(self.to(dtype), others.to(dtype))
 
     def cos_similarity(self, others: "MAP", *, eps=1e-08) -> Tensor:
         dtype = torch.get_default_dtype()
@@ -115,4 +116,4 @@ class MAP(VSA_Model):
             magnitude = self_mag * others_mag
 
         magnitude = magnitude.clamp(min=eps)
-        return self.dot_similarity(others).to(dtype) / magnitude
+        return F.linear(self.to(dtype), others.to(dtype)) / magnitude

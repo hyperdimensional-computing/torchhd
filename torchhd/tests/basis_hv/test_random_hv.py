@@ -90,7 +90,7 @@ class TestRandom_hv:
         )
 
         calc_sparsity = torch.sum(hv == False).div(10000 * 1000)
-        assert torch.allclose(calc_sparsity, torch.tensor(sparsity), atol=0.001)
+        assert torch.allclose(calc_sparsity, torch.tensor(sparsity), atol=0.005)
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     @pytest.mark.parametrize("model", vsa_models)
@@ -116,17 +116,6 @@ class TestRandom_hv:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         hv = functional.random_hv(3, 52, model, device=device, dtype=dtype)
         assert hv.device == device
-
-    # @pytest.mark.parametrize("dtype", torch_dtypes)
-    # def test_dtype(self, dtype):
-    #     if dtype == torch.uint8:
-    #         with pytest.raises(ValueError):
-    #             functional.random_hv(3, 26, dtype=dtype)
-
-    #         return
-
-    #     hv = functional.random_hv(3, 52, dtype=dtype)
-    #     assert hv.dtype == dtype
 
     def test_uses_default_dtype(self):
         hv = functional.random_hv(3, 52, torchhd.BSC)
