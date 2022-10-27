@@ -59,12 +59,12 @@ class TestLevel_hv:
 
         # look at the similarity profile w.r.t. the first hypervector
         if dtype in torch_complex_dtypes:
-            sims = functional.cosine_similarity(hv[0], hv)
+            sims = functional.cos_similarity(hv[0], hv)
             sims_diff = sims[:-1] - sims[1:]
             assert torch.all(sims_diff > 0).item(), "similarity must be decreasing"
 
             hv = functional.level_hv(5, 1000000, generator=generator, dtype=dtype)
-            sims = functional.cosine_similarity(hv[0], hv)
+            sims = functional.cos_similarity(hv[0], hv)
             sims_diff = sims[:-1] - sims[1:]
             assert torch.all(
                 (0.247 < sims_diff) & (sims_diff < 0.253)

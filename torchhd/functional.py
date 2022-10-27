@@ -1,24 +1,29 @@
 import math
+from typing import Type
 import torch
-from torch import BoolTensor, LongTensor, FloatTensor, Tensor
-import torch.nn.functional as F
+from torch import LongTensor, FloatTensor, Tensor
 from collections import deque
+
+from torchhd.base import VSA_Model
+from torchhd.map import MAP
 
 
 __all__ = [
+    "empty_hv",
     "identity_hv",
     "random_hv",
     "level_hv",
     "circular_hv",
     "bind",
-    "unbind",
     "bundle",
     "permute",
+    "inverse",
+    "negative",
     "cleanup",
     "hard_quantize",
     "soft_quantize",
     "hamming_similarity",
-    "cosine_similarity",
+    "cos_similarity",
     "dot_similarity",
     "multiset",
     "multibind",
@@ -34,14 +39,37 @@ __all__ = [
 ]
 
 
+def empty_hv(
+    num_vectors: int,
+    dimensions: int,
+    model: Type[VSA_Model] = MAP,
+    **kwargs,
+) -> VSA_Model:
+    """Creates a set of empty hypervectors.
+
+    When bundled with a random-hypervector :math:`x`, the result is :math:`x`.
+
+    Aliased as ``torchhd.empty_hv``.
+
+    Args:
+        num_vectors (int): the number of hypervectors to generate.
+        dimensions (int): the dimensionality of the hypervectors.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
+
+
+
+    """
+    return model.empty_hv(num_vectors, dimensions, **kwargs)
+
+
 def identity_hv(
-    num_embeddings: int,
-    embedding_dim: int,
-    *,
-    dtype=None,
-    device=None,
-    requires_grad=False,
-) -> Tensor:
+    num_vectors: int,
+    dimensions: int,
+    model: Type[VSA_Model] = MAP,
+    **kwargs,
+) -> VSA_Model:
     """Creates a set of identity hypervectors.
 
     When bound with a random-hypervector :math:`x`, the result is :math:`x`.
@@ -49,8 +77,8 @@ def identity_hv(
     Aliased as ``torchhd.identity_hv``.
 
     Args:
-        num_embeddings (int): the number of hypervectors to generate.
-        embedding_dim (int): the dimensionality of the hypervectors.
+        num_vectors (int): the number of hypervectors to generate.
+        dimensions (int): the dimensionality of the hypervectors.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
@@ -78,58 +106,24 @@ def identity_hv(
                 [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j]])
 
     """
-    if dtype is None:
-        dtype = torch.get_default_dtype()
-
-    if dtype == torch.uint8:
-        raise ValueError("Unsigned integer hypervectors are not supported.")
-
-    if dtype in {torch.complex64, torch.complex128}:
-        return torch.full(
-            (num_embeddings, embedding_dim),
-            1 + 0j,
-            dtype=dtype,
-            device=device,
-            requires_grad=requires_grad,
-        )
-
-    if dtype == torch.bool:
-        return torch.zeros(
-            num_embeddings,
-            embedding_dim,
-            dtype=dtype,
-            device=device,
-            requires_grad=requires_grad,
-        )
-
-    return torch.ones(
-        num_embeddings,
-        embedding_dim,
-        dtype=dtype,
-        device=device,
-        requires_grad=requires_grad,
-    )
+    return model.identity_hv(num_vectors, dimensions, **kwargs)
 
 
 def random_hv(
-    num_embeddings: int,
-    embedding_dim: int,
-    *,
-    sparsity=0.5,
-    generator=None,
-    dtype=None,
-    device=None,
-    requires_grad=False,
-) -> Tensor:
+    num_vectors: int,
+    dimensions: int,
+    model: Type[VSA_Model] = MAP,
+    **kwargs,
+) -> VSA_Model:
     """Creates a set of random-hypervectors.
 
-    The resulting hypervectors are sampled uniformly at random from the ``embedding_dim``-dimensional hyperspace.
+    The resulting hypervectors are sampled uniformly at random from the ``dimensions``-dimensional hyperspace.
 
     Aliased as ``torchhd.random_hv``.
 
     Args:
-        num_embeddings (int): the number of hypervectors to generate.
-        embedding_dim (int): the dimensionality of the hypervectors.
+        num_vectors (int): the number of hypervectors to generate.
+        dimensions (int): the dimensionality of the hypervectors.
         sparsity (float, optional): the expected fraction of elements to be in-active. Has no effect on complex hypervectors. Default: ``0.5``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
@@ -169,49 +163,21 @@ def random_hv(
                 [-0.2974+0.9548j, -0.9936+0.1127j, -0.9740+0.2264j, -0.9999+0.0113j, 0.4434-0.8963j,  0.3888+0.9213j]])
 
     """
-    if dtype is None:
-        dtype = torch.get_default_dtype()
-
-    if dtype == torch.uint8:
-        raise ValueError("Unsigned integer hypervectors are not supported.")
-
-    size = (num_embeddings, embedding_dim)
-    if dtype in {torch.complex64, torch.complex128}:
-        dtype = torch.float if dtype == torch.complex64 else torch.double
-
-        angle = torch.empty(size, dtype=dtype, device=device)
-        angle.uniform_(-math.pi, math.pi)
-        magnitude = torch.ones(size, dtype=dtype, device=device)
-
-        result = torch.polar(magnitude, angle)
-        result.requires_grad = requires_grad
-        return result
-
-    select = torch.empty(
-        size,
-        dtype=torch.bool,
-    ).bernoulli_(1.0 - sparsity, generator=generator)
-
-    if dtype == torch.bool:
-        select.requires_grad = requires_grad
-        return select
-
-    result = torch.where(select, -1, +1).to(dtype=dtype, device=device)
-    result.requires_grad = requires_grad
-    return result
+    return model.random_hv(
+        num_vectors,
+        dimensions,
+        **kwargs,
+    )
 
 
 def level_hv(
-    num_embeddings: int,
-    embedding_dim: int,
+    num_vectors: int,
+    dimensions: int,
+    model: Type[VSA_Model] = MAP,
     *,
-    sparsity=0.5,
-    randomness=0.0,
-    generator=None,
-    dtype=None,
-    device=None,
-    requires_grad=False,
-) -> Tensor:
+    randomness: float = 0.0,
+    **kwargs,
+) -> VSA_Model:
     """Creates a set of level-hypervectors.
 
     Implements level-hypervectors as an interpolation between random-hypervectors as described in `An Extension to Basis-Hypervectors for Learning from Circular Data in Hyperdimensional Computing <https://arxiv.org/abs/2205.07920>`_.
@@ -220,8 +186,8 @@ def level_hv(
     Aliased as ``torchhd.level_hv``.
 
     Args:
-        num_embeddings (int): the number of hypervectors to generate.
-        embedding_dim (int): the dimensionality of the hypervectors.
+        num_vectors (int): the number of hypervectors to generate.
+        dimensions (int): the dimensionality of the hypervectors.
         sparsity (float, optional): the expected fraction of elements to be in-active. Has no effect on complex hypervectors. Default: ``0.5``.
         randomness (float, optional): r-value to interpolate between level at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
@@ -252,46 +218,38 @@ def level_hv(
                 [-9.9803e-01+0.0627j, -9.5562e-01-0.2946j,  7.9306e-04+1.0000j,  9.9992e-01+0.0126j, -6.6328e-01+0.7484j, -8.6131e-01-0.5081j],
                 [-9.9803e-01+0.0627j, -8.5366e-01+0.5208j,  6.5232e-01-0.7579j,  9.9992e-01+0.0126j,  3.6519e-01+0.9309j,  9.7333e-01-0.2294j]])
     """
-    if dtype is None:
-        dtype = torch.get_default_dtype()
-
-    if dtype == torch.uint8:
-        raise ValueError("Unsigned integer hypervectors are not supported.")
-
     # convert from normalized "randomness" variable r to number of orthogonal vectors sets "span"
-    levels_per_span = (1 - randomness) * (num_embeddings - 1) + randomness * 1
-    # must be at least one to deal with the case that num_embeddings is less than 2
+    levels_per_span = (1 - randomness) * (num_vectors - 1) + randomness * 1
+    # must be at least one to deal with the case that num_vectors is less than 2
     levels_per_span = max(levels_per_span, 1)
-    span = (num_embeddings - 1) / levels_per_span
-
-    hv = torch.empty(
-        num_embeddings,
-        embedding_dim,
-        dtype=dtype,
-        device=device,
-    )
+    span = (num_vectors - 1) / levels_per_span
 
     # generate the set of orthogonal vectors within the level vector set
-    span_hv = random_hv(
+    span_hv = model.random_hv(
         int(math.ceil(span + 1)),
-        embedding_dim,
-        generator=generator,
-        sparsity=sparsity,
-        dtype=dtype,
-        device=device,
+        dimensions,
+        **kwargs,
     )
+
     # for each span within the set create a threshold vector
     # the threshold vector is used to interpolate between the
     # two random vector bounds of each span.
     threshold_v = torch.rand(
         int(math.ceil(span)),
-        embedding_dim,
-        generator=generator,
+        dimensions,
         dtype=torch.float,
-        device=device,
+        device=kwargs.get("device", None),
+        generator=kwargs.get("generator", None),
     )
 
-    for i in range(num_embeddings):
+    hv = torch.empty(
+        num_vectors,
+        dimensions,
+        dtype=span_hv.dtype,
+        device=span_hv.device,
+    )
+
+    for i in range(num_vectors):
         span_idx = int(i // levels_per_span)
 
         # special case: if we are on a span border (e.g. on the first or last levels)
@@ -309,21 +267,18 @@ def level_hv(
             span_end_hv = span_hv[span_idx + 1]
             hv[i] = torch.where(threshold_v[span_idx] < t, span_start_hv, span_end_hv)
 
-    hv.requires_grad = requires_grad
+    hv.requires_grad = kwargs.get("requires_grad", False)
     return hv
 
 
 def circular_hv(
-    num_embeddings: int,
-    embedding_dim: int,
+    num_vectors: int,
+    dimensions: int,
+    model: Type[VSA_Model] = MAP,
     *,
-    sparsity=0.5,
-    randomness=0.0,
-    generator=None,
-    dtype=None,
-    device=None,
-    requires_grad=False,
-) -> Tensor:
+    randomness: float = 0.0,
+    **kwargs,
+) -> VSA_Model:
     """Creates a set of circular-hypervectors.
 
     Implements circular-hypervectors based on level-hypervectors as described in `An Extension to Basis-Hypervectors for Learning from Circular Data in Hyperdimensional Computing <https://arxiv.org/abs/2205.07920>`_.
@@ -332,8 +287,8 @@ def circular_hv(
     Aliased as ``torchhd.circular_hv``.
 
     Args:
-        num_embeddings (int): the number of hypervectors to generate.
-        embedding_dim (int): the dimensionality of the hypervectors.
+        num_vectors (int): the number of hypervectors to generate.
+        dimensions (int): the dimensionality of the hypervectors.
         sparsity (float, optional): the expected fraction of elements to be in-active. Has no effect on complex hypervectors. Default: ``0.5``.
         randomness (float, optional): r-value to interpolate between circular at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
@@ -378,42 +333,33 @@ def circular_hv(
                 [ 0.0691+0.9976j, -0.1847+0.9828j, -0.7324+0.6809j, -0.8287+0.5596j, -0.8357-0.5493j, -0.5358+0.8443j]])
 
     """
-    if dtype is None:
-        dtype = torch.get_default_dtype()
-
-    if dtype == torch.uint8:
-        raise ValueError("Unsigned integer hypervectors are not supported.")
-
-    hv = torch.empty(
-        num_embeddings,
-        embedding_dim,
-        dtype=dtype,
-        device=device,
-    )
-
     # convert from normalized "randomness" variable r to
     # number of levels between orthogonal pairs or "span"
-    levels_per_span = ((1 - randomness) * (num_embeddings / 2) + randomness * 1) * 2
-    span = num_embeddings / levels_per_span
+    levels_per_span = ((1 - randomness) * (num_vectors / 2) + randomness * 1) * 2
+    span = num_vectors / levels_per_span
 
     # generate the set of orthogonal vectors within the level vector set
-    span_hv = random_hv(
+    span_hv = model.random_hv(
         int(math.ceil(span + 1)),
-        embedding_dim,
-        generator=generator,
-        sparsity=sparsity,
-        dtype=dtype,
-        device=device,
+        dimensions,
+        **kwargs,
     )
     # for each span within the set create a threshold vector
     # the threshold vector is used to interpolate between the
     # two random vector bounds of each span.
     threshold_v = torch.rand(
         int(math.ceil(span)),
-        embedding_dim,
-        generator=generator,
+        dimensions,
         dtype=torch.float,
-        device=device,
+        device=kwargs.get("device", None),
+        generator=kwargs.get("generator", None),
+    )
+
+    hv = torch.empty(
+        num_vectors,
+        dimensions,
+        dtype=span_hv.dtype,
+        device=span_hv.device,
     )
 
     mutation_history = deque()
@@ -423,7 +369,7 @@ def circular_hv(
     # mutation hypervector is the last generated vector while walking through the circle
     mutation_hv = span_hv[0]
 
-    for i in range(1, num_embeddings + 1):
+    for i in range(1, num_vectors + 1):
         span_idx = int(i // levels_per_span)
 
         # special case: if we are on a span border (e.g. on the first or last levels)
@@ -443,24 +389,24 @@ def circular_hv(
 
             temp_hv = torch.where(threshold_v[span_idx] < t, span_start_hv, span_end_hv)
 
-        mutation_history.append(unbind(temp_hv, mutation_hv))
+        mutation_history.append(bind(mutation_hv, inverse(temp_hv)))
         mutation_hv = temp_hv
 
         if i % 2 == 0:
             hv[i // 2] = mutation_hv
 
-    for i in range(num_embeddings + 1, num_embeddings * 2 - 1):
+    for i in range(num_vectors + 1, num_vectors * 2 - 1):
         mut = mutation_history.popleft()
-        mutation_hv = unbind(mutation_hv, mut)
+        mutation_hv = bind(mutation_hv, inverse(mut))
 
         if i % 2 == 0:
             hv[i // 2] = mutation_hv
 
-    hv.requires_grad = requires_grad
+    hv.requires_grad = kwargs.get("requires_grad", False)
     return hv
 
 
-def bind(input: Tensor, other: Tensor) -> Tensor:
+def bind(input: VSA_Model, other: VSA_Model) -> VSA_Model:
     r"""Binds two hypervectors which produces a hypervector dissimilar to both.
 
     Binding is used to associate information, for instance, to assign values to variables.
@@ -472,8 +418,8 @@ def bind(input: Tensor, other: Tensor) -> Tensor:
     Aliased as ``torchhd.bind``.
 
     Args:
-        input (Tensor): input hypervector
-        other (Tensor): other input hypervector
+        input (VSA_Model): input hypervector
+        other (VSA_Model): other input hypervector
 
     Shapes:
         - Input: :math:`(*)`
@@ -491,65 +437,10 @@ def bind(input: Tensor, other: Tensor) -> Tensor:
         tensor([ 1., -1., -1., -1., -1., -1., -1.,  1.,  1., -1.])
 
     """
-    dtype = input.dtype
-
-    if dtype == torch.uint8:
-        raise ValueError("Unsigned integer hypervectors are not supported.")
-
-    if dtype == torch.bool:
-        return torch.logical_xor(input, other)
-
-    return torch.mul(input, other)
+    return input.bind(other)
 
 
-def unbind(input: Tensor, other: Tensor) -> Tensor:
-    r"""Inverse of the binding operation.
-
-    See :func:`~torchhd.functional.bind`.
-
-    Aliased as ``torchhd.unbind``.
-
-    Args:
-        input (Tensor): input hypervector
-        other (Tensor): other input hypervector
-
-    Shapes:
-        - Input: :math:`(*)`
-        - Other: :math:`(*)`
-        - Output: :math:`(*)`
-
-    Examples::
-
-        >>> x = functional.random_hv(2, 6)
-        >>> x
-        tensor([[-1.,  1.,  1., -1., -1.,  1.],
-                [-1., -1.,  1.,  1.,  1., -1.]])
-        >>> functional.unbind(functional.bind(x[0], x[1]), x[1])
-        tensor([-1.,  1.,  1., -1., -1.,  1.])
-
-        >>> x = functional.random_hv(2, 6, dtype=torch.complex64)
-        >>> x
-        tensor([[-0.6510+0.7591j, -0.9675+0.2528j,  0.7358-0.6772j, -0.1791-0.9838j, -0.9874-0.1585j, -0.3726+0.9280j],
-                [ 0.1429+0.9897j, -0.9173+0.3983j, -0.4906+0.8714j,  0.4710-0.8821j, 0.6478+0.7618j,  0.8753+0.4836j]])
-        >>> functional.unbind(functional.bind(x[0], x[1]), x[1])
-        tensor([-0.6510+0.7591j, -0.9675+0.2528j,  0.7358-0.6772j, -0.1791-0.9838j, -0.9874-0.1585j, -0.3726+0.9280j])
-
-    """
-    dtype = input.dtype
-
-    if dtype == torch.uint8:
-        raise ValueError("Unsigned integer hypervectors are not supported.")
-
-    if dtype == torch.bool:
-        return torch.logical_xor(input, other)
-
-    if torch.is_complex(input):
-        return torch.mul(input, other.conj())
-
-    return torch.mul(input, other)
-
-
-def bundle(input: Tensor, other: Tensor, *, tie: BoolTensor = None) -> Tensor:
+def bundle(input: VSA_Model, other: VSA_Model) -> VSA_Model:
     r"""Bundles two hypervectors which produces a hypervector maximally similar to both.
 
     The bundling operation is used to aggregate information into a single hypervector.
@@ -561,9 +452,8 @@ def bundle(input: Tensor, other: Tensor, *, tie: BoolTensor = None) -> Tensor:
     Aliased as ``torchhd.bundle``.
 
     Args:
-        input (Tensor): input hypervector
-        other (Tensor): other input hypervector
-        tie (BoolTensor, optional): specifies how to break a tie while bundling boolean hypervectors. Default: only set bit if both ``input`` and ``other`` are ``True``.
+        input (VSA_Model): input hypervector
+        other (VSA_Model): other input hypervector
 
     Shapes:
         - Input: :math:`(*)`
@@ -581,21 +471,10 @@ def bundle(input: Tensor, other: Tensor, *, tie: BoolTensor = None) -> Tensor:
         tensor([ 2., -2.,  0.,  0.,  0.,  2., -2.,  0.,  0.,  0.])
 
     """
-    dtype = input.dtype
-
-    if dtype == torch.uint8:
-        raise ValueError("Unsigned integer hypervectors are not supported.")
-
-    if dtype == torch.bool:
-        if tie is not None:
-            return torch.where(input == other, input, tie)
-        else:
-            return torch.logical_and(input, other)
-
-    return torch.add(input, other)
+    return input.bundle(other)
 
 
-def permute(input: Tensor, *, shifts=1, dims=-1) -> Tensor:
+def permute(input: VSA_Model, *, n=1) -> VSA_Model:
     r"""Permutes hypervector by specified number of shifts.
 
     The permutation operator is used to assign an order to hypervectors.
@@ -607,9 +486,8 @@ def permute(input: Tensor, *, shifts=1, dims=-1) -> Tensor:
     Aliased as ``torchhd.permute``.
 
     Args:
-        input (Tensor): input hypervector
-        shifts (int or tuple of ints, optional): The number of places by which the elements of the tensor are shifted. If shifts is a tuple, dims must be a tuple of the same size, and each dimension will be rolled by the corresponding value.
-        dims (int or tuple of ints, optional): axis along which to permute the hypervector. Default: ``-1``.
+        input (VSA_Model): input hypervector
+        n (int or tuple of ints, optional): The number of places by which the elements of the tensor are shifted. If shifts is a tuple, dims must be a tuple of the same size, and each dimension will be rolled by the corresponding value.
 
     Shapes:
         - Input: :math:`(*)`
@@ -624,12 +502,44 @@ def permute(input: Tensor, *, shifts=1, dims=-1) -> Tensor:
         tensor([ -1.,  1.,  -1.])
 
     """
-    dtype = input.dtype
+    return input.permute(n)
 
-    if dtype == torch.uint8:
-        raise ValueError("Unsigned integer hypervectors are not supported.")
 
-    return torch.roll(input, shifts=shifts, dims=dims)
+def inverse(input: VSA_Model) -> VSA_Model:
+    r"""Inverse for the binding operation.
+
+    See :func:`~torchhd.functional.bind`.
+
+    Aliased as ``torchhd.inverse``.
+
+    Args:
+        input (VSA_Model): input hypervector
+
+    Shapes:
+        - Input: :math:`(*)`
+        - Output: :math:`(*)`
+
+    """
+    return input.inverse()
+
+
+def negative(input: VSA_Model) -> VSA_Model:
+    r"""Inverse for the bundling operation.
+
+    See :func:`~torchhd.functional.bundle`.
+
+    Aliased as ``torchhd.negative``.
+
+    Args:
+        input (VSA_Model): input hypervector
+
+    Shapes:
+        - Input: :math:`(*)`
+        - Output: :math:`(*)`
+
+
+    """
+    return input.negative()
 
 
 def soft_quantize(input: Tensor):
@@ -683,14 +593,14 @@ def hard_quantize(input: Tensor):
     return torch.where(input > 0, positive, negative)
 
 
-def dot_similarity(input: Tensor, others: Tensor) -> Tensor:
+def dot_similarity(input: VSA_Model, others: VSA_Model) -> VSA_Model:
     """Dot product between the input vector and each vector in others.
 
     Aliased as ``torchhd.dot_similarity``.
 
     Args:
-        input (Tensor): hypervectors to compare against others
-        others (Tensor): hypervectors to compare with
+        input (VSA_Model): hypervectors to compare against others
+        others (VSA_Model): hypervectors to compare with
 
     Shapes:
         - Input: :math:`(*, d)`
@@ -726,22 +636,13 @@ def dot_similarity(input: Tensor, others: Tensor) -> Tensor:
                 [ 0.6771, -4.2506,  6.0000]])
 
     """
-    if input.dtype == torch.bool:
-        input_as_bipolar = torch.where(input, -1, 1)
-        others_as_bipolar = torch.where(others, -1, 1)
-
-        return F.linear(input_as_bipolar, others_as_bipolar)
-
-    if torch.is_complex(input):
-        return F.linear(input, others.conj()).real
-
-    return F.linear(input, others)
+    return input.dot_similarity(others)
 
 
-def cosine_similarity(input: Tensor, others: Tensor, *, eps=1e-08) -> Tensor:
+def cos_similarity(input: VSA_Model, others: VSA_Model, *, eps=1e-08) -> VSA_Model:
     """Cosine similarity between the input vector and each vector in others.
 
-    Aliased as ``torchhd.cosine_similarity``.
+    Aliased as ``torchhd.cos_similarity``.
 
     Args:
         input (Tensor): hypervectors to compare against others
@@ -779,51 +680,15 @@ def cosine_similarity(input: Tensor, others: Tensor, *, eps=1e-08) -> Tensor:
                 [0.1806, 0.2607, 1.0000]])
 
     """
-    out_dtype = torch.get_default_dtype()
-
-    # calculate vector magnitude
-    if input.dtype == torch.bool:
-        input_mag = torch.full(
-            input.shape[:-1],
-            math.sqrt(input.size(-1)),
-            dtype=out_dtype,
-            device=input.device,
-        )
-        others_mag = torch.full(
-            others.shape[:-1],
-            math.sqrt(others.size(-1)),
-            dtype=out_dtype,
-            device=others.device,
-        )
-
-    elif torch.is_complex(input):
-        input_dot = torch.real(input * input.conj()).sum(dim=-1, dtype=out_dtype)
-        input_mag = input_dot.sqrt()
-
-        others_dot = torch.real(others * others.conj()).sum(dim=-1, dtype=out_dtype)
-        others_mag = others_dot.sqrt()
-
-    else:
-        input_dot = torch.sum(input * input, dim=-1, dtype=out_dtype)
-        input_mag = input_dot.sqrt()
-
-        others_dot = torch.sum(others * others, dim=-1, dtype=out_dtype)
-        others_mag = others_dot.sqrt()
-
-    if input.dim() > 1:
-        magnitude = input_mag.unsqueeze(-1) * others_mag.unsqueeze(0)
-    else:
-        magnitude = input_mag * others_mag
-
-    return dot_similarity(input, others).to(out_dtype) / (magnitude + eps)
+    return input.cos_similarity(others)
 
 
-def hamming_similarity(input: Tensor, others: Tensor) -> LongTensor:
+def hamming_similarity(input: VSA_Model, others: VSA_Model) -> LongTensor:
     """Number of equal elements between the input vectors and each vector in others.
 
     Args:
-        input (Tensor): hypervectors to compare against others
-        others (Tensor): hypervectors to compare with
+        input (VSA_Model): hypervectors to compare against others
+        others (VSA_Model): hypervectors to compare with
 
     Shapes:
         - Input: :math:`(*, d)`
@@ -844,14 +709,13 @@ def hamming_similarity(input: Tensor, others: Tensor) -> LongTensor:
 
     """
     if input.dim() > 1 and others.dim() > 1:
-        return torch.sum(
-            input.unsqueeze(-2) == others.unsqueeze(-3), dim=-1, dtype=torch.long
-        )
+        equals = input.unsqueeze(-2) == others.unsqueeze(-3)
+        return torch.sum(equals, dim=-1, dtype=torch.long)
 
     return torch.sum(input == others, dim=-1, dtype=torch.long)
 
 
-def multiset(input: Tensor) -> Tensor:
+def multiset(input: VSA_Model) -> VSA_Model:
     r"""Multiset of input hypervectors.
 
     Bundles all the input hypervectors together.
@@ -863,7 +727,7 @@ def multiset(input: Tensor) -> Tensor:
         \bigoplus_{i=0}^{n-1} V_i
 
     Args:
-        input (Tensor): input hypervector tensor
+        input (VSA_Model): input hypervector tensor
 
     Shapes:
         - Input: :math:`(*, n, d)`
@@ -880,23 +744,19 @@ def multiset(input: Tensor) -> Tensor:
         tensor([-1.,  3.,  1.])
 
     """
-    dim = -2
-    dtype = input.dtype
+    return input.multibundle()
 
-    if dtype == torch.uint8:
-        raise ValueError("Unsigned integer hypervectors are not supported.")
 
-    if dtype == torch.bool:
-        count = torch.sum(input, dim=dim, dtype=torch.long)
-        threshold = input.size(dim) // 2
-        return torch.greater(count, threshold)
-
-    return torch.sum(input, dim=dim, dtype=dtype)
+multibundle = multiset
 
 
 def randsel(
-    input: Tensor, other: Tensor, *, p: float = 0.5, generator: torch.Generator = None
-) -> Tensor:
+    input: VSA_Model,
+    other: VSA_Model,
+    *,
+    p: float = 0.5,
+    generator: torch.Generator = None,
+) -> VSA_Model:
     r"""Bundles two hypervectors by selecting random elements.
 
     A bundling operation is used to aggregate information into a single hypervector.
@@ -909,8 +769,8 @@ def randsel(
     Aliased as ``torchhd.randsel``.
 
     Args:
-        input (Tensor): input hypervector
-        other (Tensor): other input hypervector
+        input (VSA_Model): input hypervector
+        other (VSA_Model): other input hypervector
         p (float, optional): probability of selecting elements from the input hypervector. Default: 0.5.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
 
@@ -936,8 +796,8 @@ def randsel(
 
 
 def multirandsel(
-    input: Tensor, *, p: FloatTensor = None, generator: torch.Generator = None
-) -> Tensor:
+    input: VSA_Model, *, p: FloatTensor = None, generator: torch.Generator = None
+) -> VSA_Model:
     r"""Bundling multiple hypervectors by sampling random elements.
 
     Bundles all the input hypervectors together.
@@ -948,7 +808,7 @@ def multirandsel(
         \bigoplus_{i=0}^{n-1} V_i
 
     Args:
-        input (Tensor): input hypervector tensor
+        input (VSA_Model): input hypervector tensor
         p (FloatTensor, optional): probability of selecting elements from the input hypervector. Default: uniform.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
 
@@ -981,10 +841,7 @@ def multirandsel(
     return input.gather(-2, select).squeeze(-2)
 
 
-multibundle = multiset
-
-
-def multibind(input: Tensor) -> Tensor:
+def multibind(input: VSA_Model) -> VSA_Model:
     r"""Binding of multiple hypervectors.
 
     Binds all the input hypervectors together.
@@ -994,7 +851,7 @@ def multibind(input: Tensor) -> Tensor:
         \bigotimes_{i=0}^{n-1} V_i
 
     Args:
-        input (Tensor): input hypervector tensor.
+        input (VSA_Model): input hypervector tensor.
 
     Shapes:
         - Input: :math:`(*, n, d)`
@@ -1017,25 +874,10 @@ def multibind(input: Tensor) -> Tensor:
         tensor([-1., -1., -1.,  1.,  1., -1., -1.,  1., -1.,  1.])
 
     """
-    dtype = input.dtype
-    dim = -2
-
-    if dtype == torch.uint8:
-        raise ValueError("Unsigned integer hypervectors are not supported.")
-
-    if dtype == torch.bool:
-        hvs = torch.unbind(input, dim)
-        result = hvs[0]
-
-        for i in range(1, len(hvs)):
-            result = torch.logical_xor(result, hvs[i])
-
-        return result
-
-    return torch.prod(input, dim=dim, dtype=dtype)
+    return input.multibind()
 
 
-def cross_product(input: Tensor, other: Tensor) -> Tensor:
+def cross_product(input: VSA_Model, other: VSA_Model) -> VSA_Model:
     r"""Cross product between two sets of hypervectors.
 
     First creates a multiset from both tensors ``input`` (:math:`A`) and ``other`` (:math:`B`).
@@ -1046,8 +888,8 @@ def cross_product(input: Tensor, other: Tensor) -> Tensor:
         \big( \bigoplus_{i=0}^{n-1} A_i \big) \otimes \big( \bigoplus_{i=0}^{m-1} B_i \big)
 
     Args:
-        input (Tensor): first set of input hypervectors
-        other (Tensor): second set of input hypervectors
+        input (VSA_Model): first set of input hypervectors
+        other (VSA_Model): second set of input hypervectors
 
     Shapes:
         - Input: :math:`(*, n, d)`
@@ -1074,7 +916,7 @@ def cross_product(input: Tensor, other: Tensor) -> Tensor:
     return bind(multiset(input), multiset(other))
 
 
-def ngrams(input: Tensor, n: int = 3) -> Tensor:
+def ngrams(input: VSA_Model, n: int = 3) -> VSA_Model:
     r"""Creates a hypervector with the :math:`n`-gram statistics of the input.
 
     .. math::
@@ -1085,7 +927,7 @@ def ngrams(input: Tensor, n: int = 3) -> Tensor:
         For :math:`n=1` use :func:`~torchhd.functional.multiset` instead and for :math:`n=m` use :func:`~torchhd.functional.bind_sequence` instead.
 
     Args:
-        input (Tensor): The value hypervectors.
+        input (VSA_Model): The value hypervectors.
         n (int, optional): The size of each :math:`n`-gram, :math:`1 \leq n \leq m`. Default: ``3``.
 
     Shapes:
@@ -1114,7 +956,7 @@ def ngrams(input: Tensor, n: int = 3) -> Tensor:
     return multiset(n_gram)
 
 
-def hash_table(keys: Tensor, values: Tensor) -> Tensor:
+def hash_table(keys: VSA_Model, values: VSA_Model) -> VSA_Model:
     r"""Hash table from keys-values hypervector pairs.
 
     .. math::
@@ -1122,8 +964,8 @@ def hash_table(keys: Tensor, values: Tensor) -> Tensor:
         \bigoplus_{i = 0}^{n - 1} K_i \otimes V_i
 
     Args:
-        keys (Tensor): The keys hypervectors, must be the same shape as values.
-        values (Tensor): The values hypervectors, must be the same shape as keys.
+        keys (VSA_Model): The keys hypervectors, must be the same shape as values.
+        values (VSA_Model): The values hypervectors, must be the same shape as keys.
 
     Shapes:
         - Keys: :math:`(*, n, d)`
@@ -1147,7 +989,7 @@ def hash_table(keys: Tensor, values: Tensor) -> Tensor:
     return multiset(bind(keys, values))
 
 
-def bundle_sequence(input: Tensor) -> Tensor:
+def bundle_sequence(input: VSA_Model) -> VSA_Model:
     r"""Bundling-based sequence.
 
     The first value is permuted :math:`n-1` times, the last value is not permuted.
@@ -1157,7 +999,7 @@ def bundle_sequence(input: Tensor) -> Tensor:
         \bigoplus_{i=0}^{n-1} \Pi^{n - i - 1}(V_i)
 
     Args:
-        input (Tensor): The hypervector values.
+        input (VSA_Model): The hypervector values.
 
     Shapes:
         - Input: :math:`(*, n, d)`
@@ -1186,7 +1028,7 @@ def bundle_sequence(input: Tensor) -> Tensor:
     return multiset(permuted)
 
 
-def bind_sequence(input: Tensor) -> Tensor:
+def bind_sequence(input: VSA_Model) -> VSA_Model:
     r"""Binding-based sequence.
 
     The first value is permuted :math:`n-1` times, the last value is not permuted.
@@ -1196,7 +1038,7 @@ def bind_sequence(input: Tensor) -> Tensor:
         \bigotimes_{i=0}^{n-1} \Pi^{n - i - 1}(V_i)
 
     Args:
-        input (Tensor): The hypervector values.
+        input (VSA_Model): The hypervector values.
 
     Shapes:
         - Input: :math:`(*, n, d)`
@@ -1229,7 +1071,7 @@ def bind_sequence(input: Tensor) -> Tensor:
     return multibind(permuted)
 
 
-def graph(input: Tensor, *, directed=False) -> Tensor:
+def graph(input: VSA_Model, *, directed=False) -> VSA_Model:
     r"""Graph from node hypervector pairs.
 
     If ``directed=False`` this computes:
@@ -1245,7 +1087,7 @@ def graph(input: Tensor, *, directed=False) -> Tensor:
         \bigoplus_{i = 0}^{n - 1} V_{0,i} \otimes \Pi(V_{1,i})
 
     Args:
-        input (Tensor): tensor containing pairs of node hypervectors that share an edge.
+        input (VSA_Model): tensor containing pairs of node hypervectors that share an edge.
         directed (bool, optional): specify if the graph is directed or not. Default: ``False``.
 
     Shapes:
@@ -1269,6 +1111,42 @@ def graph(input: Tensor, *, directed=False) -> Tensor:
         from_nodes = permute(from_nodes)
 
     return multiset(bind(to_nodes, from_nodes))
+
+
+def cleanup(input: VSA_Model, memory: VSA_Model, threshold=0.0) -> VSA_Model:
+    """Gets the most similar hypervector in memory.
+
+    If the cosine similarity is less than threshold, raises a KeyError.
+
+    Args:
+        input (VSA_Model): The hypervector to cleanup.
+        memory (VSA_Model): The hypervectors in memory.
+        threshold (float, optional): minimal similarity between input and any hypervector in memory. Default: ``0.0``.
+
+    Shapes:
+        - Input: :math:`(d)`
+        - Memory: :math:`(n, d)`
+        - Output: :math:`(d)`
+
+    Examples::
+
+        >>> x = functional.random_hv(2, 3)
+        >>> x
+        tensor([[ 1., -1., -1.],
+                [ 1.,  1.,  1.]])
+        >>> functional.cleanup(x[0], x)
+        tensor([[ 1., -1., -1.]])
+
+    """
+    scores = cos_similarity(input, memory)
+    value, index = torch.max(scores, dim=-1)
+
+    if value.item() < threshold:
+        raise KeyError(
+            "Hypervector with the highest similarity is less similar than the provided threshold"
+        )
+
+    return torch.index_select(memory, -2, index)
 
 
 def map_range(
@@ -1380,47 +1258,3 @@ def index_to_value(
 
     """
     return map_range(input.float(), 0, index_length - 1, out_min, out_max)
-
-
-def cleanup(input: Tensor, memory: Tensor, threshold=0.0) -> Tensor:
-    """Gets the most similar hypervector in memory.
-
-    If the cosine similarity is less than threshold, raises a KeyError.
-
-    Args:
-        input (Tensor): The hypervector to cleanup.
-        memory (Tensor): The hypervectors in memory.
-        threshold (float, optional): minimal similarity between input and any hypervector in memory. Default: ``0.0``.
-
-    Shapes:
-        - Input: :math:`(d)`
-        - Memory: :math:`(n, d)`
-        - Output: :math:`(d)`
-
-    Examples::
-
-        >>> x = functional.random_hv(2, 3)
-        >>> x
-        tensor([[ 1., -1., -1.],
-                [ 1.,  1.,  1.]])
-        >>> functional.cleanup(x[0], x)
-        tensor([[ 1., -1., -1.]])
-
-    """
-    if input.dtype in {torch.bool, torch.complex64, torch.complex128}:
-        raise NotImplementedError(
-            "Boolean, and Complex hypervectors are not supported yet."
-        )
-
-    if input.dtype == torch.uint8:
-        raise ValueError("Unsigned integer hypervectors are not supported.")
-
-    scores = cosine_similarity(input.float(), memory.float())
-    value, index = torch.max(scores, dim=-1)
-
-    if value.item() < threshold:
-        raise KeyError(
-            "Hypervector with the highest similarity is less similar than the provided threshold"
-        )
-
-    return torch.index_select(memory, -2, index)

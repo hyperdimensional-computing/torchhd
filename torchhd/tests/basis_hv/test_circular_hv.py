@@ -59,7 +59,7 @@ class TestCircular_hv:
 
         hv = functional.circular_hv(8, 1000000, generator=generator, dtype=dtype)
         if dtype in torch_complex_dtypes:
-            sims = functional.cosine_similarity(hv[0], hv)
+            sims = functional.cos_similarity(hv[0], hv)
             sims_diff = sims[:-1] - sims[1:]
 
             assert torch.all(
