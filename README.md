@@ -71,7 +71,7 @@ mx_values = torch.stack([mex, mxc, mxn])
 mx = torchhd.functional.hash_table(keys, mx_values)
 
 # combine all the associated information
-mx_us = torchhd.bind(us, mx)
+mx_us = torchhd.bind(torchhd.inverse(us), mx)
 
 # query for the dollar of mexico
 usd_of_mex = torchhd.bind(mx_us, usd)
