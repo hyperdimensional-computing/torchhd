@@ -113,7 +113,7 @@ class HRR(VSA_Model):
         return self.flip(dims=(-1,)).roll(1, dims=-1)
 
     def permute(self, n: int = 1) -> "HRR":
-        return self.roll(shifts=n, dim=-1)
+        return self.roll(shifts=n, dims=-1)
 
     def dot_similarity(self, others: "HRR") -> Tensor:
         return F.linear(self, others)

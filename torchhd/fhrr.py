@@ -107,7 +107,7 @@ class FHRR(VSA_Model):
         return self.conj()
 
     def permute(self, n: int = 1) -> "FHRR":
-        return self.roll(shifts=n, dim=-1)
+        return self.roll(shifts=n, dims=-1)
 
     def dot_similarity(self, others: "FHRR") -> Tensor:
         return F.linear(self, others.conj()).real

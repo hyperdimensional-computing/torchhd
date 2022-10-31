@@ -95,7 +95,7 @@ class MAP(VSA_Model):
         return self.clone()
 
     def permute(self, n: int = 1) -> "MAP":
-        return self.roll(shifts=n, dim=-1)
+        return self.roll(shifts=n, dims=-1)
 
     def dot_similarity(self, others: "MAP") -> Tensor:
         dtype = torch.get_default_dtype()

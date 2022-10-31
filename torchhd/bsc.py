@@ -86,7 +86,7 @@ class BSC(VSA_Model):
         return result.as_subclass(cls)
 
     def bundle(self, other: "BSC", *, generator: torch.Generator = None) -> "BSC":
-        tiebreaker = torch.empty_like(input)
+        tiebreaker = torch.empty_like(other)
         tiebreaker.bernoulli_(0.5, generator=generator)
 
         is_majority = self == other
@@ -114,7 +114,7 @@ class BSC(VSA_Model):
         return count > threshold
 
     def bind(self, other: "BSC") -> "BSC":
-        return self.logical_xor(other)
+        return self.logical_xor(other).to(other.dtype)
 
     def multibind(self) -> "BSC":
         if self.dim() < 2:
@@ -149,7 +149,7 @@ class BSC(VSA_Model):
         return self.logical_not()
 
     def permute(self, n: int = 1) -> "BSC":
-        return self.roll(shifts=n, dim=-1)
+        return self.roll(shifts=n, dims=-1)
 
     def dot_similarity(self, others: "BSC") -> Tensor:
         dtype = torch.get_default_dtype()

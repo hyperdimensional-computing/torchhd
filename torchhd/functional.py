@@ -442,7 +442,7 @@ def bind(input: VSA_Model, other: VSA_Model) -> VSA_Model:
     return input.bind(other)
 
 
-def bundle(input: VSA_Model, other: VSA_Model) -> VSA_Model:
+def bundle(input: VSA_Model, other: VSA_Model, generator: torch.Generator = None) -> VSA_Model:
     r"""Bundles two hypervectors which produces a hypervector maximally similar to both.
 
     The bundling operation is used to aggregate information into a single hypervector.
@@ -504,7 +504,7 @@ def permute(input: VSA_Model, *, n=1) -> VSA_Model:
         tensor([ -1.,  1.,  -1.])
 
     """
-    return input.permute(n)
+    return input.permute(n).to(input.dtype)
 
 
 def inverse(input: VSA_Model) -> VSA_Model:
@@ -840,7 +840,13 @@ def multirandsel(
 
     select = torch.multinomial(p, d, replacement=True, generator=generator)
     select.unsqueeze_(-2)
-    return input.gather(-2, select).squeeze(-2)
+    print(input.dtype)
+    if input.dtype == torch.bfloat16:
+        input = input.to(torch.float16)
+        out = input.gather(-2, select).squeeze(-2).to(torch.bfloat16)
+    else:
+        out = input.gather(-2, select).squeeze(-2)
+    return out
 
 
 def multibind(input: VSA_Model) -> VSA_Model:
