@@ -1,9 +1,9 @@
 .. _functional:
 
-torchhd.functional
+torchhd
 =========================
 
-.. currentmodule:: torchhd.functional 
+.. currentmodule:: torchhd
 
 This module consists of the basic hypervector generation functions and operations used on hypervectors.
 
@@ -14,6 +14,7 @@ Basis-hypervector sets
     :toctree: generated/
     :template: function.rst
 
+    empty_hv
     identity_hv
     random_hv
     level_hv
@@ -28,9 +29,10 @@ Operations
     :template: function.rst
 
     bind
-    unbind
     bundle
     permute
+    inverse
+    negative
     cleanup
     randsel
     multirandsel
@@ -44,7 +46,6 @@ Similarities
 .. autosummary::
     :toctree: generated/
     :template: function.rst
-
     
     cos_similarity
     dot_similarity
@@ -68,13 +69,26 @@ Encodings
     graph
 
 
+VSA Models
+------------------------
+
+.. autosummary::
+    :toctree: generated/
+    :template: class.rst
+
+    VSA_Model
+    BSC
+    MAP
+    HRR
+    FHRR
+
+
 Utilities
 ------------------------
 
 .. autosummary::
     :toctree: generated/
     :template: function.rst
-
     
     map_range
     value_to_index
