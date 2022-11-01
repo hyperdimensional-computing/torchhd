@@ -99,21 +99,21 @@ class HRR(VSA_Model):
         return self.add(other)
 
     def multibundle(self) -> "HRR":
-        return self.sum(dim=-2)
+        return self.sum(dim=-2, dtype=self.dtype)
 
     def bind(self, other: "HRR") -> "HRR":
         result = ifft(torch.mul(fft(self), fft(other)))
         return result.real
 
     def multibind(self) -> "HRR":
-        result = ifft(torch.prod(fft(self), dim=-2))
+        result = ifft(torch.prod(fft(self), dim=-2, dtype=self.dtype))
         return result.real
 
     def inverse(self) -> "HRR":
         return self.flip(dims=(-1,)).roll(1, dims=-1)
 
-    def permute(self, n: int = 1) -> "HRR":
-        return self.roll(shifts=n, dims=-1)
+    def permute(self, shifts: int = 1) -> "HRR":
+        return self.roll(shifts=shifts, dims=-1)
 
     def dot_similarity(self, others: "HRR") -> Tensor:
         return F.linear(self, others)

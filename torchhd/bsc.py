@@ -111,7 +111,7 @@ class BSC(VSA_Model):
             n += 1
 
         threshold = n // 2
-        return count > threshold
+        return torch.greater(count, threshold).to(self.dtype)
 
     def bind(self, other: "BSC") -> "BSC":
         return self.logical_xor(other).to(other.dtype)
@@ -140,7 +140,7 @@ class BSC(VSA_Model):
         for i in range(n - n_):
             output = torch.logical_xor(output, leftovers[i])
 
-        return output
+        return output.to(self.dtype)
 
     def inverse(self) -> "BSC":
         return self.clone()
@@ -148,8 +148,8 @@ class BSC(VSA_Model):
     def negative(self) -> "BSC":
         return self.logical_not()
 
-    def permute(self, n: int = 1) -> "BSC":
-        return self.roll(shifts=n, dims=-1)
+    def permute(self, shifts: int = 1) -> "BSC":
+        return self.roll(shifts=shifts, dims=-1)
 
     def dot_similarity(self, others: "BSC") -> Tensor:
         dtype = torch.get_default_dtype()

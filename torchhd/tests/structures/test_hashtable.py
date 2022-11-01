@@ -53,11 +53,11 @@ class TestHashtable:
         H.add(keys_hv[1], values_hv[1])
 
         assert torch.equal(
-            (functional.cosine_similarity(H[keys_hv[0]], values_hv) > 0.5)[0],
+            (functional.cos_similarity(H[keys_hv[0]], values_hv) > 0.5)[0],
             torch.tensor(True),
         )
         assert torch.equal(
-            (functional.cosine_similarity(H[keys_hv[1]], values_hv) > 0.5)[1],
+            (functional.cos_similarity(H[keys_hv[1]], values_hv) > 0.5)[1],
             torch.tensor(True),
         )
 
@@ -74,13 +74,13 @@ class TestHashtable:
         H.add(keys_hv[1], values_hv[1])
 
         assert torch.equal(
-            (functional.cosine_similarity(H[keys_hv[0]], values_hv) > 0.5)[0],
+            (functional.cos_similarity(H[keys_hv[0]], values_hv) > 0.5)[0],
             torch.tensor(True),
         )
 
         H.remove(keys_hv[0], values_hv[0])
         assert torch.equal(
-            (functional.cosine_similarity(H[keys_hv[0]], values_hv) < 0.2)[0],
+            (functional.cos_similarity(H[keys_hv[0]], values_hv) < 0.2)[0],
             torch.tensor(True),
         )
 
@@ -98,20 +98,20 @@ class TestHashtable:
         H.add(keys_hv[2], values_hv[2])
 
         assert torch.equal(
-            (functional.cosine_similarity(H.get(keys_hv[0]), values_hv) > 0.5)[0],
+            (functional.cos_similarity(H.get(keys_hv[0]), values_hv) > 0.5)[0],
             torch.tensor(True),
         )
         assert torch.equal(
-            (functional.cosine_similarity(H.get(keys_hv[1]), values_hv) > 0.5)[1],
+            (functional.cos_similarity(H.get(keys_hv[1]), values_hv) > 0.5)[1],
             torch.tensor(True),
         )
         assert torch.equal(
-            (functional.cosine_similarity(H.get(keys_hv[2]), values_hv) > 0.5)[2],
+            (functional.cos_similarity(H.get(keys_hv[2]), values_hv) > 0.5)[2],
             torch.tensor(True),
         )
         assert torch.equal(
             torch.all(
-                (functional.cosine_similarity(H.get(values_hv[2]), values_hv) > 0.5)
+                (functional.cos_similarity(H.get(values_hv[2]), values_hv) > 0.5)
                 == False
             ),
             torch.tensor(True),
@@ -131,20 +131,20 @@ class TestHashtable:
         H.add(keys_hv[2], values_hv[2])
 
         assert torch.equal(
-            (functional.cosine_similarity(H[keys_hv[0]], values_hv) > 0.5)[0],
+            (functional.cos_similarity(H[keys_hv[0]], values_hv) > 0.5)[0],
             torch.tensor(True),
         )
         assert torch.equal(
-            (functional.cosine_similarity(H[keys_hv[1]], values_hv) > 0.5)[1],
+            (functional.cos_similarity(H[keys_hv[1]], values_hv) > 0.5)[1],
             torch.tensor(True),
         )
         assert torch.equal(
-            (functional.cosine_similarity(H[keys_hv[2]], values_hv) > 0.5)[2],
+            (functional.cos_similarity(H[keys_hv[2]], values_hv) > 0.5)[2],
             torch.tensor(True),
         )
         assert torch.equal(
             torch.all(
-                (functional.cosine_similarity(H[values_hv[2]], values_hv) > 0.5)
+                (functional.cos_similarity(H[values_hv[2]], values_hv) > 0.5)
                 == False
             ),
             torch.tensor(True),
@@ -164,12 +164,12 @@ class TestHashtable:
         H.add(keys_hv[2], values_hv[2])
 
         assert torch.equal(
-            (functional.cosine_similarity(H[keys_hv[0]], values_hv) > 0.5)[0],
+            (functional.cos_similarity(H[keys_hv[0]], values_hv) > 0.5)[0],
             torch.tensor(True),
         )
         H.replace(keys_hv[0], values_hv[0], values_hv[1])
         assert torch.equal(
-            (functional.cosine_similarity(H[keys_hv[0]], values_hv) > 0.5)[1],
+            (functional.cos_similarity(H[keys_hv[0]], values_hv) > 0.5)[1],
             torch.tensor(True),
         )
 
@@ -207,12 +207,12 @@ class TestHashtable:
         H.clear()
         assert len(H) == 0
         assert torch.equal(
-            (functional.cosine_similarity(H[keys_hv[0]], values_hv) > 0.5)[0],
+            (functional.cos_similarity(H[keys_hv[0]], values_hv) > 0.5)[0],
             torch.tensor(False),
         )
         H.add(keys_hv[0], values_hv[0])
         assert torch.equal(
-            (functional.cosine_similarity(H[keys_hv[0]], values_hv) > 0.5)[0],
+            (functional.cos_similarity(H[keys_hv[0]], values_hv) > 0.5)[0],
             torch.tensor(True),
         )
 

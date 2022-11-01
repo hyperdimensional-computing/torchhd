@@ -38,7 +38,7 @@ class TestBindSequence:
         hv = functional.random_hv(len(letters), 10000, generator=generator)
         S = structures.BindSequence(10000)
         S.append(hv[0])
-        assert functional.cosine_similarity(S.value, hv)[0] > 0.5
+        assert functional.cos_similarity(S.value, hv)[0] > 0.5
 
     def test_appendleft(self):
         generator = torch.Generator()
@@ -46,7 +46,7 @@ class TestBindSequence:
         hv = functional.random_hv(len(letters), 10000, generator=generator)
         S = structures.BindSequence(10000)
         S.appendleft(hv[0])
-        assert functional.cosine_similarity(S.value, hv)[0] > 0.5
+        assert functional.cos_similarity(S.value, hv)[0] > 0.5
 
     def test_pop(self):
         generator = torch.Generator()
@@ -56,13 +56,13 @@ class TestBindSequence:
         S.append(hv[0])
         S.append(hv[1])
         S.pop(hv[1])
-        assert functional.cosine_similarity(S.value, hv)[0] > 0.5
+        assert functional.cos_similarity(S.value, hv)[0] > 0.5
         S.pop(hv[0])
         S.append(hv[2])
-        assert functional.cosine_similarity(S.value, hv)[2] > 0.5
+        assert functional.cos_similarity(S.value, hv)[2] > 0.5
         S.append(hv[3])
         S.pop(hv[3])
-        assert functional.cosine_similarity(S.value, hv)[2] > 0.5
+        assert functional.cos_similarity(S.value, hv)[2] > 0.5
 
     def test_popleft(self):
         generator = torch.Generator()
@@ -72,13 +72,13 @@ class TestBindSequence:
         S.appendleft(hv[0])
         S.appendleft(hv[1])
         S.popleft(hv[1])
-        assert functional.cosine_similarity(S.value, hv)[0] > 0.5
+        assert functional.cos_similarity(S.value, hv)[0] > 0.5
         S.popleft(hv[0])
         S.appendleft(hv[2])
-        assert functional.cosine_similarity(S.value, hv)[2] > 0.5
+        assert functional.cos_similarity(S.value, hv)[2] > 0.5
         S.appendleft(hv[3])
         S.popleft(hv[3])
-        assert functional.cosine_similarity(S.value, hv)[2] > 0.5
+        assert functional.cos_similarity(S.value, hv)[2] > 0.5
 
     def test_replace(self):
         generator = torch.Generator()
@@ -86,9 +86,9 @@ class TestBindSequence:
         hv = functional.random_hv(len(letters), 10000, generator=generator)
         S = structures.BindSequence(10000)
         S.append(hv[0])
-        assert functional.cosine_similarity(S.value, hv)[0] > 0.5
+        assert functional.cos_similarity(S.value, hv)[0] > 0.5
         S.replace(0, hv[0], hv[1])
-        assert functional.cosine_similarity(S.value, hv)[1] > 0.5
+        assert functional.cos_similarity(S.value, hv)[1] > 0.5
 
     def test_length(self):
         generator = torch.Generator()

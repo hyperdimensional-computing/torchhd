@@ -66,19 +66,19 @@ class TestFSA:
 
         assert (
             torch.argmax(
-                functional.cosine_similarity(F.transition(states[1], tokens[0]), states)
+                functional.cos_similarity(F.transition(states[1], tokens[0]), states)
             ).item()
             == 2
         )
         assert (
             torch.argmax(
-                functional.cosine_similarity(F.transition(states[1], tokens[1]), states)
+                functional.cos_similarity(F.transition(states[1], tokens[1]), states)
             ).item()
             == 3
         )
         assert (
             torch.argmax(
-                functional.cosine_similarity(F.transition(states[1], tokens[2]), states)
+                functional.cos_similarity(F.transition(states[1], tokens[2]), states)
             ).item()
             == 5
         )

@@ -476,7 +476,7 @@ def bundle(input: VSA_Model, other: VSA_Model, generator: torch.Generator = None
     return input.bundle(other)
 
 
-def permute(input: VSA_Model, *, n=1) -> VSA_Model:
+def permute(input: VSA_Model, *, shifts=1) -> VSA_Model:
     r"""Permutes hypervector by specified number of shifts.
 
     The permutation operator is used to assign an order to hypervectors.
@@ -489,7 +489,7 @@ def permute(input: VSA_Model, *, n=1) -> VSA_Model:
 
     Args:
         input (VSA_Model): input hypervector
-        n (int or tuple of ints, optional): The number of places by which the elements of the tensor are shifted. If shifts is a tuple, dims must be a tuple of the same size, and each dimension will be rolled by the corresponding value.
+        shifts (int or tuple of ints, optional): The number of places by which the elements of the tensor are shifted. If shifts is a tuple, dims must be a tuple of the same size, and each dimension will be rolled by the corresponding value.
 
     Shapes:
         - Input: :math:`(*)`
@@ -504,7 +504,7 @@ def permute(input: VSA_Model, *, n=1) -> VSA_Model:
         tensor([ -1.,  1.,  -1.])
 
     """
-    return input.permute(n).to(input.dtype)
+    return input.permute(shifts)
 
 
 def inverse(input: VSA_Model) -> VSA_Model:
@@ -666,17 +666,17 @@ def cos_similarity(input: VSA_Model, others: VSA_Model, *, eps=1e-08) -> VSA_Mod
         tensor([[-1.,  1.,  1., -1.,  1., -1.],
                 [ 1.,  1.,  1.,  1.,  1.,  1.],
                 [ 1.,  1.,  1., -1.,  1., -1.]])
-        >>> functional.cosine_similarity(x, x)
+        >>> functional.cos_similarity(x, x)
         tensor([[1.0000, 0.0000, 0.6667],
                 [0.0000, 1.0000, 0.3333],
                 [0.6667, 0.3333, 1.0000]])
 
-        >>> x = functional.random_hv(3, 6, dtype=torch.complex64)
+        >>> x = functional.random_hv(3, 6, torchhd.FHRR)
         >>> x
         tensor([[-0.5578-0.8299j, -0.0043-1.0000j, -0.0181+0.9998j,  0.1107+0.9939j, -0.8215-0.5702j, -0.4585+0.8887j],
                 [-0.7400-0.6726j,  0.6895-0.7243j, -0.8760+0.4823j, -0.4582-0.8889j, -0.6128+0.7903j, -0.4839-0.8751j],
                 [-0.7839+0.6209j, -0.9239-0.3827j, -0.9961-0.0884j,  0.4614+0.8872j, -0.8546+0.5193j, -0.5468-0.8372j]])
-        >>> functional.cosine_similarity(x, x)
+        >>> functional.cos_similarity(x, x)
         tensor([[1.0000, 0.1255, 0.1806],
                 [0.1255, 1.0000, 0.2607],
                 [0.1806, 0.2607, 1.0000]])
@@ -1108,7 +1108,7 @@ def graph(input: VSA_Model, *, directed=False) -> VSA_Model:
             >>> edges_hv = node_embedding(edges)
             >>> graph = functional.graph(edges_hv)
             >>> neighbors = unbind(graph, node_embedding.weight[0])
-            >>> cosine_similarity(neighbors, node_embedding.weight)
+            >>> cos_similarity(neighbors, node_embedding.weight)
             tensor([0.0006, 0.5017, 0.4997, 0.0048])
 
     """

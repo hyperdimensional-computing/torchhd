@@ -113,14 +113,14 @@ class TestPermute:
             ), "all element must not be the same"
 
             one_shift = functional.permute(hv[0])
-            two_shift = functional.permute(hv[0], n=2)
+            two_shift = functional.permute(hv[0], shifts=2)
             assert torch.sum(one_shift == two_shift) != res.size(
                 0
             ), "all element must not be the same"
 
             hv = functional.random_hv(1, 10000, model, dtype=dtype)
-            a = functional.permute(hv, n=5)
-            b = functional.permute(a, n=-5)
+            a = functional.permute(hv, shifts=5)
+            b = functional.permute(a, shifts=-5)
             assert torch.all(hv == b).item(), "can undo shifts"
         if model == torchhd.MAP:
             assert torch.all((hv == -1) | (hv == 1)).item(), "values are either -1 or +1"
@@ -129,19 +129,19 @@ class TestPermute:
             ), "all element must not be the same"
 
             one_shift = functional.permute(hv[0])
-            two_shift = functional.permute(hv[0], n=2)
+            two_shift = functional.permute(hv[0], shifts=2)
             assert torch.sum(one_shift == two_shift) != res.size(
                 0
             ), "all element must not be the same"
 
             hv = functional.random_hv(1, 10000, model, dtype=dtype)
-            a = functional.permute(hv, n=5)
-            b = functional.permute(a, n=-5)
+            a = functional.permute(hv, shifts=5)
+            b = functional.permute(a, shifts=-5)
             assert torch.all(hv == b).item(), "can undo shifts"
         if model == torchhd.HRR or model == torchhd.FHRR:
             hv = functional.random_hv(1, 10000, model, dtype=dtype)
-            a = functional.permute(hv, n=5)
-            b = functional.permute(a, n=-5)
+            a = functional.permute(hv, shifts=5)
+            b = functional.permute(a, shifts=-5)
             assert torch.all(hv == b).item(), "can undo shifts"
         assert res.dtype == dtype
 

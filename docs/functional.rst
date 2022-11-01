@@ -46,7 +46,7 @@ Similarities
     :template: function.rst
 
     
-    cosine_similarity
+    cos_similarity
     dot_similarity
     hamming_similarity
 

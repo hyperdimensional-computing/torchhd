@@ -95,19 +95,19 @@ class FHRR(VSA_Model):
         return self.add(other)
 
     def multibundle(self) -> "FHRR":
-        return self.sum(dim=-2)
+        return self.sum(dim=-2, dtype=self.dtype)
 
     def bind(self, other: "FHRR") -> "FHRR":
         return self.mul(other)
 
     def multibind(self) -> "FHRR":
-        return self.prod(dim=-2)
+        return self.prod(dim=-2, dtype=self.dtype)
 
     def inverse(self) -> "FHRR":
         return self.conj()
 
-    def permute(self, n: int = 1) -> "FHRR":
-        return self.roll(shifts=n, dims=-1)
+    def permute(self, shifts: int = 1) -> "FHRR":
+        return self.roll(shifts=shifts, dims=-1)
 
     def dot_similarity(self, others: "FHRR") -> Tensor:
         return F.linear(self, others.conj()).real
