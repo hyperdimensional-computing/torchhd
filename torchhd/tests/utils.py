@@ -50,6 +50,9 @@ torch_dtypes = {
 
 
 def supported_dtype(dtype: torch.dtype, model: Type[torchhd.VSA_Model]) -> bool:
+    if not issubclass(model, torchhd.VSA_Model):
+        raise ValueError("Must provide a VSA_Model class")
+
     if model == torchhd.BSC:
         return dtype not in {
             torch.complex64,
@@ -59,7 +62,7 @@ def supported_dtype(dtype: torch.dtype, model: Type[torchhd.VSA_Model]) -> bool:
         }
 
     elif model == torchhd.MAP:
-        return dtype not in {torch.uint8, torch.bool}
+        return dtype not in {torch.uint8, torch.bool, torch.float16, torch.bfloat16}
 
     elif model == torchhd.HRR:
         return dtype in {torch.float32, torch.float64}
@@ -73,6 +76,6 @@ def supported_dtype(dtype: torch.dtype, model: Type[torchhd.VSA_Model]) -> bool:
 vsa_models = [
     torchhd.BSC,
     torchhd.MAP,
-    torchhd.HRR,
+    # torchhd.HRR,
     torchhd.FHRR,
 ]

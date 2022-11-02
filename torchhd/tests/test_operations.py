@@ -13,7 +13,7 @@ from .utils import (
 class TestBind:
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_value(self, dtype, model):
+    def test_value(self, model, dtype):
         if not supported_dtype(dtype, model):
             return
 
@@ -96,7 +96,7 @@ class TestBundle:
 class TestPermute:
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_value(self, dtype, model):
+    def test_value(self, model, dtype):
         if not supported_dtype(dtype, model):
             return
 
@@ -161,7 +161,7 @@ class TestPermute:
 class TestCleanup:
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_value(self, dtype, model):
+    def test_value(self, model, dtype):
         if not supported_dtype(dtype, model):
             return
 
@@ -175,7 +175,7 @@ class TestCleanup:
 
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_threshold(self, dtype, model):
+    def test_threshold(self, model, dtype):
         if not supported_dtype(dtype, model):
             return
 

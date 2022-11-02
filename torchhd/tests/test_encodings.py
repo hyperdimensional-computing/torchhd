@@ -16,7 +16,7 @@ class TestMultiset:
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_value(self, model, dtype):
-        if not supported_dtype(model, dtype):
+        if not supported_dtype(dtype, model):
             return
 
         if model == BSC:
@@ -74,7 +74,7 @@ class TestMultibind:
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_value(self, model, dtype):
-        if not supported_dtype(model, dtype):
+        if not supported_dtype(dtype, model):
             return
 
         if model == BSC:

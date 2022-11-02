@@ -19,7 +19,7 @@ class TestDotSimilarity:
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_shape(self, model, dtype):
-        if not supported_dtype(model, dtype):
+        if not supported_dtype(dtype, model):
             return
 
         generator = torch.Generator()
@@ -48,7 +48,7 @@ class TestDotSimilarity:
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_value(self, model, dtype):
-        if not supported_dtype(model, dtype):
+        if not supported_dtype(dtype, model):
             return
 
         generator = torch.Generator()
@@ -119,7 +119,7 @@ class TestDotSimilarity:
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, model, dtype):
-        if not supported_dtype(model, dtype):
+        if not supported_dtype(dtype, model):
             return
 
         generator = torch.Generator()
@@ -129,19 +129,19 @@ class TestDotSimilarity:
 
         similarity = functional.dot_similarity(hv, hv)
 
-        if dtype == torch.bool:
-            assert similarity.dtype == torch.long
-        elif dtype == torch.complex64:
-            assert similarity.dtype == torch.float
-        elif dtype == torch.complex128:
-            assert similarity.dtype == torch.double
+        if model == FHRR:
+            if dtype == torch.complex64:
+                assert similarity.dtype == torch.float
+            elif dtype == torch.complex128:
+                assert similarity.dtype == torch.double
         else:
-            assert similarity.dtype == dtype
+            assert similarity.dtype == torch.get_default_dtype()
+
 
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_device(self, model, dtype):
-        if not supported_dtype(model, dtype):
+        if not supported_dtype(dtype, model):
             return
 
         generator = torch.Generator()
@@ -161,7 +161,7 @@ class TestCosSimilarity:
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_shape(self, model, dtype):
-        if not supported_dtype(model, dtype):
+        if not supported_dtype(dtype, model):
             return
 
         generator = torch.Generator()
@@ -190,7 +190,7 @@ class TestCosSimilarity:
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_value(self, model, dtype):
-        if not supported_dtype(model, dtype):
+        if not supported_dtype(dtype, model):
             return
 
         generator = torch.Generator()
@@ -241,7 +241,8 @@ class TestCosSimilarity:
             ).as_subclass(FHRR)
 
             res = functional.cos_similarity(hv, hv)
-            exp = torch.tensor([[1.0, -0.15274], [-0.15274, 1.0]], dtype=torch.float)
+            result_dtype = torch.float if dtype == torch.complex64 else torch.double
+            exp = torch.tensor([[1.0, -0.15274], [-0.15274, 1.0]], dtype=result_dtype)
             assert torch.allclose(res, exp)
 
         elif model == MAP:
@@ -260,7 +261,7 @@ class TestCosSimilarity:
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, model, dtype):
-        if not supported_dtype(model, dtype):
+        if not supported_dtype(dtype, model):
             return
 
         generator = torch.Generator()
@@ -270,12 +271,18 @@ class TestCosSimilarity:
 
         similarity = functional.cos_similarity(hv, hv)
 
-        assert similarity.dtype == torch.float
+        if model == FHRR:
+            if dtype == torch.complex64:
+                assert similarity.dtype == torch.float
+            elif dtype == torch.complex128:
+                assert similarity.dtype == torch.double
+        else:
+            assert similarity.dtype == torch.get_default_dtype()
 
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_device(self, model, dtype):
-        if not supported_dtype(model, dtype):
+        if not supported_dtype(dtype, model):
             return
 
         generator = torch.Generator()
@@ -295,7 +302,7 @@ class TestHammingSimilarity:
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_shape(self, model, dtype):
-        if not supported_dtype(model, dtype):
+        if not supported_dtype(dtype, model):
             return
 
         generator = torch.Generator()
@@ -324,7 +331,7 @@ class TestHammingSimilarity:
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_value(self, model, dtype):
-        if not supported_dtype(model, dtype):
+        if not supported_dtype(dtype, model):
             return
 
         generator = torch.Generator()
@@ -394,7 +401,7 @@ class TestHammingSimilarity:
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, model, dtype):
-        if not supported_dtype(model, dtype):
+        if not supported_dtype(dtype, model):
             return
 
         generator = torch.Generator()
@@ -409,7 +416,7 @@ class TestHammingSimilarity:
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_device(self, model, dtype):
-        if not supported_dtype(model, dtype):
+        if not supported_dtype(dtype, model):
             return
 
         generator = torch.Generator()

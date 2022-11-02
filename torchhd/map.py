@@ -16,9 +16,9 @@ class MAP(VSA_Model):
         device=None,
         requires_grad=False,
     ) -> "MAP":
-        if dtype in {torch.uint8, torch.bool}:
+        if dtype in {torch.uint8, torch.bool, torch.float16, torch.bfloat16}:
             name = cls.__name__
-            raise ValueError(f"{name} vectors cannot be of dtype uint8 or bool.")
+            raise ValueError(f"{name} vectors cannot be of dtype uint8, bool, float16, or bfloat16.")
 
         result = torch.zeros(
             num_vectors,
@@ -40,9 +40,9 @@ class MAP(VSA_Model):
         requires_grad=False,
     ) -> "MAP":
 
-        if dtype in {torch.uint8, torch.bool}:
+        if dtype in {torch.uint8, torch.bool, torch.float16, torch.bfloat16}:
             name = cls.__name__
-            raise ValueError(f"{name} vectors cannot be of dtype uint8 or bool.")
+            raise ValueError(f"{name} vectors cannot be of dtype uint8, bool, float16, or bfloat16.")
 
         result = torch.ones(
             num_vectors,
@@ -67,9 +67,9 @@ class MAP(VSA_Model):
         if dtype is None:
             dtype = torch.get_default_dtype()
 
-        if dtype in {torch.uint8, torch.bool}:
+        if dtype in {torch.uint8, torch.bool, torch.float16, torch.bfloat16}:
             name = cls.__name__
-            raise ValueError(f"{name} vectors cannot be of dtype uint8 or bool.")
+            raise ValueError(f"{name} vectors cannot be of dtype uint8, bool, float16, or bfloat16.")
 
         size = (num_vectors, dimensions)
         select = torch.empty(size, dtype=torch.bool, device=device)
