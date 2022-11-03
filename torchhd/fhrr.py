@@ -106,6 +106,9 @@ class FHRR(VSA_Model):
     def inverse(self) -> "FHRR":
         return self.conj()
 
+    def negative(self) -> "FHRR":
+        return torch.negative(self)
+
     def permute(self, shifts: int = 1) -> "FHRR":
         return self.roll(shifts=shifts, dims=-1)
 

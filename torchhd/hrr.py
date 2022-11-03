@@ -111,7 +111,10 @@ class HRR(VSA_Model):
 
     def inverse(self) -> "HRR":
         return self.flip(dims=(-1,)).roll(1, dims=-1)
-
+    
+    def negative(self) -> "HRR":
+        return torch.negative(self)
+    
     def permute(self, shifts: int = 1) -> "HRR":
         return self.roll(shifts=shifts, dims=-1)
 

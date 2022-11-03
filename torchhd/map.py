@@ -94,6 +94,9 @@ class MAP(VSA_Model):
     def inverse(self) -> "MAP":
         return self.clone()
 
+    def negative(self) -> "MAP":
+        return torch.negative(self)
+
     def permute(self, shifts: int = 1) -> "MAP":
         return self.roll(shifts=shifts, dims=-1)
 

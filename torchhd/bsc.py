@@ -74,6 +74,10 @@ class BSC(VSA_Model):
         dtype=torch.bool,
         device=None,
     ) -> "BSC":
+        """
+            sparsity (float, optional): the expected fraction of elements to be in-active. Has no effect on complex hypervectors. Default: ``0.5``.
+        
+        """
         if dtype in {torch.complex64, torch.complex128, torch.float16, torch.bfloat16}:
             name = cls.__name__
             raise ValueError(
