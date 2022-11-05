@@ -1,5 +1,5 @@
 import math
-from typing import Type
+from typing import Type, Union
 import torch
 from torch import LongTensor, FloatTensor, Tensor
 from collections import deque
@@ -398,6 +398,16 @@ def circular_hv(
     return hv.as_subclass(model)
 
 
+def to_default_model(input: Union[Tensor, VSA_Model]):
+    if not isinstance(input, VSA_Model):
+        if torch.is_tensor(input):
+            return input.as_subclass(MAP)
+        else:
+            raise ValueError("input must be VSA_Model or Tensor instance")
+
+    return input
+
+
 def bind(input: VSA_Model, other: VSA_Model) -> VSA_Model:
     r"""Binds two hypervectors which produces a hypervector dissimilar to both.
 
@@ -427,6 +437,7 @@ def bind(input: VSA_Model, other: VSA_Model) -> VSA_Model:
         tensor([-1., -1., -1., -1., -1.,  1., -1., -1.,  1.,  1.])
 
     """
+    input = to_default_model(input)
     return input.bind(other)
 
 
@@ -459,6 +470,7 @@ def bundle(input: VSA_Model, other: VSA_Model) -> VSA_Model:
         tensor([-2.,  0., -2., -2.,  2.,  2., -2.,  0.,  0.,  2.])
 
     """
+    input = to_default_model(input)
     return input.bundle(other)
 
 
@@ -488,6 +500,7 @@ def permute(input: VSA_Model, *, shifts=1) -> VSA_Model:
         tensor([[-1., -1., -1., -1.,  1., -1., -1.,  1., -1., -1.]])
 
     """
+    input = to_default_model(input)
     return input.permute(shifts)
 
 
@@ -512,6 +525,7 @@ def inverse(input: VSA_Model) -> VSA_Model:
         tensor([[ 0.879+0.476j,  0.995+0.090j, -0.279-0.960j, -0.752+0.658j, -0.874-0.485j, -0.527+0.849j]])
 
     """
+    input = to_default_model(input)
     return input.inverse()
 
 
@@ -536,6 +550,7 @@ def negative(input: VSA_Model) -> VSA_Model:
         tensor([[-1., -1.,  1., -1., -1., -1., -1.,  1., -1., -1.]])
 
     """
+    input = to_default_model(input)
     return input.negative()
 
 
@@ -631,6 +646,7 @@ def dot_similarity(input: VSA_Model, others: VSA_Model) -> VSA_Model:
                 [ 1.0767, -0.3047,  6.0000]])
 
     """
+    input = to_default_model(input)
     return input.dot_similarity(others)
 
 
@@ -673,6 +689,7 @@ def cos_similarity(input: VSA_Model, others: VSA_Model, *, eps=1e-08) -> VSA_Mod
                 [-0.1779, -0.1900,  1.0000]])
 
     """
+    input = to_default_model(input)
     return input.cos_similarity(others)
 
 
@@ -735,6 +752,7 @@ def multiset(input: VSA_Model) -> VSA_Model:
         tensor([-3., -1.,  1., -1.,  1., -1.])
 
     """
+    input = to_default_model(input)
     return input.multibundle()
 
 
@@ -779,6 +797,7 @@ def randsel(
         tensor([-0.7404-0.6721j,  0.8280-0.5608j, -0.5059+0.8626j, -0.9965-0.0841j, -0.7337+0.6795j, -0.9925-0.1223j])
 
     """
+    input = to_default_model(input)
     select = torch.empty_like(input, dtype=torch.bool)
     select.bernoulli_(1 - p, generator=generator)
     return input.where(select, other)
@@ -818,6 +837,8 @@ def multirandsel(
         tensor([ 0.3632+0.9317j, -0.9836+0.1806j, -0.6542-0.7563j,  0.9815-0.1914j, -0.6559-0.7549j,  0.7526-0.6585j])
 
     """
+    input = to_default_model(input)
+
     d = input.size(-1)
     device = input.device
 
@@ -857,6 +878,7 @@ def multibind(input: VSA_Model) -> VSA_Model:
         tensor([ 1., -1.,  1., -1., -1., -1.])
 
     """
+    input = to_default_model(input)
     return input.multibind()
 
 
@@ -896,6 +918,7 @@ def cross_product(input: VSA_Model, other: VSA_Model) -> VSA_Model:
         tensor([ 0., -0., 10.,  2., -0., -2.])
 
     """
+    input = to_default_model(input)
     return bind(multiset(input), multiset(other))
 
 
@@ -930,6 +953,8 @@ def ngrams(input: VSA_Model, n: int = 3) -> VSA_Model:
         tensor([-1., -1.,  1., -3., -1., -3.])
 
     """
+    input = to_default_model(input)
+
     n_gram = permute(input[..., : -(n - 1), :], shifts=n - 1)
     for i in range(1, n):
         stop = None if i == (n - 1) else -(n - i - 1)
@@ -969,6 +994,7 @@ def hash_table(keys: VSA_Model, values: VSA_Model) -> VSA_Model:
         tensor([ 2., -2.,  0.,  2.,  0., -2.])
 
     """
+    keys = to_default_model(keys)
     return multiset(bind(keys, values))
 
 
@@ -1000,6 +1026,8 @@ def bundle_sequence(input: VSA_Model) -> VSA_Model:
         tensor([ 2.,  0.,  2.,  0., -2.,  0.])
 
     """
+    input = to_default_model(input)
+
     dim = -2
     n = input.size(dim)
 
@@ -1038,6 +1066,8 @@ def bind_sequence(input: VSA_Model) -> VSA_Model:
         tensor([-1., -1., -1., -1.,  1., -1.])
 
     """
+    input = to_default_model(input)
+
     dim = -2
     n = input.size(dim)
 
@@ -1095,6 +1125,8 @@ def graph(input: VSA_Model, *, directed=False) -> VSA_Model:
         tensor([ 2.,  4., -2.,  0.,  4.,  0.])
 
     """
+    input = to_default_model(input)
+
     to_nodes = input[..., 0, :, :]
     from_nodes = input[..., 1, :, :]
 
@@ -1131,6 +1163,8 @@ def cleanup(input: VSA_Model, memory: VSA_Model, threshold=0.0) -> VSA_Model:
         tensor([[-1.,  1.,  1., -1., -1., -1.]])
 
     """
+    input = to_default_model(input)
+
     scores = cos_similarity(input, memory)
     value, index = torch.max(scores, dim=-1)
 
