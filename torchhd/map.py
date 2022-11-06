@@ -6,6 +6,8 @@ from torchhd.base import VSA_Model
 
 
 class MAP(VSA_Model):
+    """Multiply Add Permute
+    """
     @classmethod
     def empty_hv(
         cls,
@@ -16,6 +18,7 @@ class MAP(VSA_Model):
         device=None,
         requires_grad=False,
     ) -> "MAP":
+        """Creates hypervectors representing empty sets"""
         if dtype in {torch.uint8, torch.bool, torch.float16, torch.bfloat16}:
             name = cls.__name__
             raise ValueError(f"{name} vectors cannot be of dtype uint8, bool, float16, or bfloat16.")
@@ -39,6 +42,7 @@ class MAP(VSA_Model):
         device=None,
         requires_grad=False,
     ) -> "MAP":
+        """Creates identity hypervectors for binding"""
 
         if dtype in {torch.uint8, torch.bool, torch.float16, torch.bfloat16}:
             name = cls.__name__
@@ -64,6 +68,7 @@ class MAP(VSA_Model):
         device=None,
         requires_grad=False,
     ) -> "MAP":
+        """Creates random or uncorrelated hypervectors"""
         if dtype is None:
             dtype = torch.get_default_dtype()
 
@@ -80,31 +85,40 @@ class MAP(VSA_Model):
         return result.as_subclass(cls)
 
     def bundle(self, other: "MAP") -> "MAP":
+        """Bundle the hypervector with other"""
         return self.add(other)
 
     def multibundle(self) -> "MAP":
+        """Bundle multiple hypervectors"""
         return self.sum(dim=-2, dtype=self.dtype)
 
     def bind(self, other: "MAP") -> "MAP":
+        """Bind the hypervector with other"""
         return self.mul(other)
 
     def multibind(self) -> "MAP":
+        """Bind multiple hypervectors"""
         return self.prod(dim=-2, dtype=self.dtype)
 
     def inverse(self) -> "MAP":
+        """Inverse the hypervector for binding"""
         return self.clone()
 
     def negative(self) -> "MAP":
+        """Negate the hypervector for the bundling inverse"""
         return torch.negative(self)
 
     def permute(self, shifts: int = 1) -> "MAP":
+        """Permute the hypervector"""
         return self.roll(shifts=shifts, dims=-1)
 
     def dot_similarity(self, others: "MAP") -> Tensor:
+        """Inner product with other hypervectors"""
         dtype = torch.get_default_dtype()
         return F.linear(self.to(dtype), others.to(dtype))
 
     def cos_similarity(self, others: "MAP", *, eps=1e-08) -> Tensor:
+        """Cosine similarity with other hypervectors"""
         dtype = torch.get_default_dtype()
 
         self_dot = torch.sum(self * self, dim=-1, dtype=dtype)

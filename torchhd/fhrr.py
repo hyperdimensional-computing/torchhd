@@ -12,6 +12,9 @@ type_conversion = {
 
 
 class FHRR(VSA_Model):
+    """Fourier Holographic Reduced Representation
+    
+    """
     @classmethod
     def empty_hv(
         cls,
@@ -22,6 +25,7 @@ class FHRR(VSA_Model):
         device=None,
         requires_grad=False,
     ) -> "FHRR":
+        """Creates hypervectors representing empty sets"""
         if dtype not in {torch.complex64, torch.complex128}:
             name = cls.__name__
             raise ValueError(
@@ -47,6 +51,7 @@ class FHRR(VSA_Model):
         device=None,
         requires_grad=False,
     ) -> "FHRR":
+        """Creates identity hypervectors for binding"""
         if dtype not in {torch.complex64, torch.complex128}:
             name = cls.__name__
             raise ValueError(
@@ -73,6 +78,7 @@ class FHRR(VSA_Model):
         requires_grad=False,
         generator=None,
     ) -> "FHRR":
+        """Creates random or uncorrelated hypervectors"""
 
         if dtype not in {torch.complex64, torch.complex128}:
             name = cls.__name__
@@ -92,30 +98,39 @@ class FHRR(VSA_Model):
         return result.as_subclass(cls)
 
     def bundle(self, other: "FHRR") -> "FHRR":
+        """Bundle the hypervector with other"""
         return self.add(other)
 
     def multibundle(self) -> "FHRR":
+        """Bundle multiple hypervectors"""
         return self.sum(dim=-2, dtype=self.dtype)
 
     def bind(self, other: "FHRR") -> "FHRR":
+        """Bind the hypervector with other"""
         return self.mul(other)
 
     def multibind(self) -> "FHRR":
+        """Bind multiple hypervectors"""
         return self.prod(dim=-2, dtype=self.dtype)
 
     def inverse(self) -> "FHRR":
+        """Inverse the hypervector for binding"""
         return self.conj()
 
     def negative(self) -> "FHRR":
+        """Negate the hypervector for the bundling inverse"""
         return torch.negative(self)
 
     def permute(self, shifts: int = 1) -> "FHRR":
+        """Permute the hypervector"""
         return self.roll(shifts=shifts, dims=-1)
 
     def dot_similarity(self, others: "FHRR") -> Tensor:
+        """Inner product with other hypervectors"""
         return F.linear(self, others.conj()).real
 
     def cos_similarity(self, others: "FHRR", *, eps=1e-08) -> Tensor:
+        """Cosine similarity with other hypervectors"""
         self_dot = torch.real(self * self.conj()).sum(dim=-1)
         self_mag = self_dot.sqrt()
 

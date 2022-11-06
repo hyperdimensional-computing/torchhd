@@ -16,6 +16,10 @@ def biggest_power_two(n):
 
 
 class BSC(VSA_Model):
+    """Binary Scatter Code
+    
+
+    """
     @classmethod
     def empty_hv(
         cls,
@@ -25,6 +29,7 @@ class BSC(VSA_Model):
         dtype=torch.bool,
         device=None,
     ) -> "BSC":
+        """Creates hypervectors representing empty sets"""
 
         if dtype in {torch.complex64, torch.complex128, torch.float16, torch.bfloat16}:
             name = cls.__name__
@@ -49,6 +54,7 @@ class BSC(VSA_Model):
         dtype=torch.bool,
         device=None,
     ) -> "BSC":
+        """Creates identity hypervectors for binding"""
         if dtype in {torch.complex64, torch.complex128, torch.float16, torch.bfloat16}:
             name = cls.__name__
             raise ValueError(
@@ -75,6 +81,8 @@ class BSC(VSA_Model):
         device=None,
     ) -> "BSC":
         """
+        Creates random or uncorrelated hypervectors
+
             sparsity (float, optional): the expected fraction of elements to be in-active. Has no effect on complex hypervectors. Default: ``0.5``.
         
         """
@@ -90,6 +98,7 @@ class BSC(VSA_Model):
         return result.as_subclass(cls)
 
     def bundle(self, other: "BSC", *, generator: torch.Generator = None) -> "BSC":
+        """Bundle the hypervector with other"""
         tiebreaker = torch.empty_like(other)
         tiebreaker.bernoulli_(0.5, generator=generator)
 
@@ -97,6 +106,7 @@ class BSC(VSA_Model):
         return self.where(is_majority, tiebreaker)
 
     def multibundle(self, *, generator: torch.Generator = None) -> "BSC":
+        """Bundle multiple hypervectors"""
         if self.dim() < 2:
             class_name = self.__class__.__name__
             raise RuntimeError(
@@ -118,9 +128,11 @@ class BSC(VSA_Model):
         return torch.greater(count, threshold).to(self.dtype)
 
     def bind(self, other: "BSC") -> "BSC":
+        """Bind the hypervector with other"""
         return self.logical_xor(other).to(other.dtype)
 
     def multibind(self) -> "BSC":
+        """Bind multiple hypervectors"""
         if self.dim() < 2:
             class_name = self.__class__.__name__
             raise RuntimeError(
@@ -147,15 +159,19 @@ class BSC(VSA_Model):
         return output.to(self.dtype)
 
     def inverse(self) -> "BSC":
+        """Inverse the hypervector for binding"""
         return self.clone()
 
     def negative(self) -> "BSC":
+        """Negate the hypervector for the bundling inverse"""
         return self.logical_not()
 
     def permute(self, shifts: int = 1) -> "BSC":
+        """Permute the hypervector"""
         return self.roll(shifts=shifts, dims=-1)
 
     def dot_similarity(self, others: "BSC") -> Tensor:
+        """Inner product with other hypervectors"""
         dtype = torch.get_default_dtype()
         
         min_one = torch.tensor(-1.0, dtype=dtype)
@@ -167,5 +183,6 @@ class BSC(VSA_Model):
         return F.linear(self_as_bipolar, others_as_bipolar)
 
     def cos_similarity(self, others: "BSC") -> Tensor:
+        """Cosine similarity with other hypervectors"""
         d = self.size(-1)
         return self.dot_similarity(others) / d
