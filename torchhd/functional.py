@@ -541,7 +541,7 @@ def permute(input: VSA_Model, *, shifts=1) -> VSA_Model:
 
     Args:
         input (VSA_Model): input hypervector
-        shifts (int or tuple of ints, optional): The number of places by which the elements of the tensor are shifted. If shifts is a tuple, dims must be a tuple of the same size, and each dimension will be rolled by the corresponding value.
+        shifts (int, optional): The number of places by which the elements of the tensor are shifted. 
 
     Shapes:
         - Input: :math:`(*)`
