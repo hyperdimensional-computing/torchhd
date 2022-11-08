@@ -2,12 +2,13 @@ import torch
 from torch import Tensor
 import torch.nn.functional as F
 from torch.fft import fft, ifft
+from typing import Set
 
 from torchhd.base import VSA_Model
 
 
 class HRR(VSA_Model):
-    supported_dtypes: set[torch.dtype] = {torch.float32, torch.float64}
+    supported_dtypes: Set[torch.dtype] = {torch.float32, torch.float64}
 
     @classmethod
     def empty_hv(

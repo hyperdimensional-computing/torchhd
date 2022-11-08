@@ -1,6 +1,7 @@
 import torch
 from torch import Tensor
 import torch.nn.functional as F
+from typing import Set
 
 from torchhd.base import VSA_Model
 
@@ -11,7 +12,7 @@ class MAP(VSA_Model):
     Proposed in `Multiplicative Binding, Representation Operators & Analogy <https://www.researchgate.net/publication/215992330_Multiplicative_Binding_Representation_Operators_Analogy>`_, this model works with bipolar hypervectors.
     """
 
-    supported_dtypes: set[torch.dtype] = {
+    supported_dtypes: Set[torch.dtype] = {
         torch.float32,
         torch.float64,
         torch.complex64,

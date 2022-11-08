@@ -1,5 +1,5 @@
 import torch
-from typing import List
+from typing import List, Set
 from torch import Tensor
 
 
@@ -8,7 +8,7 @@ class VSA_Model(Tensor):
 
     Each model must implement the methods specified on this base class.
     """
-    supported_dtypes: set[torch.dtype]
+    supported_dtypes: Set[torch.dtype]
 
     @classmethod
     def empty_hv(

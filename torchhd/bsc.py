@@ -1,4 +1,5 @@
 import torch
+from typing import Set
 from torch import Tensor
 import torch.nn.functional as F
 
@@ -21,7 +22,7 @@ class BSC(VSA_Model):
     Proposed in `Binary spatter-coding of ordered K-tuples <https://link.springer.com/chapter/10.1007/3-540-61510-5_146>`_, this model works with binary valued hypervectors.
     """
 
-    supported_dtypes: set[torch.dtype] = {
+    supported_dtypes: Set[torch.dtype] = {
         torch.float32,
         torch.float64,
         torch.uint8,

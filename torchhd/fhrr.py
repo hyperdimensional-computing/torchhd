@@ -1,5 +1,6 @@
 import math
 import torch
+from typing import Set
 from torch import Tensor
 import torch.nn.functional as F
 
@@ -17,7 +18,7 @@ class FHRR(VSA_Model):
     Proposed in `Holographic Reduced Representation: Distributed Representation for Cognitive Structures <https://philpapers.org/rec/PLAHRR/>`_, this model uses complex phaser hypervectors.
     """
 
-    supported_dtypes: set[torch.dtype] = {torch.complex64, torch.complex128}
+    supported_dtypes: Set[torch.dtype] = {torch.complex64, torch.complex128}
 
     @classmethod
     def empty_hv(
