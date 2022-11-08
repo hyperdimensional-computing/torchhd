@@ -16,7 +16,10 @@ def biggest_power_two(n):
 
 
 class BSC(VSA_Model):
-    """Binary Scatter Code"""
+    """Binary Spatter Codes
+    
+    Proposed in `Binary spatter-coding of ordered K-tuples <https://link.springer.com/chapter/10.1007/3-540-61510-5_146>`_, this model works with binary valued hypervectors.
+    """
 
     supported_dtypes: set[torch.dtype] = {
         torch.float32,

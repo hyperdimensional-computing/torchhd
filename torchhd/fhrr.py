@@ -12,7 +12,10 @@ type_conversion = {
 
 
 class FHRR(VSA_Model):
-    """Fourier Holographic Reduced Representation"""
+    """Fourier Holographic Reduced Representation
+    
+    Proposed in `Holographic Reduced Representation: Distributed Representation for Cognitive Structures <https://philpapers.org/rec/PLAHRR/>`_, this model uses complex phaser hypervectors.
+    """
 
     supported_dtypes: set[torch.dtype] = {torch.complex64, torch.complex128}
 

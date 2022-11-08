@@ -6,7 +6,10 @@ from torchhd.base import VSA_Model
 
 
 class MAP(VSA_Model):
-    """Multiply Add Permute"""
+    """Multiply Add Permute
+    
+    Proposed in `Multiplicative Binding, Representation Operators & Analogy <https://www.researchgate.net/publication/215992330_Multiplicative_Binding_Representation_Operators_Analogy>`_, this model works with bipolar hypervectors.
+    """
 
     supported_dtypes: set[torch.dtype] = {
         torch.float32,

@@ -53,7 +53,7 @@ def as_vsa_model(
     If data is already a VSA model of the correct model, dtype and device then data itself is returned.
     A copy of the data is created when dtype or device don't match using ``torch.as_tensor(data, dtype=dtype, device=device)``.
 
-    When no model is specified boolean tensors are converted to Binary Scatter Codes, complex valued tensors to Fourier Holographic Reduced Representations and otherwise to the Multiply Add Permute VSA model.
+    When no model is specified boolean tensors are converted to Binary Spatter Codes, complex valued tensors to Fourier Holographic Reduced Representations and otherwise to the Multiply Add Permute VSA model.
 
     Args:
         data (array_like): Initial data for the tensor. Can be a list, tuple, NumPy ndarray, scalar, and other types.
