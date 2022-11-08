@@ -107,9 +107,7 @@ class TestGraph:
         G.add_edge(hv[1], hv[2])
 
         assert (
-            torch.argmax(
-                functional.cos_similarity(G.node_neighbors(hv[1]), hv)
-            ).item()
+            torch.argmax(functional.cos_similarity(G.node_neighbors(hv[1]), hv)).item()
             == 2
         )
         assert functional.cos_similarity(G.node_neighbors(hv[1]), hv)[2] > 0.5

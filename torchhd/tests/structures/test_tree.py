@@ -31,16 +31,12 @@ class TestTree:
         T = structures.Tree(10000)
         T.add_leaf(hv[0], ["l", "l"])
         assert (
-            torch.argmax(
-                functional.cos_similarity(T.get_leaf(["l", "l"]), hv)
-            ).item()
+            torch.argmax(functional.cos_similarity(T.get_leaf(["l", "l"]), hv)).item()
             == 0
         )
         T.add_leaf(hv[1], ["l", "r"])
         assert (
-            torch.argmax(
-                functional.cos_similarity(T.get_leaf(["l", "r"]), hv)
-            ).item()
+            torch.argmax(functional.cos_similarity(T.get_leaf(["l", "r"]), hv)).item()
             == 1
         )
 
@@ -51,16 +47,12 @@ class TestTree:
         T = structures.Tree(10000)
         T.add_leaf(hv[0], ["l", "l"])
         assert (
-            torch.argmax(
-                functional.cos_similarity(T.get_leaf(["l", "l"]), hv)
-            ).item()
+            torch.argmax(functional.cos_similarity(T.get_leaf(["l", "l"]), hv)).item()
             == 0
         )
         T.add_leaf(hv[1], ["l", "r"])
         assert (
-            torch.argmax(
-                functional.cos_similarity(T.get_leaf(["l", "r"]), hv)
-            ).item()
+            torch.argmax(functional.cos_similarity(T.get_leaf(["l", "r"]), hv)).item()
             == 1
         )
 

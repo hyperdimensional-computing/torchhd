@@ -5,10 +5,13 @@ from torch import LongTensor, FloatTensor, Tensor
 from collections import deque
 
 from torchhd.base import VSA_Model
+from torchhd.bsc import BSC
 from torchhd.map import MAP
+from torchhd.fhrr import FHRR
 
 
 __all__ = [
+    "as_vsa_model",
     "empty_hv",
     "identity_hv",
     "random_hv",
@@ -39,13 +42,74 @@ __all__ = [
 ]
 
 
+def as_vsa_model(
+    data,
+    model: Type[VSA_Model] = None,
+    dtype: torch.dtype = None,
+    device: torch.device = None,
+) -> VSA_Model:
+    """Converts data into a VSA model tensor.
+
+    If data is already a VSA model of the correct model, dtype and device then data itself is returned.
+    A copy of the data is created when dtype or device don't match using ``torch.as_tensor(data, dtype=dtype, device=device)``.
+
+    When no model is specified boolean tensors are converted to Binary Scatter Codes, complex valued tensors to Fourier Holographic Reduced Representations and otherwise to the Multiply Add Permute VSA model.
+
+    Args:
+        data (array_like): Initial data for the tensor. Can be a list, tuple, NumPy ndarray, scalar, and other types.
+        model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor.
+        device (``torch.device``, optional): the desired device of returned tensor.
+
+    Examples::
+
+        >>> x = [True, False, False, True, False, False]
+        >>> x = torchhd.as_vsa_model(x)
+        >>> x
+        tensor([ True, False, False,  True, False, False])
+        >>> type(x)
+        <class 'torchhd.bsc.BSC'>
+
+        >>> x = torch.rand(6)
+        >>> x
+        tensor([0.2083, 0.0665, 0.6302, 0.8650, 0.6618, 0.0886])
+        >>> x = torchhd.as_vsa_model(x)
+        >>> x
+        tensor([0.2083, 0.0665, 0.6302, 0.8650, 0.6618, 0.0886])
+        >>> type(x)
+        <class 'torchhd.map.MAP'>
+
+    """
+    input = torch.as_tensor(data, dtype=dtype, device=device)
+
+    if model is not None:
+        if input.dtype not in model.supported_dtypes:
+            name = model.__name__
+            options = ", ".join([str(x) for x in model.supported_dtypes])
+            raise ValueError(f"{name} vectors must be one of dtype {options}.")
+
+        return input.as_subclass(model)
+
+    if isinstance(input, VSA_Model):
+        return input
+
+    if input.dtype == torch.bool:
+        return input.as_subclass(BSC)
+
+    elif torch.is_complex(input):
+        return input.as_subclass(FHRR)
+
+    else:
+        return input.as_subclass(MAP)
+
+
 def empty_hv(
     num_vectors: int,
     dimensions: int,
     model: Type[VSA_Model] = MAP,
     **kwargs,
 ) -> VSA_Model:
-    """Creates a set of empty hypervectors.
+    """Creates a set of hypervectors representing empty sets.
 
     When bundled with a random-hypervector :math:`x`, the result is :math:`x`.
 
@@ -68,7 +132,7 @@ def empty_hv(
         tensor([[0., 0., 0., 0., 0., 0.],
                 [0., 0., 0., 0., 0., 0.],
                 [0., 0., 0., 0., 0., 0.]])
-                
+
         >>> torchhd.empty_hv(3, 6, torchhd.FHRR)
         tensor([[0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
                 [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
@@ -123,7 +187,7 @@ def random_hv(
     model: Type[VSA_Model] = MAP,
     **kwargs,
 ) -> VSA_Model:
-    """Creates a set of random-hypervectors.
+    """Creates a set of random independent hypervectors.
 
     The resulting hypervectors are sampled uniformly at random from the ``dimensions``-dimensional hyperspace.
 
@@ -167,10 +231,10 @@ def level_hv(
     model: Type[VSA_Model] = MAP,
     *,
     randomness: float = 0.0,
-    requires_grad = False,
+    requires_grad=False,
     **kwargs,
 ) -> VSA_Model:
-    """Creates a set of level-hypervectors.
+    """Creates a set of level correlated hypervectors.
 
     Implements level-hypervectors as an interpolation between random-hypervectors as described in `An Extension to Basis-Hypervectors for Learning from Circular Data in Hyperdimensional Computing <https://arxiv.org/abs/2205.07920>`_.
     The first and last hypervector in the generated set are quasi-orthogonal.
@@ -268,10 +332,10 @@ def circular_hv(
     model: Type[VSA_Model] = MAP,
     *,
     randomness: float = 0.0,
-    requires_grad = False,
+    requires_grad=False,
     **kwargs,
 ) -> VSA_Model:
-    """Creates a set of circular-hypervectors.
+    """Creates a set of circularly correlated hypervectors.
 
     Implements circular-hypervectors based on level-hypervectors as described in `An Extension to Basis-Hypervectors for Learning from Circular Data in Hyperdimensional Computing <https://arxiv.org/abs/2205.07920>`_.
     Any hypervector is quasi-orthogonal to the hypervector opposite site of the circle.
@@ -398,16 +462,6 @@ def circular_hv(
     return hv.as_subclass(model)
 
 
-def to_default_model(input: Union[Tensor, VSA_Model]):
-    if not isinstance(input, VSA_Model):
-        if torch.is_tensor(input):
-            return input.as_subclass(MAP)
-        else:
-            raise ValueError("input must be VSA_Model or Tensor instance")
-
-    return input
-
-
 def bind(input: VSA_Model, other: VSA_Model) -> VSA_Model:
     r"""Binds two hypervectors which produces a hypervector dissimilar to both.
 
@@ -437,7 +491,8 @@ def bind(input: VSA_Model, other: VSA_Model) -> VSA_Model:
         tensor([-1., -1., -1., -1., -1.,  1., -1., -1.,  1.,  1.])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
+    other = as_vsa_model(other)
     return input.bind(other)
 
 
@@ -470,7 +525,8 @@ def bundle(input: VSA_Model, other: VSA_Model) -> VSA_Model:
         tensor([-2.,  0., -2., -2.,  2.,  2., -2.,  0.,  0.,  2.])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
+    other = as_vsa_model(other)
     return input.bundle(other)
 
 
@@ -500,7 +556,7 @@ def permute(input: VSA_Model, *, shifts=1) -> VSA_Model:
         tensor([[-1., -1., -1., -1.,  1., -1., -1.,  1., -1., -1.]])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
     return input.permute(shifts)
 
 
@@ -525,7 +581,7 @@ def inverse(input: VSA_Model) -> VSA_Model:
         tensor([[ 0.879+0.476j,  0.995+0.090j, -0.279-0.960j, -0.752+0.658j, -0.874-0.485j, -0.527+0.849j]])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
     return input.inverse()
 
 
@@ -550,7 +606,7 @@ def negative(input: VSA_Model) -> VSA_Model:
         tensor([[-1., -1.,  1., -1., -1., -1., -1.,  1., -1., -1.]])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
     return input.negative()
 
 
@@ -646,11 +702,12 @@ def dot_similarity(input: VSA_Model, others: VSA_Model) -> VSA_Model:
                 [ 1.0767, -0.3047,  6.0000]])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
+    others = as_vsa_model(others)
     return input.dot_similarity(others)
 
 
-def cos_similarity(input: VSA_Model, others: VSA_Model, *, eps=1e-08) -> VSA_Model:
+def cos_similarity(input: VSA_Model, others: VSA_Model) -> VSA_Model:
     """Cosine similarity between the input vector and each vector in others.
 
     Args:
@@ -689,7 +746,8 @@ def cos_similarity(input: VSA_Model, others: VSA_Model, *, eps=1e-08) -> VSA_Mod
                 [-0.1779, -0.1900,  1.0000]])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
+    others = as_vsa_model(others)
     return input.cos_similarity(others)
 
 
@@ -752,7 +810,7 @@ def multiset(input: VSA_Model) -> VSA_Model:
         tensor([-3., -1.,  1., -1.,  1., -1.])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
     return input.multibundle()
 
 
@@ -797,7 +855,9 @@ def randsel(
         tensor([-0.7404-0.6721j,  0.8280-0.5608j, -0.5059+0.8626j, -0.9965-0.0841j, -0.7337+0.6795j, -0.9925-0.1223j])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
+    other = as_vsa_model(other)
+
     select = torch.empty_like(input, dtype=torch.bool)
     select.bernoulli_(1 - p, generator=generator)
     return input.where(select, other)
@@ -837,7 +897,7 @@ def multirandsel(
         tensor([ 0.3632+0.9317j, -0.9836+0.1806j, -0.6542-0.7563j,  0.9815-0.1914j, -0.6559-0.7549j,  0.7526-0.6585j])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
 
     d = input.size(-1)
     device = input.device
@@ -878,7 +938,7 @@ def multibind(input: VSA_Model) -> VSA_Model:
         tensor([ 1., -1.,  1., -1., -1., -1.])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
     return input.multibind()
 
 
@@ -918,7 +978,8 @@ def cross_product(input: VSA_Model, other: VSA_Model) -> VSA_Model:
         tensor([ 0., -0., 10.,  2., -0., -2.])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
+    other = as_vsa_model(other)
     return bind(multiset(input), multiset(other))
 
 
@@ -953,7 +1014,7 @@ def ngrams(input: VSA_Model, n: int = 3) -> VSA_Model:
         tensor([-1., -1.,  1., -3., -1., -3.])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
 
     n_gram = permute(input[..., : -(n - 1), :], shifts=n - 1)
     for i in range(1, n):
@@ -994,7 +1055,8 @@ def hash_table(keys: VSA_Model, values: VSA_Model) -> VSA_Model:
         tensor([ 2., -2.,  0.,  2.,  0., -2.])
 
     """
-    keys = to_default_model(keys)
+    keys = as_vsa_model(keys)
+    values = as_vsa_model(values)
     return multiset(bind(keys, values))
 
 
@@ -1026,7 +1088,7 @@ def bundle_sequence(input: VSA_Model) -> VSA_Model:
         tensor([ 2.,  0.,  2.,  0., -2.,  0.])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
 
     dim = -2
     n = input.size(dim)
@@ -1066,7 +1128,7 @@ def bind_sequence(input: VSA_Model) -> VSA_Model:
         tensor([-1., -1., -1., -1.,  1., -1.])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
 
     dim = -2
     n = input.size(dim)
@@ -1125,7 +1187,7 @@ def graph(input: VSA_Model, *, directed=False) -> VSA_Model:
         tensor([ 2.,  4., -2.,  0.,  4.,  0.])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
 
     to_nodes = input[..., 0, :, :]
     from_nodes = input[..., 1, :, :]
@@ -1163,7 +1225,7 @@ def cleanup(input: VSA_Model, memory: VSA_Model, threshold=0.0) -> VSA_Model:
         tensor([[-1.,  1.,  1., -1., -1., -1.]])
 
     """
-    input = to_default_model(input)
+    input = as_vsa_model(input)
 
     scores = cos_similarity(input, memory)
     value, index = torch.max(scores, dim=-1)

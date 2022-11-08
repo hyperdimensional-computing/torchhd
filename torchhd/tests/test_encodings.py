@@ -141,7 +141,9 @@ class TestCrossProduct:
         res = functional.cross_product(hv, hv)
         assert torch.all(res == 0).item()
 
-        a = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1]]).as_subclass(MAP)
+        a = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1]]).as_subclass(
+            MAP
+        )
         b = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1]]).as_subclass(MAP)
         res = functional.cross_product(a, b)
         assert torch.all(res == torch.tensor([0, 2, 0, 6])).item()

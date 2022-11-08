@@ -160,7 +160,9 @@ class Multiset:
     """
 
     @overload
-    def __init__(self, dimensions: int, model: Type[VSA_Model] = MAP, *, device=None, dtype=None):
+    def __init__(
+        self, dimensions: int, model: Type[VSA_Model] = MAP, *, device=None, dtype=None
+    ):
         ...
 
     @overload
@@ -174,7 +176,9 @@ class Multiset:
         else:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
-            self.value = functional.empty_hv(1, dim_or_input, model, dtype=dtype, device=device).squeeze(0)
+            self.value = functional.empty_hv(
+                1, dim_or_input, model, dtype=dtype, device=device
+            ).squeeze(0)
 
     def add(self, input: VSA_Model) -> None:
         """Adds a new hypervector (input) to the multiset.
@@ -304,7 +308,9 @@ class HashTable:
     """
 
     @overload
-    def __init__(self, dimensions: int, model: Type[VSA_Model] = MAP, *, device=None, dtype=None):
+    def __init__(
+        self, dimensions: int, model: Type[VSA_Model] = MAP, *, device=None, dtype=None
+    ):
         ...
 
     @overload
@@ -318,7 +324,9 @@ class HashTable:
         else:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
-            self.value = functional.empty_hv(1, dim_or_input, model, dtype=dtype, device=device).squeeze(0)
+            self.value = functional.empty_hv(
+                1, dim_or_input, model, dtype=dtype, device=device
+            ).squeeze(0)
 
     def add(self, key: VSA_Model, value: VSA_Model) -> None:
         """Adds one (key, value) pair to the hash table.
@@ -467,7 +475,9 @@ class BundleSequence:
     """
 
     @overload
-    def __init__(self, dimensions: int, model: Type[VSA_Model] = MAP, *, device=None, dtype=None):
+    def __init__(
+        self, dimensions: int, model: Type[VSA_Model] = MAP, *, device=None, dtype=None
+    ):
         ...
 
     @overload
@@ -481,7 +491,9 @@ class BundleSequence:
         else:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
-            self.value = functional.empty_hv(1, dim_or_input, model, dtype=dtype, device=device).squeeze(0)
+            self.value = functional.empty_hv(
+                1, dim_or_input, model, dtype=dtype, device=device
+            ).squeeze(0)
 
     def append(self, input: VSA_Model) -> None:
         """Appends the input tensor to the right of the sequence.
@@ -655,7 +667,9 @@ class BindSequence:
     """
 
     @overload
-    def __init__(self, dimensions: int, model: Type[VSA_Model] = MAP, *, device=None, dtype=None):
+    def __init__(
+        self, dimensions: int, model: Type[VSA_Model] = MAP, *, device=None, dtype=None
+    ):
         ...
 
     @overload
@@ -815,7 +829,15 @@ class Graph:
     """
 
     @overload
-    def __init__(self, dimensions: int, model: Type[VSA_Model] = MAP, *, directed=False, device=None, dtype=None):
+    def __init__(
+        self,
+        dimensions: int,
+        model: Type[VSA_Model] = MAP,
+        *,
+        directed=False,
+        device=None,
+        dtype=None
+    ):
         ...
 
     @overload
@@ -829,7 +851,9 @@ class Graph:
         else:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
-            self.value = functional.empty_hv(1, dim_or_input, model, dtype=dtype, device=device).squeeze(0)
+            self.value = functional.empty_hv(
+                1, dim_or_input, model, dtype=dtype, device=device
+            ).squeeze(0)
 
     def add_edge(self, node1: VSA_Model, node2: VSA_Model) -> None:
         """Adds an edge to the graph.
@@ -956,10 +980,14 @@ class Tree:
 
     """
 
-    def __init__(self, dimensions, model: Type[VSA_Model] = MAP, device=None, dtype=None):
+    def __init__(
+        self, dimensions, model: Type[VSA_Model] = MAP, device=None, dtype=None
+    ):
         self.dimensions = dimensions
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
-        self.value = functional.empty_hv(1, dimensions, model, dtype=dtype, device=device).squeeze(0)
+        self.value = functional.empty_hv(
+            1, dimensions, model, dtype=dtype, device=device
+        ).squeeze(0)
         self.l_r = functional.random_hv(2, dimensions, dtype=dtype, device=device)
 
     def add_leaf(self, value: VSA_Model, path: List[str]) -> None:
@@ -1070,9 +1098,13 @@ class FiniteStateAutomata:
 
     """
 
-    def __init__(self, dimensions, model: Type[VSA_Model] = MAP, device=None, dtype=None):
+    def __init__(
+        self, dimensions, model: Type[VSA_Model] = MAP, device=None, dtype=None
+    ):
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
-        self.value = functional.empty_hv(1, dimensions, model, dtype=dtype, device=device).squeeze(0)
+        self.value = functional.empty_hv(
+            1, dimensions, model, dtype=dtype, device=device
+        ).squeeze(0)
 
     def add_transition(
         self,

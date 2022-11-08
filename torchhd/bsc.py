@@ -16,10 +16,19 @@ def biggest_power_two(n):
 
 
 class BSC(VSA_Model):
-    """Binary Scatter Code
-    
+    """Binary Scatter Code"""
 
-    """
+    supported_dtypes: set[torch.dtype] = {
+        torch.float32,
+        torch.float64,
+        torch.uint8,
+        torch.int8,
+        torch.int16,
+        torch.int32,
+        torch.int64,
+        torch.bool,
+    }
+
     @classmethod
     def empty_hv(
         cls,
@@ -31,11 +40,10 @@ class BSC(VSA_Model):
     ) -> "BSC":
         """Creates hypervectors representing empty sets"""
 
-        if dtype in {torch.complex64, torch.complex128, torch.float16, torch.bfloat16}:
+        if dtype not in cls.supported_dtypes:
             name = cls.__name__
-            raise ValueError(
-                f"{name} vectors cannot be of dtype complex64, complex128, float16, or bfloat16."
-            )
+            options = ", ".join([str(x) for x in cls.supported_dtypes])
+            raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
         result = torch.zeros(
             num_vectors,
@@ -55,11 +63,11 @@ class BSC(VSA_Model):
         device=None,
     ) -> "BSC":
         """Creates identity hypervectors for binding"""
-        if dtype in {torch.complex64, torch.complex128, torch.float16, torch.bfloat16}:
+
+        if dtype not in cls.supported_dtypes:
             name = cls.__name__
-            raise ValueError(
-                f"{name} vectors cannot be of dtype complex64, complex128, float16, or bfloat16."
-            )
+            options = ", ".join([str(x) for x in cls.supported_dtypes])
+            raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
         result = torch.zeros(
             num_vectors,
@@ -84,13 +92,12 @@ class BSC(VSA_Model):
         Creates random or uncorrelated hypervectors
 
             sparsity (float, optional): the expected fraction of elements to be in-active. Has no effect on complex hypervectors. Default: ``0.5``.
-        
+
         """
-        if dtype in {torch.complex64, torch.complex128, torch.float16, torch.bfloat16}:
+        if dtype not in cls.supported_dtypes:
             name = cls.__name__
-            raise ValueError(
-                f"{name} vectors cannot be of dtype complex64, complex128, float16, or bfloat16."
-            )
+            options = ", ".join([str(x) for x in cls.supported_dtypes])
+            raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
         size = (num_vectors, dimensions)
         result = torch.empty(size, dtype=dtype, device=device)
@@ -173,7 +180,7 @@ class BSC(VSA_Model):
     def dot_similarity(self, others: "BSC") -> Tensor:
         """Inner product with other hypervectors"""
         dtype = torch.get_default_dtype()
-        
+
         min_one = torch.tensor(-1.0, dtype=dtype)
         plus_one = torch.tensor(1.0, dtype=dtype)
 

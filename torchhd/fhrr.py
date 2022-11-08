@@ -12,9 +12,10 @@ type_conversion = {
 
 
 class FHRR(VSA_Model):
-    """Fourier Holographic Reduced Representation
-    
-    """
+    """Fourier Holographic Reduced Representation"""
+
+    supported_dtypes: set[torch.dtype] = {torch.complex64, torch.complex128}
+
     @classmethod
     def empty_hv(
         cls,
@@ -26,11 +27,11 @@ class FHRR(VSA_Model):
         requires_grad=False,
     ) -> "FHRR":
         """Creates hypervectors representing empty sets"""
-        if dtype not in {torch.complex64, torch.complex128}:
+
+        if dtype not in cls.supported_dtypes:
             name = cls.__name__
-            raise ValueError(
-                f"{name} vectors must be of dtype complex64 or complex128."
-            )
+            options = ", ".join([str(x) for x in cls.supported_dtypes])
+            raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
         result = torch.zeros(
             num_vectors,
@@ -52,11 +53,11 @@ class FHRR(VSA_Model):
         requires_grad=False,
     ) -> "FHRR":
         """Creates identity hypervectors for binding"""
-        if dtype not in {torch.complex64, torch.complex128}:
+
+        if dtype not in cls.supported_dtypes:
             name = cls.__name__
-            raise ValueError(
-                f"{name} vectors must be of dtype complex64 or complex128."
-            )
+            options = ", ".join([str(x) for x in cls.supported_dtypes])
+            raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
         result = torch.ones(
             num_vectors,
@@ -80,11 +81,10 @@ class FHRR(VSA_Model):
     ) -> "FHRR":
         """Creates random or uncorrelated hypervectors"""
 
-        if dtype not in {torch.complex64, torch.complex128}:
+        if dtype not in cls.supported_dtypes:
             name = cls.__name__
-            raise ValueError(
-                f"{name} vectors must be of dtype complex64 or complex128."
-            )
+            options = ", ".join([str(x) for x in cls.supported_dtypes])
+            raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
         dtype = type_conversion[dtype]
 

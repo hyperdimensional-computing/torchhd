@@ -38,9 +38,9 @@ class TestDotSimilarity:
         similarity = functional.dot_similarity(hv, hv2)
         assert similarity.shape == (2, 4)
 
-        hv1 = functional.random_hv(6, 100, model, generator=generator, dtype=dtype).view(
-            2, 3, 100
-        )
+        hv1 = functional.random_hv(
+            6, 100, model, generator=generator, dtype=dtype
+        ).view(2, 3, 100)
         hv2 = functional.random_hv(4, 100, model, generator=generator, dtype=dtype)
         similarity = functional.dot_similarity(hv1, hv2)
         assert similarity.shape == (2, 3, 4)
@@ -137,7 +137,6 @@ class TestDotSimilarity:
         else:
             assert similarity.dtype == torch.get_default_dtype()
 
-
     @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_device(self, model, dtype):
@@ -180,9 +179,9 @@ class TestCosSimilarity:
         similarity = functional.cos_similarity(hv, hv2)
         assert similarity.shape == (2, 4)
 
-        hv1 = functional.random_hv(6, 100, model, generator=generator, dtype=dtype).view(
-            2, 3, 100
-        )
+        hv1 = functional.random_hv(
+            6, 100, model, generator=generator, dtype=dtype
+        ).view(2, 3, 100)
         hv2 = functional.random_hv(4, 100, model, generator=generator, dtype=dtype)
         similarity = functional.cos_similarity(hv1, hv2)
         assert similarity.shape == (2, 3, 4)
@@ -321,9 +320,9 @@ class TestHammingSimilarity:
         similarity = functional.hamming_similarity(hv, hv2)
         assert similarity.shape == (2, 4)
 
-        hv1 = functional.random_hv(6, 100, model, generator=generator, dtype=dtype).view(
-            2, 3, 100
-        )
+        hv1 = functional.random_hv(
+            6, 100, model, generator=generator, dtype=dtype
+        ).view(2, 3, 100)
         hv2 = functional.random_hv(4, 100, model, generator=generator, dtype=dtype)
         similarity = functional.hamming_similarity(hv1, hv2)
         assert similarity.shape == (2, 3, 4)

@@ -90,6 +90,7 @@ Utilities
     :toctree: generated/
     :template: function.rst
     
+    as_vsa_model
     map_range
     value_to_index
     index_to_value

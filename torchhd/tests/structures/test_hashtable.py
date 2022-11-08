@@ -144,8 +144,7 @@ class TestHashtable:
         )
         assert torch.equal(
             torch.all(
-                (functional.cos_similarity(H[values_hv[2]], values_hv) > 0.5)
-                == False
+                (functional.cos_similarity(H[values_hv[2]], values_hv) > 0.5) == False
             ),
             torch.tensor(True),
         )

@@ -5,9 +5,11 @@ from torch import Tensor
 
 class VSA_Model(Tensor):
     """Base class
-    
+
     Each model should implement the methods specified on this base class.
     """
+    supported_dtypes: set[torch.dtype]
+    
     @classmethod
     def empty_hv(
         cls,

@@ -7,6 +7,8 @@ from torchhd.base import VSA_Model
 
 
 class HRR(VSA_Model):
+    supported_dtypes: set[torch.dtype] = {torch.float32, torch.float64}
+
     @classmethod
     def empty_hv(
         cls,
@@ -17,14 +19,14 @@ class HRR(VSA_Model):
         device=None,
         requires_grad=False,
     ) -> "HRR":
+
         if dtype is None:
             dtype = torch.get_default_dtype()
 
-        if dtype not in {torch.float32, torch.float64}:
+        if dtype not in cls.supported_dtypes:
             name = cls.__name__
-            raise ValueError(
-                f"{name} vectors must be of dtype float16, bfloat16, float32, or float64."
-            )
+            options = ", ".join([str(x) for x in cls.supported_dtypes])
+            raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
         result = torch.zeros(
             num_vectors,
@@ -45,14 +47,14 @@ class HRR(VSA_Model):
         device=None,
         requires_grad=False,
     ) -> "HRR":
+
         if dtype is None:
             dtype = torch.get_default_dtype()
 
-        if dtype not in {torch.float32, torch.float64}:
+        if dtype not in cls.supported_dtypes:
             name = cls.__name__
-            raise ValueError(
-                f"{name} vectors must be of dtype float16, bfloat16, float32, or float64."
-            )
+            options = ", ".join([str(x) for x in cls.supported_dtypes])
+            raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
         result = torch.ones(
             num_vectors,
@@ -75,14 +77,14 @@ class HRR(VSA_Model):
         device=None,
         requires_grad=False,
     ) -> "HRR":
+
         if dtype is None:
             dtype = torch.get_default_dtype()
 
-        if dtype not in {torch.float32, torch.float64}:
+        if dtype not in cls.supported_dtypes:
             name = cls.__name__
-            raise ValueError(
-                f"{name} vectors must be of dtype float16, bfloat16, float32, or float64."
-            )
+            options = ", ".join([str(x) for x in cls.supported_dtypes])
+            raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
         size = (num_vectors, dimensions)
         result = torch.empty(size, dtype=dtype, device=device)
@@ -111,10 +113,10 @@ class HRR(VSA_Model):
 
     def inverse(self) -> "HRR":
         return self.flip(dims=(-1,)).roll(1, dims=-1)
-    
+
     def negative(self) -> "HRR":
         return torch.negative(self)
-    
+
     def permute(self, shifts: int = 1) -> "HRR":
         return self.roll(shifts=shifts, dims=-1)
 

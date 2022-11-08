@@ -11,6 +11,7 @@ from torchhd.hrr import HRR
 from torchhd.fhrr import FHRR
 
 from torchhd.functional import (
+    as_vsa_model,
     empty_hv,
     identity_hv,
     random_hv,
@@ -56,6 +57,7 @@ __all__ = [
     "structures",
     "datasets",
     "utils",
+    "as_vsa_model",
     "empty_hv",
     "identity_hv",
     "random_hv",

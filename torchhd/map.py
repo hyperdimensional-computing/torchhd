@@ -6,8 +6,19 @@ from torchhd.base import VSA_Model
 
 
 class MAP(VSA_Model):
-    """Multiply Add Permute
-    """
+    """Multiply Add Permute"""
+
+    supported_dtypes: set[torch.dtype] = {
+        torch.float32,
+        torch.float64,
+        torch.complex64,
+        torch.complex128,
+        torch.int8,
+        torch.int16,
+        torch.int32,
+        torch.int64,
+    }
+
     @classmethod
     def empty_hv(
         cls,
@@ -19,9 +30,14 @@ class MAP(VSA_Model):
         requires_grad=False,
     ) -> "MAP":
         """Creates hypervectors representing empty sets"""
-        if dtype in {torch.uint8, torch.bool, torch.float16, torch.bfloat16}:
+
+        if dtype is None:
+            dtype = torch.get_default_dtype()
+
+        if dtype not in cls.supported_dtypes:
             name = cls.__name__
-            raise ValueError(f"{name} vectors cannot be of dtype uint8, bool, float16, or bfloat16.")
+            options = ", ".join([str(x) for x in cls.supported_dtypes])
+            raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
         result = torch.zeros(
             num_vectors,
@@ -44,9 +60,13 @@ class MAP(VSA_Model):
     ) -> "MAP":
         """Creates identity hypervectors for binding"""
 
-        if dtype in {torch.uint8, torch.bool, torch.float16, torch.bfloat16}:
+        if dtype is None:
+            dtype = torch.get_default_dtype()
+
+        if dtype not in cls.supported_dtypes:
             name = cls.__name__
-            raise ValueError(f"{name} vectors cannot be of dtype uint8, bool, float16, or bfloat16.")
+            options = ", ".join([str(x) for x in cls.supported_dtypes])
+            raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
         result = torch.ones(
             num_vectors,
@@ -69,12 +89,14 @@ class MAP(VSA_Model):
         requires_grad=False,
     ) -> "MAP":
         """Creates random or uncorrelated hypervectors"""
+
         if dtype is None:
             dtype = torch.get_default_dtype()
 
-        if dtype in {torch.uint8, torch.bool, torch.float16, torch.bfloat16}:
+        if dtype not in cls.supported_dtypes:
             name = cls.__name__
-            raise ValueError(f"{name} vectors cannot be of dtype uint8, bool, float16, or bfloat16.")
+            options = ", ".join([str(x) for x in cls.supported_dtypes])
+            raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
         size = (num_vectors, dimensions)
         select = torch.empty(size, dtype=torch.bool, device=device)

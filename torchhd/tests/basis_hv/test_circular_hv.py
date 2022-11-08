@@ -4,11 +4,7 @@ import torch
 import torchhd
 from torchhd import functional
 
-from ..utils import (
-    torch_dtypes,
-    supported_dtype,
-    vsa_models
-)
+from ..utils import torch_dtypes, supported_dtype, vsa_models
 
 seed = 2147483644
 
@@ -71,7 +67,6 @@ class TestCircular_hv:
             mag = hv.abs()
             assert torch.allclose(mag, torch.tensor(1.0, dtype=mag.dtype))
 
-
         hv = functional.circular_hv(8, 1000000, model, generator=generator, dtype=dtype)
         sims = functional.cos_similarity(hv[0], hv)
         sims_diff = sims[:-1] - sims[1:]
@@ -79,7 +74,9 @@ class TestCircular_hv:
             sims_diff.sign() == torch.tensor([1, 1, 1, 1, -1, -1, -1])
         ), "second half must get more similar"
 
-        assert torch.allclose(sims_diff.abs(), torch.tensor(0.25, dtype=sims_diff.dtype), atol=0.005), "similarity decreases linearly"
+        assert torch.allclose(
+            sims_diff.abs(), torch.tensor(0.25, dtype=sims_diff.dtype), atol=0.005
+        ), "similarity decreases linearly"
 
     @pytest.mark.parametrize("sparsity", [0.0, 0.1, 0.756, 1.0])
     @pytest.mark.parametrize("dtype", torch_dtypes)

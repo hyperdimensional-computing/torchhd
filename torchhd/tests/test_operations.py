@@ -20,19 +20,13 @@ class TestBind:
         hv = functional.empty_hv(2, 10, model, dtype=dtype)
         res = functional.bind(hv[0], hv[1])
         if model == torchhd.BSC:
-            assert torch.all(
-                res
-                == torch.logical_xor(hv[0], hv[1])
-            ).item()
+            assert torch.all(res == torch.logical_xor(hv[0], hv[1])).item()
         elif model == torchhd.FHRR or model == torchhd.MAP:
-            assert torch.all(
-                res == torch.mul(hv[0], hv[1])
-            ).item()
+            assert torch.all(res == torch.mul(hv[0], hv[1])).item()
         elif model == torchhd.HRR:
             from torch.fft import fft, ifft
-            assert torch.all(
-                res == ifft(torch.mul(fft(hv[0]), fft(hv[1])))
-            ).item()
+
+            assert torch.all(res == ifft(torch.mul(fft(hv[0]), fft(hv[1])))).item()
         assert dtype == res.dtype
 
     def test_device(self):
@@ -59,12 +53,28 @@ class TestBundle:
         res = functional.bundle(hv[0], hv[1])
 
         if model == torchhd.BSC:
-            hv[0] = torch.tensor([False, False, True, False, False, True, True, True, False, False])
-            hv[1] = torch.tensor([True, False, True, False, False, True, False, False, True, False])
+            hv[0] = torch.tensor(
+                [False, False, True, False, False, True, True, True, False, False]
+            )
+            hv[1] = torch.tensor(
+                [True, False, True, False, False, True, False, False, True, False]
+            )
 
             res = functional.bundle(hv[0], hv[1])
             for i in range(10):
-                assert (hv[0][i].item() == hv[1][i].item() and hv[1][i].item() == True and res[i].item()) or (hv[0][i].item() == hv[1][i].item() and hv[1][i].item() == False and not res[i].item()) or (hv[0][i].item() != hv[1][i].item())
+                assert (
+                    (
+                        hv[0][i].item() == hv[1][i].item()
+                        and hv[1][i].item() == True
+                        and res[i].item()
+                    )
+                    or (
+                        hv[0][i].item() == hv[1][i].item()
+                        and hv[1][i].item() == False
+                        and not res[i].item()
+                    )
+                    or (hv[0][i].item() != hv[1][i].item())
+                )
 
         if model == torchhd.MAP:
             hv[0] = torch.tensor([1, 1, -1, -1, 1, 1, 1, 1, -1, -1])
@@ -75,9 +85,7 @@ class TestBundle:
                 res == torch.tensor([2, 2, -2, -2, 0, 0, 0, 0, 0, -2], dtype=dtype)
             ).item()
         if model == torchhd.FHRR:
-            assert torch.all(
-                res == hv[0].add(hv[1])
-            ).item()
+            assert torch.all(res == hv[0].add(hv[1])).item()
         assert res.dtype == dtype
 
     def test_device(self):
@@ -123,7 +131,9 @@ class TestPermute:
             b = functional.permute(a, shifts=-5)
             assert torch.all(hv == b).item(), "can undo shifts"
         if model == torchhd.MAP:
-            assert torch.all((hv == -1) | (hv == 1)).item(), "values are either -1 or +1"
+            assert torch.all(
+                (hv == -1) | (hv == 1)
+            ).item(), "values are either -1 or +1"
             assert torch.sum(res == hv[0]) != res.size(
                 0
             ), "all element must not be the same"
