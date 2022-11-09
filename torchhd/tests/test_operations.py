@@ -178,8 +178,8 @@ class TestCleanup:
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        hv = functional.random_hv(5, 100, model, dtype=dtype)
-        noise = functional.random_hv(1, 100, model, dtype=dtype)
+        hv = functional.random_hv(5, 100, model, dtype=dtype, generator=generator)
+        noise = functional.random_hv(1, 100, model, dtype=dtype, generator=generator)
         res = functional.cleanup(functional.bundle(hv[0], noise), hv)
         assert torch.all(hv[0] == res).item()
 
@@ -192,8 +192,8 @@ class TestCleanup:
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        hv = functional.random_hv(5, 100, model, dtype=dtype)
-        noise = functional.random_hv(1, 100, model, dtype=dtype)
+        hv = functional.random_hv(5, 100, model, dtype=dtype, generator=generator)
+        noise = functional.random_hv(1, 100, model, dtype=dtype, generator=generator)
         res = functional.cleanup(functional.bundle(hv[0], noise), hv, threshold=0.3)
         assert torch.all(hv[0] == res).item()
 
@@ -218,16 +218,16 @@ class TestRandsel:
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        a, b = functional.random_hv(2, 1000, model, dtype=dtype)
-        res = functional.randsel(a, b, p=0)
+        a, b = functional.random_hv(2, 1000, model, dtype=dtype, generator=generator)
+        res = functional.randsel(a, b, p=0, generator=generator)
         assert torch.all(a == res)
 
-        a, b = functional.random_hv(2, 1000, model, dtype=dtype)
-        res = functional.randsel(a, b, p=1)
+        a, b = functional.random_hv(2, 1000, model, dtype=dtype, generator=generator)
+        res = functional.randsel(a, b, p=1, generator=generator)
         assert torch.all(b == res)
 
-        a, b = functional.random_hv(2, 1000, model, dtype=dtype)
-        res = functional.randsel(a, b)
+        a, b = functional.random_hv(2, 1000, model, dtype=dtype, generator=generator)
+        res = functional.randsel(a, b, generator=generator)
         assert torch.all((b == res) | (a == res))
         assert res.dtype == dtype
 
