@@ -3,7 +3,7 @@ import torch
 # Note: this example requires the mmh3 library: https://github.com/hajimes/mmh3
 import mmh3
 
-from torchhd import functional
+import torchhd
 
 
 class HDHashing:
@@ -14,7 +14,7 @@ class HDHashing:
         self.dimensions = dimensions
         self.device = device
 
-        self.hvs = functional.circular_hv(levels, dimensions, device=device)
+        self.hvs = torchhd.circular_hv(levels, dimensions, device=device)
         self.servers = []
         self.server_hvs = []
         self.weight_by_server = {}
@@ -35,7 +35,7 @@ class HDHashing:
         # The next three lines simulate associative memory in HDC
         # It returns the value at the memory location (server)
         # that is most similar to the requested location (request).
-        similarity = functional.dot_similarity(hv, server_hvs)
+        similarity = torchhd.dot_similarity(hv, server_hvs)
         server_idx = torch.argmax(similarity).item()
         return self.servers[server_idx]
 

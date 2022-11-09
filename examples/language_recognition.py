@@ -7,7 +7,7 @@ import torch.utils.data as data
 import torchmetrics
 from tqdm import tqdm
 
-from torchhd import functional
+import torchhd
 from torchhd import embeddings
 from torchhd.datasets import EuropeanLanguages as Languages
 
@@ -65,8 +65,8 @@ class Model(nn.Module):
 
     def encode(self, x):
         symbols = self.symbol(x)
-        sample_hv = functional.ngrams(symbols, n=3)
-        return functional.hard_quantize(sample_hv)
+        sample_hv = torchhd.ngrams(symbols, n=3)
+        return torchhd.hard_quantize(sample_hv)
 
     def forward(self, x):
         enc = self.encode(x)

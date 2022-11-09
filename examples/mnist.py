@@ -8,7 +8,7 @@ from torchvision.datasets import MNIST
 import torchmetrics
 from tqdm import tqdm
 
-from torchhd import functional
+import torchhd
 from torchhd import embeddings
 
 
@@ -43,9 +43,9 @@ class Model(nn.Module):
 
     def encode(self, x):
         x = self.flatten(x)
-        sample_hv = functional.bind(self.position.weight, self.value(x))
-        sample_hv = functional.multiset(sample_hv)
-        return functional.hard_quantize(sample_hv)
+        sample_hv = torchhd.bind(self.position.weight, self.value(x))
+        sample_hv = torchhd.multiset(sample_hv)
+        return torchhd.hard_quantize(sample_hv)
 
     def forward(self, x):
         enc = self.encode(x)

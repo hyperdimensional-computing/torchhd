@@ -8,7 +8,7 @@ from torchhd.base import VSA_Model
 
 class MAP(VSA_Model):
     """Multiply Add Permute
-    
+
     Proposed in `Multiplicative Binding, Representation Operators & Analogy <https://www.researchgate.net/publication/215992330_Multiplicative_Binding_Representation_Operators_Analogy>`_, this model works with dense bipolar hypervectors with elements from :math:`\{-1,1\}`.
     """
 
@@ -35,7 +35,7 @@ class MAP(VSA_Model):
     ) -> "MAP":
         """Creates a set of hypervectors representing empty sets.
 
-        When bundled with a hypervector :math:`x`, the result is :math:`x`. 
+        When bundled with a hypervector :math:`x`, the result is :math:`x`.
 
         Args:
             num_vectors (int): the number of hypervectors to generate.
@@ -202,11 +202,11 @@ class MAP(VSA_Model):
 
     def bind(self, other: "MAP") -> "MAP":
         r"""Bind the hypervector with other using element-wise multiplication.
-        
-        This produces a hypervector dissimilar to both. 
+
+        This produces a hypervector dissimilar to both.
 
         Binding is used to associate information, for instance, to assign values to variables.
-        
+
         Args:
             other (MAP): other input hypervector
 
@@ -237,7 +237,7 @@ class MAP(VSA_Model):
         r"""Invert the hypervector for binding.
 
         Each hypervector in MAP is its own inverse, so this returns a copy of self.
-        
+
         Shapes:
             - Self: :math:`(*)`
             - Output: :math:`(*)`
@@ -274,11 +274,11 @@ class MAP(VSA_Model):
 
     def permute(self, shifts: int = 1) -> "MAP":
         r"""Permute the hypervector.
-        
+
         The permutation operator is commonly used to assign an order to hypervectors.
 
         Args:
-            shifts (int, optional): The number of places by which the elements of the tensor are shifted. 
+            shifts (int, optional): The number of places by which the elements of the tensor are shifted.
 
         Shapes:
             - Self: :math:`(*)`

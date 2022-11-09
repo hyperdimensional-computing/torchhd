@@ -14,7 +14,7 @@ type_conversion = {
 
 class FHRR(VSA_Model):
     """Fourier Holographic Reduced Representation
-    
+
     Proposed in `Holographic Reduced Representation: Distributed Representation for Cognitive Structures <https://philpapers.org/rec/PLAHRR/>`_, this model uses complex phaser hypervectors.
     """
 
@@ -32,29 +32,29 @@ class FHRR(VSA_Model):
     ) -> "FHRR":
         """Creates a set of hypervectors representing empty sets.
 
-            When bundled with a random-hypervector :math:`x`, the result is :math:`\sim x`.
-            The empty vector of the FHRR model is a set of 0 values in both real and imaginary part.
+        When bundled with a random-hypervector :math:`x`, the result is :math:`x`.
+        The empty vector of the FHRR model is a set of 0 values in both real and imaginary part.
 
-            Args:
-                num_vectors (int): the number of hypervectors to generate.
-                dimensions (int): the dimensionality of the hypervectors.
-                dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` is torch.complex64.
-                device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
-                requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
+        Args:
+            num_vectors (int): the number of hypervectors to generate.
+            dimensions (int): the dimensionality of the hypervectors.
+            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` is torch.complex64.
+            device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+            requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
-            Examples::
+        Examples::
 
-                >>> torchhd.FHRR.empty_hv(3, 6)
-                FHRR([[0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
-                        [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
-                        [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j]])
+            >>> torchhd.FHRR.empty_hv(3, 6)
+            FHRR([[0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
+                    [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
+                    [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j]])
 
-                >>> torchhd.FHRR.empty_hv(3, 6, dtype=torch.complex128)
-                FHRR([[0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
-                        [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
-                        [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j]],
-                       dtype=torch.complex128)
-            """
+            >>> torchhd.FHRR.empty_hv(3, 6, dtype=torch.complex128)
+            FHRR([[0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
+                    [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
+                    [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j]],
+                   dtype=torch.complex128)
+        """
         if dtype not in cls.supported_dtypes:
             name = cls.__name__
             options = ", ".join([str(x) for x in cls.supported_dtypes])
@@ -81,30 +81,30 @@ class FHRR(VSA_Model):
     ) -> "FHRR":
         """Creates a set of identity hypervectors.
 
-            When bound with a random-hypervector :math:`x`, the result is :math:`x`.
+        When bound with a random-hypervector :math:`x`, the result is :math:`x`.
 
-            Args:
-                num_vectors (int): the number of hypervectors to generate.
-                dimensions (int): the dimensionality of the hypervectors.
-                dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` is torch.complex64.
-                device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
-                requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
+        Args:
+            num_vectors (int): the number of hypervectors to generate.
+            dimensions (int): the dimensionality of the hypervectors.
+            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` is torch.complex64.
+            device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+            requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
-            Examples::
+        Examples::
 
-                >>> torchhd.FHRR.identity_hv(3, 6)
-                FHRR([[1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
-                        [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
-                        [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j]])
+            >>> torchhd.FHRR.identity_hv(3, 6)
+            FHRR([[1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
+                    [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
+                    [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j]])
 
-                >>> torchhd.FHRR.identity_hv(3, 6, dtype=torch.complex128)
-                FHRR([[1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
-                        [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
-                        [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j]],
-                       dtype=torch.complex128)
+            >>> torchhd.FHRR.identity_hv(3, 6, dtype=torch.complex128)
+            FHRR([[1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
+                    [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
+                    [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j]],
+                   dtype=torch.complex128)
 
 
-            """
+        """
         if dtype not in cls.supported_dtypes:
             name = cls.__name__
             options = ", ".join([str(x) for x in cls.supported_dtypes])
@@ -173,7 +173,7 @@ class FHRR(VSA_Model):
         return result.as_subclass(cls)
 
     def bundle(self, other: "FHRR") -> "FHRR":
-        r"""Bundle the hypervector with other.
+        r"""Bundle the hypervector with other using element-wise sum.
 
         This produces a hypervector maximally similar to both.
 
@@ -216,7 +216,7 @@ class FHRR(VSA_Model):
         return self.sum(dim=-2, dtype=self.dtype)
 
     def bind(self, other: "FHRR") -> "FHRR":
-        r"""Bind the hypervector with other multiplying them.
+        r"""Bind the hypervector with other using element-wise multiplication.
 
         This produces a hypervector dissimilar to both.
 
@@ -259,7 +259,7 @@ class FHRR(VSA_Model):
         return self.prod(dim=-2, dtype=self.dtype)
 
     def inverse(self) -> "FHRR":
-        r"""Inverse the hypervector for binding.
+        r"""Invert the hypervector for binding.
 
         For FHRR the inverse of hypervector is its conjugate, this returns the conjugate of the hypervector.
 
@@ -290,57 +290,57 @@ class FHRR(VSA_Model):
     def negative(self) -> "FHRR":
         r"""Negate the hypervector for the bundling inverse.
 
-            Shapes:
-                - Self: :math:`(*)`
-                - Output: :math:`(*)`
+        Shapes:
+            - Self: :math:`(*)`
+            - Output: :math:`(*)`
 
-            Examples::
+        Examples::
 
-                >>> a = torchhd.FHRR.random_hv(1, 6)
-                >>> a
-                FHRR([[-0.0187-0.9998j,  0.1950-0.9808j,  0.5203+0.8540j,  0.8587+0.5124j, 0.9998+0.0203j, -0.6237-0.7816j]])
-                >>> a.negative()
-                FHRR([[ 0.0187+0.9998j, -0.1950+0.9808j, -0.5203-0.8540j, -0.8587-0.5124j, -0.9998-0.0203j,  0.6237+0.7816j]])
+            >>> a = torchhd.FHRR.random_hv(1, 6)
+            >>> a
+            FHRR([[-0.0187-0.9998j,  0.1950-0.9808j,  0.5203+0.8540j,  0.8587+0.5124j, 0.9998+0.0203j, -0.6237-0.7816j]])
+            >>> a.negative()
+            FHRR([[ 0.0187+0.9998j, -0.1950+0.9808j, -0.5203-0.8540j, -0.8587-0.5124j, -0.9998-0.0203j,  0.6237+0.7816j]])
 
-                >>> a = torchhd.FHRR.random_hv(1, 6, dtype=torch.complex128)
-                >>> a
-                FHRR([[ 0.8255+0.5644j, -0.8352-0.5500j,  0.9751-0.2218j, -0.9808-0.1950j, -0.3840-0.9233j,  0.4106-0.9118j]],
-                dtype=torch.complex128)
-                >>> a.negative()
-                FHRR([[-0.8255-0.5644j,  0.8352+0.5500j, -0.9751+0.2218j,  0.9808+0.1950j, 0.3840+0.9233j, -0.4106+0.9118j]], dtype=torch.complex128)
+            >>> a = torchhd.FHRR.random_hv(1, 6, dtype=torch.complex128)
+            >>> a
+            FHRR([[ 0.8255+0.5644j, -0.8352-0.5500j,  0.9751-0.2218j, -0.9808-0.1950j, -0.3840-0.9233j,  0.4106-0.9118j]],
+            dtype=torch.complex128)
+            >>> a.negative()
+            FHRR([[-0.8255-0.5644j,  0.8352+0.5500j, -0.9751+0.2218j,  0.9808+0.1950j, 0.3840+0.9233j, -0.4106+0.9118j]], dtype=torch.complex128)
 
-            """
+        """
         return torch.negative(self)
 
     def permute(self, shifts: int = 1) -> "FHRR":
         r"""Permute the hypervector.
 
-            The permutation operator is used to assign an order to hypervectors.
+        The permutation operator is used to assign an order to hypervectors.
 
-            Args:
-                shifts (int, optional): The number of places by which the elements of the tensor are shifted.
+        Args:
+            shifts (int, optional): The number of places by which the elements of the tensor are shifted.
 
-            Shapes:
-                - Self: :math:`(*)`
-                - Output: :math:`(*)`
+        Shapes:
+            - Self: :math:`(*)`
+            - Output: :math:`(*)`
 
-            Examples::
+        Examples::
 
-                >>> a = torchhd.FHRR.random_hv(1, 6)
-                >>> a
-                FHRR([[-0.3286-0.9445j,  0.2161-0.9764j, -0.6484+0.7613j, -0.4020+0.9156j, 0.8282-0.5605j, -0.9869+0.1613j]])
-                >>> a.permute()
-                FHRR([[-0.9869+0.1613j, -0.3286-0.9445j,  0.2161-0.9764j, -0.6484+0.7613j, -0.4020+0.9156j,  0.8282-0.5605j]])
+            >>> a = torchhd.FHRR.random_hv(1, 6)
+            >>> a
+            FHRR([[-0.3286-0.9445j,  0.2161-0.9764j, -0.6484+0.7613j, -0.4020+0.9156j, 0.8282-0.5605j, -0.9869+0.1613j]])
+            >>> a.permute()
+            FHRR([[-0.9869+0.1613j, -0.3286-0.9445j,  0.2161-0.9764j, -0.6484+0.7613j, -0.4020+0.9156j,  0.8282-0.5605j]])
 
-                >>> a = torchhd.FHRR.random_hv(1, 6, dtype=torch.complex128)
-                >>> a
-                FHRR([[-0.9500-0.3123j, -0.0234+0.9997j, -0.1071-0.9943j, -0.8558-0.5174j, 0.9631-0.2690j,  0.5470-0.8371j]],
-                dtype=torch.complex128)
-                >>> a.permute()
-                FHRR([[ 0.5470-0.8371j, -0.9500-0.3123j, -0.0234+0.9997j, -0.1071-0.9943j, -0.8558-0.5174j,  0.9631-0.2690j]],
-                dtype=torch.complex128)
+            >>> a = torchhd.FHRR.random_hv(1, 6, dtype=torch.complex128)
+            >>> a
+            FHRR([[-0.9500-0.3123j, -0.0234+0.9997j, -0.1071-0.9943j, -0.8558-0.5174j, 0.9631-0.2690j,  0.5470-0.8371j]],
+            dtype=torch.complex128)
+            >>> a.permute()
+            FHRR([[ 0.5470-0.8371j, -0.9500-0.3123j, -0.0234+0.9997j, -0.1071-0.9943j, -0.8558-0.5174j,  0.9631-0.2690j]],
+            dtype=torch.complex128)
 
-            """
+        """
         return self.roll(shifts=shifts, dims=-1)
 
     def dot_similarity(self, others: "FHRR") -> Tensor:

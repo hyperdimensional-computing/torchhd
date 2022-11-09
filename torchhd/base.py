@@ -8,6 +8,7 @@ class VSA_Model(Tensor):
 
     Each model must implement the methods specified on this base class.
     """
+
     supported_dtypes: Set[torch.dtype]
 
     @classmethod

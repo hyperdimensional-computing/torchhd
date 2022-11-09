@@ -9,7 +9,7 @@ import torch_geometric
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
 
-from torchhd import functional
+import torchhd
 from torchhd import embeddings
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -98,8 +98,8 @@ class Model(nn.Module):
 
         row, col = to_undirected(x.edge_index)
 
-        hvs = functional.bind(node_id_hvs[row], node_id_hvs[col])
-        return functional.multiset(hvs)
+        hvs = torchhd.bind(node_id_hvs[row], node_id_hvs[col])
+        return torchhd.multiset(hvs)
 
     def forward(self, x):
         enc = self.encode(x)

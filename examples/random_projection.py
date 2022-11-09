@@ -8,7 +8,7 @@ import torch.nn.functional as F
 import torchmetrics
 from tqdm import tqdm
 
-from torchhd import functional
+import torchhd
 from torchhd import embeddings
 from torchhd.datasets import BeijingAirQuality
 
@@ -68,16 +68,16 @@ class Model(nn.Module):
     def encode(self, x):
         enc = self.project(x)
         sample_hv = torch.cos(enc + self.bias) * torch.sin(enc)
-        return functional.hard_quantize(sample_hv)
+        return torchhd.hard_quantize(sample_hv)
 
     def forward(self, x):
         enc = self.encode(x)
 
         # Get the approximate target hv from the model
-        target_hv = functional.bind(self.regression.weight, enc)
+        target_hv = torchhd.bind(self.regression.weight, enc)
 
         # Get the index of the most similar target vector
-        sim = functional.dot_similarity(target_hv, self.target.weight)
+        sim = torchhd.dot_similarity(target_hv, self.target.weight)
         index = torch.argmax(sim, dim=-1)
 
         # Convert the index of the hypervector back to the value it represents
@@ -96,7 +96,7 @@ with torch.no_grad():
 
         samples_hv = model.encode(samples)
         target_hv = model.target(labels)
-        model.regression.weight += functional.bind(samples_hv, target_hv)
+        model.regression.weight += torchhd.bind(samples_hv, target_hv)
 
     model.regression.weight[:] = F.normalize(model.regression.weight)
 

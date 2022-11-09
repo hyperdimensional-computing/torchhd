@@ -541,7 +541,7 @@ def permute(input: VSA_Model, *, shifts=1) -> VSA_Model:
 
     Args:
         input (VSA_Model): input hypervector
-        shifts (int, optional): The number of places by which the elements of the tensor are shifted. 
+        shifts (int, optional): The number of places by which the elements of the tensor are shifted.
 
     Shapes:
         - Input: :math:`(*)`

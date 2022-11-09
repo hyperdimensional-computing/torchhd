@@ -7,7 +7,7 @@ import torch.utils.data as data
 import torchmetrics
 from tqdm import tqdm
 
-from torchhd import functional
+import torchhd
 from torchhd import embeddings
 from torchhd.datasets import EMGHandGestures
 
@@ -40,12 +40,12 @@ class Model(nn.Module):
 
     def encode(self, x: torch.Tensor) -> torch.Tensor:
         signal = self.signals(x)
-        samples = functional.bind(signal, self.channels.weight.unsqueeze(0))
-        samples = functional.bind(signal, self.timestamps.weight.unsqueeze(1))
+        samples = torchhd.bind(signal, self.channels.weight.unsqueeze(0))
+        samples = torchhd.bind(signal, self.timestamps.weight.unsqueeze(1))
 
-        samples = functional.multiset(samples)
-        sample_hv = functional.ngrams(samples, n=N_GRAM_SIZE)
-        return functional.hard_quantize(sample_hv)
+        samples = torchhd.multiset(samples)
+        sample_hv = torchhd.ngrams(samples, n=N_GRAM_SIZE)
+        return torchhd.hard_quantize(sample_hv)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         enc = self.encode(x)

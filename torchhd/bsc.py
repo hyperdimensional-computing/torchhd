@@ -18,7 +18,7 @@ def biggest_power_two(n):
 
 class BSC(VSA_Model):
     """Binary Spatter Codes
-    
+
     Proposed in `Binary spatter-coding of ordered K-tuples <https://link.springer.com/chapter/10.1007/3-540-61510-5_146>`_, this model works with binary valued hypervectors.
     """
 
@@ -46,7 +46,7 @@ class BSC(VSA_Model):
     ) -> "BSC":
         """Creates a set of hypervectors representing empty sets.
 
-        When bundled with a random-hypervector :math:`x`, the result is :math:`\sim x`. 
+        When bundled with a random-hypervector :math:`x`, the result is :math:`\sim x`.
         Because of the low precession of the BSC model an empty set cannot be explicitly represented, therefore the returned hypervectors are identical to random-hypervectors.
 
         Args:
@@ -109,7 +109,7 @@ class BSC(VSA_Model):
             tensor([[False, False, False, False, False, False],
                     [False, False, False, False, False, False],
                     [False, False, False, False, False, False]])
-                    
+
             >>> torchhd.BSC.identity_hv(3, 6, dtype=torch.long)
             tensor([[0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0],
@@ -127,7 +127,7 @@ class BSC(VSA_Model):
             dimensions,
             dtype=dtype,
             device=device,
-            requires_grad=requires_grad
+            requires_grad=requires_grad,
         )
         return result.as_subclass(cls)
 
@@ -253,8 +253,8 @@ class BSC(VSA_Model):
 
     def bind(self, other: "BSC") -> "BSC":
         r"""Bind the hypervector with other using XOR.
-        
-        This produces a hypervector dissimilar to both. 
+
+        This produces a hypervector dissimilar to both.
 
         Binding is used to associate information, for instance, to assign values to variables.
 
@@ -319,7 +319,7 @@ class BSC(VSA_Model):
         r"""Invert the hypervector for binding.
 
         Each hypervector in BSC is its own inverse, so this returns a copy of self.
-        
+
         Shapes:
             - Self: :math:`(*)`
             - Output: :math:`(*)`
@@ -344,7 +344,7 @@ class BSC(VSA_Model):
 
     def negative(self) -> "BSC":
         r"""Negate the hypervector for the bundling inverse.
-        
+
         Shapes:
             - Self: :math:`(*)`
             - Output: :math:`(*)`
@@ -369,11 +369,11 @@ class BSC(VSA_Model):
 
     def permute(self, shifts: int = 1) -> "BSC":
         r"""Permute the hypervector.
-        
+
         The permutation operator is commonly used to assign an order to hypervectors.
 
         Args:
-            shifts (int, optional): The number of places by which the elements of the tensor are shifted. 
+            shifts (int, optional): The number of places by which the elements of the tensor are shifted.
 
         Shapes:
             - Self: :math:`(*)`
