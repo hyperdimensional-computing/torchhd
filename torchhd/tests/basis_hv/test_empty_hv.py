@@ -41,7 +41,7 @@ class TestEmpty_hv:
         assert hv.size(1) == 26
 
         if model == torchhd.BSC:
-            assert torch.all(hv == False).item()
+            assert torch.all((hv == False) | (hv == True)).item()
 
         else:
             hv = functional.empty_hv(8, 26, model, dtype=dtype)

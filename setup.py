@@ -24,6 +24,9 @@ setup(
         "numpy",
         "requests",
     ],
+    dependency_links=[
+        'https://download.pytorch.org/whl/cpu'
+    ],
     packages=find_packages(exclude=["docs", "torchhd.tests", "examples"]),
     python_requires=">=3.6, <4",
     project_urls={
