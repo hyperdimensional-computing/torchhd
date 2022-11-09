@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from tqdm import tqdm
 
 # Note: this example requires the torch_geometric library: https://pytorch-geometric.readthedocs.io
-import torch_geometric
+from torch_geometric.datasets import TUDataset
 
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
@@ -20,7 +20,7 @@ DIMENSIONS = 10000  # hypervectors dimension
 # for other available datasets see: https://pytorch-geometric.readthedocs.io/en/latest/notes/data_cheatsheet.html?highlight=tudatasets
 dataset = "MUTAG"
 
-graphs = torch_geometric.datasets.TUDataset("data", dataset)
+graphs = TUDataset("../data", dataset)
 train_size = int(0.7 * len(graphs))
 test_size = len(graphs) - train_size
 train_ld, test_ld = torch.utils.data.random_split(graphs, [train_size, test_size])

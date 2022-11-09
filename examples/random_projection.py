@@ -96,7 +96,7 @@ with torch.no_grad():
 
         samples_hv = model.encode(samples)
         target_hv = model.target(labels)
-        model.regression.weight += torchhd.bind(samples_hv, target_hv)
+        model.regression.weight.data += torchhd.bind(samples_hv, target_hv)
 
     model.regression.weight[:] = F.normalize(model.regression.weight)
 
