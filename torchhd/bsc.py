@@ -316,9 +316,9 @@ class BSC(VSA_Model):
         return output.to(self.dtype)
 
     def inverse(self) -> "BSC":
-        r"""Inverse the hypervector for binding.
+        r"""Invert the hypervector for binding.
 
-        Each hypervector in BSC is its own inverse, this returns a copy of self.
+        Each hypervector in BSC is its own inverse, so this returns a copy of self.
         
         Shapes:
             - Self: :math:`(*)`
@@ -370,7 +370,7 @@ class BSC(VSA_Model):
     def permute(self, shifts: int = 1) -> "BSC":
         r"""Permute the hypervector.
         
-        The permutation operator is used to assign an order to hypervectors.
+        The permutation operator is commonly used to assign an order to hypervectors.
 
         Args:
             shifts (int, optional): The number of places by which the elements of the tensor are shifted. 
