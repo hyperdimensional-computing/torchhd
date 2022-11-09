@@ -19,13 +19,10 @@ setup(
     url="https://github.com/hyperdimensional-computing/torchhd",
     license="MIT",
     install_requires=[
-        "torch>=1.11.0",
+        "torch>=1.9.0",
         "pandas",
         "numpy",
         "requests",
-    ],
-    dependency_links=[
-        'https://download.pytorch.org/whl/cpu'
     ],
     packages=find_packages(exclude=["docs", "torchhd.tests", "examples"]),
     python_requires=">=3.6, <4",
