@@ -35,7 +35,7 @@ def plot_pair_similarity(memory: Tensor, ax=None, **kwargs):
         See https://matplotlib.org/stable/users/installing/index.html for more information."
         )
 
-    similarity = functional.cosine_similarity(memory, memory).tolist()
+    similarity = functional.cos_similarity(memory, memory).tolist()
 
     if ax is None:
         ax = plt.gca()
@@ -81,7 +81,7 @@ def plot_similarity(input: Tensor, memory: Tensor, ax=None, **kwargs):
         See https://matplotlib.org/stable/users/installing/index.html for more information."
         )
 
-    similarity = functional.cosine_similarity(input, memory).tolist()
+    similarity = functional.cos_similarity(input, memory).tolist()
 
     if ax is None:
         ax = plt.gca()

@@ -2,8 +2,10 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch import Tensor
 
 import torchhd.functional as functional
+from torchhd.map import MAP
 
 __all__ = [
     "Identity",
@@ -54,6 +56,9 @@ class Identity(nn.Embedding):
 
         self._fill_padding_idx_with_zero()
 
+    def forward(self, input: Tensor) -> Tensor:
+        return super().forward(input).as_subclass(MAP)
+
 
 class Random(nn.Embedding):
     """Embedding wrapper around :func:`~torchhd.functional.random_hv`.
@@ -93,6 +98,9 @@ class Random(nn.Embedding):
         )
 
         self._fill_padding_idx_with_zero()
+
+    def forward(self, input: Tensor) -> Tensor:
+        return super().forward(input).as_subclass(MAP)
 
 
 class Level(nn.Embedding):
@@ -158,7 +166,7 @@ class Level(nn.Embedding):
             input, self.low_value, self.high_value, self.num_embeddings
         ).clamp(0, self.num_embeddings - 1)
 
-        return super(Level, self).forward(indices)
+        return super(Level, self).forward(indices).as_subclass(MAP)
 
 
 class Circular(nn.Embedding):
@@ -224,7 +232,7 @@ class Circular(nn.Embedding):
             input, self.low_value, self.high_value, self.num_embeddings
         ).remainder(self.num_embeddings - 1)
 
-        return super(Circular, self).forward(indices)
+        return super(Circular, self).forward(indices).as_subclass(MAP)
 
 
 class Projection(nn.Module):
@@ -280,7 +288,7 @@ class Projection(nn.Module):
         self.weight.data.copy_(F.normalize(self.weight.data))
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
-        return F.linear(input, self.weight)
+        return F.linear(input, self.weight).as_subclass(MAP)
 
 
 class Sinusoid(nn.Module):
@@ -342,4 +350,5 @@ class Sinusoid(nn.Module):
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         projected = F.linear(input, self.weight)
-        return torch.cos(projected + self.bias) * torch.sin(projected)
+        output = torch.cos(projected + self.bias) * torch.sin(projected)
+        return output.as_subclass(MAP)

@@ -8,7 +8,7 @@ import torch.utils.data as data
 import torchmetrics
 from tqdm import tqdm
 
-from torchhd import functional
+import torchhd
 from torchhd import embeddings
 from torchhd.datasets import AirfoilSelfNoise
 
@@ -65,7 +65,7 @@ class SingleModel(nn.Module):
     def encode(self, x):
         enc = self.project(x)
         sample_hv = torch.cos(enc + self.bias) * torch.sin(enc)
-        return functional.hard_quantize(sample_hv)
+        return torchhd.hard_quantize(sample_hv)
 
     def model_update(self, x, y):
         update = self.M + self.lr * (y - (F.linear(x, self.M))) * x

@@ -2,21 +2,24 @@ import pytest
 import torch
 
 from torchhd import functional
+from torchhd.bsc import BSC
+from torchhd.map import MAP
 
 from .utils import (
     torch_dtypes,
-    torch_complex_dtypes,
+    vsa_models,
     supported_dtype,
 )
 
 
 class TestMultiset:
+    @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_value(self, dtype):
-        if not supported_dtype(dtype):
+    def test_value(self, model, dtype):
+        if not supported_dtype(dtype, model):
             return
 
-        if dtype == torch.bool:
+        if model == BSC:
             hv = torch.tensor(
                 [
                     [1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -26,7 +29,7 @@ class TestMultiset:
                     [1, 1, 0, 1, 1, 0, 1, 1, 0, 0],
                 ],
                 dtype=dtype,
-            )
+            ).as_subclass(BSC)
             res = functional.multiset(hv)
             assert torch.all(
                 res
@@ -36,7 +39,7 @@ class TestMultiset:
                 )
             ).item()
 
-        else:
+        elif model == MAP:
             hv = torch.tensor(
                 [
                     [1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
@@ -46,7 +49,7 @@ class TestMultiset:
                     [1, 1, -1, -1, -1, 1, -1, 1, -1, 1],
                 ],
                 dtype=dtype,
-            )
+            ).as_subclass(MAP)
             res = functional.multiset(hv)
             assert torch.all(
                 res == torch.tensor([3, 3, -5, 1, 1, 1, 1, 1, -1, 1], dtype=dtype)
@@ -54,13 +57,7 @@ class TestMultiset:
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
-        hv = torch.zeros(23, 1000, dtype=dtype)
-
-        if dtype == torch.uint8:
-            with pytest.raises(ValueError):
-                functional.multiset(hv)
-
-            return
+        hv = torch.zeros(23, 1000, dtype=dtype).as_subclass(MAP)
 
         res = functional.multiset(hv)
         assert res.dtype == dtype
@@ -74,16 +71,13 @@ class TestMultiset:
 
 
 class TestMultibind:
+    @pytest.mark.parametrize("model", vsa_models)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_value(self, dtype):
-        if not supported_dtype(dtype):
+    def test_value(self, model, dtype):
+        if not supported_dtype(dtype, model):
             return
 
-        if dtype == torch.float16 or dtype == torch.bfloat16:
-            # Half precision is not supported by Torch on a CPU device
-            return
-
-        if dtype == torch.bool:
+        if model == BSC:
             hv = torch.tensor(
                 [
                     [1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -93,7 +87,7 @@ class TestMultibind:
                     [1, 1, 0, 1, 1, 0, 1, 1, 0, 0],
                 ],
                 dtype=dtype,
-            )
+            ).as_subclass(BSC)
             res = functional.multibind(hv)
             assert torch.all(
                 res
@@ -103,7 +97,7 @@ class TestMultibind:
                 )
             ).item()
 
-        else:
+        elif model == MAP:
             hv = torch.tensor(
                 [
                     [1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
@@ -113,7 +107,7 @@ class TestMultibind:
                     [1, 1, -1, -1, -1, 1, -1, 1, -1, 1],
                 ],
                 dtype=dtype,
-            )
+            ).as_subclass(MAP)
             res = functional.multibind(hv)
             assert torch.all(
                 res == torch.tensor([-1, -1, -1, 1, 1, 1, 1, 1, -1, 1], dtype=dtype)
@@ -121,13 +115,7 @@ class TestMultibind:
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
-        hv = torch.zeros(23, 1000, dtype=dtype)
-
-        if dtype == torch.uint8:
-            with pytest.raises(ValueError):
-                functional.multibind(hv)
-
-            return
+        hv = torch.zeros(23, 1000, dtype=dtype).as_subclass(MAP)
 
         if dtype in {torch.float16, torch.bfloat16}:
             # torch.product is not implemented on CPU for these dtypes
@@ -149,25 +137,21 @@ class TestMultibind:
 
 class TestCrossProduct:
     def test_value(self):
-        hv = torch.zeros(4, 1000)
+        hv = torch.zeros(4, 1000).as_subclass(MAP)
         res = functional.cross_product(hv, hv)
         assert torch.all(res == 0).item()
 
-        a = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1]])
-        b = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1]])
+        a = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1]]).as_subclass(
+            MAP
+        )
+        b = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1]]).as_subclass(MAP)
         res = functional.cross_product(a, b)
         assert torch.all(res == torch.tensor([0, 2, 0, 6])).item()
         assert res.dtype == a.dtype
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
-        hv = torch.zeros(23, 1000, dtype=dtype)
-
-        if dtype == torch.uint8:
-            with pytest.raises(ValueError):
-                functional.cross_product(hv, hv)
-
-            return
+        hv = torch.zeros(23, 1000, dtype=dtype).as_subclass(MAP)
 
         res = functional.cross_product(hv, hv)
         assert res.dtype == dtype
@@ -182,26 +166,20 @@ class TestCrossProduct:
 
 class TestNgrams:
     def test_value(self):
-        hv = torch.zeros(4, 1000)
+        hv = torch.zeros(4, 1000).as_subclass(MAP)
         res = functional.ngrams(hv)
         assert torch.all(res == 0).item()
 
         hv = torch.tensor(
             [[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1], [-1, 1, 1, -1]]
-        )
+        ).as_subclass(MAP)
         res = functional.ngrams(hv)
         assert torch.all(res == torch.tensor([0, -2, -2, 0])).item()
         assert res.dtype == hv.dtype
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
-        hv = torch.zeros(23, 1000, dtype=dtype)
-
-        if dtype == torch.uint8:
-            with pytest.raises(ValueError):
-                functional.ngrams(hv)
-
-            return
+        hv = torch.zeros(23, 1000, dtype=dtype).as_subclass(MAP)
 
         res = functional.ngrams(hv)
         assert res.dtype == dtype
@@ -216,25 +194,19 @@ class TestNgrams:
 
 class TestHashTable:
     def test_value(self):
-        hv = torch.zeros(4, 1000)
+        hv = torch.zeros(4, 1000).as_subclass(MAP)
         res = functional.hash_table(hv, hv)
         assert torch.all(res == 0).item()
 
-        a = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1]])
-        b = torch.tensor([[-1, 1, 1, 1], [-1, 1, 1, -1]])
+        a = torch.tensor([[1, -1, -1, 1], [-1, -1, 1, 1]]).as_subclass(MAP)
+        b = torch.tensor([[-1, 1, 1, 1], [-1, 1, 1, -1]]).as_subclass(MAP)
         res = functional.hash_table(a, b)
         assert torch.all(res == torch.tensor([0, -2, 0, 0])).item()
         assert res.dtype == a.dtype
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
-        hv = torch.zeros(23, 1000, dtype=dtype)
-
-        if dtype == torch.uint8:
-            with pytest.raises(ValueError):
-                functional.hash_table(hv, hv)
-
-            return
+        hv = torch.zeros(23, 1000, dtype=dtype).as_subclass(MAP)
 
         res = functional.hash_table(hv, hv)
         assert res.dtype == dtype
@@ -249,26 +221,20 @@ class TestHashTable:
 
 class TestBundleSequence:
     def test_value(self):
-        hv = torch.zeros(4, 1000)
+        hv = torch.zeros(4, 1000).as_subclass(MAP)
         res = functional.bundle_sequence(hv)
         assert torch.all(res == 0).item()
 
         hv = torch.tensor(
             [[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1], [-1, 1, 1, -1]]
-        )
+        ).as_subclass(MAP)
         res = functional.bundle_sequence(hv)
         assert torch.all(res == torch.tensor([0, 0, 2, 0])).item()
         assert res.dtype == hv.dtype
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
-        hv = torch.zeros(23, 1000, dtype=dtype)
-
-        if dtype == torch.uint8:
-            with pytest.raises(ValueError):
-                functional.bundle_sequence(hv)
-
-            return
+        hv = torch.zeros(23, 1000, dtype=dtype).as_subclass(MAP)
 
         res = functional.bundle_sequence(hv)
         assert res.dtype == dtype
@@ -283,26 +249,20 @@ class TestBundleSequence:
 
 class TestBindSequence:
     def test_value(self):
-        hv = torch.zeros(4, 1000)
+        hv = torch.zeros(4, 1000).as_subclass(MAP)
         res = functional.bind_sequence(hv)
         assert torch.all(res == 0).item()
 
         hv = torch.tensor(
             [[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1], [-1, 1, 1, -1]]
-        )
+        ).as_subclass(MAP)
         res = functional.bind_sequence(hv)
         assert torch.all(res == torch.tensor([1, 1, -1, 1])).item()
         assert res.dtype == hv.dtype
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
-        hv = torch.zeros(23, 1000, dtype=dtype)
-
-        if dtype == torch.uint8:
-            with pytest.raises(ValueError):
-                functional.bind_sequence(hv)
-
-            return
+        hv = torch.zeros(23, 1000, dtype=dtype).as_subclass(MAP)
 
         if dtype in {torch.float16, torch.bfloat16}:
             # torch.product is not implemented on CPU for these dtypes
@@ -324,7 +284,7 @@ class TestBindSequence:
 
 class TestGraph:
     def test_value(self):
-        hv = torch.zeros(2, 4, 1000)
+        hv = torch.zeros(2, 4, 1000).as_subclass(MAP)
         res = functional.graph(hv)
         assert torch.all(res == 0).item()
 
@@ -333,7 +293,7 @@ class TestGraph:
                 [[1, -1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, 1]],
                 [[-1, -1, 1, 1], [-1, 1, 1, 1], [1, -1, -1, 1]],
             ]
-        )
+        ).as_subclass(MAP)
         res = functional.graph(g)
         assert torch.all(res == torch.tensor([-1, -1, -1, 3])).item()
         assert res.dtype == g.dtype
@@ -344,13 +304,7 @@ class TestGraph:
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
-        hv = torch.zeros(5, 2, 23, 1000, dtype=dtype)
-
-        if dtype == torch.uint8:
-            with pytest.raises(ValueError):
-                functional.graph(hv)
-
-            return
+        hv = torch.zeros(5, 2, 23, 1000, dtype=dtype).as_subclass(MAP)
 
         res = functional.graph(hv)
         assert res.dtype == dtype
@@ -358,6 +312,6 @@ class TestGraph:
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        hv = torch.zeros(5, 2, 23, 1000, device=device)
+        hv = torch.zeros(5, 2, 23, 1000, device=device).as_subclass(MAP)
         res = functional.graph(hv)
         assert res.device == device

@@ -19,7 +19,7 @@ setup(
     url="https://github.com/hyperdimensional-computing/torchhd",
     license="MIT",
     install_requires=[
-        "torch",
+        "torch>=1.9.0",
         "pandas",
         "numpy",
         "requests",

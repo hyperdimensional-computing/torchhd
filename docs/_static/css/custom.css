@@ -243,3 +243,33 @@ body,
 .wy-nav-content-wrap {
     background: none;
 }
+
+.body,
+.rst-content .toctree-wrapper>p.caption,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+legend {
+    font-family: -apple-system, BlinkMacSystemFont, arial, sans-serif !important;
+}
+
+.body {
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "liga", "case", "calt";
+}
+
+.btn {
+    border: None;
+    box-shadow: None;
+    padding: 8px 12px;
+}
+
+.btn:active {
+    box-shadow: None;
+    padding: 8px 12px;
+}

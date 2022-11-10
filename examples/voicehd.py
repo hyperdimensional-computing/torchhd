@@ -6,7 +6,7 @@ import torch.nn.functional as F
 import torchmetrics
 from tqdm import tqdm
 
-from torchhd import functional
+import torchhd
 from torchhd import embeddings
 from torchhd.datasets.isolet import ISOLET
 
@@ -29,9 +29,9 @@ class Model(nn.Module):
         self.classify.weight.data.fill_(0.0)
 
     def encode(self, x):
-        sample_hv = functional.bind(self.id.weight, self.value(x))
-        sample_hv = functional.multiset(sample_hv)
-        return functional.hard_quantize(sample_hv)
+        sample_hv = torchhd.bind(self.id.weight, self.value(x))
+        sample_hv = torchhd.multiset(sample_hv)
+        return torchhd.hard_quantize(sample_hv)
 
     def forward(self, x):
         enc = self.encode(x)

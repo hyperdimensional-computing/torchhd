@@ -1,5 +1,6 @@
-from typing import Union
+from typing import Union, Type
 import torch
+import torchhd
 
 number = Union[float, int]
 
@@ -33,12 +34,12 @@ torch_int_dtypes = {
 }
 
 torch_dtypes = {
+    torch.float16,
+    torch.bfloat16,
     torch.float32,
     torch.float64,
     torch.complex64,
     torch.complex128,
-    torch.float16,
-    torch.bfloat16,
     torch.uint8,
     torch.int8,
     torch.int16,
@@ -48,6 +49,33 @@ torch_dtypes = {
 }
 
 
-def supported_dtype(dtype: torch.dtype) -> bool:
-    not_supported = dtype == torch.uint8
-    return not not_supported
+def supported_dtype(dtype: torch.dtype, model: Type[torchhd.VSA_Model]) -> bool:
+    if not issubclass(model, torchhd.VSA_Model):
+        raise ValueError("Must provide a VSA_Model class")
+
+    if model == torchhd.BSC:
+        return dtype not in {
+            torch.complex64,
+            torch.complex128,
+            torch.float16,
+            torch.bfloat16,
+        }
+
+    elif model == torchhd.MAP:
+        return dtype not in {torch.uint8, torch.bool, torch.float16, torch.bfloat16}
+
+    elif model == torchhd.HRR:
+        return dtype in {torch.float32, torch.float64}
+
+    elif model == torchhd.FHRR:
+        return dtype in {torch.complex64, torch.complex128}
+
+    return False
+
+
+vsa_models = [
+    torchhd.BSC,
+    torchhd.MAP,
+    # torchhd.HRR,
+    torchhd.FHRR,
+]

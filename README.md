@@ -65,19 +65,19 @@ usd, mxn = torchhd.random_hv(2, d)  # US Dollar and Mexican Peso
 
 # create country representations
 us_values = torch.stack([usa, wdc, usd])
-us = torchhd.functional.hash_table(keys, us_values)
+us = torchhd.hash_table(keys, us_values)
 
 mx_values = torch.stack([mex, mxc, mxn])
-mx = torchhd.functional.hash_table(keys, mx_values)
+mx = torchhd.hash_table(keys, mx_values)
 
 # combine all the associated information
-mx_us = torchhd.bind(us, mx)
+mx_us = torchhd.bind(torchhd.inverse(us), mx)
 
 # query for the dollar of mexico
 usd_of_mex = torchhd.bind(mx_us, usd)
 
 memory = torch.cat([keys, us_values, mx_values], dim=0)
-torchhd.functional.cosine_similarity(usd_of_mex, memory)
+torchhd.cos_similarity(usd_of_mex, memory)
 # tensor([-0.0062,  0.0123, -0.0057, -0.0019, -0.0084, -0.0078,  0.0102,  0.0057,  0.3292])
 # The hypervector for the Mexican Peso is the most similar.
 ```

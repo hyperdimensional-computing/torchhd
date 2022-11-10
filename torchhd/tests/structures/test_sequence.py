@@ -115,16 +115,16 @@ class TestBundleSequence:
         S.append(hv[5])
         S.append(hv[6])
 
-        assert functional.cosine_similarity(S[2], hv)[2] > 0.35
+        assert functional.cos_similarity(S[2], hv)[2] > 0.35
         S.replace(2, hv[2], hv[6])
-        assert functional.cosine_similarity(S[2], hv)[2] < 0.35
-        assert functional.cosine_similarity(S[2], hv)[6] > 0.35
+        assert functional.cos_similarity(S[2], hv)[2] < 0.35
+        assert functional.cos_similarity(S[2], hv)[6] > 0.35
 
         S2 = structures.BundleSequence.from_tensor(hv[:7])
-        assert functional.cosine_similarity(S2[2], hv)[2] > 0.35
+        assert functional.cos_similarity(S2[2], hv)[2] > 0.35
         S2.replace(2, hv[2], hv[6])
-        assert functional.cosine_similarity(S2[2], hv)[2] < 0.35
-        assert functional.cosine_similarity(S2[2], hv)[6] > 0.35
+        assert functional.cos_similarity(S2[2], hv)[2] < 0.35
+        assert functional.cos_similarity(S2[2], hv)[6] > 0.35
 
     def test_concat(self):
         generator = torch.Generator()
@@ -146,12 +146,12 @@ class TestBundleSequence:
         S = S.concat(S2)
         assert len(S) == 6
 
-        assert torch.argmax(functional.cosine_similarity(S[0], hv)).item() == 0
-        assert torch.argmax(functional.cosine_similarity(S[1], hv)).item() == 1
-        assert torch.argmax(functional.cosine_similarity(S[2], hv)).item() == 2
-        assert torch.argmax(functional.cosine_similarity(S[3], hv)).item() == 0
-        assert torch.argmax(functional.cosine_similarity(S[4], hv)).item() == 1
-        assert torch.argmax(functional.cosine_similarity(S[5], hv)).item() == 2
+        assert torch.argmax(functional.cos_similarity(S[0], hv)).item() == 0
+        assert torch.argmax(functional.cos_similarity(S[1], hv)).item() == 1
+        assert torch.argmax(functional.cos_similarity(S[2], hv)).item() == 2
+        assert torch.argmax(functional.cos_similarity(S[3], hv)).item() == 0
+        assert torch.argmax(functional.cos_similarity(S[4], hv)).item() == 1
+        assert torch.argmax(functional.cos_similarity(S[5], hv)).item() == 2
 
         SS = structures.BundleSequence(1000)
 
@@ -166,12 +166,12 @@ class TestBundleSequence:
 
         SS = SS.concat(SS2)
 
-        assert torch.argmax(functional.cosine_similarity(SS[0], hv)).item() == 2
-        assert torch.argmax(functional.cosine_similarity(SS[1], hv)).item() == 1
-        assert torch.argmax(functional.cosine_similarity(SS[2], hv)).item() == 0
-        assert torch.argmax(functional.cosine_similarity(SS[3], hv)).item() == 2
-        assert torch.argmax(functional.cosine_similarity(SS[4], hv)).item() == 1
-        assert torch.argmax(functional.cosine_similarity(SS[5], hv)).item() == 0
+        assert torch.argmax(functional.cos_similarity(SS[0], hv)).item() == 2
+        assert torch.argmax(functional.cos_similarity(SS[1], hv)).item() == 1
+        assert torch.argmax(functional.cos_similarity(SS[2], hv)).item() == 0
+        assert torch.argmax(functional.cos_similarity(SS[3], hv)).item() == 2
+        assert torch.argmax(functional.cos_similarity(SS[4], hv)).item() == 1
+        assert torch.argmax(functional.cos_similarity(SS[5], hv)).item() == 0
 
     def test_getitem(self):
         generator = torch.Generator()
@@ -183,7 +183,7 @@ class TestBundleSequence:
         S.append(hv[1])
         S.append(hv[2])
 
-        assert torch.argmax(functional.cosine_similarity(S[0], hv)).item() == 0
+        assert torch.argmax(functional.cos_similarity(S[0], hv)).item() == 0
 
     def test_length(self):
         generator = torch.Generator()
@@ -222,6 +222,6 @@ class TestBundleSequence:
         hv = functional.random_hv(len(letters), 10000, generator=generator)
         S = structures.BundleSequence.from_tensor(hv)
 
-        assert torch.argmax(functional.cosine_similarity(S[3], hv)).item() == 3
-        assert torch.argmax(functional.cosine_similarity(S[5], hv)).item() == 5
-        assert torch.argmax(functional.cosine_similarity(S[1], hv)).item() == 1
+        assert torch.argmax(functional.cos_similarity(S[3], hv)).item() == 3
+        assert torch.argmax(functional.cos_similarity(S[5], hv)).item() == 5
+        assert torch.argmax(functional.cos_similarity(S[1], hv)).item() == 1
