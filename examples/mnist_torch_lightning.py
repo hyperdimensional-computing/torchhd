@@ -9,7 +9,7 @@ import torchmetrics
 from tqdm import tqdm
 import pytorch_lightning as pl
 
-import torchhd 
+import torchhd
 from torchhd import embeddings
 
 
