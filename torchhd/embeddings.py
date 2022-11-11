@@ -11,6 +11,7 @@ __all__ = [
     "Identity",
     "Random",
     "Level",
+    "Thermometer",       
     "Circular",
     "Projection",
     "Sinusoid",
@@ -168,6 +169,64 @@ class Level(nn.Embedding):
 
         return super(Level, self).forward(indices).as_subclass(MAP)
 
+class Thermometer(nn.Embedding):
+    """Embedding wrapper around :func:`~torchhd.functional.thermometer_hv`.
+
+    Class inherits from `Embedding <https://pytorch.org/docs/stable/generated/torch.nn.Embedding.html>`_ and supports the same keyword arguments.
+
+    Args:
+        embedding_dim (int): the dimensionality of the hypervectors.
+        low (float, optional): The lower bound of the real number range that the levels represent. Default: ``0.0``
+        high (float, optional): The upper bound of the real number range that the levels represent. Default: ``1.0``
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
+
+    Examples::
+
+        >>> emb = embeddings.Thermometer(10, low=-1, high=2)
+        >>> x = torch.FloatTensor([0.3, 1.9, -0.8])
+        >>> emb(x)
+        tensor([[ 1.,  1.,  1.,  1., -1., -1., -1., -1., -1., -1.],
+                [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
+                [ 1., -1., -1., -1., -1., -1., -1., -1., -1., -1.]])
+
+    """
+
+    def __init__(
+        self,
+        embedding_dim,
+        low=0.0,
+        high=1.0,
+        requires_grad=False,
+        **kwargs
+    ):
+        self.low_value = low
+        self.high_value = high
+        self.num_embeddings = embedding_dim +1
+
+        super(Thermometer, self).__init__(self.num_embeddings,embedding_dim, **kwargs)
+        self.weight.requires_grad = requires_grad
+
+    def reset_parameters(self):
+        factory_kwargs = {
+            "device": self.weight.data.device,
+            "dtype": self.weight.data.dtype,
+        }
+
+        self.weight.data.copy_(
+            functional.thermometer_hv(
+                self.embedding_dim,
+                **factory_kwargs
+            )
+        )
+
+        self._fill_padding_idx_with_zero()
+
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
+        indices = functional.value_to_index(
+            input, self.low_value, self.high_value, self.num_embeddings
+        ).clamp(0, self.num_embeddings - 1)
+
+        return super(Thermometer, self).forward(indices).as_subclass(MAP)
 
 class Circular(nn.Embedding):
     """Embedding wrapper around :func:`~torchhd.functional.circular_hv`.

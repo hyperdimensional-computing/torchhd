@@ -16,6 +16,7 @@ __all__ = [
     "identity_hv",
     "random_hv",
     "level_hv",
+    "thermometer_hv",    
     "circular_hv",
     "bind",
     "bundle",
@@ -325,6 +326,85 @@ def level_hv(
     hv.requires_grad = requires_grad
     return hv.as_subclass(model)
 
+def thermometer_hv(
+    dimensions: int,
+    model: Type[VSA_Model] = MAP,
+    *,
+    requires_grad=False,
+    **kwargs,
+) -> VSA_Model:
+    """Creates a thermometer code for given dimensionality.
+
+    Implements similarity-preserving hypervectors as described in "Sparse Binary Distributed Encoding of Scalars" <https://doi.org/10.1615/J Automat Inf Scien.v37.i6.20>.
+
+    Args:
+        dimensions (int): the dimensionality of the hypervectors.
+        model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAP``.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
+
+    Examples::
+
+        >>> torchhd.thermometer_hv(6, torchhd.BSC)
+        tensor([[False, False, False, False, False, False],
+                [ True, False, False, False, False, False],
+                [ True,  True, False, False, False, False],
+                [ True,  True,  True, False, False, False],
+                [ True,  True,  True,  True, False, False],
+                [ True,  True,  True,  True,  True, False],
+                [ True,  True,  True,  True,  True,  True]])
+
+        >>> torchhd.thermometer_hv(6, torchhd.MAP)
+        tensor([[-1., -1., -1., -1., -1., -1.],
+                [ 1., -1., -1., -1., -1., -1.],
+                [ 1.,  1., -1., -1., -1., -1.],
+                [ 1.,  1.,  1., -1., -1., -1.],
+                [ 1.,  1.,  1.,  1., -1., -1.],
+                [ 1.,  1.,  1.,  1.,  1., -1.],
+                [ 1.,  1.,  1.,  1.,  1.,  1.]])
+
+        >>> torchhd.thermometer_hv(6, torchhd.FHRR)
+        tensor([[0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
+                [1.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
+                [1.+0.j, 1.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
+                [1.+0.j, 1.+0.j, 1.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
+                [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 0.+0.j, 0.+0.j],
+                [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 0.+0.j],
+                [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j]])
+
+    """
+    
+    # number of vectors is determined by the dimensionality
+    num_vectors = dimensions+1
+
+    # generate a random vector as a placeholder
+    rand_hv = model.random_hv(
+        1,
+        dimensions,
+        **kwargs,
+    )
+
+
+    hv = torch.empty(
+        num_vectors,
+        dimensions,
+        dtype=rand_hv.dtype,
+        device=rand_hv.device,
+    )
+
+    for i in range(num_vectors):
+        if (model == BSC) | (model == FHRR):
+            hv[i,:] = torch.concat((torch.ones(1, i), torch.zeros(1, dimensions-i)), axis=1)            
+        elif model == MAP:
+            #Use bipolar vectors
+            hv[i,:] = torch.concat((torch.ones(1, i), -torch.ones(1, dimensions-i)), axis=1)  
+        else:    
+            raise ValueError(f"{model} HD/VSA model is not defined.")
+
+
+    hv.requires_grad = requires_grad
+    return hv.as_subclass(model)
 
 def circular_hv(
     num_vectors: int,
