@@ -12,6 +12,7 @@ torchhd.embeddings
     Identity
     Random
     Level
+    Thermometer
     Circular
     Projection
     Sinusoid
