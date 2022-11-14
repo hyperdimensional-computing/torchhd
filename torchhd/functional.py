@@ -16,7 +16,7 @@ __all__ = [
     "identity_hv",
     "random_hv",
     "level_hv",
-    "thermometer_hv",    
+    "thermometer_hv",
     "circular_hv",
     "bind",
     "bundle",
@@ -326,6 +326,7 @@ def level_hv(
     hv.requires_grad = requires_grad
     return hv.as_subclass(model)
 
+
 def thermometer_hv(
     dimensions: int,
     model: Type[VSA_Model] = MAP,
@@ -374,9 +375,9 @@ def thermometer_hv(
                 [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j]])
 
     """
-    
+
     # number of vectors is determined by the dimensionality
-    num_vectors = dimensions+1
+    num_vectors = dimensions + 1
 
     # generate a random vector as a placeholder
     rand_hv = model.random_hv(
@@ -385,33 +386,40 @@ def thermometer_hv(
         **kwargs,
     )
 
-    if (model == BSC):
-        #Use binary vectors
-         hv = torch.zeros(
+    if model == BSC:
+        # Use binary vectors
+        hv = torch.zeros(
             num_vectors,
             dimensions,
             dtype=rand_hv.dtype,
             device=rand_hv.device,
-        )       
-    elif (model == MAP)|(model == FHRR):
-        #Use bipolar vectors
-         hv = -torch.ones(
-            num_vectors,
-            dimensions,
+        )
+    elif (model == MAP) | (model == FHRR):
+        # Use bipolar vectors
+        hv = torch.full(
+            (
+                num_vectors,
+                dimensions,
+            ),
+            -1,
             dtype=rand_hv.dtype,
             device=rand_hv.device,
-        )  
-    else:    
+        )
+    else:
         raise ValueError(f"{model} HD/VSA model is not defined.")
 
-    # Create indices for efficient implementation 
-    indices = torch.tril_indices(dimensions, dimensions, dtype=torch.long, device=rand_hv.device)
-    indices[0,:] += 1 
-            
-    hv[indices[0,:],indices[1,:]]=1
+    # Create indices for efficient implementation
+    indices = torch.tril_indices(
+        dimensions, dimensions, offset=-1, dtype=torch.long, device=rand_hv.device
+    )
+
+    row, col = indices
+    hv[row, col] = 1
+    hv[-1] = 1
 
     hv.requires_grad = requires_grad
     return hv.as_subclass(model)
+
 
 def circular_hv(
     num_vectors: int,
