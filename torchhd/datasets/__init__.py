@@ -6,6 +6,7 @@ from torchhd.datasets.airfoil_self_noise import AirfoilSelfNoise
 from torchhd.datasets.emg_hand_gestures import EMGHandGestures
 from torchhd.datasets.pamap import PAMAP
 from torchhd.datasets.ccpp import CyclePowerPlant
+from torchhd.datasets.abalone import Abalone
 
 __all__ = [
     "BeijingAirQuality",
@@ -16,4 +17,5 @@ __all__ = [
     "EMGHandGestures",
     "PAMAP",
     "CyclePowerPlant",
+    "Abalone",    
 ]

@@ -19,3 +19,4 @@ The Torchhd library provides many popular built-in datasets to work with.
     EMGHandGestures
     PAMAP
     CyclePowerPlant
+    Abalone
