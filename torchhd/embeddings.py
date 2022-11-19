@@ -11,7 +11,7 @@ __all__ = [
     "Identity",
     "Random",
     "Level",
-    "Thermometer",       
+    "Thermometer",
     "Circular",
     "Projection",
     "Sinusoid",
@@ -128,16 +128,7 @@ class Level(nn.Embedding):
 
     """
 
-    def __init__(
-        self,
-        num_embeddings,
-        embedding_dim,
-        low=0.0,
-        high=1.0,
-        randomness=0.0,
-        requires_grad=False,
-        **kwargs
-    ):
+    def __init__(self, num_embeddings, embedding_dim, low=0.0, high=1.0, randomness=0.0, requires_grad=False,**kwargs):
         self.low_value = low
         self.high_value = high
         self.randomness = randomness
@@ -169,6 +160,7 @@ class Level(nn.Embedding):
 
         return super(Level, self).forward(indices).as_subclass(MAP)
 
+
 class Thermometer(nn.Embedding):
     """Embedding wrapper around :func:`~torchhd.functional.thermometer_hv`.
 
@@ -191,15 +183,7 @@ class Thermometer(nn.Embedding):
 
     """
 
-    def __init__(
-        self,
-        num_embeddings,
-        embedding_dim,
-        low=0.0,
-        high=1.0,
-        requires_grad=False,
-        **kwargs
-    ):
+    def __init__(self, num_embeddings, embedding_dim, low=0.0, high=1.0, requires_grad=False, **kwargs):
         self.low_value = low
         self.high_value = high
 
@@ -228,6 +212,7 @@ class Thermometer(nn.Embedding):
         ).clamp(0, self.num_embeddings - 1)
 
         return super(Thermometer, self).forward(indices).as_subclass(MAP)
+
 
 class Circular(nn.Embedding):
     """Embedding wrapper around :func:`~torchhd.functional.circular_hv`.

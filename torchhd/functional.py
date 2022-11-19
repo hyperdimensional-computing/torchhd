@@ -16,7 +16,7 @@ __all__ = [
     "identity_hv",
     "random_hv",
     "level_hv",
-    "thermometer_hv",    
+    "thermometer_hv",
     "circular_hv",
     "bind",
     "bundle",
@@ -326,6 +326,7 @@ def level_hv(
     hv.requires_grad = requires_grad
     return hv.as_subclass(model)
 
+
 def thermometer_hv(
     num_vectors: int,
     dimensions: int,
@@ -371,8 +372,7 @@ def thermometer_hv(
                 [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j],
                 [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j, -1.+-0.j]])
 
-    """
-    
+    """    
     # Check if the requested number of vectors can be accommodated
     if num_vectors>dimensions+1:
         raise ValueError(f"For the given dimensionality: {dimensions}, the thermometer code cannot create more than {dimensions+1} hypervectors.")
@@ -382,6 +382,7 @@ def thermometer_hv(
         if num_vectors>1:
             step = (dimensions)//(num_vectors-1)
 
+
     # generate a random vector as a placeholder to get dtype and device
     rand_hv = model.random_hv(
         1,
@@ -389,23 +390,26 @@ def thermometer_hv(
         **kwargs,
     )
 
-    if (model == BSC):
-        #Use binary vectors
-         hv = torch.zeros(
+    if model == BSC:
+        # Use binary vectors
+        hv = torch.zeros(
             num_vectors,
             dimensions,
             dtype=rand_hv.dtype,
             device=rand_hv.device,
-        )       
-    elif (model == MAP)|(model == FHRR):
-        #Use bipolar vectors
-         hv = -torch.ones(
-            num_vectors,
-            dimensions,
+        )
+    elif (model == MAP) | (model == FHRR):
+        # Use bipolar vectors
+        hv = torch.full(
+            (
+                num_vectors,
+                dimensions,
+            ),
+            -1,
             dtype=rand_hv.dtype,
             device=rand_hv.device,
-        )  
-    else:    
+        )
+    else:
         raise ValueError(f"{model} HD/VSA model is not defined.")
 
     # Create hypervectors using the obtained step
@@ -414,6 +418,7 @@ def thermometer_hv(
 
     hv.requires_grad = requires_grad
     return hv.as_subclass(model)
+
 
 def circular_hv(
     num_vectors: int,

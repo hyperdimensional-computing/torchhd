@@ -1,10 +1,12 @@
-# Uses Black to reformat the Python code on the main branch.
+# Uses Black to reformat the Python code on the all but the main branch.
 
 name: Format
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - '**'      # matches every branch
+      - '!main'   # excludes master
 
 permissions:
   contents: write
