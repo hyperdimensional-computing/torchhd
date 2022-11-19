@@ -1,10 +1,12 @@
 import math
+from typing import Type, Union
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
 
 import torchhd.functional as functional
+from torchhd.base import VSA_Model
 from torchhd.map import MAP
 
 __all__ = [
@@ -176,14 +178,16 @@ class Thermometer(nn.Embedding):
     Class inherits from `Embedding <https://pytorch.org/docs/stable/generated/torch.nn.Embedding.html>`_ and supports the same keyword arguments.
 
     Args:
+        num_embeddings (int): the number of hypervectors to generate.
         embedding_dim (int): the dimensionality of the hypervectors.
+        model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAP``.
         low (float, optional): The lower bound of the real number range that the levels represent. Default: ``0.0``
         high (float, optional): The upper bound of the real number range that the levels represent. Default: ``1.0``
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
     Examples::
 
-        >>> emb = embeddings.Thermometer(11, 10, low=-1, high=2)
+        >>> emb = embeddings.Thermometer(11, 10, model=MAP, low=-1, high=2)
         >>> x = torch.FloatTensor([0.3, 1.9, -0.8])
         >>> emb(x)
         tensor([[ 1.,  1.,  1.,  1., -1., -1., -1., -1., -1., -1.],
@@ -196,11 +200,13 @@ class Thermometer(nn.Embedding):
         self,
         num_embeddings,
         embedding_dim,
+        model: Type[VSA_Model] = MAP,
         low=0.0,
         high=1.0,
         requires_grad=False,
         **kwargs
     ):
+        self.model = model
         self.low_value = low
         self.high_value = high
 
@@ -215,7 +221,7 @@ class Thermometer(nn.Embedding):
 
         self.weight.data.copy_(
             functional.thermometer_hv(
-                self.num_embeddings, self.embedding_dim, **factory_kwargs
+                self.num_embeddings, self.embedding_dim, self.model, **factory_kwargs
             )
         )
 
@@ -226,7 +232,7 @@ class Thermometer(nn.Embedding):
             input, self.low_value, self.high_value, self.num_embeddings
         ).clamp(0, self.num_embeddings - 1)
 
-        return super(Thermometer, self).forward(indices).as_subclass(MAP)
+        return super(Thermometer, self).forward(indices).as_subclass(self.model)
 
 
 class Circular(nn.Embedding):
