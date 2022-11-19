@@ -182,7 +182,7 @@ class Thermometer(nn.Embedding):
 
     Examples::
 
-        >>> emb = embeddings.Thermometer(10, low=-1, high=2)
+        >>> emb = embeddings.Thermometer(11, 10, low=-1, high=2)
         >>> x = torch.FloatTensor([0.3, 1.9, -0.8])
         >>> emb(x)
         tensor([[ 1.,  1.,  1.,  1., -1., -1., -1., -1., -1., -1.],
@@ -193,6 +193,7 @@ class Thermometer(nn.Embedding):
 
     def __init__(
         self,
+        num_embeddings,
         embedding_dim,
         low=0.0,
         high=1.0,
@@ -201,9 +202,8 @@ class Thermometer(nn.Embedding):
     ):
         self.low_value = low
         self.high_value = high
-        self.num_embeddings = embedding_dim +1
 
-        super(Thermometer, self).__init__(self.num_embeddings,embedding_dim, **kwargs)
+        super(Thermometer, self).__init__(num_embeddings,embedding_dim, **kwargs)
         self.weight.requires_grad = requires_grad
 
     def reset_parameters(self):
@@ -214,6 +214,7 @@ class Thermometer(nn.Embedding):
 
         self.weight.data.copy_(
             functional.thermometer_hv(
+                self.num_embeddings,               
                 self.embedding_dim,
                 **factory_kwargs
             )

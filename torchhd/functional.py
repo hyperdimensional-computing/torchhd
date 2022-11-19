@@ -327,6 +327,7 @@ def level_hv(
     return hv.as_subclass(model)
 
 def thermometer_hv(
+    num_vectors: int,
     dimensions: int,
     model: Type[VSA_Model] = MAP,
     *,
@@ -338,6 +339,7 @@ def thermometer_hv(
     Implements similarity-preserving hypervectors as described in `Sparse Binary Distributed Encoding of Scalars <https://doi.org/10.1615/J%20Automat%20Inf%20Scien.v37.i6.20>`_.
 
     Args:
+        num_vectors (int): the number of hypervectors to generate.
         dimensions (int): the dimensionality of the hypervectors.
         model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAP``.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
@@ -346,7 +348,7 @@ def thermometer_hv(
 
     Examples::
 
-        >>> torchhd.thermometer_hv(6, torchhd.BSC)
+        >>> torchhd.thermometer_hv(7, 6, torchhd.BSC)
         tensor([[False, False, False, False, False, False],
                 [ True, False, False, False, False, False],
                 [ True,  True, False, False, False, False],
@@ -355,30 +357,32 @@ def thermometer_hv(
                 [ True,  True,  True,  True,  True, False],
                 [ True,  True,  True,  True,  True,  True]])
 
-        >>> torchhd.thermometer_hv(6, torchhd.MAP)
+        >>> torchhd.thermometer_hv(4, 6, torchhd.MAP)
         tensor([[-1., -1., -1., -1., -1., -1.],
-                [ 1., -1., -1., -1., -1., -1.],
                 [ 1.,  1., -1., -1., -1., -1.],
-                [ 1.,  1.,  1., -1., -1., -1.],
                 [ 1.,  1.,  1.,  1., -1., -1.],
-                [ 1.,  1.,  1.,  1.,  1., -1.],
                 [ 1.,  1.,  1.,  1.,  1.,  1.]])
 
-        >>> torchhd.thermometer_hv(6, torchhd.FHRR)
+        >>> torchhd.thermometer_hv(6, 6, torchhd.FHRR)
         tensor([[-1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
                 [ 1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
                 [ 1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
                 [ 1.+0.j,  1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
                 [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j],
-                [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j, -1.+0.j],
-                [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j]])
+                [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j, -1.+-0.j]])
 
     """
     
-    # number of vectors is determined by the dimensionality
-    num_vectors = dimensions+1
+    # Check if the requested number of vectors can be accommodated
+    if num_vectors>dimensions+1:
+        raise ValueError(f"For the given dimensionality: {dimensions}, the thermometer code cannot create more than {dimensions+1} hypervectors.")
+    else:
+        #Based on num_vectors and dimensions compute step between neighboring hypervectors
+        step = 0
+        if num_vectors>1:
+            step = (dimensions)//(num_vectors-1)
 
-    # generate a random vector as a placeholder
+    # generate a random vector as a placeholder to get dtype and device
     rand_hv = model.random_hv(
         1,
         dimensions,
@@ -404,11 +408,9 @@ def thermometer_hv(
     else:    
         raise ValueError(f"{model} HD/VSA model is not defined.")
 
-    # Create indices for efficient implementation 
-    indices = torch.tril_indices(dimensions, dimensions, dtype=torch.long, device=rand_hv.device)
-    indices[0,:] += 1 
-            
-    hv[indices[0,:],indices[1,:]]=1
+    # Create hypervectors using the obtained step
+    for i in range(1,num_vectors):
+        hv[i,0:i*step]=1
 
     hv.requires_grad = requires_grad
     return hv.as_subclass(model)
