@@ -372,16 +372,17 @@ def thermometer_hv(
                 [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j],
                 [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j, -1.+-0.j]])
 
-    """    
+    """
     # Check if the requested number of vectors can be accommodated
-    if num_vectors>dimensions+1:
-        raise ValueError(f"For the given dimensionality: {dimensions}, the thermometer code cannot create more than {dimensions+1} hypervectors.")
+    if num_vectors > dimensions + 1:
+        raise ValueError(
+            f"For the given dimensionality: {dimensions}, the thermometer code cannot create more than {dimensions+1} hypervectors."
+        )
     else:
-        #Based on num_vectors and dimensions compute step between neighboring hypervectors
+        # Based on num_vectors and dimensions compute step between neighboring hypervectors
         step = 0
-        if num_vectors>1:
-            step = (dimensions)//(num_vectors-1)
-
+        if num_vectors > 1:
+            step = (dimensions) // (num_vectors - 1)
 
     # generate a random vector as a placeholder to get dtype and device
     rand_hv = model.random_hv(
@@ -413,8 +414,8 @@ def thermometer_hv(
         raise ValueError(f"{model} HD/VSA model is not defined.")
 
     # Create hypervectors using the obtained step
-    for i in range(1,num_vectors):
-        hv[i,0:i*step]=1
+    for i in range(1, num_vectors):
+        hv[i, 0 : i * step] = 1
 
     hv.requires_grad = requires_grad
     return hv.as_subclass(model)

@@ -128,7 +128,16 @@ class Level(nn.Embedding):
 
     """
 
-    def __init__(self, num_embeddings, embedding_dim, low=0.0, high=1.0, randomness=0.0, requires_grad=False,**kwargs):
+    def __init__(
+        self,
+        num_embeddings,
+        embedding_dim,
+        low=0.0,
+        high=1.0,
+        randomness=0.0,
+        requires_grad=False,
+        **kwargs
+    ):
         self.low_value = low
         self.high_value = high
         self.randomness = randomness
@@ -183,11 +192,19 @@ class Thermometer(nn.Embedding):
 
     """
 
-    def __init__(self, num_embeddings, embedding_dim, low=0.0, high=1.0, requires_grad=False, **kwargs):
+    def __init__(
+        self,
+        num_embeddings,
+        embedding_dim,
+        low=0.0,
+        high=1.0,
+        requires_grad=False,
+        **kwargs
+    ):
         self.low_value = low
         self.high_value = high
 
-        super(Thermometer, self).__init__(num_embeddings,embedding_dim, **kwargs)
+        super(Thermometer, self).__init__(num_embeddings, embedding_dim, **kwargs)
         self.weight.requires_grad = requires_grad
 
     def reset_parameters(self):
@@ -198,9 +215,7 @@ class Thermometer(nn.Embedding):
 
         self.weight.data.copy_(
             functional.thermometer_hv(
-                self.num_embeddings,               
-                self.embedding_dim,
-                **factory_kwargs
+                self.num_embeddings, self.embedding_dim, **factory_kwargs
             )
         )
 
