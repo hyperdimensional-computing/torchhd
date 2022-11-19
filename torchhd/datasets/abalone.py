@@ -17,7 +17,7 @@ class Abalone(data.Dataset):
 
     Args:
         root (string): Root directory containing the files of the dataset.
-        train (bool, optional): If True, returns training (sub)set stored in ``train.data`` as further determined by fold_id and fold_train variables. 
+        train (bool, optional): If True, returns training (sub)set stored in ``train.data`` as further determined by fold_id and fold_train variables.
             Otherwise tries to return test set if ``test.data`` exists, issues error in case it is not available.
         fold_id (int, optional): Specifies which fold number to use. Relevant only if train is set to True. The default value of 0 returns the whole data in ``train.data``.
             Values between 1 and 4 specify, which fold in ``k_fold_cross_val.data`` to use.
@@ -97,7 +97,9 @@ class Abalone(data.Dataset):
 
         # Check if the root directory contains the required files
         has_train_file = os.path.isfile(os.path.join(self.root, "train.data"))
-        has_k_fold_file = os.path.isfile(os.path.join(self.root, "k_fold_cross_val.data"))
+        has_k_fold_file = os.path.isfile(
+            os.path.join(self.root, "k_fold_cross_val.data")
+        )
         if has_train_file and has_k_fold_file:
             return True
 
@@ -108,27 +110,41 @@ class Abalone(data.Dataset):
     def _load_data(self):
         train_data_file = "train.data"
         val_file = "k_fold_cross_val.data"
-        
-        if self.train: 
-            train_data = pd.read_csv(os.path.join(self.root, train_data_file), sep='\t', header=None, skiprows = 1)
+
+        if self.train:
+            train_data = pd.read_csv(
+                os.path.join(self.root, train_data_file),
+                sep="\t",
+                header=None,
+                skiprows=1,
+            )
             train_data_all = train_data.values[:, 1:-1]
             train_targets_all = train_data.values[:, -1].astype(int)
-            
+
             if self.fold_id == 0:
                 self.data = torch.tensor(train_data_all, dtype=torch.float)
-                self.targets = torch.tensor(train_targets_all, dtype=torch.long) 
-            else:            
-                cross_val_ind = pd.read_csv(os.path.join(self.root, val_file), sep=' ', header=None)
+                self.targets = torch.tensor(train_targets_all, dtype=torch.long)
+            else:
+                cross_val_ind = pd.read_csv(
+                    os.path.join(self.root, val_file), sep=" ", header=None
+                )
                 cross_val_ind = cross_val_ind.values[:, 0:-1]
-                fold_index = (self.fold_id-1)*2 + int(self.fold_val)
-                k_fold_indices = cross_val_ind[fold_index,np.invert(np.isnan(cross_val_ind[fold_index,:]))].astype(int)
-                self.data = torch.tensor(train_data_all[k_fold_indices,:], dtype=torch.float)
-                self.targets = torch.tensor(train_targets_all[k_fold_indices], dtype=torch.long) 
- 
-        else: 
-            raise ValueError(f"This dataset does not have a separate file for test data.")
-        
-        
+                fold_index = (self.fold_id - 1) * 2 + int(self.fold_val)
+                k_fold_indices = cross_val_ind[
+                    fold_index, np.invert(np.isnan(cross_val_ind[fold_index, :]))
+                ].astype(int)
+                self.data = torch.tensor(
+                    train_data_all[k_fold_indices, :], dtype=torch.float
+                )
+                self.targets = torch.tensor(
+                    train_targets_all[k_fold_indices], dtype=torch.long
+                )
+
+        else:
+            raise ValueError(
+                f"This dataset does not have a separate file for test data."
+            )
+
     def download(self):
         """Download the data if it doesn't exist already."""
 
@@ -136,32 +152,35 @@ class Abalone(data.Dataset):
             print("Files are already downloaded and verified")
             return
 
-
         url = "http://persoal.citius.usc.es/manuel.fernandez.delgado/papers/jmlr/data.tar.gz"
         resp = requests.get(url, stream=True)
-        
+
         archive_path = os.path.abspath(os.path.join(self.root, os.pardir))
         tar_name = "data_hundreds_classifiers.tar.gz"
         tar_name_path = os.path.join(archive_path, tar_name)
         archive_unpacked_path = os.path.join(archive_path, "data_hundreds_classifiers")
-        
+
         if os.path.isfile(tar_name_path):
             print("Archive file is already downloaded")
-        else:        
-            tar_file = open(tar_name_path, 'wb')
+        else:
+            tar_file = open(tar_name_path, "wb")
             tar_file.write(resp.content)
-            tar_file.close()                     
-                
-        #Extract archive  
+            tar_file.close()
+
+        # Extract archive
         file = tarfile.open(tar_name_path)
         file.extractall(archive_unpacked_path)
-        file.close()            
-            
-        #Copy file to the dataset's directory
-        shutil.copyfile(os.path.join(archive_unpacked_path, "abalone", "abalone_R.dat"), os.path.join(self.root,"train.data"))               
-        #Copy file to the dataset's directory
-        shutil.copyfile(os.path.join(archive_unpacked_path, "abalone", "conxuntos_kfold.dat"), os.path.join(self.root,"k_fold_cross_val.data"))       
-        #Remove unpacked arhcive
-        shutil.rmtree(archive_unpacked_path) 
-        
-        
+        file.close()
+
+        # Copy file to the dataset's directory
+        shutil.copyfile(
+            os.path.join(archive_unpacked_path, "abalone", "abalone_R.dat"),
+            os.path.join(self.root, "train.data"),
+        )
+        # Copy file to the dataset's directory
+        shutil.copyfile(
+            os.path.join(archive_unpacked_path, "abalone", "conxuntos_kfold.dat"),
+            os.path.join(self.root, "k_fold_cross_val.data"),
+        )
+        # Remove unpacked arhcive
+        shutil.rmtree(archive_unpacked_path)

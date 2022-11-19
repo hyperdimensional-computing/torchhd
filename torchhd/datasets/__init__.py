@@ -17,5 +17,5 @@ __all__ = [
     "EMGHandGestures",
     "PAMAP",
     "CyclePowerPlant",
-    "Abalone",    
+    "Abalone",
 ]
