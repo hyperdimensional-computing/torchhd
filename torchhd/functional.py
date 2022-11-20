@@ -16,6 +16,7 @@ __all__ = [
     "identity_hv",
     "random_hv",
     "level_hv",
+    "thermometer_hv",
     "circular_hv",
     "bind",
     "bundle",
@@ -321,6 +322,100 @@ def level_hv(
             span_start_hv = span_hv[span_idx]
             span_end_hv = span_hv[span_idx + 1]
             hv[i] = torch.where(threshold_v[span_idx] < t, span_start_hv, span_end_hv)
+
+    hv.requires_grad = requires_grad
+    return hv.as_subclass(model)
+
+
+def thermometer_hv(
+    num_vectors: int,
+    dimensions: int,
+    model: Type[VSA_Model] = MAP,
+    *,
+    requires_grad=False,
+    **kwargs,
+) -> VSA_Model:
+    """Creates a thermometer code for given dimensionality.
+
+    Implements similarity-preserving hypervectors as described in `Sparse Binary Distributed Encoding of Scalars <https://doi.org/10.1615/J%20Automat%20Inf%20Scien.v37.i6.20>`_.
+
+    Args:
+        num_vectors (int): the number of hypervectors to generate.
+        dimensions (int): the dimensionality of the hypervectors.
+        model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAP``.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
+
+    Examples::
+
+        >>> torchhd.thermometer_hv(7, 6, torchhd.BSC)
+        tensor([[False, False, False, False, False, False],
+                [ True, False, False, False, False, False],
+                [ True,  True, False, False, False, False],
+                [ True,  True,  True, False, False, False],
+                [ True,  True,  True,  True, False, False],
+                [ True,  True,  True,  True,  True, False],
+                [ True,  True,  True,  True,  True,  True]])
+
+        >>> torchhd.thermometer_hv(4, 6, torchhd.MAP)
+        tensor([[-1., -1., -1., -1., -1., -1.],
+                [ 1.,  1., -1., -1., -1., -1.],
+                [ 1.,  1.,  1.,  1., -1., -1.],
+                [ 1.,  1.,  1.,  1.,  1.,  1.]])
+
+        >>> torchhd.thermometer_hv(6, 6, torchhd.FHRR)
+        tensor([[-1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
+                [ 1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
+                [ 1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
+                [ 1.+0.j,  1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
+                [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j],
+                [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j, -1.+-0.j]])
+
+    """
+    # Check if the requested number of vectors can be accommodated
+    if num_vectors > dimensions + 1:
+        raise ValueError(
+            f"For the given dimensionality: {dimensions}, the thermometer code cannot create more than {dimensions+1} hypervectors."
+        )
+    else:
+        # Based on num_vectors and dimensions compute step between neighboring hypervectors
+        step = 0
+        if num_vectors > 1:
+            step = (dimensions) // (num_vectors - 1)
+
+    # generate a random vector as a placeholder to get dtype and device
+    rand_hv = model.random_hv(
+        1,
+        dimensions,
+        **kwargs,
+    )
+
+    if model == BSC:
+        # Use binary vectors
+        hv = torch.zeros(
+            num_vectors,
+            dimensions,
+            dtype=rand_hv.dtype,
+            device=rand_hv.device,
+        )
+    elif (model == MAP) | (model == FHRR):
+        # Use bipolar vectors
+        hv = torch.full(
+            (
+                num_vectors,
+                dimensions,
+            ),
+            -1,
+            dtype=rand_hv.dtype,
+            device=rand_hv.device,
+        )
+    else:
+        raise ValueError(f"{model} HD/VSA model is not defined.")
+
+    # Create hypervectors using the obtained step
+    for i in range(1, num_vectors):
+        hv[i, 0 : i * step] = 1
 
     hv.requires_grad = requires_grad
     return hv.as_subclass(model)
