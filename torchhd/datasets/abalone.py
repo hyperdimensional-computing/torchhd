@@ -4,12 +4,10 @@ from typing import Callable, Optional, Tuple, List
 import torch
 from torch.utils import data
 import pandas as pd
-import requests
 import tarfile
-import shutil
 import numpy as np
 
-from .utils import download_file_from_google_drive, unzip_file
+from .utils import download_file
 
 
 class Abalone(data.Dataset):
@@ -96,10 +94,8 @@ class Abalone(data.Dataset):
             return False
 
         # Check if the root directory contains the required files
-        has_train_file = os.path.isfile(os.path.join(self.root, "train.data"))
-        has_k_fold_file = os.path.isfile(
-            os.path.join(self.root, "k_fold_cross_val.data")
-        )
+        has_train_file = os.path.isfile(os.path.join(self.root, "abalone_R.dat"))
+        has_k_fold_file = os.path.isfile(os.path.join(self.root, "conxuntos_kfold.dat"))
         if has_train_file and has_k_fold_file:
             return True
 
@@ -108,8 +104,8 @@ class Abalone(data.Dataset):
         return False
 
     def _load_data(self):
-        train_data_file = "train.data"
-        val_file = "k_fold_cross_val.data"
+        train_data_file = "abalone_R.dat"
+        val_file = "conxuntos_kfold.dat"
 
         if self.train:
             train_data = pd.read_csv(
@@ -153,34 +149,17 @@ class Abalone(data.Dataset):
             return
 
         url = "http://persoal.citius.usc.es/manuel.fernandez.delgado/papers/jmlr/data.tar.gz"
-        resp = requests.get(url, stream=True)
 
-        archive_path = os.path.abspath(os.path.join(self.root, os.pardir))
-        tar_name = "data_hundreds_classifiers.tar.gz"
-        tar_name_path = os.path.join(archive_path, tar_name)
-        archive_unpacked_path = os.path.join(archive_path, "data_hundreds_classifiers")
+        data_dir = os.path.join(self.root, os.pardir)
+        archive_path = os.path.join(data_dir, "data_hundreds_classifiers.tar.gz")
 
-        if os.path.isfile(tar_name_path):
+        if os.path.isfile(archive_path):
             print("Archive file is already downloaded")
         else:
-            tar_file = open(tar_name_path, "wb")
-            tar_file.write(resp.content)
-            tar_file.close()
+            download_file(url, archive_path)
 
         # Extract archive
-        file = tarfile.open(tar_name_path)
-        file.extractall(archive_unpacked_path)
-        file.close()
-
-        # Copy file to the dataset's directory
-        shutil.copyfile(
-            os.path.join(archive_unpacked_path, "abalone", "abalone_R.dat"),
-            os.path.join(self.root, "train.data"),
-        )
-        # Copy file to the dataset's directory
-        shutil.copyfile(
-            os.path.join(archive_unpacked_path, "abalone", "conxuntos_kfold.dat"),
-            os.path.join(self.root, "k_fold_cross_val.data"),
-        )
-        # Remove unpacked arhcive
-        shutil.rmtree(archive_unpacked_path)
+        with tarfile.open(archive_path) as file:
+            for member in file.getmembers():
+                if member.name.startswith("abalone"):
+                    file.extract(member, data_dir)

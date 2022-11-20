@@ -1,7 +1,6 @@
 import zipfile
 import requests
-
-CHUNK_SIZE = 32768
+import shutil
 
 
 def download_file(url, destination):
@@ -36,10 +35,8 @@ def get_google_drive_confirm_token(response):
 
 
 def write_response_to_disk(response, destination):
-    with open(destination, "wb") as f:
-        for chunk in response.iter_content(CHUNK_SIZE):
-            if chunk:  # filter out keep-alive new chunks
-                f.write(chunk)
+    with open(destination, 'wb') as file:
+        shutil.copyfileobj(response.raw, file)
 
 
 def unzip_file(file, destination):
