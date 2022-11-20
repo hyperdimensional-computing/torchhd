@@ -35,7 +35,7 @@ def get_google_drive_confirm_token(response):
 
 
 def write_response_to_disk(response, destination):
-    with open(destination, 'wb') as file:
+    with open(destination, "wb") as file:
         shutil.copyfileobj(response.raw, file)
 
 
