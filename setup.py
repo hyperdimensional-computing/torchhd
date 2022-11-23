@@ -23,6 +23,7 @@ setup(
         "pandas",
         "numpy",
         "requests",
+        "tqdm",
     ],
     packages=find_packages(exclude=["docs", "torchhd.tests", "examples"]),
     python_requires=">=3.6, <4",
