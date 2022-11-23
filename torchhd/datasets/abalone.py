@@ -157,7 +157,9 @@ class Abalone(data.Dataset):
         if os.path.isfile(archive_path):
             print("Archive file is already downloaded")
         else:
-            download_file_from_google_drive("1Z3tEzCmR-yTvn1ZlAXaeAuVB5a9oCAkk", archive_path)
+            download_file_from_google_drive(
+                "1Z3tEzCmR-yTvn1ZlAXaeAuVB5a9oCAkk", archive_path
+            )
 
         # Extract archive
         with tarfile.open(archive_path) as file:
