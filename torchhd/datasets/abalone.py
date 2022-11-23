@@ -7,7 +7,7 @@ import pandas as pd
 import tarfile
 import numpy as np
 
-from .utils import download_file
+from .utils import download_file_from_google_drive
 
 
 class Abalone(data.Dataset):
@@ -148,7 +148,8 @@ class Abalone(data.Dataset):
             print("Files are already downloaded and verified")
             return
 
-        url = "http://persoal.citius.usc.es/manuel.fernandez.delgado/papers/jmlr/data.tar.gz"
+        # original data url
+        # http://persoal.citius.usc.es/manuel.fernandez.delgado/papers/jmlr/data.tar.gz
 
         data_dir = os.path.join(self.root, os.pardir)
         archive_path = os.path.join(data_dir, "data_hundreds_classifiers.tar.gz")
@@ -156,7 +157,7 @@ class Abalone(data.Dataset):
         if os.path.isfile(archive_path):
             print("Archive file is already downloaded")
         else:
-            download_file(url, archive_path)
+            download_file_from_google_drive("1Z3tEzCmR-yTvn1ZlAXaeAuVB5a9oCAkk", archive_path)
 
         # Extract archive
         with tarfile.open(archive_path) as file:
