@@ -44,7 +44,6 @@ class CollectionDataset(data.Dataset):
                 "Dataset not found or corrupted. You can try to specify download=True to download it"
             )
 
-
     def _check_integrity(self) -> bool:
         if not os.path.isdir(self.root):
             return False
@@ -53,12 +52,12 @@ class CollectionDataset(data.Dataset):
         if self.__has_test:
             has_train_file = os.path.isfile(
                 os.path.join(self.root, self.__dataset + "_train_R.dat")
-            )            
+            )
         else:
             has_train_file = os.path.isfile(
                 os.path.join(self.root, self.__dataset + "_R.dat")
             )
-        
+
         has_k_fold_file = os.path.isfile(os.path.join(self.root, "conxuntos_kfold.dat"))
         has_fold_file = os.path.isfile(os.path.join(self.root, "conxuntos.dat"))
 
@@ -96,7 +95,6 @@ class CollectionDataset(data.Dataset):
                     file.extract(member, data_dir)
 
 
-
 class DatasetFourFold(CollectionDataset):
     """`Generic class for loading datasets without separate test data that were used in `Do we Need Hundreds of Classifiers to Solve Real World Classification Problems? <https://jmlr.org/papers/v15/delgado14a.html>`_.
 
@@ -104,7 +102,7 @@ class DatasetFourFold(CollectionDataset):
         dataset (string): Name of the dataset. Used when downloading
         root (string): Root directory containing the files of the dataset.
         train (bool): If True, returns training (sub)set from the file storing training data as further determined by fold and hyper_search variables.
-            Otherwise returns a subset of train dataset if hypersearch is performed (hyper_search = True) if not (hyper_search = False) returns a subset of training dataset 
+            Otherwise returns a subset of train dataset if hypersearch is performed (hyper_search = True) if not (hyper_search = False) returns a subset of training dataset
             as specified in ``conxuntos_kfold.dat`` if fold number is correct. Otherwise issues an error.
         fold (int): Specifies which fold number to use. The default value of -1 returns the whole train data from the corresponding file.
             Values between 0 and 3 specify, which fold in ``conxuntos_kfold.dat`` to use. Relevant only if hyper_search is set to False and  0<=fold<=3.
@@ -136,7 +134,7 @@ class DatasetFourFold(CollectionDataset):
         transform: Optional[Callable],
         target_transform: Optional[Callable],
     ):
-        super().__init__(dataset,root,self.HAS_TEST,download)
+        super().__init__(dataset, root, self.HAS_TEST, download)
         self.__dataset = dataset
         self.train = train
         self.fold = fold
@@ -167,7 +165,6 @@ class DatasetFourFold(CollectionDataset):
             label = self.target_transform(label)
 
         return sample, label
-
 
     def _load_data(self):
         # Files with pregenerated folds with indices
@@ -299,7 +296,7 @@ class DatasetTrainTest(CollectionDataset):
         transform: Optional[Callable],
         target_transform: Optional[Callable],
     ):
-        super().__init__(dataset,root,self.HAS_TEST,download)
+        super().__init__(dataset, root, self.HAS_TEST, download)
         self.__dataset = dataset
         self.train = train
         self.hyper_search = hyper_search
@@ -329,7 +326,6 @@ class DatasetTrainTest(CollectionDataset):
             label = self.target_transform(label)
 
         return sample, label
-
 
     def _load_data(self):
         # Files with pregenerated folds with indices
@@ -405,7 +401,3 @@ class DatasetTrainTest(CollectionDataset):
                     raise ValueError(
                         f"This dataset does not have a separate file for test data. Please check if the correct class is used."
                     )
-
-
-
-

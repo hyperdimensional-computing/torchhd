@@ -1,13 +1,14 @@
 from typing import Callable, Optional, Tuple, List
 from torchhd.datasets import DatasetFourFold
 
+
 class Abalone(DatasetFourFold):
     """`Abalone <https://archive.ics.uci.edu/ml/datasets/abalone>`_ dataset.
 
     Args:
         root (string): Root directory containing the files of the dataset.
         train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by fold and hyper_search variables.
-            Otherwise returns a subset of train dataset if hypersearch is performed (hyper_search = True) if not (hyper_search = False) returns a subset of training dataset 
+            Otherwise returns a subset of train dataset if hypersearch is performed (hyper_search = True) if not (hyper_search = False) returns a subset of training dataset
             as specified in ``conxuntos_kfold.dat`` if fold number is correct. Otherwise issues an error.
         fold (int, optional): Specifies which fold number to use. The default value of -1 returns the whole train data from the corresponding file.
             Values between 0 and 3 specify, which fold in ``conxuntos_kfold.dat`` to use. Relevant only if hyper_search is set to False and  0<=fold<=3.
@@ -28,7 +29,7 @@ class Abalone(DatasetFourFold):
         "1",
         "2",
     ]
-   
+
     # Useful to specify name once to avoid changing it in several places
     DATASET = "abalone"
 
@@ -42,7 +43,13 @@ class Abalone(DatasetFourFold):
         target_transform: Optional[Callable] = None,
         download: bool = False,
     ):
-        super().__init__(self.DATASET,root,train,fold,hyper_search,download,transform,target_transform)
-
-
-
+        super().__init__(
+            self.DATASET,
+            root,
+            train,
+            fold,
+            hyper_search,
+            download,
+            transform,
+            target_transform,
+        )

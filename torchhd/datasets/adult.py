@@ -1,6 +1,7 @@
 from typing import Callable, Optional, Tuple, List
 from torchhd.datasets import DatasetTrainTest
 
+
 class Adult(DatasetTrainTest):
     """`Adult <https://archive.ics.uci.edu/ml/datasets/adult>`_ dataset.
 
@@ -23,7 +24,7 @@ class Adult(DatasetTrainTest):
         ">50K",
         "<=50K",
     ]
-   
+
     # Useful to specify name once to avoid changing it in several places
     DATASET = "adult"
 
@@ -37,4 +38,12 @@ class Adult(DatasetTrainTest):
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
     ):
-        super().__init__(self.DATASET,root,train,hyper_search,download,transform,target_transform)
+        super().__init__(
+            self.DATASET,
+            root,
+            train,
+            hyper_search,
+            download,
+            transform,
+            target_transform,
+        )
