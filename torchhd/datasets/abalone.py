@@ -43,4 +43,6 @@ class Abalone(DatasetFourFold):
         target_transform: Optional[Callable] = None,
         download: bool = False,
     ):
-        super().__init__(root,train,fold,hyper_search,download,transform,target_transform)
+        super().__init__(
+            root, train, fold, hyper_search, download, transform, target_transform
+        )

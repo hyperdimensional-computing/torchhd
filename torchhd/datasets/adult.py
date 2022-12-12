@@ -37,4 +37,6 @@ class Adult(DatasetTrainTest):
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
     ):
-        super().__init__(root,train,hyper_search,download,transform,target_transform)
+        super().__init__(
+            root, train, hyper_search, download, transform, target_transform
+        )
