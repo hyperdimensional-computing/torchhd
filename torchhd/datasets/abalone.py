@@ -31,7 +31,7 @@ class Abalone(DatasetFourFold):
     ]
 
     # Useful to specify name once to avoid changing it in several places
-    DATASET = "abalone"
+    name = "abalone"
 
     def __init__(
         self,
@@ -43,13 +43,4 @@ class Abalone(DatasetFourFold):
         target_transform: Optional[Callable] = None,
         download: bool = False,
     ):
-        super().__init__(
-            self.DATASET,
-            root,
-            train,
-            fold,
-            hyper_search,
-            download,
-            transform,
-            target_transform,
-        )
+        super().__init__(root,train,fold,hyper_search,download,transform,target_transform)

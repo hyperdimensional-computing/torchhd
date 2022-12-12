@@ -26,24 +26,15 @@ class Adult(DatasetTrainTest):
     ]
 
     # Useful to specify name once to avoid changing it in several places
-    DATASET = "adult"
+    name = "adult"
 
     def __init__(
         self,
         root: str,
         train: bool = True,
-        fold: int = -1,
         hyper_search: bool = False,
         download: bool = False,
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
     ):
-        super().__init__(
-            self.DATASET,
-            root,
-            train,
-            hyper_search,
-            download,
-            transform,
-            target_transform,
-        )
+        super().__init__(root,train,hyper_search,download,transform,target_transform)

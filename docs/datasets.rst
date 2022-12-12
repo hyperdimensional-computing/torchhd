@@ -20,3 +20,7 @@ The Torchhd library provides many popular built-in datasets to work with.
     PAMAP
     CyclePowerPlant
     Abalone
+    Adult
+    CollectionDataset
+    DatasetFourFold
+    DatasetTrainTest
