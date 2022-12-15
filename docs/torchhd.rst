@@ -18,6 +18,7 @@ Basis-hypervector sets
     identity_hv
     random_hv
     level_hv
+    thermometer_hv
     circular_hv
     
 
