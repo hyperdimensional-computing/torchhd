@@ -146,7 +146,7 @@ class DatasetFourFold(CollectionDataset):
         hyper_search: bool = False,
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
-        download: bool = False
+        download: bool = False,
     ):
         self.train = train
         self.fold = fold
@@ -158,9 +158,7 @@ class DatasetFourFold(CollectionDataset):
             return False
 
         # Check if the root directory contains the required files
-        has_train_file = os.path.isfile(
-            os.path.join(self.root, self.name + "_R.dat")
-        )
+        has_train_file = os.path.isfile(os.path.join(self.root, self.name + "_R.dat"))
 
         has_k_fold_file = os.path.isfile(os.path.join(self.root, "conxuntos_kfold.dat"))
         has_fold_file = os.path.isfile(os.path.join(self.root, "conxuntos.dat"))
@@ -290,11 +288,11 @@ class DatasetTrainTest(CollectionDataset):
     def __init__(
         self,
         root: str,
-        train: bool =True,
+        train: bool = True,
         hyper_search: bool = False,
-        transform: Optional[Callable] =None,
-        target_transform: Optional[Callable] =None,
-        download: bool =False,
+        transform: Optional[Callable] = None,
+        target_transform: Optional[Callable] = None,
+        download: bool = False,
     ):
         self.train = train
         self.hyper_search = hyper_search
