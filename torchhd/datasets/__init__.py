@@ -6,9 +6,9 @@ from torchhd.datasets.airfoil_self_noise import AirfoilSelfNoise
 from torchhd.datasets.emg_hand_gestures import EMGHandGestures
 from torchhd.datasets.pamap import PAMAP
 from torchhd.datasets.ccpp import CyclePowerPlant
-from torchhd.datasets.collection_datasets import CollectionDataset
-from torchhd.datasets.collection_datasets import DatasetFourFold
-from torchhd.datasets.collection_datasets import DatasetTrainTest
+from torchhd.datasets.dataset import CollectionDataset
+from torchhd.datasets.dataset import DatasetFourFold
+from torchhd.datasets.dataset import DatasetTrainTest
 from torchhd.datasets.abalone import Abalone
 from torchhd.datasets.adult import Adult
 
