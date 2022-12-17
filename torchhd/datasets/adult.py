@@ -25,4 +25,3 @@ class Adult(DatasetTrainTest):
         ">50K",
         "<=50K",
     ]
-

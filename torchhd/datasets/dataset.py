@@ -146,8 +146,18 @@ class DatasetFourFold(CollectionDataset):
         hyper_search: bool = False,
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
-        download: bool = False
+        download: bool = False,
     ):
+        if (fold < -1) or (fold >= self.num_folds):
+            raise ValueError(
+                f"Fold number {fold} is not available. Fold should be between -1 and {self.num_folds - 1}"
+            )
+
+        if not train and fold == -1 and not hyper_search:
+            raise ValueError(
+                "This dataset does not have a separate file for test data. Please check that fold is specified correctly."
+            )
+
         self.train = train
         self.fold = fold
         self.hyper_search = hyper_search
@@ -158,9 +168,7 @@ class DatasetFourFold(CollectionDataset):
             return False
 
         # Check if the root directory contains the required files
-        has_train_file = os.path.isfile(
-            os.path.join(self.root, self.name + "_R.dat")
-        )
+        has_train_file = os.path.isfile(os.path.join(self.root, self.name + "_R.dat"))
 
         has_k_fold_file = os.path.isfile(os.path.join(self.root, "conxuntos_kfold.dat"))
         has_fold_file = os.path.isfile(os.path.join(self.root, "conxuntos.dat"))
@@ -173,100 +181,43 @@ class DatasetFourFold(CollectionDataset):
         return False
 
     def _load_data(self):
-        # Files with pregenerated folds with indices
-        k_fold_file = "conxuntos_kfold.dat"
-        hyper_search_file = "conxuntos.dat"
-
-        # Names of data file
-        train_data_file = self.name + "_R.dat"
-
-        # Load train data
-        train_data = pd.read_csv(
-            os.path.join(self.root, train_data_file),
-            sep="\t",
-            header=None,
-            skiprows=1,
-        )
-        # Skip number & target columns
-        train_targets_all = train_data.values[:, -1].astype(int)
-        train_data_all = train_data.values[:, 1:-1]
+        data_path = os.path.join(self.root, self.name + "_R.dat")
+        data = np.loadtxt(data_path, skiprows=1, dtype=np.float32)
+        # Separate the targets from the data
+        targets = torch.from_numpy(data[:, -1].astype(np.int64))
+        data = torch.from_numpy(data[:, 1:-1])
 
         # Load fold used in hyperparameter search if necessary
         if self.hyper_search:
-            hyper_search_ind = pd.read_csv(
-                os.path.join(self.root, hyper_search_file), sep=" ", header=None
-            ).values
-        # Load k-fold if necessary
-        if self.fold >= 0:
-            cross_val_ind = pd.read_csv(
-                os.path.join(self.root, k_fold_file), sep=" ", header=None
-            ).values
+            # Files with pre-generated folds with indices
+            hyper_split_path = os.path.join(self.root, "conxuntos.dat")
+            line_idx = 0 if self.train else 1
 
-        # train = True  - some form of train data is requested
-        if self.train:
-            # If hyperparameter search is being performed
-            if self.hyper_search:
-                indices = hyper_search_ind[
-                    0, np.invert(np.isnan(hyper_search_ind[0, :]))
-                ].astype(int)
-                self.data = torch.tensor(train_data_all[indices, :], dtype=torch.float)
-                self.targets = torch.tensor(
-                    train_targets_all[indices], dtype=torch.long
-                )
-            # If regular training is going on
-            else:
-                # If no fold is specified
-                if self.fold == -1:
-                    self.data = torch.tensor(train_data_all, dtype=torch.float)
-                    self.targets = torch.tensor(train_targets_all, dtype=torch.long)
-                elif (self.fold >= 0) and (self.fold < self.num_folds):
-                    # Identify which row of cross_val_ind to index - even number
-                    fold_index = self.fold * 2
-                    indices = cross_val_ind[
-                        fold_index, np.invert(np.isnan(cross_val_ind[fold_index, :]))
-                    ].astype(int)
-                    self.data = torch.tensor(
-                        train_data_all[indices, :], dtype=torch.float
-                    )
-                    self.targets = torch.tensor(
-                        train_targets_all[indices], dtype=torch.long
-                    )
-                # Wrong fold number
-                else:
-                    raise ValueError(
-                        f"No such fold number. Please check that it is specified correctly"
-                    )
-        # train = False  - some form of test data is requested
-        else:
-            # If hyperparameter search is being performed
-            if self.hyper_search:
-                indices = hyper_search_ind[
-                    1, np.invert(np.isnan(hyper_search_ind[1, :]))
-                ].astype(int)
-                self.data = torch.tensor(train_data_all[indices, :], dtype=torch.float)
-                self.targets = torch.tensor(
-                    train_targets_all[indices], dtype=torch.long
-                )
-            # If regular testing is going on
-            else:
-                # Check that fold number is within limits otherwise issue error
-                if (self.fold >= 0) and (self.fold < self.num_folds):
-                    # Identify which row of cross_val_ind to index - odd number
-                    fold_index = self.fold * 2 + 1
-                    indices = cross_val_ind[
-                        fold_index,
-                        np.invert(np.isnan(cross_val_ind[fold_index, :])),
-                    ].astype(int)
-                    self.data = torch.tensor(
-                        train_data_all[indices, :], dtype=torch.float
-                    )
-                    self.targets = torch.tensor(
-                        train_targets_all[indices], dtype=torch.long
-                    )
-                else:
-                    raise ValueError(
-                        f"This dataset does not have a separate file for test data. Please check that fold is specified correctly"
-                    )
+            with open(hyper_split_path, "r") as file:
+                lines = file.readlines()
+                indices = np.fromstring(lines[line_idx], sep=" ", dtype=np.int64)
+                indices = torch.from_numpy(indices)
+
+                data = data[indices]
+                targets = targets[indices]
+
+        elif self.fold != -1:
+            # Files with pre-generated folds with indices
+            k_fold_path = os.path.join(self.root, "conxuntos_kfold.dat")
+            fold_idx = self.fold * 2
+            if not self.train:
+                fold_idx += 1
+
+            with open(k_fold_path, "r") as file:
+                lines = file.readlines()
+                indices = np.fromstring(lines[fold_idx], sep=" ", dtype=np.int64)
+                indices = torch.from_numpy(indices)
+
+                data = data[indices]
+                targets = targets[indices]
+
+        self.data = data
+        self.targets = targets
 
 
 class DatasetTrainTest(CollectionDataset):
@@ -290,11 +241,11 @@ class DatasetTrainTest(CollectionDataset):
     def __init__(
         self,
         root: str,
-        train: bool =True,
+        train: bool = True,
         hyper_search: bool = False,
-        transform: Optional[Callable] =None,
-        target_transform: Optional[Callable] =None,
-        download: bool =False,
+        transform: Optional[Callable] = None,
+        target_transform: Optional[Callable] = None,
+        download: bool = False,
     ):
         self.train = train
         self.hyper_search = hyper_search
@@ -320,69 +271,32 @@ class DatasetTrainTest(CollectionDataset):
         return False
 
     def _load_data(self):
-        # Files with pregenerated folds with indices
-        hyper_search_file = "conxuntos.dat"
+        if self.train or self.hyper_search:
+            data_name = self.name + "_train_R.dat"
+        else:
+            data_name = self.name + "_test_R.dat"
 
-        # Names of data file
-        train_data_file = self.name + "_train_R.dat"
-        test_data_file = self.name + "_test_R.dat"
+        data_path = os.path.join(self.root, data_name)
 
-        # Load train data
-        train_data = pd.read_csv(
-            os.path.join(self.root, train_data_file),
-            sep="\t",
-            header=None,
-            skiprows=1,
-        )
-        # Skip number & target columns
-        train_targets_all = train_data.values[:, -1].astype(int)
-        train_data_all = train_data.values[:, 1:-1]
-
-        # Load test data
-        test_data = pd.read_csv(
-            os.path.join(self.root, test_data_file),
-            sep="\t",
-            header=None,
-            skiprows=1,
-        )
-        # Skip number & target columns
-        test_targets = test_data.values[:, -1].astype(int)
-        test_data = test_data.values[:, 1:-1]
+        data = np.loadtxt(data_path, skiprows=1, dtype=np.float32)
+        # Separate the targets from the data
+        targets = torch.from_numpy(data[:, -1].astype(np.int64))
+        data = torch.from_numpy(data[:, 1:-1])
 
         # Load fold used in hyperparameter search if necessary
         if self.hyper_search:
-            hyper_search_ind = pd.read_csv(
-                os.path.join(self.root, hyper_search_file), sep=" ", header=None
-            ).values
 
-        # train = True  - some form of train data is requested
-        if self.train:
-            # If hyperparameter search is being performed
-            if self.hyper_search:
-                indices = hyper_search_ind[
-                    0, np.invert(np.isnan(hyper_search_ind[0, :]))
-                ].astype(int)
-                self.data = torch.tensor(train_data_all[indices, :], dtype=torch.float)
-                self.targets = torch.tensor(
-                    train_targets_all[indices], dtype=torch.long
-                )
-            # If regular training is going on
-            else:
-                self.data = torch.tensor(train_data_all, dtype=torch.float)
-                self.targets = torch.tensor(train_targets_all, dtype=torch.long)
+            # Files with pre-generated folds with indices
+            hyper_split_path = os.path.join(self.root, "conxuntos.dat")
+            line_idx = 0 if self.train else 1
 
-        # train = False  - some form of test data is requested
-        else:
-            # If hyperparameter search is being performed
-            if self.hyper_search:
-                indices = hyper_search_ind[
-                    1, np.invert(np.isnan(hyper_search_ind[1, :]))
-                ].astype(int)
-                self.data = torch.tensor(train_data_all[indices, :], dtype=torch.float)
-                self.targets = torch.tensor(
-                    train_targets_all[indices], dtype=torch.long
-                )
-            # If regular testing is going on
-            else:
-                self.data = torch.tensor(test_data, dtype=torch.float)
-                self.targets = torch.tensor(test_targets, dtype=torch.long)
+            with open(hyper_split_path, "r") as file:
+                lines = file.readlines()
+                indices = np.fromstring(lines[line_idx], sep=" ", dtype=np.int64)
+                indices = torch.from_numpy(indices)
+
+                data = data[indices]
+                targets = targets[indices]
+
+        self.data = data
+        self.targets = targets
