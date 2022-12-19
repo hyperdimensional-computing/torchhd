@@ -16,11 +16,11 @@ class CollectionDataset(data.Dataset):
 
     Args:
         root (string): Root directory containing the files of the dataset.
-        transform (callable): A function/transform that takes in an torch.FloatTensor
+        transform (callable, optional): A function/transform that takes in an torch.FloatTensor
             and returns a transformed version.
-        target_transform (callable): A function/transform that takes in the
+        target_transform (callable, optional): A function/transform that takes in the
             target and transforms it.
-        download (bool): If True, downloads the dataset from the internet and
+        download (bool, optional): If True, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
     """
@@ -33,9 +33,9 @@ class CollectionDataset(data.Dataset):
     def __init__(
         self,
         root: str,
-        transform: Optional[Callable],
-        target_transform: Optional[Callable],
-        download: bool,
+        transform: Optional[Callable] = None,
+        target_transform: Optional[Callable] = None,
+        download: bool = False,
     ):
         root = os.path.join(root, self.name)
         root = os.path.expanduser(root)
@@ -114,23 +114,23 @@ class CollectionDataset(data.Dataset):
 
 
 class DatasetFourFold(CollectionDataset):
-    """`Generic class for loading datasets without separate test data that were used in `Do we Need Hundreds of Classifiers to Solve Real World Classification Problems? <https://jmlr.org/papers/v15/delgado14a.html>`_.
+    """Generic class for loading datasets without separate test data that were used in `Do we Need Hundreds of Classifiers to Solve Real World Classification Problems? <https://jmlr.org/papers/v15/delgado14a.html>`_.
 
     Args:
         root (string): Root directory containing the files of the dataset.
-        train (bool): If True, returns training (sub)set from the file storing training data as further determined by fold and hyper_search variables.
-            Otherwise returns a subset of train dataset if hypersearch is performed (hyper_search = True) if not (hyper_search = False) returns a subset of training dataset
+        train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by fold and hyper_search variables.
+            Otherwise returns a subset of train dataset if hypersearch is performed (``hyper_search = True``) if not (``hyper_search = False``) returns a subset of training dataset
             as specified in ``conxuntos_kfold.dat`` if fold number is correct. Otherwise issues an error.
-        fold (int): Specifies which fold number to use. The default value of -1 returns the whole train data from the corresponding file.
-            Values between 0 and 3 specify, which fold in ``conxuntos_kfold.dat`` to use. Relevant only if hyper_search is set to False and  0<=fold<=3.
+        fold (int, optional): Specifies which fold number to use. The default value of -1 returns all the training data from the corresponding file.
+            Values between 0 and 3 specify, which fold in ``conxuntos_kfold.dat`` to use. Relevant only if hyper_search is set to False and ``0 <= fold <= 3``.
             Indices in even rows (zero indexing) of ``conxuntos_kfold.dat`` correspond to train subsets while indices in odd rows correspond to test subsets.
-        hyper_search (bool): If True, creates dataset using indeces in ``conxuntos.dat``. This split is used for hyperparameter search. The first row corresponds to train indices (used if train = True)
-            while the second row corresponds to test indices (used if train = False).
-        transform (callable): A function/transform that takes in an torch.FloatTensor
+        hyper_search (bool, optional): If True, creates dataset using indeces in ``conxuntos.dat``. This split is used for hyperparameter search. The first row corresponds to train indices (used if ``train = True``)
+            while the second row corresponds to test indices (used if ``train = False``).
+        transform (callable, optional): A function/transform that takes in an torch.FloatTensor
             and returns a transformed version.
-        target_transform (callable): A function/transform that takes in the
+        target_transform (callable, optional): A function/transform that takes in the
             target and transforms it.
-        download (bool): If True, downloads the dataset from the internet and
+        download (bool, optional): If True, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
     """
@@ -221,19 +221,19 @@ class DatasetFourFold(CollectionDataset):
 
 
 class DatasetTrainTest(CollectionDataset):
-    """`Generic class for loading datasets with separate files for train and test data that were used in `Do we Need Hundreds of Classifiers to Solve Real World Classification Problems? <https://jmlr.org/papers/v15/delgado14a.html>`_.
+    """Generic class for loading datasets with separate files for train and test data that were used in `Do we Need Hundreds of Classifiers to Solve Real World Classification Problems? <https://jmlr.org/papers/v15/delgado14a.html>`_.
 
     Args:
         root (string): Root directory containing the files of the dataset.
-        train (bool): If True, returns training (sub)set from the file storing training data as further determined by hyper_search variable.
-            Otherwise returns a subset of train dataset if hypersearch is performed (hyper_search = True) if not (hyper_search = False) returns test set.
-        hyper_search (bool): If True, creates dataset using indeces in ``conxuntos.dat``. This split is used for hyperparameter search. The first row corresponds to train indices (used if train = True)
-            while the second row corresponds to test indices (used if train = False).
-        transform (callable): A function/transform that takes in an torch.FloatTensor
+        train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by hyper_search variable.
+            Otherwise returns a subset of train dataset if hyperparameter search is performed (``hyper_search = True``) if not (``hyper_search = False``) returns test set.
+        hyper_search (bool, optional): If True, creates dataset using indices in ``conxuntos.dat``. This split is used for hyperparameter search. The first row corresponds to train indices (used if ``train = True``)
+            while the second row corresponds to test indices (used if ``train = False``).
+        transform (callable, optional): A function/transform that takes in an torch.FloatTensor
             and returns a transformed version.
-        target_transform (callable): A function/transform that takes in the
+        target_transform (callable, optional): A function/transform that takes in the
             target and transforms it.
-        download (bool): If True, downloads the dataset from the internet and
+        download (bool, optional): If True, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
     """

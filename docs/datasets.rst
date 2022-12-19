@@ -21,6 +21,15 @@ The Torchhd library provides many popular built-in datasets to work with.
     CyclePowerPlant
     Abalone
     Adult
+
+
+Base classes
+------------------------
+
+.. autosummary::
+    :toctree: generated/
+    :template: class_dataset.rst
+
     CollectionDataset
     DatasetFourFold
     DatasetTrainTest
