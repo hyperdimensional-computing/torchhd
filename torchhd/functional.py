@@ -708,7 +708,7 @@ def negative(input: VSA_Model) -> VSA_Model:
 def soft_quantize(input: Tensor):
     """Applies the hyperbolic tanh function to all elements of the input tensor.
 
-    .. warning:: 
+    .. warning::
         This function does not take the VSA model class into account.
 
     Args:
@@ -737,7 +737,7 @@ def soft_quantize(input: Tensor):
 def hard_quantize(input: Tensor):
     """Applies binary quantization to all elements of the input tensor.
 
-    .. warning:: 
+    .. warning::
         This function does not take the VSA model class into account.
 
     Args:
