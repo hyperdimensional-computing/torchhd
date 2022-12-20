@@ -708,6 +708,9 @@ def negative(input: VSA_Model) -> VSA_Model:
 def soft_quantize(input: Tensor):
     """Applies the hyperbolic tanh function to all elements of the input tensor.
 
+    .. warning::
+        This function does not take the VSA model class into account.
+
     Args:
         input (Tensor): input tensor.
 
@@ -717,12 +720,15 @@ def soft_quantize(input: Tensor):
 
     Examples::
 
-        >>> x = functional.random_hv(2, 3)
-        >>> y = functional.bundle(x[0], x[1])
+        >>> x = torchhd.random_hv(2, 6)
+        >>> x
+        tensor([[ 1.,  1., -1.,  1.,  1.,  1.],
+            [ 1., -1., -1., -1.,  1., -1.]])
+        >>> y = torchhd.bundle(x[0], x[1])
         >>> y
-        tensor([0., 2., 0.])
-        >>> functional.soft_quantize(y)
-        tensor([0.0000, 0.9640, 0.0000])
+        tensor([ 2.,  0., -2.,  0.,  2.,  0.])
+        >>> torchhd.soft_quantize(y)
+        tensor([ 0.9640,  0.0000, -0.9640,  0.0000,  0.9640,  0.0000])
 
     """
     return torch.tanh(input)
@@ -730,6 +736,9 @@ def soft_quantize(input: Tensor):
 
 def hard_quantize(input: Tensor):
     """Applies binary quantization to all elements of the input tensor.
+
+    .. warning::
+        This function does not take the VSA model class into account.
 
     Args:
         input (Tensor): input tensor
@@ -740,12 +749,15 @@ def hard_quantize(input: Tensor):
 
     Examples::
 
-        >>> x = functional.random_hv(2, 3)
-        >>> y = functional.bundle(x[0], x[1])
+        >>> x = torchhd.random_hv(2, 6)
+        >>> x
+        tensor([[ 1.,  1., -1.,  1.,  1.,  1.],
+            [ 1., -1., -1., -1.,  1., -1.]])
+        >>> y = torchhd.bundle(x[0], x[1])
         >>> y
-        tensor([ 0., -2., -2.])
-        >>> functional.hard_quantize(y)
-        tensor([ 1., -1., -1.])
+        tensor([ 2.,  0., -2.,  0.,  2.,  0.])
+        >>> torchhd.hard_quantize(y)
+        tensor([ 1., -1., -1., -1.,  1., -1.])
 
     """
     # Make sure that the output tensor has the same dtype and device
