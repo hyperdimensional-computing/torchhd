@@ -22,6 +22,7 @@ requirements:
     - pytorch
     - pandas
     - requests
+    - tqdm
 
 test:
   imports:
