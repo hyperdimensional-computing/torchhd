@@ -27,7 +27,7 @@ class ChessKrvk(DatasetFourFold):
     name = "chess-krvk"
     classes: List[str] = [
         "draw",
-        "0",        
+        "0",
         "1",
         "2",
         "3",

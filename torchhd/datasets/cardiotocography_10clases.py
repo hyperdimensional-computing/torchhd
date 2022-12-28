@@ -37,4 +37,3 @@ class Cardiotocography10Clases(DatasetFourFold):
         "9",
         "10",
     ]
-

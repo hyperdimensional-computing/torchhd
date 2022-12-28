@@ -31,8 +31,6 @@ from torchhd.datasets.cardiotocography_10clases import Cardiotocography10Clases
 from torchhd.datasets.chess_krvk import ChessKrvk
 
 
-
-
 __all__ = [
     "BeijingAirQuality",
     "ISOLET",
@@ -47,7 +45,7 @@ __all__ = [
     "DatasetTrainTest",
     "Abalone",
     "Adult",
-    "AcuteInflammation",    
+    "AcuteInflammation",
     "AcuteNephritis",
     "Annealing",
     "Arrhythmia",

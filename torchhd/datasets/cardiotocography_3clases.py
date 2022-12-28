@@ -30,4 +30,3 @@ class Cardiotocography3Clases(DatasetFourFold):
         "suspect",
         "pathologic",
     ]
-
