@@ -21,7 +21,24 @@ The Torchhd library provides many popular built-in datasets to work with.
     CyclePowerPlant
     Abalone
     Adult
-
+    AcuteInflammation    
+    AcuteNephritis
+    Annealing
+    Arrhythmia
+    AudiologyStd
+    BalanceScale
+    Balloons
+    Bank
+    Blood
+    BreastCancer
+    BreastCancerWisc
+    BreastCancerWiscDiag
+    BreastCancerWiscProg
+    BreastTissue
+    Car
+    Cardiotocography3Clases
+    Cardiotocography10Clases
+    ChessKrvk
 
 Base classes
 ------------------------
