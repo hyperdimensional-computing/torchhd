@@ -29,6 +29,26 @@ from torchhd.datasets.car import Car
 from torchhd.datasets.cardiotocography_3clases import Cardiotocography3Clases
 from torchhd.datasets.cardiotocography_10clases import Cardiotocography10Clases
 from torchhd.datasets.chess_krvk import ChessKrvk
+from torchhd.datasets.chess_krvkp import ChessKrvkp
+from torchhd.datasets.congressional_voting import CongressionalVoting
+from torchhd.datasets.conn_bench_sonar_mines_rocks import ConnBenchSonarMinesRocks
+from torchhd.datasets.conn_bench_vowel_deterding import ConnBenchVowelDeterding
+from torchhd.datasets.connect_4 import Connect4
+from torchhd.datasets.contrac import Contrac
+from torchhd.datasets.credit_approval import CreditApproval
+from torchhd.datasets.cylinder_bands import CylinderBands
+from torchhd.datasets.dermatology import Dermatology
+from torchhd.datasets.echocardiogram import Echocardiogram
+from torchhd.datasets.ecoli import Ecoli
+from torchhd.datasets.energy_y1 import EnergyY1
+from torchhd.datasets.energy_y2 import EnergyY2
+from torchhd.datasets.fertility import Fertility
+from torchhd.datasets.flags import Flags
+from torchhd.datasets.glass import Glass
+from torchhd.datasets.haberman_survival import HabermanSurvival
+from torchhd.datasets.hayes_roth import HayesRoth
+from torchhd.datasets.heart_cleveland import HeartCleveland
+from torchhd.datasets.heart_hungarian import HeartHungarian
 
 
 __all__ = [
@@ -62,5 +82,25 @@ __all__ = [
     "Car",
     "Cardiotocography3Clases",
     "Cardiotocography10Clases",
-    "ChessKrvk",
+    "ChessKrvk",    
+    "ChessKrvkp",
+    "CongressionalVoting",
+    "ConnBenchSonarMinesRocks",
+    "ConnBenchVowelDeterding",
+    "Connect4",
+    "Contrac",
+    "CreditApproval",
+    "CylinderBands",
+    "Dermatology",
+    "Echocardiogram",
+    "Ecoli",
+    "EnergyY1",
+    "EnergyY2",
+    "Fertility",
+    "Flags",
+    "Glass",
+    "HabermanSurvival",
+    "HayesRoth",
+    "HeartCleveland",
+    "HeartHungarian",
 ]
