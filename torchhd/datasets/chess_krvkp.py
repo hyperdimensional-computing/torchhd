@@ -29,5 +29,3 @@ class ChessKrvkp(DatasetFourFold):
         "White can win",
         "White cannot win",
     ]
-
-

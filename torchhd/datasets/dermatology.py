@@ -32,6 +32,4 @@ class Dermatology(DatasetFourFold):
         "pityriasis rosea",
         "cronic dermatitis",
         "pityriasis rubra pilaris",
-
     ]
-

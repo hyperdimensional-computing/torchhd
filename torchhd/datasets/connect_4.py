@@ -30,4 +30,3 @@ class Connect4(DatasetFourFold):
         "loss",
         "win",
     ]
-

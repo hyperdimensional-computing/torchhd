@@ -82,7 +82,7 @@ __all__ = [
     "Car",
     "Cardiotocography3Clases",
     "Cardiotocography10Clases",
-    "ChessKrvk",    
+    "ChessKrvk",
     "ChessKrvkp",
     "CongressionalVoting",
     "ConnBenchSonarMinesRocks",

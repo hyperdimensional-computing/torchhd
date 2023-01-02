@@ -33,6 +33,5 @@ class Ecoli(DatasetFourFold):
         "om",
         "omL",
         "imL",
-        "imS",        
+        "imS",
     ]
-
