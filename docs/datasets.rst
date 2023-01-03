@@ -39,6 +39,26 @@ The Torchhd library provides many popular built-in datasets to work with.
     Cardiotocography3Clases
     Cardiotocography10Clases
     ChessKrvk
+    ChessKrvkp
+    CongressionalVoting
+    ConnBenchSonarMinesRocks
+    ConnBenchVowelDeterding
+    Connect4
+    Contrac
+    CreditApproval
+    CylinderBands
+    Dermatology
+    Echocardiogram
+    Ecoli
+    EnergyY1
+    EnergyY2
+    Fertility
+    Flags
+    Glass
+    HabermanSurvival
+    HayesRoth
+    HeartCleveland
+    HeartHungarian
 
 Base classes
 ------------------------
