@@ -34,6 +34,6 @@ class LedDisplay(DatasetFourFold):
         "5",
         "6",
         "7",
-        "8",        
-        "9",        
+        "8",
+        "9",
     ]

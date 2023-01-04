@@ -29,5 +29,4 @@ class ImageSegmentation(DatasetTrainTest):
         "window",
         "path",
         "grass",
-
     ]

@@ -25,4 +25,3 @@ class HorseColic(DatasetTrainTest):
         "Yes, it had surgery",
         "It was treated without surgery",
     ]
-

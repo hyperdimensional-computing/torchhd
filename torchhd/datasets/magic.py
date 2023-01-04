@@ -28,4 +28,4 @@ class Magic(DatasetFourFold):
     classes: List[str] = [
         "gamma (signal)",
         "hadron (background)",
-    ]  
+    ]

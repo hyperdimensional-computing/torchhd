@@ -122,7 +122,7 @@ __all__ = [
     "HabermanSurvival",
     "HayesRoth",
     "HeartCleveland",
-    "HeartHungarian",    
+    "HeartHungarian",
     "HeartSwitzerland",
     "HeartVa",
     "Hepatitis",
