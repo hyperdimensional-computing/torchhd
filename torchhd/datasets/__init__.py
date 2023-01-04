@@ -49,6 +49,26 @@ from torchhd.datasets.haberman_survival import HabermanSurvival
 from torchhd.datasets.hayes_roth import HayesRoth
 from torchhd.datasets.heart_cleveland import HeartCleveland
 from torchhd.datasets.heart_hungarian import HeartHungarian
+from torchhd.datasets.heart_switzerland import HeartSwitzerland
+from torchhd.datasets.heart_va import HeartVa
+from torchhd.datasets.hepatitis import Hepatitis
+from torchhd.datasets.hill_valley import HillValley
+from torchhd.datasets.horse_colic import HorseColic
+from torchhd.datasets.ilpd_indian_liver import IlpdIndianLiver
+from torchhd.datasets.image_segmentation import ImageSegmentation
+from torchhd.datasets.ionosphere import Ionosphere
+from torchhd.datasets.iris import Iris
+from torchhd.datasets.led_display import LedDisplay
+from torchhd.datasets.lenses import Lenses
+from torchhd.datasets.letter import Letter
+from torchhd.datasets.libras import Libras
+from torchhd.datasets.low_res_spect import LowResSpect
+from torchhd.datasets.lung_cancer import LungCancer
+from torchhd.datasets.lymphography import Lymphography
+from torchhd.datasets.magic import Magic
+from torchhd.datasets.mammographic import Mammographic
+from torchhd.datasets.miniboone import Miniboone
+from torchhd.datasets.molec_biol_promoter import MolecBiolPromoter
 
 
 __all__ = [
@@ -103,4 +123,24 @@ __all__ = [
     "HayesRoth",
     "HeartCleveland",
     "HeartHungarian",
+    "HeartSwitzerland",
+    "HeartVa",
+    "Hepatitis",
+    "HillValley",
+    "HorseColic",
+    "IlpdIndianLiver",
+    "ImageSegmentation",
+    "Ionosphere",
+    "Iris",
+    "LedDisplay",
+    "Lenses",
+    "Letter",
+    "Libras",
+    "LowResSpect",
+    "LungCancer",
+    "Lymphography",
+    "Magic",
+    "Mammographic",
+    "Miniboone",
+    "MolecBiolPromoter",
 ]

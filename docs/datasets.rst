@@ -59,6 +59,27 @@ The Torchhd library provides many popular built-in datasets to work with.
     HayesRoth
     HeartCleveland
     HeartHungarian
+    HeartSwitzerland
+    HeartVa
+    Hepatitis
+    HillValley
+    HorseColic
+    IlpdIndianLiver
+    ImageSegmentation
+    Ionosphere
+    Iris
+    LedDisplay
+    Lenses
+    Letter
+    Libras
+    LowResSpect
+    LungCancer
+    Lymphography
+    Magic
+    Mammographic
+    Miniboone
+    MolecBiolPromoter
+
 
 Base classes
 ------------------------
