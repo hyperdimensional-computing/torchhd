@@ -69,7 +69,36 @@ from torchhd.datasets.magic import Magic
 from torchhd.datasets.mammographic import Mammographic
 from torchhd.datasets.miniboone import Miniboone
 from torchhd.datasets.molec_biol_promoter import MolecBiolPromoter
-
+from torchhd.datasets.molec_biol_splice import MolecBiolSplice
+from torchhd.datasets.monks_1 import Monks1
+from torchhd.datasets.monks_2 import Monks2
+from torchhd.datasets.monks_3 import Monks3
+from torchhd.datasets.mushroom import Mushroom
+from torchhd.datasets.musk_1 import Musk1
+from torchhd.datasets.musk_2 import Musk2
+from torchhd.datasets.nursery import Nursery
+from torchhd.datasets.oocytes_merluccius_nucleus_4d import OocytesMerlucciusNucleus4d
+from torchhd.datasets.oocytes_merluccius_states_2f import OocytesMerlucciusStates2f
+from torchhd.datasets.oocytes_trisopterus_nucleus_2f import OocytesTrisopterusNucleus2f
+from torchhd.datasets.oocytes_trisopterus_states_5b import OocytesTrisopterusStates5b
+from torchhd.datasets.optical import Optical
+from torchhd.datasets.ozone import Ozone
+from torchhd.datasets.page_blocks import PageBlocks
+from torchhd.datasets.parkinsons import Parkinsons
+from torchhd.datasets.pendigits import Pendigits
+from torchhd.datasets.pima import Pima
+from torchhd.datasets.pittsburg_bridges_material import PittsburgBridgesMaterial
+from torchhd.datasets.pittsburg_bridges_rel_l import PittsburgBridgesRelL
+from torchhd.datasets.pittsburg_bridges_span import PittsburgBridgesSpan
+from torchhd.datasets.pittsburg_bridges_t_or_d import PittsburgBridgesTOrD
+from torchhd.datasets.pittsburg_bridges_type import PittsburgBridgesType
+from torchhd.datasets.planning import Planning
+from torchhd.datasets.plant_margin import PlantMargin
+from torchhd.datasets.plant_shape import PlantShape
+from torchhd.datasets.plant_texture import PlantTexture
+from torchhd.datasets.post_operative import PostOperative
+from torchhd.datasets.primary_tumor import PrimaryTumor
+from torchhd.datasets.ringnorm import Ringnorm
 
 __all__ = [
     "BeijingAirQuality",
@@ -143,4 +172,34 @@ __all__ = [
     "Mammographic",
     "Miniboone",
     "MolecBiolPromoter",
+    "MolecBiolSplice",
+    "Monks1",
+    "Monks2",
+    "Monks3",
+    "Mushroom",
+    "Musk1",
+    "Musk2",
+    "Nursery",
+    "OocytesMerlucciusNucleus4d",
+    "OocytesMerlucciusStates2f",
+    "OocytesTrisopterusNucleus2f",
+    "OocytesTrisopterusStates5b",
+    "Optical",
+    "Ozone",
+    "PageBlocks",
+    "Parkinsons",
+    "Pendigits",
+    "Pima",
+    "PittsburgBridgesMaterial",
+    "PittsburgBridgesRelL",
+    "PittsburgBridgesSpan",
+    "PittsburgBridgesTOrD",
+    "PittsburgBridgesType",
+    "Planning",
+    "PlantMargin",
+    "PlantShape",
+    "PlantTexture",
+    "PostOperative",
+    "PrimaryTumor",
+    "Ringnorm",
 ]

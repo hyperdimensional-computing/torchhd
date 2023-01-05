@@ -79,7 +79,36 @@ The Torchhd library provides many popular built-in datasets to work with.
     Mammographic
     Miniboone
     MolecBiolPromoter
-
+    MolecBiolSplice
+    Monks1
+    Monks2
+    Monks3
+    Mushroom
+    Musk1
+    Musk2
+    Nursery
+    OocytesMerlucciusNucleus4d
+    OocytesMerlucciusStates2f
+    OocytesTrisopterusNucleus2f
+    OocytesTrisopterusStates5b
+    Optical
+    Ozone
+    PageBlocks
+    Parkinsons
+    Pendigits
+    Pima
+    PittsburgBridgesMaterial
+    PittsburgBridgesRelL
+    PittsburgBridgesSpan
+    PittsburgBridgesTOrD
+    PittsburgBridgesType
+    Planning
+    PlantMargin
+    PlantShape
+    PlantTexture
+    PostOperative
+    PrimaryTumor
+    Ringnorm
 
 Base classes
 ------------------------
