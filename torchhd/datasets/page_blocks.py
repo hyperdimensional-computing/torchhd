@@ -32,4 +32,3 @@ class PageBlocks(DatasetFourFold):
         "vert. line",
         "picture",
     ]
-
