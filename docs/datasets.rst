@@ -109,6 +109,37 @@ The Torchhd library provides many popular built-in datasets to work with.
     PostOperative
     PrimaryTumor
     Ringnorm
+    Seeds
+    Semeion
+    Soybean
+    Spambase
+    Spect
+    Spectf
+    StatlogAustralianCredit
+    StatlogGermanCredit
+    StatlogHeart
+    StatlogImage
+    StatlogLandsat
+    StatlogShuttle
+    StatlogVehicle
+    SteelPlates
+    SyntheticControl
+    Teaching
+    Thyroid
+    TicTacToe
+    Titanic
+    Trains
+    Twonorm
+    VertebralColumn2Clases
+    VertebralColumn3Clases
+    WallFollowing
+    Waveform
+    WaveformNoise
+    Wine
+    WineQualityRed
+    WineQualityWhite
+    Yeast
+    Zoo
 
 Base classes
 ------------------------
