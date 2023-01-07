@@ -99,6 +99,37 @@ from torchhd.datasets.plant_texture import PlantTexture
 from torchhd.datasets.post_operative import PostOperative
 from torchhd.datasets.primary_tumor import PrimaryTumor
 from torchhd.datasets.ringnorm import Ringnorm
+from torchhd.datasets.seeds import Seeds
+from torchhd.datasets.semeion import Semeion
+from torchhd.datasets.soybean import Soybean
+from torchhd.datasets.spambase import Spambase
+from torchhd.datasets.spect import Spect
+from torchhd.datasets.spectf import Spectf
+from torchhd.datasets.statlog_australian_credit import StatlogAustralianCredit
+from torchhd.datasets.statlog_german_credit import StatlogGermanCredit
+from torchhd.datasets.statlog_heart import StatlogHeart
+from torchhd.datasets.statlog_image import StatlogImage
+from torchhd.datasets.statlog_landsat import StatlogLandsat
+from torchhd.datasets.statlog_shuttle import StatlogShuttle
+from torchhd.datasets.statlog_vehicle import StatlogVehicle
+from torchhd.datasets.steel_plates import SteelPlates
+from torchhd.datasets.synthetic_control import SyntheticControl
+from torchhd.datasets.teaching import Teaching
+from torchhd.datasets.thyroid import Thyroid
+from torchhd.datasets.tic_tac_toe import TicTacToe
+from torchhd.datasets.titanic import Titanic
+from torchhd.datasets.trains import Trains
+from torchhd.datasets.twonorm import Twonorm
+from torchhd.datasets.vertebral_column_2clases import VertebralColumn2Clases
+from torchhd.datasets.vertebral_column_3clases import VertebralColumn3Clases
+from torchhd.datasets.wall_following import WallFollowing
+from torchhd.datasets.waveform import Waveform
+from torchhd.datasets.waveform_noise import WaveformNoise 
+from torchhd.datasets.wine import Wine
+from torchhd.datasets.wine_quality_red import WineQualityRed
+from torchhd.datasets.wine_quality_white import WineQualityWhite
+from torchhd.datasets.yeast import Yeast
+from torchhd.datasets.zoo import Zoo
 
 __all__ = [
     "BeijingAirQuality",
@@ -201,5 +232,36 @@ __all__ = [
     "PlantTexture",
     "PostOperative",
     "PrimaryTumor",
-    "Ringnorm",
+    "Ringnorm",   
+    "Seeds",
+    "Semeion",
+    "Soybean",
+    "Spambase",
+    "Spect",
+    "Spectf",
+    "StatlogAustralianCredit",
+    "StatlogGermanCredit",
+    "StatlogHeart",
+    "StatlogImage",
+    "StatlogLandsat",
+    "StatlogShuttle",
+    "StatlogVehicle",
+    "SteelPlates",
+    "SyntheticControl",
+    "Teaching",
+    "Thyroid",
+    "TicTacToe",
+    "Titanic",
+    "Trains",
+    "Twonorm",
+    "VertebralColumn2Clases",
+    "VertebralColumn3Clases",
+    "WallFollowing",
+    "Waveform",
+    "WaveformNoise",
+    "Wine",
+    "WineQualityRed",
+    "WineQualityWhite",
+    "Yeast",
+    "Zoo",
 ]
