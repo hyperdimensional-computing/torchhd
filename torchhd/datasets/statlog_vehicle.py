@@ -30,5 +30,4 @@ class StatlogVehicle(DatasetFourFold):
         "opel",
         "saab",
         "van",
-
     ]

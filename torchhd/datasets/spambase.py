@@ -29,4 +29,3 @@ class Spambase(DatasetFourFold):
         "non-spam",
         "spam",
     ]
- 

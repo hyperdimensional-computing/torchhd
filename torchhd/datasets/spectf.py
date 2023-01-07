@@ -25,4 +25,3 @@ class Spectf(DatasetTrainTest):
         "normal",
         "abnormal",
     ]
- 

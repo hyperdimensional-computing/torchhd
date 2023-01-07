@@ -25,4 +25,3 @@ class Spect(DatasetTrainTest):
         "normal",
         "abnormal",
     ]
- 

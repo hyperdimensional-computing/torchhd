@@ -124,7 +124,7 @@ from torchhd.datasets.vertebral_column_2clases import VertebralColumn2Clases
 from torchhd.datasets.vertebral_column_3clases import VertebralColumn3Clases
 from torchhd.datasets.wall_following import WallFollowing
 from torchhd.datasets.waveform import Waveform
-from torchhd.datasets.waveform_noise import WaveformNoise 
+from torchhd.datasets.waveform_noise import WaveformNoise
 from torchhd.datasets.wine import Wine
 from torchhd.datasets.wine_quality_red import WineQualityRed
 from torchhd.datasets.wine_quality_white import WineQualityWhite
@@ -232,7 +232,7 @@ __all__ = [
     "PlantTexture",
     "PostOperative",
     "PrimaryTumor",
-    "Ringnorm",   
+    "Ringnorm",
     "Seeds",
     "Semeion",
     "Soybean",

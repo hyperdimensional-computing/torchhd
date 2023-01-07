@@ -22,5 +22,22 @@ class Soybean(DatasetTrainTest):
 
     name = "soybean"
     classes: List[str] = [
-        'diaporthe-stem-canker', 'charcoal-rot', 'rhizoctonia-root-rot','phytophthora-rot', 'brown-stem-rot', 'powdery-mildew','downy-mildew','brown-spot', 'bacterial-blight','bacterial-pustule', 'purple-seed-stain', 'anthracnose','phyllosticta-leaf-spot', 'alternarialeaf-spot','frog-eye-leaf-spot', 'diaporthe-pod-&-stem-blight','cyst-nematode', 'herbicide-injury',	
+        "diaporthe-stem-canker",
+        "charcoal-rot",
+        "rhizoctonia-root-rot",
+        "phytophthora-rot",
+        "brown-stem-rot",
+        "powdery-mildew",
+        "downy-mildew",
+        "brown-spot",
+        "bacterial-blight",
+        "bacterial-pustule",
+        "purple-seed-stain",
+        "anthracnose",
+        "phyllosticta-leaf-spot",
+        "alternarialeaf-spot",
+        "frog-eye-leaf-spot",
+        "diaporthe-pod-&-stem-blight",
+        "cyst-nematode",
+        "herbicide-injury",
     ]

@@ -30,4 +30,3 @@ class Seeds(DatasetFourFold):
         "Rosa",
         "Canadian",
     ]
-
