@@ -233,7 +233,7 @@ class HRR(VSA_Model):
             HRR([-0.0338,  0.0340,  0.0289, -0.1498,  0.1178, -0.2822])
             >>> a.bind(b)
             HRR([ 0.0786, -0.0260,  0.0591, -0.0706,  0.0799, -0.0216])
-            
+
             >>> a, b = torchhd.HRR.random_hv(2, 6, dtype=torch.float64)
             >>> a
             HRR([ 0.0354, -0.0818,  0.0216,  0.0384,  0.2961,  0.1976], dtype=torch.float64)
@@ -253,7 +253,7 @@ class HRR(VSA_Model):
 
     def exact_inverse(self) -> "HRR":
         """Unstable, but exact, inverse"""
-        result = ifft(1. / fft(self).conj())
+        result = ifft(1.0 / fft(self).conj())
         result = torch.real(result)
         return torch.nan_to_num(result)
 
@@ -280,7 +280,7 @@ class HRR(VSA_Model):
             >>> a.inverse()
             HRR([[ 0.0090, -0.1744, -0.2351,  0.0441,  0.0836,  0.2620]], dtype=torch.float64)
 
-        """        
+        """
         result = ifft(fft(self).conj())
         return torch.real(result)
 
@@ -327,7 +327,7 @@ class HRR(VSA_Model):
             HRR([[-0.2521,  0.1140, -0.1647, -0.1490, -0.2091, -0.0618]])
             >>> a.permute()
             HRR([[-0.0618, -0.2521,  0.1140, -0.1647, -0.1490, -0.2091]])
-            
+
             >>> a = torchhd.HRR.random_hv(1, 6, dtype=torch.float64)
             >>> a
             HRR([[-0.0495, -0.0318,  0.3923, -0.3205,  0.1587,  0.1926]], dtype=torch.float64)

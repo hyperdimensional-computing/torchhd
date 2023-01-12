@@ -15,7 +15,7 @@ class TestCircular_hv:
     @pytest.mark.parametrize("d", [84, 10])
     @pytest.mark.parametrize("model", vsa_models)
     def test_shape(self, n, d, model):
-        if model == HRR:       
+        if model == HRR:
             return
 
         hv = functional.circular_hv(n, d, model)
@@ -26,7 +26,7 @@ class TestCircular_hv:
 
     @pytest.mark.parametrize("model", vsa_models)
     def test_generator(self, model):
-        if model == HRR:       
+        if model == HRR:
             return
 
         generator = torch.Generator()
@@ -52,9 +52,9 @@ class TestCircular_hv:
         if model == HRR:
             with pytest.raises(ValueError):
                 functional.circular_hv(3, 26, model, dtype=dtype)
-       
+
             return
-       
+
         generator = torch.Generator()
         generator.manual_seed(seed)
 
@@ -127,7 +127,7 @@ class TestCircular_hv:
         if not supported_dtype(dtype, model):
             return
 
-        if model == HRR:       
+        if model == HRR:
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

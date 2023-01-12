@@ -486,7 +486,9 @@ def circular_hv(
 
     """
     if model == HRR:
-        raise ValueError("The circular hypervectors don't currently work with the HRR model. We are not sure why, if you have any insight that could help please share it at: https://github.com/hyperdimensional-computing/torchhd/issues/108.")
+        raise ValueError(
+            "The circular hypervectors don't currently work with the HRR model. We are not sure why, if you have any insight that could help please share it at: https://github.com/hyperdimensional-computing/torchhd/issues/108."
+        )
 
     # convert from normalized "randomness" variable r to
     # number of levels between orthogonal pairs or "span"
