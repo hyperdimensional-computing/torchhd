@@ -5,6 +5,7 @@ from torchhd import functional
 from torchhd.bsc import BSC
 from torchhd.fhrr import FHRR
 from torchhd.map import MAP
+from torchhd.hrr import HRR
 
 from .utils import (
     torch_dtypes,
@@ -134,6 +135,8 @@ class TestDotSimilarity:
                 assert similarity.dtype == torch.float
             elif dtype == torch.complex128:
                 assert similarity.dtype == torch.double
+        elif model == HRR:
+            assert similarity.dtype == dtype
         else:
             assert similarity.dtype == torch.get_default_dtype()
 
@@ -275,6 +278,8 @@ class TestCosSimilarity:
                 assert similarity.dtype == torch.float
             elif dtype == torch.complex128:
                 assert similarity.dtype == torch.double
+        elif model == HRR:
+            assert similarity.dtype == dtype
         else:
             assert similarity.dtype == torch.get_default_dtype()
 

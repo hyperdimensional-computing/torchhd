@@ -76,6 +76,6 @@ def supported_dtype(dtype: torch.dtype, model: Type[torchhd.VSA_Model]) -> bool:
 vsa_models = [
     torchhd.BSC,
     torchhd.MAP,
-    # torchhd.HRR,
+    torchhd.HRR,
     torchhd.FHRR,
 ]

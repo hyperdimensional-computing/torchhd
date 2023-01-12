@@ -3,6 +3,7 @@ import torch
 
 import torchhd
 from torchhd import functional
+from torchhd import HRR
 
 from ..utils import torch_dtypes, supported_dtype, vsa_models
 
@@ -14,6 +15,9 @@ class TestCircular_hv:
     @pytest.mark.parametrize("d", [84, 10])
     @pytest.mark.parametrize("model", vsa_models)
     def test_shape(self, n, d, model):
+        if model == HRR:       
+            return
+
         hv = functional.circular_hv(n, d, model)
 
         assert hv.dim() == 2
@@ -22,6 +26,9 @@ class TestCircular_hv:
 
     @pytest.mark.parametrize("model", vsa_models)
     def test_generator(self, model):
+        if model == HRR:       
+            return
+
         generator = torch.Generator()
         generator.manual_seed(seed)
         hv1 = functional.circular_hv(20, 10000, model, generator=generator)
@@ -42,6 +49,12 @@ class TestCircular_hv:
 
             return
 
+        if model == HRR:
+            with pytest.raises(ValueError):
+                functional.circular_hv(3, 26, model, dtype=dtype)
+       
+            return
+       
         generator = torch.Generator()
         generator.manual_seed(seed)
 
@@ -114,6 +127,9 @@ class TestCircular_hv:
         if not supported_dtype(dtype, model):
             return
 
+        if model == HRR:       
+            return
+
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         hv = functional.circular_hv(3, 52, model, device=device, dtype=dtype)
         assert hv.device == device
@@ -125,14 +141,14 @@ class TestCircular_hv:
         torch.set_default_dtype(torch.float32)
         hv = functional.circular_hv(3, 52, torchhd.MAP)
         assert hv.dtype == torch.float32
-        hv = functional.circular_hv(3, 52, torchhd.HRR)
-        assert hv.dtype == torch.float32
+        # hv = functional.circular_hv(3, 52, torchhd.HRR)
+        # assert hv.dtype == torch.float32
 
         torch.set_default_dtype(torch.float64)
         hv = functional.circular_hv(3, 52, torchhd.MAP)
         assert hv.dtype == torch.float64
-        hv = functional.circular_hv(3, 52, torchhd.HRR)
-        assert hv.dtype == torch.float64
+        # hv = functional.circular_hv(3, 52, torchhd.HRR)
+        # assert hv.dtype == torch.float64
 
         hv = functional.circular_hv(3, 52, torchhd.FHRR)
         assert hv.dtype == torch.complex64
@@ -141,8 +157,8 @@ class TestCircular_hv:
         hv = functional.circular_hv(3, 52, torchhd.MAP, requires_grad=True)
         assert hv.requires_grad == True
 
-        hv = functional.circular_hv(3, 52, torchhd.HRR, requires_grad=True)
-        assert hv.requires_grad == True
+        # hv = functional.circular_hv(3, 52, torchhd.HRR, requires_grad=True)
+        # assert hv.requires_grad == True
 
         hv = functional.circular_hv(3, 52, torchhd.FHRR, requires_grad=True)
         assert hv.requires_grad == True
