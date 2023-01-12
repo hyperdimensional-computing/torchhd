@@ -7,6 +7,7 @@ from collections import deque
 from torchhd.base import VSA_Model
 from torchhd.bsc import BSC
 from torchhd.map import MAP
+from torchhd.hrr import HRR
 from torchhd.fhrr import FHRR
 
 
@@ -484,6 +485,11 @@ def circular_hv(
                 [-0.887-0.460j, -0.906+0.421j, -0.727-0.686j, -0.271+0.962j, -0.705-0.709j,  0.562-0.827j]])
 
     """
+    if model == HRR:
+        raise ValueError(
+            "The circular hypervectors don't currently work with the HRR model. We are not sure why, if you have any insight that could help please share it at: https://github.com/hyperdimensional-computing/torchhd/issues/108."
+        )
+
     # convert from normalized "randomness" variable r to
     # number of levels between orthogonal pairs or "span"
     levels_per_span = ((1 - randomness) * (num_vectors / 2) + randomness * 1) * 2
