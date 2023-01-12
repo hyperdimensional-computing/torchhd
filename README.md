@@ -91,15 +91,17 @@ Initial development of Torchhd was performed by [Mike Heddes](https://www.mikehe
 
 ## Contributing
 
+We are always looking for people that want to contribute to the library. If you are considering contributing for the first time we acknowledgde that this can be daunting, but fear not! You can look through the [open issues](https://github.com/hyperdimensional-computing/torchhd/issues) for inspiration on the kind of problems you can work on. If you are a researcher and want to contribute your work to the library, feel free to open a new issue so we can discuss the best strategy for integrating your work.
+
 ### Documentation
 
 To build the documentation locally, use `pip install -r docs/requirements.txt` to install the required packages. Then, with `sphinx-build -b html docs build` you can generate the html documentation in the `/build` directory. To create a clean build, remove the `/build` and `/docs/generated` directories.
 
 ### Creating a New Release
 
-- A GitHub release triggers a GitHub action that builds the library and publishes it to PyPi and Conda in addition to the documentation website.
-- Before creating a new GitHub release, increment the version number in [version.py](https://github.com/hyperdimensional-computing/torchhd/blob/main/torchhd/version.py) using [semantic versioning](https://semver.org).
-- When creating a new GitHub release, set the tag according to [PEP 440](https://peps.python.org/pep-0440/), e.g., v1.5.2, and provide a clear description of the changes. You can use GitHub's "auto-generate release notes" button. Look at previous releases for examples.
+1. Increment the version number in [version.py](https://github.com/hyperdimensional-computing/torchhd/blob/main/torchhd/version.py) using [semantic versioning](https://semver.org).
+2. Create a new GitHub release. Set the tag according to [PEP 440](https://peps.python.org/pep-0440/), e.g., v1.5.2, and provide a clear description of the changes. You can use GitHub's "auto-generate release notes" button. Look at previous releases for examples.
+3. A GitHub release triggers a GitHub action that builds the library and publishes it to PyPi and Conda in addition to the documentation website.
 
 ### License
 
