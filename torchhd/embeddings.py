@@ -355,18 +355,19 @@ class Random(nn.Embedding):
         return super().forward(input).as_subclass(self.vsa_model)
 
 
-class Level(nn.Embedding):
+class Level(nn.Module):
     """Embedding wrapper around :func:`~torchhd.level_hv`.
 
-    Class inherits from `Embedding <https://pytorch.org/docs/stable/generated/torch.nn.Embedding.html>`_ and supports the same keyword arguments.
-
     Args:
-        num_embeddings (int): the number of hypervectors to generate.
         embedding_dim (int): the dimensionality of the hypervectors.
         low (float, optional): The lower bound of the real number range that the levels represent. Default: ``0.0``
         high (float, optional): The upper bound of the real number range that the levels represent. Default: ``1.0``
-        randomness (float, optional): r-value to interpolate between level at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
-        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
+        num_ortho (int): the number of quasi-orthogonal hypervectors to generate over the span from ``low`` to ``high``. Default: ``2.0``
+        randomness (float, optional): r-value to interpolate between level at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``
+
+    For example, ``num_ortho=2.0`` means that the ``low`` and ``high`` values have exactly one random hypervector each and in between is an interpolation of those two.
+    And with ``num_ortho=3.0`` there is one additional random hypervector that represents halfway between ``low`` and ``high``.
 
     Examples::
 
@@ -379,46 +380,93 @@ class Level(nn.Embedding):
 
     """
 
+    __constants__ = [
+        "num_ortho",
+        "num_embeddings",
+        "embedding_dim",
+        "low",
+        "high",
+        "vsa_model",
+    ]
+
+    num_ortho: float
+    num_embeddings: int
+    embedding_dim: int
+    low: float
+    high: float
+    vsa_model: Type[VSA_Model]
+    threshold: Tensor
+    weight: Tensor
+
     def __init__(
         self,
-        num_embeddings,
-        embedding_dim,
-        low=0.0,
-        high=1.0,
-        randomness=0.0,
-        requires_grad=False,
-        **kwargs
-    ):
-        self.low_value = low
-        self.high_value = high
-        self.randomness = randomness
+        embedding_dim: int,
+        low: float = 0.0,
+        high: float = 1.0,
+        num_ortho: float = 2.0,
+        vsa_model: Type[VSA_Model] = MAP,
+        requires_grad: bool = False,
+        device=None,
+        dtype=None,
+    ) -> None:
 
-        super(Level, self).__init__(num_embeddings, embedding_dim, **kwargs)
-        self.weight.requires_grad = requires_grad
+        factory_kwargs = {"device": device, "dtype": dtype}
+        super(Level, self).__init__()
 
-    def reset_parameters(self):
-        factory_kwargs = {
-            "device": self.weight.data.device,
-            "dtype": self.weight.data.dtype,
-        }
+        assert num_ortho > 1.0, "num_ortho must be more than 1.0"
 
-        self.weight.data.copy_(
-            functional.level_hv(
+        self.num_ortho = num_ortho
+        self.num_embeddings = int(math.ceil(num_ortho))
+        self.embedding_dim = embedding_dim
+        self.vsa_model = vsa_model
+        self.low = low
+        self.high = high
+
+        embeddings = functional.random_hv(
+            self.num_embeddings, self.embedding_dim, vsa_model, **factory_kwargs
+        )
+        self.weight = Parameter(embeddings, requires_grad=requires_grad)
+
+        threshold = torch.rand(
+            self.num_embeddings - 1,
+            embedding_dim,
+            dtype=torch.float,
+            device=device,
+        )
+        self.register_buffer("threshold", threshold)
+
+    def reset_parameters(self) -> None:
+        factory_kwargs = {"device": self.weight.device, "dtype": self.weight.dtype}
+
+        with torch.no_grad():
+            self.threshold.uniform_()
+            embeddings = functional.random_hv(
                 self.num_embeddings,
                 self.embedding_dim,
-                randomness=self.randomness,
+                self.vsa_model,
                 **factory_kwargs
             )
+            self.weight.copy_(embeddings)
+
+    def forward(self, input: Tensor) -> Tensor:
+        shape = input.shape
+
+        span = functional.map_range(
+            input, self.low, self.high, 0, self.num_embeddings - 1
         )
+        span = span.clamp(min=0, max=self.num_embeddings - 1)
+        span_idx = span.floor().clamp_max(self.num_embeddings - 2)
 
-        self._fill_padding_idx_with_zero()
+        tau = (span - span_idx).ravel().unsqueeze(-1)
+        span_idx = span_idx.long().ravel()
 
-    def forward(self, input: torch.Tensor) -> torch.Tensor:
-        indices = functional.value_to_index(
-            input, self.low_value, self.high_value, self.num_embeddings
-        ).clamp(0, self.num_embeddings - 1)
+        span_start = self.weight.index_select(0, span_idx)
+        span_end = self.weight.index_select(0, span_idx + 1)
+        threshold = self.threshold.index_select(0, span_idx)
 
-        return super(Level, self).forward(indices).as_subclass(MAP)
+        hv = torch.where(threshold < tau, span_start, span_end)
+        hv = hv.view(*shape, -1)
+        return hv.as_subclass(self.vsa_model)
 
 
 class Thermometer(nn.Embedding):
