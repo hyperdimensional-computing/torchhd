@@ -70,6 +70,8 @@ class BSC(VSA_Model):
                     [0, 1, 1, 0, 1, 1]])
 
         """
+        if dtype is None:
+            dtype = torch.bool
 
         if dtype not in cls.supported_dtypes:
             name = cls.__name__
@@ -116,6 +118,8 @@ class BSC(VSA_Model):
                     [0, 0, 0, 0, 0, 0]])
 
         """
+        if dtype is None:
+            dtype = torch.bool
 
         if dtype not in cls.supported_dtypes:
             name = cls.__name__
@@ -174,6 +178,9 @@ class BSC(VSA_Model):
                     [0, 1, 1, 0, 0, 0]])
 
         """
+        if dtype is None:
+            dtype = torch.bool
+
         if dtype not in cls.supported_dtypes:
             name = cls.__name__
             options = ", ".join([str(x) for x in cls.supported_dtypes])

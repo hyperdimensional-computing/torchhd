@@ -1,15 +1,17 @@
 import math
-from typing import Type, Union
+from typing import Type, Union, Optional
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
+from torch.nn.parameter import Parameter
 
 import torchhd.functional as functional
 from torchhd.base import VSA_Model
 from torchhd.map import MAP
 
 __all__ = [
+    "Empty",
     "Identity",
     "Random",
     "Level",
@@ -20,94 +22,341 @@ __all__ = [
 ]
 
 
-class Identity(nn.Embedding):
-    """Embedding wrapper around :func:`~torchhd.functional.identity_hv`.
+class Empty(nn.Embedding):
+    """Embedding wrapper around :func:`~torchhd.empty_hv`.
 
     Class inherits from `Embedding <https://pytorch.org/docs/stable/generated/torch.nn.Embedding.html>`_ and supports the same keyword arguments.
 
     Args:
         num_embeddings (int): the number of hypervectors to generate.
         embedding_dim (int): the dimensionality of the hypervectors.
+        model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAP``.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
     Examples::
 
-        >>> emb = embeddings.Identity(5, 3)
-        >>> idx = torch.LongTensor([0, 1, 4])
+        >>> emb = embeddings.Empty(4, 6)
+        >>> idx = torch.LongTensor([0, 1, 3])
         >>> emb(idx)
-        tensor([[1., 1., 1.],
-                [1., 1., 1.],
-                [1., 1., 1.]])
+        MAP([[0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0.],
+             [0., 0., 0., 0., 0., 0.]])
+
+        >>> emb = embeddings.Empty(4, 6, torchhd.FHRR)
+        >>> idx = torch.LongTensor([0, 1, 3])
+        >>> emb(idx)
+        FHRR([[0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
+             [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
+             [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j]])
 
     """
 
-    def __init__(self, num_embeddings, embedding_dim, requires_grad=False, **kwargs):
-        super(Identity, self).__init__(num_embeddings, embedding_dim, **kwargs)
-        self.weight.requires_grad = requires_grad
+    __constants__ = [
+        "num_embeddings",
+        "embedding_dim",
+        "vsa_model",
+        "padding_idx",
+        "max_norm",
+        "norm_type",
+        "scale_grad_by_freq",
+        "sparse",
+    ]
 
-    def reset_parameters(self):
-        factory_kwargs = {
-            "device": self.weight.data.device,
-            "dtype": self.weight.data.dtype,
-        }
+    vsa_model: Type[VSA_Model]
 
-        self.weight.data.copy_(
-            functional.identity_hv(
-                self.num_embeddings, self.embedding_dim, **factory_kwargs
-            )
+    def __init__(
+        self,
+        num_embeddings: int,
+        embedding_dim: int,
+        vsa_model: Type[VSA_Model] = MAP,
+        requires_grad: bool = False,
+        padding_idx: Optional[int] = None,
+        max_norm: Optional[float] = None,
+        norm_type: float = 2.0,
+        scale_grad_by_freq: bool = False,
+        sparse: bool = False,
+        device=None,
+        dtype=None,
+    ) -> None:
+
+        factory_kwargs = {"device": device, "dtype": dtype}
+        # Have to call Module init explicitly in order not to use the Embedding init
+        nn.Module.__init__(self)
+
+        self.num_embeddings = num_embeddings
+        self.embedding_dim = embedding_dim
+        self.vsa_model = vsa_model
+
+        if padding_idx is not None:
+            if padding_idx > 0:
+                assert (
+                    padding_idx < self.num_embeddings
+                ), "Padding_idx must be within num_embeddings"
+            elif padding_idx < 0:
+                assert (
+                    padding_idx >= -self.num_embeddings
+                ), "Padding_idx must be within num_embeddings"
+                padding_idx = self.num_embeddings + padding_idx
+
+        self.padding_idx = padding_idx
+        self.max_norm = max_norm
+        self.norm_type = norm_type
+        self.scale_grad_by_freq = scale_grad_by_freq
+        self.sparse = sparse
+
+        embeddings = functional.empty_hv(
+            num_embeddings, embedding_dim, vsa_model, **factory_kwargs
         )
+        # Have to provide requires grad at the creation of the parameters to
+        # prevent errors when instantiating a non-float embedding
+        self.weight = Parameter(embeddings, requires_grad=requires_grad)
+
+        self._fill_padding_idx_with_zero()
+
+    def reset_parameters(self) -> None:
+        factory_kwargs = {"device": self.weight.device, "dtype": self.weight.dtype}
+
+        with torch.no_grad():
+            embeddings = functional.empty_hv(
+                self.num_embeddings,
+                self.embedding_dim,
+                self.vsa_model,
+                **factory_kwargs
+            )
+            self.weight.copy_(embeddings)
 
         self._fill_padding_idx_with_zero()
 
     def forward(self, input: Tensor) -> Tensor:
-        return super().forward(input).as_subclass(MAP)
+        return super().forward(input).as_subclass(self.vsa_model)
+
+
+class Identity(nn.Embedding):
+    """Embedding wrapper around :func:`~torchhd.identity_hv`.
+
+    Class inherits from `Embedding <https://pytorch.org/docs/stable/generated/torch.nn.Embedding.html>`_ and supports the same keyword arguments.
+
+    Args:
+        num_embeddings (int): the number of hypervectors to generate.
+        embedding_dim (int): the dimensionality of the hypervectors.
+        model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAP``.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
+
+    Examples::
+
+        >>> emb = embeddings.Identity(4, 6)
+        >>> idx = torch.LongTensor([0, 1, 3])
+        >>> emb(idx)
+        MAP([[1., 1., 1., 1., 1., 1.],
+             [1., 1., 1., 1., 1., 1.],
+             [1., 1., 1., 1., 1., 1.]])
+
+        >>> emb = embeddings.Identity(4, 6, torchhd.HRR)
+        >>> idx = torch.LongTensor([0, 1, 3])
+        >>> emb(idx)
+        HRR([[1., 0., 0., 0., 0., 0.],
+             [1., 0., 0., 0., 0., 0.],
+             [1., 0., 0., 0., 0., 0.]])
+
+    """
+
+    __constants__ = [
+        "num_embeddings",
+        "embedding_dim",
+        "vsa_model",
+        "padding_idx",
+        "max_norm",
+        "norm_type",
+        "scale_grad_by_freq",
+        "sparse",
+    ]
+
+    vsa_model: Type[VSA_Model]
+
+    def __init__(
+        self,
+        num_embeddings: int,
+        embedding_dim: int,
+        vsa_model: Type[VSA_Model] = MAP,
+        requires_grad: bool = False,
+        padding_idx: Optional[int] = None,
+        max_norm: Optional[float] = None,
+        norm_type: float = 2.0,
+        scale_grad_by_freq: bool = False,
+        sparse: bool = False,
+        device=None,
+        dtype=None,
+    ) -> None:
+
+        factory_kwargs = {"device": device, "dtype": dtype}
+        # Have to call Module init explicitly in order not to use the Embedding init
+        nn.Module.__init__(self)
+
+        self.num_embeddings = num_embeddings
+        self.embedding_dim = embedding_dim
+        self.vsa_model = vsa_model
+
+        if padding_idx is not None:
+            if padding_idx > 0:
+                assert (
+                    padding_idx < self.num_embeddings
+                ), "Padding_idx must be within num_embeddings"
+            elif padding_idx < 0:
+                assert (
+                    padding_idx >= -self.num_embeddings
+                ), "Padding_idx must be within num_embeddings"
+                padding_idx = self.num_embeddings + padding_idx
+
+        self.padding_idx = padding_idx
+        self.max_norm = max_norm
+        self.norm_type = norm_type
+        self.scale_grad_by_freq = scale_grad_by_freq
+        self.sparse = sparse
+
+        embeddings = functional.identity_hv(
+            num_embeddings, embedding_dim, vsa_model, **factory_kwargs
+        )
+        # Have to provide requires grad at the creation of the parameters to
+        # prevent errors when instantiating a non-float embedding
+        self.weight = Parameter(embeddings, requires_grad=requires_grad)
+
+        self._fill_padding_idx_with_zero()
+
+    def reset_parameters(self) -> None:
+        factory_kwargs = {"device": self.weight.device, "dtype": self.weight.dtype}
+
+        with torch.no_grad():
+            embeddings = functional.identity_hv(
+                self.num_embeddings,
+                self.embedding_dim,
+                self.vsa_model,
+                **factory_kwargs
+            )
+            self.weight.copy_(embeddings)
+
+        self._fill_padding_idx_with_zero()
+
+    def forward(self, input: Tensor) -> Tensor:
+        return super().forward(input).as_subclass(self.vsa_model)
 
 
 class Random(nn.Embedding):
-    """Embedding wrapper around :func:`~torchhd.functional.random_hv`.
+    """Embedding wrapper around :func:`~torchhd.random_hv`.
 
     Class inherits from `Embedding <https://pytorch.org/docs/stable/generated/torch.nn.Embedding.html>`_ and supports the same keyword arguments.
 
     Args:
         num_embeddings (int): the number of hypervectors to generate.
         embedding_dim (int): the dimensionality of the hypervectors.
+        model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAP``.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
     Examples::
 
-        >>> emb = embeddings.Random(5, 3)
-        >>> idx = torch.LongTensor([0, 1, 4])
+        >>> emb = embeddings.Random(4, 6)
+        >>> idx = torch.LongTensor([0, 1, 3])
         >>> emb(idx)
-        tensor([[ 1., -1.,  1.],
-                [ 1., -1.,  1.],
-                [ 1.,  1.,  1.]])
+        MAP([[-1.,  1., -1.,  1., -1., -1.],
+            [ 1., -1., -1., -1.,  1., -1.],
+            [ 1., -1.,  1.,  1.,  1.,  1.]])
+
+        >>> emb = embeddings.Random(4, 6, torchhd.BSC)
+        >>> idx = torch.LongTensor([0, 1, 3])
+        >>> emb(idx)
+        BSC([[ True, False, False, False, False,  True],
+            [False,  True,  True,  True, False,  True],
+            [False, False,  True, False, False, False]])
 
     """
 
-    def __init__(self, num_embeddings, embedding_dim, requires_grad=False, **kwargs):
-        super(Random, self).__init__(num_embeddings, embedding_dim, **kwargs)
-        self.weight.requires_grad = requires_grad
+    __constants__ = [
+        "num_embeddings",
+        "embedding_dim",
+        "vsa_model",
+        "padding_idx",
+        "max_norm",
+        "norm_type",
+        "scale_grad_by_freq",
+        "sparse",
+    ]
 
-    def reset_parameters(self):
-        factory_kwargs = {
-            "device": self.weight.data.device,
-            "dtype": self.weight.data.dtype,
-        }
+    vsa_model: Type[VSA_Model]
 
-        self.weight.data.copy_(
-            functional.random_hv(
-                self.num_embeddings, self.embedding_dim, **factory_kwargs
-            )
+    def __init__(
+        self,
+        num_embeddings: int,
+        embedding_dim: int,
+        vsa_model: Type[VSA_Model] = MAP,
+        requires_grad: bool = False,
+        padding_idx: Optional[int] = None,
+        max_norm: Optional[float] = None,
+        norm_type: float = 2.0,
+        scale_grad_by_freq: bool = False,
+        sparse: bool = False,
+        device=None,
+        dtype=None,
+    ) -> None:
+
+        factory_kwargs = {"device": device, "dtype": dtype}
+        # Have to call Module init explicitly in order not to use the Embedding init
+        nn.Module.__init__(self)
+
+        self.num_embeddings = num_embeddings
+        self.embedding_dim = embedding_dim
+        self.vsa_model = vsa_model
+
+        if padding_idx is not None:
+            if padding_idx > 0:
+                assert (
+                    padding_idx < self.num_embeddings
+                ), "Padding_idx must be within num_embeddings"
+            elif padding_idx < 0:
+                assert (
+                    padding_idx >= -self.num_embeddings
+                ), "Padding_idx must be within num_embeddings"
+                padding_idx = self.num_embeddings + padding_idx
+
+        self.padding_idx = padding_idx
+        self.max_norm = max_norm
+        self.norm_type = norm_type
+        self.scale_grad_by_freq = scale_grad_by_freq
+        self.sparse = sparse
+
+        embeddings = functional.random_hv(
+            num_embeddings, embedding_dim, vsa_model, **factory_kwargs
         )
+        # Have to provide requires grad at the creation of the parameters to
+        # prevent errors when instantiating a non-float embedding
+        self.weight = Parameter(embeddings, requires_grad=requires_grad)
+
+        self._fill_padding_idx_with_zero()
+
+    def reset_parameters(self) -> None:
+        factory_kwargs = {"device": self.weight.device, "dtype": self.weight.dtype}
+
+        with torch.no_grad():
+            embeddings = functional.random_hv(
+                self.num_embeddings,
+                self.embedding_dim,
+                self.vsa_model,
+                **factory_kwargs
+            )
+            self.weight.copy_(embeddings)
 
         self._fill_padding_idx_with_zero()
 
     def forward(self, input: Tensor) -> Tensor:
-        return super().forward(input).as_subclass(MAP)
+        return super().forward(input).as_subclass(self.vsa_model)
 
 
 class Level(nn.Embedding):
-    """Embedding wrapper around :func:`~torchhd.functional.level_hv`.
+    """Embedding wrapper around :func:`~torchhd.level_hv`.
 
     Class inherits from `Embedding <https://pytorch.org/docs/stable/generated/torch.nn.Embedding.html>`_ and supports the same keyword arguments.
 
@@ -173,7 +422,7 @@ class Level(nn.Embedding):
 
 
 class Thermometer(nn.Embedding):
-    """Embedding wrapper around :func:`~torchhd.functional.thermometer_hv`.
+    """Embedding wrapper around :func:`~torchhd.thermometer_hv`.
 
     Class inherits from `Embedding <https://pytorch.org/docs/stable/generated/torch.nn.Embedding.html>`_ and supports the same keyword arguments.
 
@@ -233,7 +482,7 @@ class Thermometer(nn.Embedding):
 
 
 class Circular(nn.Embedding):
-    """Embedding wrapper around :func:`~torchhd.functional.circular_hv`.
+    """Embedding wrapper around :func:`~torchhd.circular_hv`.
 
     Class inherits from `Embedding <https://pytorch.org/docs/stable/generated/torch.nn.Embedding.html>`_ and supports the same keyword arguments.
 
