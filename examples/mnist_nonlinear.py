@@ -1,3 +1,4 @@
+# This is an example of using nonlinear encoding on the MNIST dataset
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -17,7 +18,6 @@ print("Using {} device".format(device))
 
 DIMENSIONS = 10000
 IMG_SIZE = 28
-NUM_LEVELS = 1000
 BATCH_SIZE = 1  # for GPUs with enough memory we can process multiple images at ones
 
 transform = torchvision.transforms.ToTensor()
