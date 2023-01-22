@@ -6,6 +6,7 @@ from torchvision.datasets import MNIST
 
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
+
 # Note: this example requires the accelerate library: https://github.com/huggingface/accelerate
 from accelerate import Accelerator
 from tqdm import tqdm

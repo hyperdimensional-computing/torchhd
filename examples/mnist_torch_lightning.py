@@ -6,6 +6,7 @@ from torchvision.datasets import MNIST
 
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
+
 # Note: this example requires the pytorch-lightning library: https://www.pytorchlightning.ai
 import pytorch_lightning as pl
 from tqdm import tqdm
