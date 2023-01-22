@@ -556,11 +556,12 @@ def circular_hv(
     hv.requires_grad = requires_grad
     return hv.as_subclass(model)
 
+
 def clipping(input: VSA_Model, kappa) -> VSA_Model:
     """Performs the clipping operation on the given input that clips the lower and upper values.
 
     Args:
-        input (VSA_Model): input hypervector.        
+        input (VSA_Model): input hypervector.
         kappa (int): specifies the range of the clipping function.
 
     """
@@ -569,6 +570,7 @@ def clipping(input: VSA_Model, kappa) -> VSA_Model:
     input[input < -kappa] = -kappa
 
     return input
+
 
 def bind(input: VSA_Model, other: VSA_Model) -> VSA_Model:
     r"""Binds two hypervectors which produces a hypervector dissimilar to both.

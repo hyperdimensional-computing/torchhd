@@ -19,19 +19,17 @@ def UCIDatasetCollection(dataset_collection, root, download):
     for i in range(len(dataset_collection)):
         # Fetch the current dataset
         dataset = getattr(torchhd.datasets, dataset_collection[i])
-        
+
         train_ds = []
         test_ds = []
         # If no separate test dataset available - do 4-fold cross-validation
         if hasattr(dataset, "num_folds"):
             for fold_id in range(dataset.num_folds):
                 # Set test and train datasets for the current fold
-                train_ds.append(dataset(
-                    root, train=True, download= download, fold=fold_id
-                ))
-                test_ds.append(dataset(
-                    root, train=False, download= False, fold=fold_id
-                ))
+                train_ds.append(
+                    dataset(root, train=True, download=download, fold=fold_id)
+                )
+                test_ds.append(dataset(root, train=False, download=False, fold=fold_id))
 
         # Case of avaiable test set
         else:
@@ -40,6 +38,7 @@ def UCIDatasetCollection(dataset_collection, root, download):
             test_ds.append(dataset(root, train=False, download=False))
 
         yield train_ds, test_ds
+
 
 class CollectionDataset(data.Dataset):
     """Generic class for loading datasets used in `Do we Need Hundreds of Classifiers to Solve Real World Classification Problems? <https://jmlr.org/papers/v15/delgado14a.html>`_.

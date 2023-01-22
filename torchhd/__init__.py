@@ -66,7 +66,7 @@ __all__ = [
     "level_hv",
     "thermometer_hv",
     "circular_hv",
-    "clipping",    
+    "clipping",
     "bind",
     "bundle",
     "permute",
