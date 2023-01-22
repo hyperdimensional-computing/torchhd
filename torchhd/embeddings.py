@@ -516,7 +516,7 @@ class Thermometer(nn.Embedding):
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
     Values outside the interval between low and high are clipped to the closed bound.
-    
+
     Examples::
 
         >>> emb = embeddings.Thermometer(4, 6)
@@ -731,7 +731,9 @@ class Circular(nn.Embedding):
             self.weight.copy_(embeddings)
 
     def forward(self, input: Tensor) -> Tensor:
-        mapped = functional.map_range(input, self.phase, self.period, 0, self.num_embeddings)
+        mapped = functional.map_range(
+            input, self.phase, self.period, 0, self.num_embeddings
+        )
         index = mapped.round().long() % self.num_embeddings
         return super().forward(index).as_subclass(self.vsa_model)
 

@@ -28,6 +28,7 @@ train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=
 test_ds = MNIST("../data", train=False, transform=transform, download=True)
 test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
+
 class Model(nn.Module):
     def __init__(self, num_classes, size):
         super(Model, self).__init__()
