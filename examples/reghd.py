@@ -18,7 +18,7 @@ print("Using {} device".format(device))
 DIMENSIONS = 10000  # number of hypervector dimensions
 NUM_FEATURES = 5  # number of features in dataset
 
-ds = AirfoilSelfNoise("../data", download=False)
+ds = AirfoilSelfNoise("../data", download=True)
 
 # Get necessary statistics for data and target transform
 STD_DEVS = ds.data.std(0)
@@ -57,14 +57,10 @@ class SingleModel(nn.Module):
 
         self.lr = 0.00001
         self.M = torch.zeros(1, DIMENSIONS)
-        self.project = embeddings.Projection(size, DIMENSIONS)
-        self.project.weight.data.normal_(0, 1)
-        self.bias = nn.parameter.Parameter(torch.empty(DIMENSIONS), requires_grad=False)
-        self.bias.data.uniform_(0, 2 * math.pi)
+        self.project = embeddings.Sinusoid(size, DIMENSIONS)
 
     def encode(self, x):
-        enc = self.project(x)
-        sample_hv = torch.cos(enc + self.bias) * torch.sin(enc)
+        sample_hv = self.project(x)
         return torchhd.hard_quantize(sample_hv)
 
     def model_update(self, x, y):

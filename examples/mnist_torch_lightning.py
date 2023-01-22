@@ -6,8 +6,9 @@ from torchvision.datasets import MNIST
 
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
-from tqdm import tqdm
+# Note: this example requires the pytorch-lightning library: https://www.pytorchlightning.ai
 import pytorch_lightning as pl
+from tqdm import tqdm
 
 import torchhd
 from torchhd import embeddings
@@ -60,7 +61,8 @@ class Model(pl.LightningModule):
         return
 
 
-model = Model(len(train_ds.classes), IMG_SIZE)
+num_classes = len(train_ds.classes)
+model = Model(num_classes, IMG_SIZE)
 trainer = pl.Trainer(
     accelerator="cpu",
     devices=1,
@@ -77,8 +79,7 @@ with torch.no_grad():
 
     model.classify.weight[:] = F.normalize(model.classify.weight)
 
-accuracy = torchmetrics.Accuracy()
-
+accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
 with torch.no_grad():
     for samples, labels in tqdm(test_ld, desc="Testing"):

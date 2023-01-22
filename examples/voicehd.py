@@ -43,10 +43,10 @@ train_ds = ISOLET("../data", train=True, download=True)
 train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
 
 test_ds = ISOLET("../data", train=False, download=True)
-
 test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
-model = Model(len(train_ds.classes), train_ds[0][0].size(-1))
+num_classes = len(train_ds.classes)
+model = Model(num_classes, train_ds[0][0].size(-1))
 model = model.to(device)
 
 with torch.no_grad():
@@ -59,7 +59,7 @@ with torch.no_grad():
 
     model.classify.weight[:] = F.normalize(model.classify.weight)
 
-accuracy = torchmetrics.Accuracy()
+accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
 with torch.no_grad():
     for samples, labels in tqdm(test_ld, desc="Testing"):

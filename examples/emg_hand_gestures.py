@@ -66,7 +66,8 @@ def experiment(subjects=[0]):
     train_ld = data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
     test_ld = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
-    model = Model(len(ds.classes), ds[0][0].size(-2), ds[0][0].size(-1))
+    num_classes = len(ds.classes)
+    model = Model(num_classes, ds[0][0].size(-2), ds[0][0].size(-1))
     model = model.to(device)
 
     with torch.no_grad():
@@ -79,7 +80,7 @@ def experiment(subjects=[0]):
 
         model.classify.weight[:] = F.normalize(model.classify.weight)
 
-    accuracy = torchmetrics.Accuracy()
+    accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
     with torch.no_grad():
         for samples, labels in tqdm(test_ld, desc="Testing"):

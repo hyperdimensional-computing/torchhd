@@ -51,6 +51,7 @@ class Model(nn.Module):
         return logit
 
 
+num_classes = len(train_ds.classes)
 model = Model(len(train_ds.classes), IMG_SIZE)
 model = model.to(device)
 
@@ -64,8 +65,7 @@ with torch.no_grad():
 
     model.classify.weight[:] = F.normalize(model.classify.weight)
 
-accuracy = torchmetrics.Accuracy()
-
+accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
 with torch.no_grad():
     for samples, labels in tqdm(test_ld, desc="Testing"):
