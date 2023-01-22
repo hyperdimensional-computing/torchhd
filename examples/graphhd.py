@@ -121,7 +121,7 @@ with torch.no_grad():
 
     model.classify.weight[:] = F.normalize(model.classify.weight)
 
-accuracy = torchmetrics.Accuracy()
+accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
 
 with torch.no_grad():
     for samples in tqdm(test_ld, desc="Testing"):
