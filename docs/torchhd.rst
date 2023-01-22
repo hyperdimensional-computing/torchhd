@@ -37,6 +37,7 @@ Operations
     cleanup
     randsel
     multirandsel
+    clipping
     soft_quantize
     hard_quantize
 

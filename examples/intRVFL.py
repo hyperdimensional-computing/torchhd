@@ -8,30 +8,48 @@ import torchmetrics
 import torchhd
 from torchhd import embeddings
 from torchhd.map import MAP
+from torch import Tensor
 
 
-# Function that performs the encoding according to intRVFL model. See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
-def encoding_density_clipped(
-    keys,
-    values,
-    kappa: int,
-):
-    # Perform binding of key and value vectors
-    sample_hv = MAP.bind(keys, values)
-    # Perform the superposition operation on the bound key-value pairs
-    sample_hv = MAP.multibundle(sample_hv)
-    # DK: consider making this function into the functinal.py - could be useful in other contexts
-    # Perform clipping function on the result of the superposition operation
-    sample_hv[sample_hv > kappa] = kappa
-    sample_hv[sample_hv < -kappa] = -kappa
-    return sample_hv
 
+# DK: For classes and functions below we likely want to create a separate file as they might be more useful then just for this example
+class EncodingDensityClipped():
+    """Class that performs the transformation of input data into hypervectors according to intRVFL model. See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
+
+    Args:
+        dimensions (int): Dimensionality of vectors used when transforming input data.
+        num_feat (int): Number of features in the dataset.
+        kappa (int): Parameter of the clipping function used as the part of transforming input data.
+        key (torchhd.map.MAP): A set of random vectors used as unique IDs for features of the dataset.
+        density_encoding (torchhd.embeddings.Thermometer): Thermometer encoding used for transforming input data.
+    """
+
+    def __init__(
+        self,
+        dimensions: int,
+        num_feat: int,
+        kappa: int,        
+    ):
+        super(EncodingDensityClipped, self).__init__()
+   
+        self.key = torchhd.random_hv(num_feat, dimensions, model=MAP)  
+        # DK: this will likely have to be double-checked once API for embeddigns is revised
+        self.density_encoding = embeddings.Thermometer(
+            dimensions + 1, dimensions, low=0, high=1
+        )
+        self.kappa = kappa
+
+    def encode(self, x):
+        # Perform binding of key and value vectors
+        sample_hv = MAP.bind(self.key, self.density_encoding(x))
+        # Perform the superposition operation on the bound key-value pairs
+        sample_hv = MAP.multibundle(sample_hv)        
+        # Perform clipping function on the result of the superposition operation and return
+        return torchhd.clipping(sample_hv, self.kappa)
 
 # Function that forms the classifier (readout matrix) with the ridge regression
 def classifier_ridge(
     train_ld: torch.utils.data.dataloader.DataLoader,
-    min_val: torch.float,
-    max_val: torch.float,
     dimensions: int,
     num_classes: int,
     lamb: float,
@@ -41,7 +59,7 @@ def classifier_ridge(
 ):
 
     # Get number of training samples
-    num_train = train_ld.dataset.targets.size(0)
+    num_train = len(train_ld.dataset)
     # Collects high-dimensional represetations of data in the train data
     total_samples_hv = torch.zeros(
         num_train,
@@ -63,18 +81,14 @@ def classifier_ridge(
 
             samples = samples.to(device)
             labels = labels.to(device)
-            # Make one-hot encoding
-            labels_one_hot[count, labels] = 1
-
-            # DK: I think this needs to be somehow connected to transform (callable, optional) that we have for datasets
-            # Normalize
-            samples = (samples - min_val) / (max_val - min_val)
-
+            # Make one-hot encoding            
+            labels_one_hot[torch.arange(count,count+samples.size(0)), labels] = 1
+            
             # Make transformation into high-dimensional space
             samples_hv = encoding_function(samples)
-            total_samples_hv[count, :] = samples_hv
+            total_samples_hv[count:count+samples.size(0), :] = samples_hv
 
-            count += 1
+            count += samples.size(0)
 
         # Compute the readout matrix using the ridge regression
         Wout = (
@@ -99,8 +113,6 @@ class intRVFLRidge(nn.Module):
         dimensions (int): Dimensionality of vectors used when transforming input data.
         kappa (int): Parameter of the clipping function used as the part of transforming input data.
         lamb (float): Regularization parameter used for ridge regression.
-        key (torchhd.map.MAP): A set of random vectors used as unique IDs for features of the dataset.
-        density_encoding (torchhd.embeddings.Thermometer): Thermometer encoding used for transforming input data.
         device (torch.device): Specifies device to be used for Torch.
     """
 
@@ -246,39 +258,35 @@ class intRVFLRidge(nn.Module):
         self.kappa = hyper_param[1]
         # Get number of classes
         self.num_classes = len(dataset.classes)
-        self.key = torchhd.random_hv(self.num_feat, self.dimensions, model=MAP)
-        # DK: this will likely have to be double-checked once API for embeddigns is revised
-        self.density_encoding = embeddings.Thermometer(
-            self.dimensions + 1, self.dimensions, low=0, high=1
-        )
         self.classify = nn.Linear(self.dimensions, self.num_classes, bias=False)
         self.classify.weight.data.fill_(0.0)
+        self.hypervector_encoding = EncodingDensityClipped (self.dimensions, self.num_feat, self.kappa)
 
     def encode(self, x):
-        return encoding_density_clipped(self.key, self.density_encoding(x), self.kappa)
+        return self.hypervector_encoding.encode(x)
+
 
     def forward(self, x):
         enc = self.encode(x)
+        # Get similarity values for each class assuming implicitly that there is only one prototype per class. This does not have to be the case in general.
         logit = self.classify(enc)
-        return logit
+        # Form predictions
+        predictions = torch.argmax(logit, dim=-1)
+        return predictions
 
     # Train the classfier
     def fit(
         self,
         train_ld: torch.utils.data.dataloader.DataLoader,
-        min_val: torch.float,
-        max_val: torch.float,
     ):
         # Gets classifier (readout matrix) via the ridge regression
         Wout = classifier_ridge(
             train_ld,
-            min_val,
-            max_val,
             self.dimensions,
             self.num_classes,
             self.lamb,
             self.encode,
-            self.key.dtype,
+            self.hypervector_encoding.key.dtype,
             self.device,
         )
         # Assign the obtained classifier to the output
@@ -291,7 +299,7 @@ class BenchmarkCollectionDataset:
 
     Args:
         model_class (nn.Module): Specifies a class for a model to be evaluated. The model should specify both transformation of input data as weel as the algortihm for forming the classifier.
-        simul (int, optional): Specifies how many random initializations of the model to evaluate for each dataset in the collection.
+        repeats (int, optional): Specifies how many random initializations of the model to evaluate for each dataset in the collection.
         batch_size (int, optional): Specifies batch size to be used for the model.
         device (torch.device, optional): Specifies device to be used for Torch.
     """
@@ -424,21 +432,25 @@ class BenchmarkCollectionDataset:
     def __init__(
         self,
         model_class: nn.Module,
-        simul: int = 1,
-        batch_size: int = 1,  # DK: The current code will not work for other values. Because "encoding_density_clipped()" assumes only one sample. Do we want to make it more generic?
+        repeats: int = 1,
+        batch_size: int = 1,
         device: torch.device = torch.device("cpu"),
     ):
         self.model_class = model_class
-        self.simul = simul
+        self.repeats = repeats
         self.batch_size = batch_size
         self.device = device
 
         # Collects average accuracy for each simulation of each dataset
         self.accuracy_collection = torch.zeros(
             len(self.dataset_collection),
-            self.simul,
+            self.repeats,
             device=self.device,
         )
+
+    # Function that performs min-max normalization of the input data samples 
+    def normalize(self, input: Tensor) -> Tensor:
+        return (input - self.min_val) / (self.max_val - self.min_val)
 
     ## Function compute the accuracy for a given model and data
     def compute_accuracy(self, model, train_ds, test_ds):
@@ -447,93 +459,63 @@ class BenchmarkCollectionDataset:
             train_ds, batch_size=self.batch_size, shuffle=True
         )
         test_ld = torch.utils.data.DataLoader(
-            test_ds, batch_size=self.batch_size, shuffle=True
+            test_ds, batch_size=self.batch_size
         )
 
-        # DK: I think this needs to be somehow connected to transform (callable, optional) that we have for datasets
-        # Used to make min-max normalization of the data
-        min_val = torch.min(train_ds.data, 0).values.to(self.device)
-        max_val = torch.max(train_ds.data, 0).values.to(self.device)
 
         # Obtain the classifier for the model
-        model.fit(train_ld, min_val, max_val)
+        model.fit(train_ld)
 
         accuracy = torchmetrics.Accuracy()
         with torch.no_grad():
             for samples, labels in tqdm(test_ld, desc="Testing"):
-                samples = samples.to(self.device)
-
-                # DK: I think this needs to be somehow connected to transform (callable, optional) that we have for datasets
-                # Normalize
-                samples = (samples - min_val) / (max_val - min_val)
-
-                # Get values for each class
-                outputs = model(samples)
+                samples = samples.to(self.device)                
                 # Make prediction
-                # DK: Point for extension. Currently, it assumes implicitly that there is only one vector (prototype) per class, which does not have to be the case in general
-                predictions = torch.argmax(outputs, dim=-1)
+                predictions = model(samples)
                 accuracy.update(predictions.cpu(), labels)
 
         return accuracy.compute().item()
 
     def evaluate(self):
         # For all datasets in the collection
-        for i in range(len(self.dataset_collection)):
-            # Fetch the current dataset
-            dataset = getattr(torchhd.datasets, self.dataset_collection[i])
-
+        for i, [train_ds, test_ds] in enumerate(torchhd.datasets.UCIDatasetCollection(self.dataset_collection, "../data", True)):
+            num_feat = train_ds[0][0][0].size(-1)
             # Run for the requested number of simulations
-            for sim in range(self.simul):
-                # If no separate test dataset available - do 4-fold cross-validation
-                if hasattr(dataset, "num_folds"):
-                    accuracy_dataset = 0.0
-                    for fold_id in range(dataset.num_folds):
-                        # Set test and train datasets for the current fold
-                        train_ds = dataset(
-                            "../data", train=True, download=True, fold=fold_id
-                        )
-                        test_ds = dataset(
-                            "../data", train=False, download=False, fold=fold_id
-                        )
-
-                        # Initialize model
-                        model = self.model_class(
-                            dataset, train_ds[0][0].size(-1), self.device
-                        ).to(self.device)
-                        # Train model and computer the validation accuracy
-                        accuracy_dataset += self.compute_accuracy(
-                            model, train_ds, test_ds
-                        )
-
-                    # Average over folds
-                    accuracy_dataset = accuracy_dataset / dataset.num_folds
-
-                # Case of avaiable test set
-                else:
-                    # Set test and train datasets
-                    train_ds = dataset("../data", train=True, download=True)
-                    test_ds = dataset("../data", train=False, download=False)
-
+            for repeat in range(self.repeats):
+                accuracy_dataset = 0.0
+                for fold_id in range(len(train_ds)):
+                    # Set test and train datasets for the current fold
+                    # Get values for min-max normalization and add the transformation
+                    # DK: doing this inside FOR loop for self.repeats because uncertain if otherwise each fold will get its own min_val and max_val in self.normalize 
+                    self.min_val = torch.min(train_ds[fold_id].data, 0).values.to(self.device)
+                    self.max_val = torch.max(train_ds[fold_id].data, 0).values.to(self.device)                        
+                    train_ds[fold_id].transform = self.normalize
+                    test_ds[fold_id].transform = self.normalize   
+                    
                     # Initialize model
                     model = self.model_class(
-                        dataset, train_ds[0][0].size(-1), self.device
+                        getattr(torchhd.datasets, self.dataset_collection[i]), num_feat, self.device
                     ).to(self.device)
-                    # Train model and computer the test accuracy
-                    accuracy_dataset = self.compute_accuracy(model, train_ds, test_ds)
+                    # Train model and computer the validation accuracy
+                    accuracy_dataset += self.compute_accuracy(
+                        model, train_ds[fold_id], test_ds[fold_id]
+                    )
 
-                print(
-                    f"Dataset {i} - {self.dataset_collection[i]}: average testing accuracy of {(accuracy_dataset* 100):.3f}%"
-                )
+                # Average over folds
+                accuracy_dataset = accuracy_dataset / len(train_ds)
 
                 # Update the statistics for the current dataset and simulation
-                self.accuracy_collection[i, sim] = accuracy_dataset
+                self.accuracy_collection[i, repeat] = accuracy_dataset
 
-        # DK: Think whether to average accross simulations or not. May be introduce boolean variable indicating whether to do so or not
+            print(
+                f"Dataset {i} - {self.dataset_collection[i]}: average testing accuracy of {(torch.mean(self.accuracy_collection[i, :])* 100):.2f}%"
+            )
+
         return self.accuracy_collection
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
 
-benchmark = BenchmarkCollectionDataset(intRVFLRidge, simul=1, device=device)
+benchmark = BenchmarkCollectionDataset(intRVFLRidge, repeats=3, batch_size = 10, device=device)
 accuracy_collection = benchmark.evaluate()
