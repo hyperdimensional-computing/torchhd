@@ -661,6 +661,29 @@ def permute(input: VSA_Model, *, shifts=1) -> VSA_Model:
     return input.permute(shifts)
 
 
+def create_random_permute(dim: int):
+    r"""Creates random permutation functions.
+    
+    Args:
+        dim (int): dimension of the permutation
+        
+    Examples::
+    
+        >>> x = [0, 1, 2, 3, 4, 5]
+        >>> p = create_random_permute(10)
+        >>> p(x, 2)
+        [5, 3, 0, 1, 2, 4]
+    
+    """
+    forward = torch.randint(dim)
+    def permute(x, n: int = 1):
+        y = x[foward]
+        for _ in range(1, n):
+            y = y[forward]
+        return y
+    return permute
+
+
 def inverse(input: VSA_Model) -> VSA_Model:
     r"""Inverse for the binding operation.
 
