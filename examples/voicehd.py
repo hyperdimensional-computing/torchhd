@@ -8,6 +8,7 @@ from tqdm import tqdm
 
 import torchhd
 from torchhd import embeddings
+from torchhd.models import Centroid
 from torchhd.datasets.isolet import ISOLET
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -18,25 +19,16 @@ NUM_LEVELS = 100
 BATCH_SIZE = 1  # for GPUs with enough memory we can process multiple images at ones
 
 
-class Model(nn.Module):
+class Encoder(nn.Module):
     def __init__(self, num_classes, size):
-        super(Model, self).__init__()
-
+        super(Encoder, self).__init__()
         self.id = embeddings.Random(size, DIMENSIONS)
         self.value = embeddings.Level(NUM_LEVELS, DIMENSIONS)
 
-        self.classify = nn.Linear(DIMENSIONS, num_classes, bias=False)
-        self.classify.weight.data.fill_(0.0)
-
-    def encode(self, x):
+    def forward(self, x):
         sample_hv = torchhd.bind(self.id.weight, self.value(x))
         sample_hv = torchhd.multiset(sample_hv)
         return torchhd.hard_quantize(sample_hv)
-
-    def forward(self, x):
-        enc = self.encode(x)
-        logit = self.classify(enc)
-        return logit
 
 
 train_ds = ISOLET("../data", train=True, download=True)
@@ -45,8 +37,11 @@ train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=
 test_ds = ISOLET("../data", train=False, download=True)
 test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
+encode = Encoder(DIMENSIONS, train_ds[0][0].size(-1))
+encode = encode.to(device)
+
 num_classes = len(train_ds.classes)
-model = Model(num_classes, train_ds[0][0].size(-1))
+model = Centroid(DIMENSIONS, num_classes)
 model = model.to(device)
 
 with torch.no_grad():
@@ -54,19 +49,19 @@ with torch.no_grad():
         samples = samples.to(device)
         labels = labels.to(device)
 
-        samples_hv = model.encode(samples)
-        model.classify.weight[labels] += samples_hv
-
-    model.classify.weight[:] = F.normalize(model.classify.weight)
+        samples_hv = encode(samples)
+        model.add(samples_hv, labels)
 
 accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
 with torch.no_grad():
+    model.normalize()
+
     for samples, labels in tqdm(test_ld, desc="Testing"):
         samples = samples.to(device)
 
-        outputs = model(samples)
-        predictions = torch.argmax(outputs, dim=-1)
-        accuracy.update(predictions.cpu(), labels)
+        samples_hv = encode(samples)
+        outputs = model(samples_hv, dot=True)
+        accuracy.update(outputs.cpu(), labels)
 
 print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")

@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 import torchhd
 from torchhd import embeddings
+from torchhd.models import Centroid
 from torchhd.datasets import EMGHandGestures
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -27,30 +28,22 @@ def transform(x):
     return x[SUBSAMPLES]
 
 
-class Model(nn.Module):
-    def __init__(self, num_classes, timestamps, channels):
-        super(Model, self).__init__()
+class Encoder(nn.Module):
+    def __init__(self, out_features, timestamps, channels):
+        super(Encoder, self).__init__()
 
-        self.channels = embeddings.Random(channels, DIMENSIONS)
-        self.timestamps = embeddings.Random(timestamps, DIMENSIONS)
-        self.signals = embeddings.Level(NUM_LEVELS, DIMENSIONS, high=20)
+        self.channels = embeddings.Random(channels, out_features)
+        self.timestamps = embeddings.Random(timestamps, out_features)
+        self.signals = embeddings.Level(NUM_LEVELS, out_features, high=20)
 
-        self.classify = nn.Linear(DIMENSIONS, num_classes, bias=False)
-        self.classify.weight.data.fill_(0.0)
-
-    def encode(self, x: torch.Tensor) -> torch.Tensor:
-        signal = self.signals(x)
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
+        signal = self.signals(input)
         samples = torchhd.bind(signal, self.channels.weight.unsqueeze(0))
         samples = torchhd.bind(signal, self.timestamps.weight.unsqueeze(1))
 
         samples = torchhd.multiset(samples)
         sample_hv = torchhd.ngrams(samples, n=N_GRAM_SIZE)
         return torchhd.hard_quantize(sample_hv)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        enc = self.encode(x)
-        logit = self.classify(enc)
-        return logit
 
 
 def experiment(subjects=[0]):
@@ -66,29 +59,32 @@ def experiment(subjects=[0]):
     train_ld = data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
     test_ld = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
+    encode = Encoder(DIMENSIONS, ds[0][0].size(-2), ds[0][0].size(-1))
+    encode = encode.to(device)
+
     num_classes = len(ds.classes)
-    model = Model(num_classes, ds[0][0].size(-2), ds[0][0].size(-1))
+    model = Centroid(DIMENSIONS, num_classes)
     model = model.to(device)
 
     with torch.no_grad():
-        for samples, labels in tqdm(train_ld, desc="Training"):
+        for samples, targets in tqdm(train_ld, desc="Training"):
             samples = samples.to(device)
-            labels = labels.to(device)
+            targets = targets.to(device)
 
-            samples_hv = model.encode(samples)
-            model.classify.weight[labels] += samples_hv
-
-        model.classify.weight[:] = F.normalize(model.classify.weight)
+            sample_hv = encode(samples)
+            model.add(sample_hv, targets)
 
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
     with torch.no_grad():
-        for samples, labels in tqdm(test_ld, desc="Testing"):
+        model.normalize()
+
+        for samples, targets in tqdm(test_ld, desc="Testing"):
             samples = samples.to(device)
 
-            outputs = model(samples)
-            predictions = torch.argmax(outputs, dim=-1)
-            accuracy.update(predictions.cpu(), labels)
+            sample_hv = encode(samples)
+            output = model(sample_hv, dot=True)
+            accuracy.update(output.cpu(), targets)
 
     print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
 

@@ -95,7 +95,7 @@ with torch.no_grad():
         target_hv = model.target(labels)
         model.regression.weight.data += torchhd.bind(samples_hv, target_hv)
 
-    model.regression.weight[:] = F.normalize(model.regression.weight)
+    model.regression.weight.copy_(F.normalize(model.regression.weight))
 
 mse = torchmetrics.MeanSquaredError()
 

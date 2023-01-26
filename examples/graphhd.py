@@ -11,6 +11,7 @@ import torchmetrics
 
 import torchhd
 from torchhd import embeddings
+from torchhd.models import Centroid
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
@@ -80,20 +81,17 @@ def min_max_graph_size(graph_dataset):
     return min_num_nodes, max_num_nodes
 
 
-class Model(nn.Module):
-    def __init__(self, num_classes, size):
-        super(Model, self).__init__()
+class Encoder(nn.Module):
+    def __init__(self, out_features, size):
+        super(Encoder, self).__init__()
+        self.out_features = out_features
+        self.node_ids = embeddings.Random(size, out_features)
 
-        self.node_ids = embeddings.Random(size, DIMENSIONS)
-
-        self.classify = nn.Linear(DIMENSIONS, num_classes, bias=False)
-        self.classify.weight.data.fill_(0.0)
-
-    def encode(self, x):
+    def forward(self, x):
         pr = pagerank(x)
         pr_sort, pr_argsort = pr.sort()
 
-        node_id_hvs = torch.zeros((x.num_nodes, DIMENSIONS), device=device)
+        node_id_hvs = torch.zeros((x.num_nodes, self.out_features), device=device)
         node_id_hvs[pr_argsort] = self.node_ids.weight[: x.num_nodes]
 
         row, col = to_undirected(x.edge_index)
@@ -101,14 +99,12 @@ class Model(nn.Module):
         hvs = torchhd.bind(node_id_hvs[row], node_id_hvs[col])
         return torchhd.multiset(hvs)
 
-    def forward(self, x):
-        enc = self.encode(x)
-        logit = self.classify(enc)
-        return logit
-
 
 min_graph_size, max_graph_size = min_max_graph_size(graphs)
-model = Model(graphs.num_classes, max_graph_size)
+encode = Encoder(DIMENSIONS, max_graph_size)
+encode = encode.to(device)
+
+model = Centroid(DIMENSIONS, graphs.num_classes)
 model = model.to(device)
 
 with torch.no_grad():
@@ -116,19 +112,19 @@ with torch.no_grad():
         samples.edge_index = samples.edge_index.to(device)
         samples.y = samples.y.to(device)
 
-        samples_hv = model.encode(samples)
-        model.classify.weight[samples.y] += samples_hv
-
-    model.classify.weight[:] = F.normalize(model.classify.weight)
+        samples_hv = encode(samples).unsqueeze(0)
+        model.add(samples_hv, samples.y)
 
 accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
 
 with torch.no_grad():
+    model.normalize()
+
     for samples in tqdm(test_ld, desc="Testing"):
         samples.edge_index = samples.edge_index.to(device)
 
-        outputs = model(samples)
-        predictions = torch.argmax(outputs, dim=-1).unsqueeze(0)
-        accuracy.update(predictions.cpu(), samples.y)
+        samples_hv = encode(samples).unsqueeze(0)
+        outputs = model(samples_hv, dot=True)
+        accuracy.update(outputs.cpu(), samples.y)
 
 print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
