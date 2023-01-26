@@ -66,7 +66,6 @@ class SingleModel(nn.Module):
     def model_update(self, x, y):
         update = self.M + self.lr * (y - (F.linear(x, self.M))) * x
         update = update.mean(0)
-
         self.M = update
 
     def forward(self, x):
