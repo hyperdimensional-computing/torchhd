@@ -75,10 +75,10 @@ class Centroid(nn.Module):
         """Only updates the prototype vectors on wrongly predicted inputs.
 
         Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
-        
-        Adds the input to the mispredicted class prototype scaled by :math:`\epsilon - 1` 
-        and adds the input to the target prototype scaled by :math:`1 - \delta`, 
-        where :math:`\epsilon` is the cosine similarity of the input with the mispredicted class prototype 
+
+        Adds the input to the mispredicted class prototype scaled by :math:`\epsilon - 1`
+        and adds the input to the target prototype scaled by :math:`1 - \delta`,
+        where :math:`\epsilon` is the cosine similarity of the input with the mispredicted class prototype
         and :math:`\delta` is the cosine similarity of the input with the target class prototype.
         """
         # Adapted from: https://gitlab.com/biaslab/onlinehd/-/blob/master/onlinehd/onlinehd.py
@@ -105,7 +105,7 @@ class Centroid(nn.Module):
     @torch.no_grad()
     def normalize(self, eps=1e-12) -> None:
         """Transforms all the class prototype vectors into unit vectors.
-        
+
         After calling this, inferences can be made more efficiently by specifying ``dot=True`` in the forward pass.
         Training further after calling this method is not advised.
         """
