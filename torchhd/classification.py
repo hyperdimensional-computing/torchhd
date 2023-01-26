@@ -9,7 +9,8 @@ __all__ = [
     "classifier_ridge_regression",
 ]
 
-class EncodingDensityClipped():
+
+class EncodingDensityClipped:
     """Class that performs the transformation of input data into hypervectors according to intRVFL model. See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
 
     Args:
@@ -24,21 +25,22 @@ class EncodingDensityClipped():
         self,
         dimensions: int,
         num_feat: int,
-        kappa: int,        
+        kappa: int,
     ):
         super(EncodingDensityClipped, self).__init__()
-   
-        self.key = torchhd.random_hv(num_feat, dimensions, model=MAP)  
+
+        self.key = torchhd.random_hv(num_feat, dimensions, model=MAP)
         self.density_encoding = torchhd.embeddings.Thermometer(
             dimensions + 1, dimensions, low=0, high=1
         )
         self.kappa = kappa
+
     # Specify the steps needed to perform the encoding
     def encode(self, x):
         # Perform binding of key and value vectors
         sample_hv = MAP.bind(self.key, self.density_encoding(x))
         # Perform the superposition operation on the bound key-value pairs
-        sample_hv = MAP.multibundle(sample_hv)        
+        sample_hv = MAP.multibundle(sample_hv)
         # Perform clipping function on the result of the superposition operation and return
         return sample_hv.clipping(self.kappa)
 
@@ -77,12 +79,12 @@ def classifier_ridge_regression(
 
             samples = samples.to(device)
             labels = labels.to(device)
-            # Make one-hot encoding            
-            labels_one_hot[torch.arange(count,count+samples.size(0)), labels] = 1
-            
+            # Make one-hot encoding
+            labels_one_hot[torch.arange(count, count + samples.size(0)), labels] = 1
+
             # Make transformation into high-dimensional space
             samples_hv = encoding_function(samples)
-            total_samples_hv[count:count+samples.size(0), :] = samples_hv
+            total_samples_hv[count : count + samples.size(0), :] = samples_hv
 
             count += samples.size(0)
 
@@ -97,4 +99,3 @@ def classifier_ridge_regression(
         )
 
     return Wout
-

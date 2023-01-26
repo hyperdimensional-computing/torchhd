@@ -10,9 +10,9 @@ import numpy as np
 import torchhd
 from .utils import download_file_from_google_drive
 from collections import namedtuple
- 
 
-class UCIClassificationBenchmark():
+
+class UCIClassificationBenchmark:
     """Class that performs the transformation of input data into hypervectors according to intRVFL model. See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
 
     Args:
@@ -149,7 +149,7 @@ class UCIClassificationBenchmark():
     ]
 
     # Specify namedtuple format
-    DATASET = namedtuple('Dataset', ['name', 'train', 'test'])
+    DATASET = namedtuple("Dataset", ["name", "train", "test"])
 
     def __init__(
         self,
@@ -158,31 +158,37 @@ class UCIClassificationBenchmark():
     ):
         super(UCIClassificationBenchmark, self).__init__()
         self.root = root
-        self.download = download        
-        self.statistics = {key: [0.,0.] for key in self.UCI_DATASET_COLLECTION}
-        
-    #DK there could be better a way to make this generator within the class but I did not find it        
-    def datasets(self):    
+        self.download = download
+        self.statistics = {key: [0.0, 0.0] for key in self.UCI_DATASET_COLLECTION}
+
+    # DK there could be better a way to make this generator within the class but I did not find it
+    def datasets(self):
         # For all datasets in the collection
         for i in range(len(self.UCI_DATASET_COLLECTION)):
             # Fetch the current dataset
             dataset = getattr(torchhd.datasets, self.UCI_DATASET_COLLECTION[i])
-            
+
             # If no separate test dataset available - do 4-fold cross-validation
             if hasattr(dataset, "num_folds"):
                 for fold_id in range(dataset.num_folds):
                     # Set test and train datasets for the current fold
-                    train_ds = dataset(self.root, train = True, download = self.download, fold=fold_id)
-                    test_ds = dataset(self.root, train = False, download = False, fold=fold_id)
-                    yield self.DATASET(self.UCI_DATASET_COLLECTION[i], train_ds, test_ds)
+                    train_ds = dataset(
+                        self.root, train=True, download=self.download, fold=fold_id
+                    )
+                    test_ds = dataset(
+                        self.root, train=False, download=False, fold=fold_id
+                    )
+                    yield self.DATASET(
+                        self.UCI_DATASET_COLLECTION[i], train_ds, test_ds
+                    )
             # Case of avaiable test set
             else:
                 # Set test and train datasets
-                train_ds = dataset(self.root, train = True, download = self.download)
-                test_ds = dataset(self.root, train = False, download = False)
+                train_ds = dataset(self.root, train=True, download=self.download)
+                test_ds = dataset(self.root, train=False, download=False)
                 yield self.DATASET(self.UCI_DATASET_COLLECTION[i], train_ds, test_ds)
-    
-    def report(self,dataset,accuracy):
+
+    def report(self, dataset, accuracy):
         # Update variable for running statistics
         self.statistics[dataset.name][0] += accuracy
         # Update variable for counter for later averaging
@@ -191,12 +197,12 @@ class UCIClassificationBenchmark():
     def score(self):
         results = self.statistics.copy()
         for key in results:
-            #Average over folds and repeats (if applicable)
+            # Average over folds and repeats (if applicable)
             try:
-                results[key] = results[key][0]/results[key][1] 
+                results[key] = results[key][0] / results[key][1]
             except:
                 results[key] = 0
-        return results  
+        return results
 
 
 class CollectionDataset(data.Dataset):

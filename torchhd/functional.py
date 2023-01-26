@@ -562,6 +562,7 @@ def circular_hv(
     hv.requires_grad = requires_grad
     return hv.as_subclass(model)
 
+
 def bind(input: VSA_Model, other: VSA_Model) -> VSA_Model:
     r"""Binds two hypervectors which produces a hypervector dissimilar to both.
 

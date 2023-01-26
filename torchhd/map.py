@@ -297,7 +297,7 @@ class MAP(VSA_Model):
 
     def clipping(self, kappa) -> "MAP":
         """Performs the clipping function that clips the lower and upper values.
-    
+
         Args:
             kappa (int): specifies the range of the clipping function.
 
@@ -312,9 +312,9 @@ class MAP(VSA_Model):
             MAP([-8.,  0.,  6.,  8.,  4., -6.,  0., -2.,  0., -4.])
             >>> a.clipping(4)
             MAP([-4.,  0.,  4.,  4.,  4., -4.,  0., -2.,  0., -4.])
-    
+
         """
-    
+
         return self.clamp(min=-kappa, max=kappa)
 
     def dot_similarity(self, others: "MAP") -> Tensor:
