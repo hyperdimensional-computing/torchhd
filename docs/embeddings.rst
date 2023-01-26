@@ -9,6 +9,7 @@ torchhd.embeddings
     :toctree: generated/
     :template: class.rst
 
+    Empty
     Identity
     Random
     Level

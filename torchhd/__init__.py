@@ -1,5 +1,6 @@
 import torchhd.functional as functional
 import torchhd.embeddings as embeddings
+import torchhd.classification as classification
 import torchhd.structures as structures
 import torchhd.datasets as datasets
 import torchhd.utils as utils
@@ -18,7 +19,6 @@ from torchhd.functional import (
     level_hv,
     thermometer_hv,
     circular_hv,
-    clipping,
     bind,
     bundle,
     permute,
@@ -66,7 +66,6 @@ __all__ = [
     "level_hv",
     "thermometer_hv",
     "circular_hv",
-    "clipping",
     "bind",
     "bundle",
     "permute",

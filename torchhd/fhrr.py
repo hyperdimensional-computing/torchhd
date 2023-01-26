@@ -55,6 +55,9 @@ class FHRR(VSA_Model):
                     [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j]],
                    dtype=torch.complex128)
         """
+        if dtype is None:
+            dtype = torch.complex64
+
         if dtype not in cls.supported_dtypes:
             name = cls.__name__
             options = ", ".join([str(x) for x in cls.supported_dtypes])
@@ -105,6 +108,9 @@ class FHRR(VSA_Model):
 
 
         """
+        if dtype is None:
+            dtype = torch.complex64
+
         if dtype not in cls.supported_dtypes:
             name = cls.__name__
             options = ", ".join([str(x) for x in cls.supported_dtypes])
@@ -156,6 +162,9 @@ class FHRR(VSA_Model):
                     dtype=torch.complex128)
 
         """
+        if dtype is None:
+            dtype = torch.complex64
+
         if dtype not in cls.supported_dtypes:
             name = cls.__name__
             options = ", ".join([str(x) for x in cls.supported_dtypes])

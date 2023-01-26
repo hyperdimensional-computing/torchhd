@@ -7,6 +7,7 @@ from collections import deque
 from torchhd.base import VSA_Model
 from torchhd.bsc import BSC
 from torchhd.map import MAP
+from torchhd.hrr import HRR
 from torchhd.fhrr import FHRR
 
 
@@ -484,6 +485,11 @@ def circular_hv(
                 [-0.887-0.460j, -0.906+0.421j, -0.727-0.686j, -0.271+0.962j, -0.705-0.709j,  0.562-0.827j]])
 
     """
+    if model == HRR:
+        raise ValueError(
+            "The circular hypervectors don't currently work with the HRR model. We are not sure why, if you have any insight that could help please share it at: https://github.com/hyperdimensional-computing/torchhd/issues/108."
+        )
+
     # convert from normalized "randomness" variable r to
     # number of levels between orthogonal pairs or "span"
     levels_per_span = ((1 - randomness) * (num_vectors / 2) + randomness * 1) * 2
@@ -555,22 +561,6 @@ def circular_hv(
 
     hv.requires_grad = requires_grad
     return hv.as_subclass(model)
-
-
-def clipping(input: VSA_Model, kappa) -> VSA_Model:
-    """Performs the clipping operation on the given input that clips the lower and upper values.
-
-    Args:
-        input (VSA_Model): input hypervector.
-        kappa (int): specifies the range of the clipping function.
-
-    """
-
-    input[input > kappa] = kappa
-    input[input < -kappa] = -kappa
-
-    return input
-
 
 def bind(input: VSA_Model, other: VSA_Model) -> VSA_Model:
     r"""Binds two hypervectors which produces a hypervector dissimilar to both.
@@ -723,6 +713,9 @@ def negative(input: VSA_Model) -> VSA_Model:
 def soft_quantize(input: Tensor):
     """Applies the hyperbolic tanh function to all elements of the input tensor.
 
+    .. warning::
+        This function does not take the VSA model class into account.
+
     Args:
         input (Tensor): input tensor.
 
@@ -732,12 +725,15 @@ def soft_quantize(input: Tensor):
 
     Examples::
 
-        >>> x = functional.random_hv(2, 3)
-        >>> y = functional.bundle(x[0], x[1])
+        >>> x = torchhd.random_hv(2, 6)
+        >>> x
+        tensor([[ 1.,  1., -1.,  1.,  1.,  1.],
+            [ 1., -1., -1., -1.,  1., -1.]])
+        >>> y = torchhd.bundle(x[0], x[1])
         >>> y
-        tensor([0., 2., 0.])
-        >>> functional.soft_quantize(y)
-        tensor([0.0000, 0.9640, 0.0000])
+        tensor([ 2.,  0., -2.,  0.,  2.,  0.])
+        >>> torchhd.soft_quantize(y)
+        tensor([ 0.9640,  0.0000, -0.9640,  0.0000,  0.9640,  0.0000])
 
     """
     return torch.tanh(input)
@@ -745,6 +741,9 @@ def soft_quantize(input: Tensor):
 
 def hard_quantize(input: Tensor):
     """Applies binary quantization to all elements of the input tensor.
+
+    .. warning::
+        This function does not take the VSA model class into account.
 
     Args:
         input (Tensor): input tensor
@@ -755,12 +754,15 @@ def hard_quantize(input: Tensor):
 
     Examples::
 
-        >>> x = functional.random_hv(2, 3)
-        >>> y = functional.bundle(x[0], x[1])
+        >>> x = torchhd.random_hv(2, 6)
+        >>> x
+        tensor([[ 1.,  1., -1.,  1.,  1.,  1.],
+            [ 1., -1., -1., -1.,  1., -1.]])
+        >>> y = torchhd.bundle(x[0], x[1])
         >>> y
-        tensor([ 0., -2., -2.])
-        >>> functional.hard_quantize(y)
-        tensor([ 1., -1., -1.])
+        tensor([ 2.,  0., -2.,  0.,  2.,  0.])
+        >>> torchhd.hard_quantize(y)
+        tensor([ 1., -1., -1., -1.,  1., -1.])
 
     """
     # Make sure that the output tensor has the same dtype and device

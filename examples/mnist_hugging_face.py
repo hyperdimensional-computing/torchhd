@@ -6,8 +6,10 @@ from torchvision.datasets import MNIST
 
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
-from tqdm import tqdm
+
+# Note: this example requires the accelerate library: https://github.com/huggingface/accelerate
 from accelerate import Accelerator
+from tqdm import tqdm
 
 import torchhd
 from torchhd import embeddings
@@ -54,7 +56,8 @@ class Model(nn.Module):
         return logit
 
 
-model = Model(len(train_ds.classes), IMG_SIZE)
+num_classes = len(train_ds.classes)
+model = Model(num_classes, IMG_SIZE)
 model.to(device)
 
 model, train_ld, test_ld = accelerator.prepare(model, train_ld, test_ld)
@@ -69,8 +72,7 @@ with torch.no_grad():
 
     model.classify.weight[:] = F.normalize(model.classify.weight)
 
-accuracy = torchmetrics.Accuracy()
-
+accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
 with torch.no_grad():
     for samples, labels in tqdm(test_ld, desc="Testing"):

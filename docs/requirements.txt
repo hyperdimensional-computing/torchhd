@@ -2,6 +2,7 @@ torch
 torchvision
 pandas
 requests
+tqdm
 numpy
 sphinx
 sphinx-rtd-theme

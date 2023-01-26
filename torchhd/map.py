@@ -295,6 +295,28 @@ class MAP(VSA_Model):
         """
         return self.roll(shifts=shifts, dims=-1)
 
+    def clipping(self, kappa) -> "MAP":
+        """Performs the clipping function that clips the lower and upper values.
+    
+        Args:
+            kappa (int): specifies the range of the clipping function.
+
+        Shapes:
+            - Self: :math:`(*)`
+            - Output: :math:`(*)`
+
+        Examples::
+
+            >>> a = torchhd.MAP.random_hv(30, 10).multibundle()
+            >>> a
+            MAP([-8.,  0.,  6.,  8.,  4., -6.,  0., -2.,  0., -4.])
+            >>> a.clipping(4)
+            MAP([-4.,  0.,  4.,  4.,  4., -4.,  0., -2.,  0., -4.])
+    
+        """
+    
+        return self.clamp(min=-kappa, max=kappa)
+
     def dot_similarity(self, others: "MAP") -> Tensor:
         """Inner product with other hypervectors"""
         dtype = torch.get_default_dtype()

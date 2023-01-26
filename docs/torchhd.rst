@@ -81,7 +81,7 @@ VSA Models
     VSA_Model
     BSC
     MAP
-    .. HRR
+    HRR
     FHRR
 
 

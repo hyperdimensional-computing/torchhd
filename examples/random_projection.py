@@ -58,16 +58,13 @@ class Model(nn.Module):
         self.target = embeddings.Level(
             500, DIMENSIONS, low=MIN_TEMPERATURE, high=MAX_TEMPERATURE
         )
-        self.project = embeddings.Projection(size, DIMENSIONS)
-        self.bias = nn.parameter.Parameter(torch.empty(DIMENSIONS), requires_grad=False)
-        self.bias.data.uniform_(0, 2 * math.pi)
+        self.project = embeddings.Sinusoid(size, DIMENSIONS)
 
         self.regression = nn.Linear(DIMENSIONS, num_classes, bias=False)
         self.regression.weight.data.fill_(0.0)
 
     def encode(self, x):
-        enc = self.project(x)
-        sample_hv = torch.cos(enc + self.bias) * torch.sin(enc)
+        sample_hv = self.project(x)
         return torchhd.hard_quantize(sample_hv)
 
     def forward(self, x):

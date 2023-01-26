@@ -8,36 +8,195 @@ import pandas as pd
 import tarfile
 import numpy as np
 import torchhd
-
-
 from .utils import download_file_from_google_drive
+from collections import namedtuple
+ 
 
+class UCIClassificationBenchmark():
+    """Class that performs the transformation of input data into hypervectors according to intRVFL model. See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
 
-# Function that iterates via a given collection of datasets
-def UCIDatasetCollection(dataset_collection, root, download):
-    # For all datasets in the collection
-    for i in range(len(dataset_collection)):
-        # Fetch the current dataset
-        dataset = getattr(torchhd.datasets, dataset_collection[i])
+    Args:
+        dimensions (int): Dimensionality of vectors used when transforming input data.
+        num_feat (int): Number of features in the dataset.
+        kappa (int): Parameter of the clipping function used as the part of transforming input data.
+        key (torchhd.map.MAP): A set of random vectors used as unique IDs for features of the dataset.
+        density_encoding (torchhd.embeddings.Thermometer): Thermometer encoding used for transforming input data.
+    """
 
-        train_ds = []
-        test_ds = []
-        # If no separate test dataset available - do 4-fold cross-validation
-        if hasattr(dataset, "num_folds"):
-            for fold_id in range(dataset.num_folds):
-                # Set test and train datasets for the current fold
-                train_ds.append(
-                    dataset(root, train=True, download=download, fold=fold_id)
-                )
-                test_ds.append(dataset(root, train=False, download=False, fold=fold_id))
+    # All datasets included in the collection
+    UCI_DATASET_COLLECTION = [
+        "Abalone",
+        "AcuteInflammation",
+        "AcuteNephritis",
+        "Adult",
+        "Annealing",
+        "Arrhythmia",
+        "AudiologyStd",
+        "BalanceScale",
+        "Balloons",
+        "Bank",
+        "Blood",
+        "BreastCancer",
+        "BreastCancerWisc",
+        "BreastCancerWiscDiag",
+        "BreastCancerWiscProg",
+        "BreastTissue",
+        "Car",
+        "Cardiotocography10Clases",
+        "Cardiotocography3Clases",
+        "ChessKrvk",
+        "ChessKrvkp",
+        "CongressionalVoting",
+        "ConnBenchSonarMinesRocks",
+        "ConnBenchVowelDeterding",
+        "Connect4",
+        "Contrac",
+        "CreditApproval",
+        "CylinderBands",
+        "Dermatology",
+        "Echocardiogram",
+        "Ecoli",
+        "EnergyY1",
+        "EnergyY2",
+        "Fertility",
+        "Flags",
+        "Glass",
+        "HabermanSurvival",
+        "HayesRoth",
+        "HeartCleveland",
+        "HeartHungarian",
+        "HeartSwitzerland",
+        "HeartVa",
+        "Hepatitis",
+        "HillValley",
+        "HorseColic",
+        "IlpdIndianLiver",
+        "ImageSegmentation",
+        "Ionosphere",
+        "Iris",
+        "LedDisplay",
+        "Lenses",
+        "Letter",
+        "Libras",
+        "LowResSpect",
+        "LungCancer",
+        "Lymphography",
+        "Magic",
+        "Mammographic",
+        "Miniboone",
+        "MolecBiolPromoter",
+        "MolecBiolSplice",
+        "Monks1",
+        "Monks2",
+        "Monks3",
+        "Mushroom",
+        "Musk1",
+        "Musk2",
+        "Nursery",
+        "OocytesMerlucciusNucleus4d",
+        "OocytesMerlucciusStates2f",
+        "OocytesTrisopterusNucleus2f",
+        "OocytesTrisopterusStates5b",
+        "Optical",
+        "Ozone",
+        "PageBlocks",
+        "Parkinsons",
+        "Pendigits",
+        "Pima",
+        "PittsburgBridgesMaterial",
+        "PittsburgBridgesRelL",
+        "PittsburgBridgesSpan",
+        "PittsburgBridgesTOrD",
+        "PittsburgBridgesType",
+        "Planning",
+        "PlantMargin",
+        "PlantShape",
+        "PlantTexture",
+        "PostOperative",
+        "PrimaryTumor",
+        "Ringnorm",
+        "Seeds",
+        "Semeion",
+        "Soybean",
+        "Spambase",
+        "Spect",
+        "Spectf",
+        "StatlogAustralianCredit",
+        "StatlogGermanCredit",
+        "StatlogHeart",
+        "StatlogImage",
+        "StatlogLandsat",
+        "StatlogShuttle",
+        "StatlogVehicle",
+        "SteelPlates",
+        "SyntheticControl",
+        "Teaching",
+        "Thyroid",
+        "TicTacToe",
+        "Titanic",
+        "Trains",
+        "Twonorm",
+        "VertebralColumn2Clases",
+        "VertebralColumn3Clases",
+        "WallFollowing",
+        "Waveform",
+        "WaveformNoise",
+        "Wine",
+        "WineQualityRed",
+        "WineQualityWhite",
+        "Yeast",
+        "Zoo",
+    ]
 
-        # Case of avaiable test set
-        else:
-            # Set test and train datasets
-            train_ds.append(dataset(root, train=True, download=download))
-            test_ds.append(dataset(root, train=False, download=False))
+    # Specify namedtuple format
+    DATASET = namedtuple('Dataset', ['name', 'train', 'test'])
 
-        yield train_ds, test_ds
+    def __init__(
+        self,
+        root: str,
+        download: bool,
+    ):
+        super(UCIClassificationBenchmark, self).__init__()
+        self.root = root
+        self.download = download        
+        self.statistics = {key: [0.,0.] for key in self.UCI_DATASET_COLLECTION}
+        
+    #DK there could be better a way to make this generator within the class but I did not find it        
+    def datasets(self):    
+        # For all datasets in the collection
+        for i in range(len(self.UCI_DATASET_COLLECTION)):
+            # Fetch the current dataset
+            dataset = getattr(torchhd.datasets, self.UCI_DATASET_COLLECTION[i])
+            
+            # If no separate test dataset available - do 4-fold cross-validation
+            if hasattr(dataset, "num_folds"):
+                for fold_id in range(dataset.num_folds):
+                    # Set test and train datasets for the current fold
+                    train_ds = dataset(self.root, train = True, download = self.download, fold=fold_id)
+                    test_ds = dataset(self.root, train = False, download = False, fold=fold_id)
+                    yield self.DATASET(self.UCI_DATASET_COLLECTION[i], train_ds, test_ds)
+            # Case of avaiable test set
+            else:
+                # Set test and train datasets
+                train_ds = dataset(self.root, train = True, download = self.download)
+                test_ds = dataset(self.root, train = False, download = False)
+                yield self.DATASET(self.UCI_DATASET_COLLECTION[i], train_ds, test_ds)
+    
+    def report(self,dataset,accuracy):
+        # Update variable for running statistics
+        self.statistics[dataset.name][0] += accuracy
+        # Update variable for counter for later averaging
+        self.statistics[dataset.name][1] += 1
+
+    def score(self):
+        results = self.statistics.copy()
+        for key in results:
+            #Average over folds and repeats (if applicable)
+            try:
+                results[key] = results[key][0]/results[key][1] 
+            except:
+                results[key] = 0
+        return results  
 
 
 class CollectionDataset(data.Dataset):
