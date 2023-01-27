@@ -17,3 +17,4 @@ torchhd.embeddings
     Circular
     Projection
     Sinusoid
+    EncodingDensityClipped

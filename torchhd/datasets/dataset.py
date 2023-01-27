@@ -9,8 +9,8 @@ import tarfile
 import numpy as np
 import torchhd
 from .utils import download_file_from_google_drive
-from collections import namedtuple
- 
+from typing import NamedTuple 
+
 
 class UCIClassificationBenchmark():
     """Class that performs the transformation of input data into hypervectors according to intRVFL model. See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
@@ -149,8 +149,11 @@ class UCIClassificationBenchmark():
     ]
 
     # Specify namedtuple format
-    DATASET = namedtuple('Dataset', ['name', 'train', 'test'])
-
+    class DatasetEntry(NamedTuple):
+        name: str
+        train: data.Dataset
+        test: data.Dataset
+    
     def __init__(
         self,
         root: str,
@@ -159,14 +162,14 @@ class UCIClassificationBenchmark():
         super(UCIClassificationBenchmark, self).__init__()
         self.root = root
         self.download = download        
-        self.statistics = {key: [0.,0.] for key in self.UCI_DATASET_COLLECTION}
+        #self.statistics = {key: [0.,0.] for key in self.UCI_DATASET_COLLECTION}
+        self.statistics = {key: [] for key in self.UCI_DATASET_COLLECTION}
         
-    #DK there could be better a way to make this generator within the class but I did not find it        
     def datasets(self):    
         # For all datasets in the collection
-        for i in range(len(self.UCI_DATASET_COLLECTION)):
+        for dataset_name in self.UCI_DATASET_COLLECTION:
             # Fetch the current dataset
-            dataset = getattr(torchhd.datasets, self.UCI_DATASET_COLLECTION[i])
+            dataset = getattr(torchhd.datasets, dataset_name)
             
             # If no separate test dataset available - do 4-fold cross-validation
             if hasattr(dataset, "num_folds"):
@@ -174,28 +177,35 @@ class UCIClassificationBenchmark():
                     # Set test and train datasets for the current fold
                     train_ds = dataset(self.root, train = True, download = self.download, fold=fold_id)
                     test_ds = dataset(self.root, train = False, download = False, fold=fold_id)
-                    yield self.DATASET(self.UCI_DATASET_COLLECTION[i], train_ds, test_ds)
+                    yield self.DatasetEntry(dataset_name, train_ds, test_ds)
             # Case of avaiable test set
             else:
                 # Set test and train datasets
                 train_ds = dataset(self.root, train = True, download = self.download)
                 test_ds = dataset(self.root, train = False, download = False)
-                yield self.DATASET(self.UCI_DATASET_COLLECTION[i], train_ds, test_ds)
+                yield self.DatasetEntry(dataset_name, train_ds, test_ds)
     
-    def report(self,dataset,accuracy):
-        # Update variable for running statistics
-        self.statistics[dataset.name][0] += accuracy
-        # Update variable for counter for later averaging
-        self.statistics[dataset.name][1] += 1
-
+    def report(self,dataset_tuple,accuracy):        
+        # Update statistics for the current run if the dataset use cross-validation
+        if hasattr(dataset_tuple.train, "num_folds"):              
+            if len(self.statistics[dataset_tuple.name]) < dataset_tuple.train.fold+1 :            
+                self.statistics[dataset_tuple.name].append([accuracy])
+            else:
+                self.statistics[dataset_tuple.name][dataset_tuple.train.fold].append(accuracy)
+        # Update statistics for the current run if the dataset has train/test split
+        else:
+            self.statistics[dataset_tuple.name].append(accuracy)
+        
     def score(self):
         results = self.statistics.copy()
         for key in results:
-            #Average over folds and repeats (if applicable)
-            try:
-                results[key] = results[key][0]/results[key][1] 
-            except:
-                results[key] = 0
+            #If applicable average over folds
+            if hasattr(getattr(torchhd.datasets, key), "num_folds"):
+                # If division by zero occurs keep empty
+                try:
+                    results[key] = [sum(acc)/len(acc)   for acc in list(zip(*results[key]))]
+                except:
+                    results[key] = []            
         return results  
 
 

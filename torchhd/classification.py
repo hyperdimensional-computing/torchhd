@@ -5,43 +5,8 @@ import torchhd
 from torchhd.map import MAP
 
 __all__ = [
-    "EncodingDensityClipped",
     "classifier_ridge_regression",
 ]
-
-class EncodingDensityClipped():
-    """Class that performs the transformation of input data into hypervectors according to intRVFL model. See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
-
-    Args:
-        dimensions (int): Dimensionality of vectors used when transforming input data.
-        num_feat (int): Number of features in the dataset.
-        kappa (int): Parameter of the clipping function used as the part of transforming input data.
-        key (torchhd.map.MAP): A set of random vectors used as unique IDs for features of the dataset.
-        density_encoding (torchhd.embeddings.Thermometer): Thermometer encoding used for transforming input data.
-    """
-
-    def __init__(
-        self,
-        dimensions: int,
-        num_feat: int,
-        kappa: int,        
-    ):
-        super(EncodingDensityClipped, self).__init__()
-   
-        self.key = torchhd.random_hv(num_feat, dimensions, model=MAP)  
-        self.density_encoding = torchhd.embeddings.Thermometer(
-            dimensions + 1, dimensions, low=0, high=1
-        )
-        self.kappa = kappa
-    # Specify the steps needed to perform the encoding
-    def encode(self, x):
-        # Perform binding of key and value vectors
-        sample_hv = MAP.bind(self.key, self.density_encoding(x))
-        # Perform the superposition operation on the bound key-value pairs
-        sample_hv = MAP.multibundle(sample_hv)        
-        # Perform clipping function on the result of the superposition operation and return
-        return sample_hv.clipping(self.kappa)
-
 
 # Function that forms the classifier (readout matrix) with the ridge regression
 def classifier_ridge_regression(
@@ -97,4 +62,3 @@ def classifier_ridge_regression(
         )
 
     return Wout
-
