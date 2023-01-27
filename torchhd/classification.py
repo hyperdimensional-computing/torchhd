@@ -42,12 +42,12 @@ def classifier_ridge_regression(
 
             samples = samples.to(device)
             labels = labels.to(device)
-            # Make one-hot encoding            
-            labels_one_hot[torch.arange(count,count+samples.size(0)), labels] = 1
-            
+            # Make one-hot encoding
+            labels_one_hot[torch.arange(count, count + samples.size(0)), labels] = 1
+
             # Make transformation into high-dimensional space
             samples_hv = encoding_function(samples)
-            total_samples_hv[count:count+samples.size(0), :] = samples_hv
+            total_samples_hv[count : count + samples.size(0), :] = samples_hv
 
             count += samples.size(0)
 

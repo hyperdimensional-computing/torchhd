@@ -11,8 +11,7 @@ import torchhd
 from .utils import download_file_from_google_drive
 from typing import NamedTuple 
 
-
-class UCIClassificationBenchmark():
+class UCIClassificationBenchmark:
     """Class that performs the transformation of input data into hypervectors according to intRVFL model. See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
 
     Args:
@@ -153,7 +152,7 @@ class UCIClassificationBenchmark():
         name: str
         train: data.Dataset
         test: data.Dataset
-    
+
     def __init__(
         self,
         root: str,
@@ -162,7 +161,6 @@ class UCIClassificationBenchmark():
         super(UCIClassificationBenchmark, self).__init__()
         self.root = root
         self.download = download        
-        #self.statistics = {key: [0.,0.] for key in self.UCI_DATASET_COLLECTION}
         self.statistics = {key: [] for key in self.UCI_DATASET_COLLECTION}
         
     def datasets(self):    
@@ -207,7 +205,6 @@ class UCIClassificationBenchmark():
                 except:
                     results[key] = []            
         return results  
-
 
 class CollectionDataset(data.Dataset):
     """Generic class for loading datasets used in `Do we Need Hundreds of Classifiers to Solve Real World Classification Problems? <https://jmlr.org/papers/v15/delgado14a.html>`_.

@@ -2,14 +2,15 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 from tqdm import tqdm
+
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
 import torchhd
 
 
-# Function for performing min-max normalization of the input data samples 
+# Function for performing min-max normalization of the input data samples
 def normalize_min_max(input: Tensor) -> Tensor:
-    return torch.nan_to_num((input - min_val) / (max_val - min_val))  
+    return torch.nan_to_num((input - min_val) / (max_val - min_val))
 
 
 # Specify a model to be evaluated
@@ -215,7 +216,7 @@ batch_size = 10
 repeats = 5
 
 
-# Get an instance of the UCI benchmark 
+# Get an instance of the UCI benchmark
 benchmark = torchhd.datasets.UCIClassificationBenchmark("../data", download=True)
 # Perform evaluation
 for dataset in benchmark.datasets():
@@ -228,17 +229,15 @@ for dataset in benchmark.datasets():
 
     # Get values for min-max normalization and add the transformation
     min_val = torch.min(dataset.train.data, 0).values.to(device)
-    max_val = torch.max(dataset.train.data, 0).values.to(device)                            
+    max_val = torch.max(dataset.train.data, 0).values.to(device)
     dataset.train.transform = normalize_min_max
-    dataset.test.transform = normalize_min_max 
+    dataset.test.transform = normalize_min_max
 
     # Set up data loaders
     train_loader = torch.utils.data.DataLoader(
         dataset.train, batch_size=batch_size, shuffle=True
     )
-    test_loader = torch.utils.data.DataLoader(
-        dataset.test, batch_size=batch_size
-    )
+    test_loader = torch.utils.data.DataLoader(dataset.test, batch_size=batch_size)
 
     # Run for the requested number of simulations
     for r in range(repeats):
@@ -246,18 +245,18 @@ for dataset in benchmark.datasets():
         model = IntRVFLRidge(
             getattr(torchhd.datasets, dataset.name), num_feat, device
         ).to(device)
-    
+
         # Obtain the classifier for the model
         model.fit(train_loader)
-        accuracy = torchmetrics.Accuracy("multiclass", num_classes= num_classes)
-    
+        accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
+
         with torch.no_grad():
             for samples, targets in tqdm(test_loader, desc="Testing"):
-                samples = samples.to(device)                
+                samples = samples.to(device)
                 # Make prediction
                 predictions = model(samples)
                 accuracy.update(predictions.cpu(), targets)
         benchmark.report(dataset, accuracy.compute().item())
-    
+
 # Returns a dictionary with names of the datasets and their respective accuracy that is averaged over folds (if applicable) and repeats
-benchmark_accuracy = benchmark.score() 
+benchmark_accuracy = benchmark.score()
