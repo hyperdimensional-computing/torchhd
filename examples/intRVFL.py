@@ -171,12 +171,14 @@ class IntRVFLRidge(nn.Module):
         self.classify = nn.Linear(self.dimensions, self.num_classes, bias=False)
         self.classify.weight.data.fill_(0.0)
         # Set up the encoding for the model as specified in "EncodingDensityClipped"
-        self.hypervector_encoding = torchhd.embeddings.EncodingDensityClipped(self.dimensions, self.num_feat, self.kappa)
-    
+        self.hypervector_encoding = torchhd.embeddings.EncodingDensityClipped(
+            self.dimensions, self.num_feat, self.kappa
+        )
+
     # Specify encoding function for data samples
     def encode(self, x):
         return self.hypervector_encoding(x)
-    
+
     # Specify how to make an inference step and issue a prediction
     def forward(self, x):
         # Make encodings for all data samples in the batch

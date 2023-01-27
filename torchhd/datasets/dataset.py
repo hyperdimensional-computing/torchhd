@@ -9,7 +9,8 @@ import tarfile
 import numpy as np
 import torchhd
 from .utils import download_file_from_google_drive
-from typing import NamedTuple 
+from typing import NamedTuple
+
 
 class UCIClassificationBenchmark:
     """Class that performs the transformation of input data into hypervectors according to intRVFL model. See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
@@ -160,51 +161,60 @@ class UCIClassificationBenchmark:
     ):
         super(UCIClassificationBenchmark, self).__init__()
         self.root = root
-        self.download = download        
+        self.download = download
         self.statistics = {key: [] for key in self.UCI_DATASET_COLLECTION}
-        
-    def datasets(self):    
+
+    def datasets(self):
         # For all datasets in the collection
         for dataset_name in self.UCI_DATASET_COLLECTION:
             # Fetch the current dataset
             dataset = getattr(torchhd.datasets, dataset_name)
-            
+
             # If no separate test dataset available - do 4-fold cross-validation
             if hasattr(dataset, "num_folds"):
                 for fold_id in range(dataset.num_folds):
                     # Set test and train datasets for the current fold
-                    train_ds = dataset(self.root, train = True, download = self.download, fold=fold_id)
-                    test_ds = dataset(self.root, train = False, download = False, fold=fold_id)
+                    train_ds = dataset(
+                        self.root, train=True, download=self.download, fold=fold_id
+                    )
+                    test_ds = dataset(
+                        self.root, train=False, download=False, fold=fold_id
+                    )
                     yield self.DatasetEntry(dataset_name, train_ds, test_ds)
             # Case of avaiable test set
             else:
                 # Set test and train datasets
-                train_ds = dataset(self.root, train = True, download = self.download)
-                test_ds = dataset(self.root, train = False, download = False)
+                train_ds = dataset(self.root, train=True, download=self.download)
+                test_ds = dataset(self.root, train=False, download=False)
                 yield self.DatasetEntry(dataset_name, train_ds, test_ds)
-    
-    def report(self,dataset_tuple,accuracy):        
+
+    def report(self, dataset_tuple, accuracy):
         # Update statistics for the current run if the dataset use cross-validation
-        if hasattr(dataset_tuple.train, "num_folds"):              
-            if len(self.statistics[dataset_tuple.name]) < dataset_tuple.train.fold+1 :            
+        if hasattr(dataset_tuple.train, "num_folds"):
+            if len(self.statistics[dataset_tuple.name]) < dataset_tuple.train.fold + 1:
                 self.statistics[dataset_tuple.name].append([accuracy])
             else:
-                self.statistics[dataset_tuple.name][dataset_tuple.train.fold].append(accuracy)
+                self.statistics[dataset_tuple.name][dataset_tuple.train.fold].append(
+                    accuracy
+                )
         # Update statistics for the current run if the dataset has train/test split
         else:
             self.statistics[dataset_tuple.name].append(accuracy)
-        
+
     def score(self):
         results = self.statistics.copy()
         for key in results:
-            #If applicable average over folds
+            # If applicable average over folds
             if hasattr(getattr(torchhd.datasets, key), "num_folds"):
                 # If division by zero occurs keep empty
                 try:
-                    results[key] = [sum(acc)/len(acc)   for acc in list(zip(*results[key]))]
+                    results[key] = [
+                        sum(acc) / len(acc) for acc in list(zip(*results[key]))
+                    ]
                 except:
-                    results[key] = []            
-        return results  
+                    results[key] = []
+        return results
+
 
 class CollectionDataset(data.Dataset):
     """Generic class for loading datasets used in `Do we Need Hundreds of Classifiers to Solve Real World Classification Problems? <https://jmlr.org/papers/v15/delgado14a.html>`_.

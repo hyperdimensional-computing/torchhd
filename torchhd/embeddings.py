@@ -858,6 +858,7 @@ class Sinusoid(nn.Module):
         output = torch.cos(projected + self.bias) * torch.sin(projected)
         return output.as_subclass(MAP)
 
+
 class EncodingDensityClipped(nn.Module):
     """Class that performs the transformation of input data into hypervectors according to intRVFL model. See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
 
@@ -868,31 +869,30 @@ class EncodingDensityClipped(nn.Module):
         low (float, optional): The lower bound of the real number range that the levels of the thermometer encoding represent. Default: ``0.0``
         high (float, optional): The upper bound of the real number range that the levels of the thermometer encoding represent. Default: ``1.0``
     """
-    
+
     def __init__(
         self,
         dimensions: int,
         num_feat: int,
-        kappa: int,   
-        low: float = 0.,
-        high: float = 1.,
-        
+        kappa: int,
+        low: float = 0.0,
+        high: float = 1.0,
     ):
         super(EncodingDensityClipped, self).__init__()
-                
-        #torchhd.embeddings.Random: A set of random vectors used as unique IDs for features of the dataset.
-        self.key = Random(num_feat, dimensions, vsa_model = MAP)
-        #torchhd.embeddings.Thermometer: Thermometer encoding used for transforming input data.
+
+        # torchhd.embeddings.Random: A set of random vectors used as unique IDs for features of the dataset.
+        self.key = Random(num_feat, dimensions, vsa_model=MAP)
+        # torchhd.embeddings.Thermometer: Thermometer encoding used for transforming input data.
         self.density_encoding = Thermometer(
             dimensions + 1, dimensions, low=low, high=high
         )
         self.kappa = kappa
+
     # Specify the steps needed to perform the encoding
     def forward(self, x):
         # Perform binding of key and value vectors
         sample_hv = MAP.bind(self.key.weight, self.density_encoding(x))
         # Perform the superposition operation on the bound key-value pairs
-        sample_hv = MAP.multibundle(sample_hv)        
+        sample_hv = MAP.multibundle(sample_hv)
         # Perform clipping function on the result of the superposition operation and return
         return sample_hv.clipping(self.kappa)
-
