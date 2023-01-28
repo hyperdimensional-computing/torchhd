@@ -1,15 +1,13 @@
 import os
 import os.path
-from typing import Callable, Optional, Tuple, List
+from typing import Callable, Optional, Tuple, List, NamedTuple, Generator, Dict
 import torch
 from torch import Tensor
 from torch.utils import data
-import pandas as pd
 import tarfile
 import numpy as np
 import torchhd
 from .utils import download_file_from_google_drive
-from typing import NamedTuple
 
 
 class UCIClassificationBenchmark:
@@ -24,7 +22,7 @@ class UCIClassificationBenchmark:
     """
 
     # All datasets included in the collection
-    UCI_DATASET_COLLECTION = [
+    dataset_names = [
         "Abalone",
         "AcuteInflammation",
         "AcuteNephritis",
@@ -162,11 +160,11 @@ class UCIClassificationBenchmark:
         super(UCIClassificationBenchmark, self).__init__()
         self.root = root
         self.download = download
-        self.statistics = {key: [] for key in self.UCI_DATASET_COLLECTION}
+        self.statistics = {key: [] for key in self.dataset_names}
 
-    def datasets(self):
+    def datasets(self) -> Generator[DatasetEntry, None, None]:
         # For all datasets in the collection
-        for dataset_name in self.UCI_DATASET_COLLECTION:
+        for dataset_name in self.dataset_names:
             # Fetch the current dataset
             dataset = getattr(torchhd.datasets, dataset_name)
 
@@ -181,6 +179,7 @@ class UCIClassificationBenchmark:
                         self.root, train=False, download=False, fold=fold_id
                     )
                     yield self.DatasetEntry(dataset_name, train_ds, test_ds)
+
             # Case of avaiable test set
             else:
                 # Set test and train datasets
@@ -188,31 +187,39 @@ class UCIClassificationBenchmark:
                 test_ds = dataset(self.root, train=False, download=False)
                 yield self.DatasetEntry(dataset_name, train_ds, test_ds)
 
-    def report(self, dataset_tuple, accuracy):
-        # Update statistics for the current run if the dataset use cross-validation
-        if hasattr(dataset_tuple.train, "num_folds"):
-            if len(self.statistics[dataset_tuple.name]) < dataset_tuple.train.fold + 1:
-                self.statistics[dataset_tuple.name].append([accuracy])
-            else:
-                self.statistics[dataset_tuple.name][dataset_tuple.train.fold].append(
-                    accuracy
-                )
+    def report(self, dataset: DatasetEntry, metric: float) -> None:
+        # Update statistics for the current run if the dataset uses cross-validation
+        if hasattr(dataset.train, "num_folds"):
+            num_folds = dataset.train.num_folds
+            fold_idx = dataset.train.fold
+
+            if len(self.statistics[dataset.name]) == 0:
+                # Create a new nested list for each fold
+                self.statistics[dataset.name] = [[] for _ in range(num_folds)]
+            
+            self.statistics[dataset.name][fold_idx].append(metric)
+
         # Update statistics for the current run if the dataset has train/test split
         else:
-            self.statistics[dataset_tuple.name].append(accuracy)
+            self.statistics[dataset.name].append(metric)
 
-    def score(self):
-        results = self.statistics.copy()
-        for key in results:
+    def score(self) -> Dict[str, List[float]]:
+        results = {}
+        for key in self.statistics:
             # If applicable average over folds
-            if hasattr(getattr(torchhd.datasets, key), "num_folds"):
+            if len(self.statistics[key]) > 0 and isinstance(self.statistics[key][0], list):
+                group_by_repetition = list(zip(*self.statistics[key]))
                 # If division by zero occurs keep empty
                 try:
                     results[key] = [
-                        sum(acc) / len(acc) for acc in list(zip(*results[key]))
+                        sum(metrics) / len(metrics) for metrics in group_by_repetition
                     ]
                 except:
                     results[key] = []
+
+            else:
+                results[key] = self.statistics[key]
+
         return results
 
 
