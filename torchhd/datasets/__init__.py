@@ -9,6 +9,7 @@ from torchhd.datasets.ccpp import CyclePowerPlant
 from torchhd.datasets.dataset import CollectionDataset
 from torchhd.datasets.dataset import DatasetFourFold
 from torchhd.datasets.dataset import DatasetTrainTest
+from torchhd.datasets.dataset import UCIClassificationBenchmark
 from torchhd.datasets.abalone import Abalone
 from torchhd.datasets.adult import Adult
 from torchhd.datasets.acute_inflammation import AcuteInflammation
@@ -143,6 +144,7 @@ __all__ = [
     "CollectionDataset",
     "DatasetFourFold",
     "DatasetTrainTest",
+    "UCIClassificationBenchmark",
     "Abalone",
     "Adult",
     "AcuteInflammation",

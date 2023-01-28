@@ -1,14 +1,228 @@
 import os
 import os.path
-from typing import Callable, Optional, Tuple, List
+from typing import Callable, Optional, Tuple, List, NamedTuple, Generator, Dict
 import torch
 from torch import Tensor
 from torch.utils import data
-import pandas as pd
 import tarfile
 import numpy as np
-
+import torchhd
 from .utils import download_file_from_google_drive
+
+
+class UCIClassificationBenchmark:
+    """Class that performs the transformation of input data into hypervectors according to intRVFL model. See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
+
+    Args:
+        dimensions (int): Dimensionality of vectors used when transforming input data.
+        num_feat (int): Number of features in the dataset.
+        kappa (int): Parameter of the clipping function used as the part of transforming input data.
+        key (torchhd.map.MAP): A set of random vectors used as unique IDs for features of the dataset.
+        density_encoding (torchhd.embeddings.Thermometer): Thermometer encoding used for transforming input data.
+    """
+
+    # All datasets included in the collection
+    dataset_names = [
+        "Abalone",
+        "AcuteInflammation",
+        "AcuteNephritis",
+        "Adult",
+        "Annealing",
+        "Arrhythmia",
+        "AudiologyStd",
+        "BalanceScale",
+        "Balloons",
+        "Bank",
+        "Blood",
+        "BreastCancer",
+        "BreastCancerWisc",
+        "BreastCancerWiscDiag",
+        "BreastCancerWiscProg",
+        "BreastTissue",
+        "Car",
+        "Cardiotocography10Clases",
+        "Cardiotocography3Clases",
+        "ChessKrvk",
+        "ChessKrvkp",
+        "CongressionalVoting",
+        "ConnBenchSonarMinesRocks",
+        "ConnBenchVowelDeterding",
+        "Connect4",
+        "Contrac",
+        "CreditApproval",
+        "CylinderBands",
+        "Dermatology",
+        "Echocardiogram",
+        "Ecoli",
+        "EnergyY1",
+        "EnergyY2",
+        "Fertility",
+        "Flags",
+        "Glass",
+        "HabermanSurvival",
+        "HayesRoth",
+        "HeartCleveland",
+        "HeartHungarian",
+        "HeartSwitzerland",
+        "HeartVa",
+        "Hepatitis",
+        "HillValley",
+        "HorseColic",
+        "IlpdIndianLiver",
+        "ImageSegmentation",
+        "Ionosphere",
+        "Iris",
+        "LedDisplay",
+        "Lenses",
+        "Letter",
+        "Libras",
+        "LowResSpect",
+        "LungCancer",
+        "Lymphography",
+        "Magic",
+        "Mammographic",
+        "Miniboone",
+        "MolecBiolPromoter",
+        "MolecBiolSplice",
+        "Monks1",
+        "Monks2",
+        "Monks3",
+        "Mushroom",
+        "Musk1",
+        "Musk2",
+        "Nursery",
+        "OocytesMerlucciusNucleus4d",
+        "OocytesMerlucciusStates2f",
+        "OocytesTrisopterusNucleus2f",
+        "OocytesTrisopterusStates5b",
+        "Optical",
+        "Ozone",
+        "PageBlocks",
+        "Parkinsons",
+        "Pendigits",
+        "Pima",
+        "PittsburgBridgesMaterial",
+        "PittsburgBridgesRelL",
+        "PittsburgBridgesSpan",
+        "PittsburgBridgesTOrD",
+        "PittsburgBridgesType",
+        "Planning",
+        "PlantMargin",
+        "PlantShape",
+        "PlantTexture",
+        "PostOperative",
+        "PrimaryTumor",
+        "Ringnorm",
+        "Seeds",
+        "Semeion",
+        "Soybean",
+        "Spambase",
+        "Spect",
+        "Spectf",
+        "StatlogAustralianCredit",
+        "StatlogGermanCredit",
+        "StatlogHeart",
+        "StatlogImage",
+        "StatlogLandsat",
+        "StatlogShuttle",
+        "StatlogVehicle",
+        "SteelPlates",
+        "SyntheticControl",
+        "Teaching",
+        "Thyroid",
+        "TicTacToe",
+        "Titanic",
+        "Trains",
+        "Twonorm",
+        "VertebralColumn2Clases",
+        "VertebralColumn3Clases",
+        "WallFollowing",
+        "Waveform",
+        "WaveformNoise",
+        "Wine",
+        "WineQualityRed",
+        "WineQualityWhite",
+        "Yeast",
+        "Zoo",
+    ]
+
+    # Specify namedtuple format
+    class DatasetEntry(NamedTuple):
+        name: str
+        train: data.Dataset
+        test: data.Dataset
+
+    def __init__(
+        self,
+        root: str,
+        download: bool,
+    ):
+        super(UCIClassificationBenchmark, self).__init__()
+        self.root = root
+        self.download = download
+        self.statistics = {key: [] for key in self.dataset_names}
+
+    def datasets(self) -> Generator[DatasetEntry, None, None]:
+        # For all datasets in the collection
+        for dataset_name in self.dataset_names:
+            # Fetch the current dataset
+            dataset = getattr(torchhd.datasets, dataset_name)
+
+            # If no separate test dataset available - do 4-fold cross-validation
+            if hasattr(dataset, "num_folds"):
+                for fold_id in range(dataset.num_folds):
+                    # Set test and train datasets for the current fold
+                    train_ds = dataset(
+                        self.root, train=True, download=self.download, fold=fold_id
+                    )
+                    test_ds = dataset(
+                        self.root, train=False, download=False, fold=fold_id
+                    )
+                    yield self.DatasetEntry(dataset_name, train_ds, test_ds)
+
+            # Case of avaiable test set
+            else:
+                # Set test and train datasets
+                train_ds = dataset(self.root, train=True, download=self.download)
+                test_ds = dataset(self.root, train=False, download=False)
+                yield self.DatasetEntry(dataset_name, train_ds, test_ds)
+
+    def report(self, dataset: DatasetEntry, metric: float) -> None:
+        # Update statistics for the current run if the dataset uses cross-validation
+        if hasattr(dataset.train, "num_folds"):
+            num_folds = dataset.train.num_folds
+            fold_idx = dataset.train.fold
+
+            if len(self.statistics[dataset.name]) == 0:
+                # Create a new nested list for each fold
+                self.statistics[dataset.name] = [[] for _ in range(num_folds)]
+
+            self.statistics[dataset.name][fold_idx].append(metric)
+
+        # Update statistics for the current run if the dataset has train/test split
+        else:
+            self.statistics[dataset.name].append(metric)
+
+    def score(self) -> Dict[str, List[float]]:
+        results = {}
+        for key in self.statistics:
+            # If applicable average over folds
+            if len(self.statistics[key]) > 0 and isinstance(
+                self.statistics[key][0], list
+            ):
+                group_by_repetition = list(zip(*self.statistics[key]))
+                # If division by zero occurs keep empty
+                try:
+                    results[key] = [
+                        sum(metrics) / len(metrics) for metrics in group_by_repetition
+                    ]
+                except:
+                    results[key] = []
+
+            else:
+                results[key] = self.statistics[key]
+
+        return results
 
 
 class CollectionDataset(data.Dataset):

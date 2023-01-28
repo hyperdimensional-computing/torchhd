@@ -19,6 +19,7 @@ __all__ = [
     "Circular",
     "Projection",
     "Sinusoid",
+    "Density",
 ]
 
 
@@ -856,3 +857,58 @@ class Sinusoid(nn.Module):
         projected = F.linear(input, self.weight)
         output = torch.cos(projected + self.bias) * torch.sin(projected)
         return output.as_subclass(MAP)
+
+
+class Density(nn.Module):
+    """Performs the transformation of input data into hypervectors according to the intRVFL model.
+
+    See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
+
+    Args:
+        in_features (int): the dimensionality of the input feature vector.
+        out_features (int): the dimensionality of the hypervectors.
+        vsa_model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAP``.
+        low (float, optional): The lower bound of the real number range that the levels of the thermometer encoding represent. Default: ``0.0``
+        high (float, optional): The upper bound of the real number range that the levels of the thermometer encoding represent. Default: ``1.0``
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` uses default of ``vsa_model``.
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
+
+    """
+
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        vsa_model: Type[VSA_Model] = MAP,
+        low: float = 0.0,
+        high: float = 1.0,
+        device=None,
+        dtype=None,
+        requires_grad: bool = False,
+    ):
+        factory_kwargs = {
+            "device": device,
+            "dtype": dtype,
+            "requires_grad": requires_grad,
+        }
+        super(Density, self).__init__()
+
+        # A set of random vectors used as unique IDs for features of the dataset.
+        self.key = Random(in_features, out_features, vsa_model, **factory_kwargs)
+        # Thermometer encoding used for transforming input data.
+        self.density_encoding = Thermometer(
+            out_features + 1,
+            out_features,
+            vsa_model,
+            low=low,
+            high=high,
+            **factory_kwargs
+        )
+
+    # Specify the steps needed to perform the encoding
+    def forward(self, input: Tensor) -> Tensor:
+        # Perform binding of key and value vectors
+        output = functional.bind(self.key.weight, self.density_encoding(input))
+        # Perform the superposition operation on the bound key-value pairs
+        return functional.multibundle(output)

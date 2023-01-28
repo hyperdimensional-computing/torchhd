@@ -148,6 +148,7 @@ Base classes
     :toctree: generated/
     :template: class_dataset.rst
 
+    UCIClassificationBenchmark
     CollectionDataset
     DatasetFourFold
     DatasetTrainTest
