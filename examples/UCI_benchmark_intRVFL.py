@@ -12,11 +12,11 @@ from torchhd.datasets import UCIClassificationBenchmark
 
 # Function for performing min-max normalization of the input data samples
 def create_min_max_normalize(min: Tensor, max: Tensor):
-    
     def normalize(input: Tensor) -> Tensor:
         return torch.nan_to_num((input - min) / (max - min))
-    
+
     return normalize
+
 
 # Function that forms the classifier (readout matrix) with the ridge regression
 def classifier_ridge_regression(

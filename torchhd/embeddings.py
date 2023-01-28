@@ -860,8 +860,8 @@ class Sinusoid(nn.Module):
 
 
 class Density(nn.Module):
-    """Performs the transformation of input data into hypervectors according to the intRVFL model. 
-    
+    """Performs the transformation of input data into hypervectors according to the intRVFL model.
+
     See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
 
     Args:

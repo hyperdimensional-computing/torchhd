@@ -196,7 +196,7 @@ class UCIClassificationBenchmark:
             if len(self.statistics[dataset.name]) == 0:
                 # Create a new nested list for each fold
                 self.statistics[dataset.name] = [[] for _ in range(num_folds)]
-            
+
             self.statistics[dataset.name][fold_idx].append(metric)
 
         # Update statistics for the current run if the dataset has train/test split
@@ -207,7 +207,9 @@ class UCIClassificationBenchmark:
         results = {}
         for key in self.statistics:
             # If applicable average over folds
-            if len(self.statistics[key]) > 0 and isinstance(self.statistics[key][0], list):
+            if len(self.statistics[key]) > 0 and isinstance(
+                self.statistics[key][0], list
+            ):
                 group_by_repetition = list(zip(*self.statistics[key]))
                 # If division by zero occurs keep empty
                 try:
