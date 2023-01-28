@@ -2,6 +2,7 @@ import torchhd.functional as functional
 import torchhd.embeddings as embeddings
 import torchhd.classification as classification
 import torchhd.structures as structures
+import torchhd.models as models
 import torchhd.datasets as datasets
 import torchhd.utils as utils
 
@@ -57,6 +58,7 @@ __all__ = [
     "functional",
     "embeddings",
     "structures",
+    "models",
     "datasets",
     "utils",
     "as_vsa_model",

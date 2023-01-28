@@ -84,6 +84,15 @@ torchhd.cos_similarity(usd_of_mex, memory)
 
 This example is from the paper [What We Mean When We Say "What's the Dollar of Mexico?": Prototypes and Mapping in Concept Space](https://redwood.berkeley.edu/wp-content/uploads/2020/05/kanerva2010what.pdf) by Kanerva. It first creates hypervectors for all the symbols that are used in the computation, i.e., the variables for `country`, `capital`, and `currency` and their values for both countries. These hypervectors are then combined to make a single hypervector for each country using a hash table structure. A hash table encodes key-value pairs as: `k1 * v1 + k2 * v2 + ... + kn * vn`. The hash tables are then bound together to form their combined representation which is finally queried by binding with the Dollar hypervector to obtain the approximate Mexican Peso hypervector. The similarity output shows that the Mexican Peso hypervector is indeed the most similar one.
 
+## Supported HDC/VSA models
+Currently, the library supports the following HDC/VSA models:
+
+- [Multiply-Add-Permute](https://torchhd.readthedocs.io/en/stable/generated/torchhd.MAP.html)
+- [Binary Spatter Codes](https://torchhd.readthedocs.io/en/stable/generated/torchhd.BSC.html)
+- [Holographic Reduced Representations](https://torchhd.readthedocs.io/en/stable/generated/torchhd.HRR.html)
+- [Fourier Holographic Reduced Representations](https://torchhd.readthedocs.io/en/stable/generated/torchhd.FHRR.html)
+
+We welcome anyone to help with contributing more models to the library!
 
 ## About
 
