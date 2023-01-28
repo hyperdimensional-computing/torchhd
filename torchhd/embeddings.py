@@ -19,7 +19,7 @@ __all__ = [
     "Circular",
     "Projection",
     "Sinusoid",
-    "EncodingDensityClipped",
+    "Density",
 ]
 
 
@@ -859,40 +859,56 @@ class Sinusoid(nn.Module):
         return output.as_subclass(MAP)
 
 
-class EncodingDensityClipped(nn.Module):
-    """Class that performs the transformation of input data into hypervectors according to intRVFL model. See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
+class Density(nn.Module):
+    """Performs the transformation of input data into hypervectors according to the intRVFL model. 
+    
+    See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
 
     Args:
-        dimensions (int): Dimensionality of vectors used when transforming input data.
-        num_feat (int): Number of features in the dataset.
-        kappa (int): Parameter of the clipping function used as the part of transforming input data.
+        in_features (int): the dimensionality of the input feature vector.
+        out_features (int): the dimensionality of the hypervectors.
+        vsa_model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAP``.
         low (float, optional): The lower bound of the real number range that the levels of the thermometer encoding represent. Default: ``0.0``
         high (float, optional): The upper bound of the real number range that the levels of the thermometer encoding represent. Default: ``1.0``
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` uses default of ``vsa_model``.
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
+
     """
 
     def __init__(
         self,
-        dimensions: int,
-        num_feat: int,
-        kappa: int,
+        in_features: int,
+        out_features: int,
+        vsa_model: Type[VSA_Model] = MAP,
         low: float = 0.0,
         high: float = 1.0,
+        device=None,
+        dtype=None,
+        requires_grad: bool = False,
     ):
-        super(EncodingDensityClipped, self).__init__()
+        factory_kwargs = {
+            "device": device,
+            "dtype": dtype,
+            "requires_grad": requires_grad,
+        }
+        super(Density, self).__init__()
 
-        # torchhd.embeddings.Random: A set of random vectors used as unique IDs for features of the dataset.
-        self.key = Random(num_feat, dimensions, vsa_model=MAP)
-        # torchhd.embeddings.Thermometer: Thermometer encoding used for transforming input data.
+        # A set of random vectors used as unique IDs for features of the dataset.
+        self.key = Random(in_features, out_features, vsa_model, **factory_kwargs)
+        # Thermometer encoding used for transforming input data.
         self.density_encoding = Thermometer(
-            dimensions + 1, dimensions, low=low, high=high
+            out_features + 1,
+            out_features,
+            vsa_model,
+            low=low,
+            high=high,
+            **factory_kwargs
         )
-        self.kappa = kappa
 
     # Specify the steps needed to perform the encoding
-    def forward(self, x):
+    def forward(self, input: Tensor) -> Tensor:
         # Perform binding of key and value vectors
-        sample_hv = MAP.bind(self.key.weight, self.density_encoding(x))
+        output = functional.bind(self.key.weight, self.density_encoding(input))
         # Perform the superposition operation on the bound key-value pairs
-        sample_hv = MAP.multibundle(sample_hv)
-        # Perform clipping function on the result of the superposition operation and return
-        return sample_hv.clipping(self.kappa)
+        return functional.multibundle(output)
