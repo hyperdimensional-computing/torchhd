@@ -1,6 +1,5 @@
 import torchhd.functional as functional
 import torchhd.embeddings as embeddings
-import torchhd.classification as classification
 import torchhd.structures as structures
 import torchhd.models as models
 import torchhd.datasets as datasets

@@ -1,16 +1,77 @@
 import torch
 import torch.nn as nn
+import torch.utils.data as data
 from torch import Tensor
 from tqdm import tqdm
 
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
 import torchhd
+from torchhd.datasets import UCIClassificationBenchmark
 
 
 # Function for performing min-max normalization of the input data samples
-def normalize_min_max(input: Tensor) -> Tensor:
-    return torch.nan_to_num((input - min_val) / (max_val - min_val))
+def create_min_max_normalize(min: Tensor, max: Tensor):
+    
+    def normalize(input: Tensor) -> Tensor:
+        return torch.nan_to_num((input - min) / (max - min))
+    
+    return normalize
+
+# Function that forms the classifier (readout matrix) with the ridge regression
+def classifier_ridge_regression(
+    train_ld: data.DataLoader,
+    dimensions: int,
+    num_classes: int,
+    lamb: float,
+    encoding_function,
+    data_type: torch.dtype,
+    device: torch.device,
+):
+
+    # Get number of training samples
+    num_train = len(train_ld.dataset)
+    # Collects high-dimensional represetations of data in the train data
+    total_samples_hv = torch.zeros(
+        num_train,
+        dimensions,
+        dtype=data_type,
+        device=device,
+    )
+    # Collects one-hot encodings of class labels
+    labels_one_hot = torch.zeros(
+        num_train,
+        num_classes,
+        dtype=data_type,
+        device=device,
+    )
+
+    with torch.no_grad():
+        count = 0
+        for samples, labels in tqdm(train_ld, desc="Training"):
+
+            samples = samples.to(device)
+            labels = labels.to(device)
+            # Make one-hot encoding
+            labels_one_hot[torch.arange(count, count + samples.size(0)), labels] = 1
+
+            # Make transformation into high-dimensional space
+            samples_hv = encoding_function(samples)
+            total_samples_hv[count : count + samples.size(0), :] = samples_hv
+
+            count += samples.size(0)
+
+        # Compute the readout matrix using the ridge regression
+        Wout = (
+            torch.t(labels_one_hot)
+            @ total_samples_hv
+            @ torch.linalg.pinv(
+                torch.t(total_samples_hv) @ total_samples_hv
+                + lamb * torch.diag(torch.var(total_samples_hv, 0))
+            )
+        )
+
+    return Wout
 
 
 # Specify a model to be evaluated
@@ -170,14 +231,14 @@ class IntRVFLRidge(nn.Module):
         # Initialize the classifier
         self.classify = nn.Linear(self.dimensions, self.num_classes, bias=False)
         self.classify.weight.data.fill_(0.0)
-        # Set up the encoding for the model as specified in "EncodingDensityClipped"
-        self.hypervector_encoding = torchhd.embeddings.EncodingDensityClipped(
-            self.dimensions, self.num_feat, self.kappa
+        # Set up the encoding for the model as specified in "Density"
+        self.hypervector_encoding = torchhd.embeddings.Density(
+            self.num_feat, self.dimensions
         )
 
     # Specify encoding function for data samples
     def encode(self, x):
-        return self.hypervector_encoding(x)
+        return self.hypervector_encoding(x).clipping(self.kappa)
 
     # Specify how to make an inference step and issue a prediction
     def forward(self, x):
@@ -192,10 +253,10 @@ class IntRVFLRidge(nn.Module):
     # Train the classfier
     def fit(
         self,
-        train_ld: torch.utils.data.dataloader.DataLoader,
+        train_ld: data.DataLoader,
     ):
         # Gets classifier (readout matrix) via the ridge regression
-        Wout = torchhd.classification.classifier_ridge_regression(
+        Wout = classifier_ridge_regression(
             train_ld,
             self.dimensions,
             self.num_classes,
@@ -206,7 +267,7 @@ class IntRVFLRidge(nn.Module):
         )
         # Assign the obtained classifier to the output
         with torch.no_grad():
-            self.classify.weight[:] = Wout
+            self.classify.weight.copy_(Wout)
 
 
 # Specify device to be used for Torch.
@@ -219,7 +280,7 @@ repeats = 5
 
 
 # Get an instance of the UCI benchmark
-benchmark = torchhd.datasets.UCIClassificationBenchmark("../data", download=True)
+benchmark = UCIClassificationBenchmark("../data", download=True)
 # Perform evaluation
 for dataset in benchmark.datasets():
     print(dataset.name)
@@ -232,14 +293,13 @@ for dataset in benchmark.datasets():
     # Get values for min-max normalization and add the transformation
     min_val = torch.min(dataset.train.data, 0).values.to(device)
     max_val = torch.max(dataset.train.data, 0).values.to(device)
-    dataset.train.transform = normalize_min_max
-    dataset.test.transform = normalize_min_max
+    transform = create_min_max_normalize(min_val, max_val)
+    dataset.train.transform = transform
+    dataset.test.transform = transform
 
     # Set up data loaders
-    train_loader = torch.utils.data.DataLoader(
-        dataset.train, batch_size=batch_size, shuffle=True
-    )
-    test_loader = torch.utils.data.DataLoader(dataset.test, batch_size=batch_size)
+    train_loader = data.DataLoader(dataset.train, batch_size=batch_size, shuffle=True)
+    test_loader = data.DataLoader(dataset.test, batch_size=batch_size)
 
     # Run for the requested number of simulations
     for r in range(repeats):
@@ -258,7 +318,9 @@ for dataset in benchmark.datasets():
                 # Make prediction
                 predictions = model(samples)
                 accuracy.update(predictions.cpu(), targets)
+
         benchmark.report(dataset, accuracy.compute().item())
 
 # Returns a dictionary with names of the datasets and their respective accuracy that is averaged over folds (if applicable) and repeats
 benchmark_accuracy = benchmark.score()
+print(benchmark_accuracy)
