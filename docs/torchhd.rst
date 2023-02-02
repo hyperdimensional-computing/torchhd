@@ -37,6 +37,7 @@ Operations
     cleanup
     randsel
     multirandsel
+    create_random_permute
     soft_quantize
     hard_quantize
 
