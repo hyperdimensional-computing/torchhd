@@ -1,5 +1,5 @@
 import math
-from typing import Type, Union
+from typing import Type, Union, Callable
 import torch
 from torch import LongTensor, FloatTensor, Tensor
 from collections import deque
@@ -25,6 +25,7 @@ __all__ = [
     "inverse",
     "negative",
     "cleanup",
+    "create_random_permute",
     "hard_quantize",
     "soft_quantize",
     "hamming_similarity",
@@ -659,6 +660,50 @@ def permute(input: VSA_Model, *, shifts=1) -> VSA_Model:
     """
     input = as_vsa_model(input)
     return input.permute(shifts)
+
+
+
+def create_random_permute(dim: int) -> Callable[[VSA_Model, int], VSA_Model]:
+    r"""Creates random permutation functions.
+
+    Args:
+        dim (int): dimension of the hypervectors
+
+    Examples::
+
+        >>> a = torchhd.random_hv(3, 10)
+        >>> a
+        tensor([[-1.,  1.,  1.,  1., -1., -1., -1., -1.,  1., -1.],
+                [-1., -1., -1.,  1., -1.,  1., -1., -1.,  1., -1.],
+                [ 1.,  1.,  1., -1., -1.,  1., -1.,  1.,  1.,  1.]])
+        >>> p = torchhd.create_random_permute(10)
+        >>> p(a, 2)
+        tensor([[ 1.,  1., -1., -1., -1.,  1., -1., -1.,  1., -1.],
+                [ 1., -1., -1., -1.,  1.,  1., -1., -1., -1., -1.],
+                [ 1.,  1.,  1., -1.,  1., -1., -1.,  1.,  1.,  1.]])
+        >>> p(a, -2)
+        tensor([[-1.,  1.,  1.,  1., -1., -1., -1., -1.,  1., -1.],
+                [-1., -1., -1.,  1., -1.,  1., -1., -1.,  1., -1.],
+                [ 1.,  1.,  1., -1., -1.,  1., -1.,  1.,  1.,  1.]])
+
+    """
+
+    forward = torch.randperm(dim)
+    backward = torch.empty_like(forward)
+    backward[forward] = torch.arange(dim)
+
+    def permute(input: VSA_Model, shifts: int = 1) -> VSA_Model:
+        y = input
+        if shifts > 0:
+            for _ in range(shifts):
+                y = y[..., forward]
+        elif shifts < 0:
+            for _ in range(shifts):
+                y = y[..., backward]
+        return y
+    
+    return permute
+
 
 
 def inverse(input: VSA_Model) -> VSA_Model:
