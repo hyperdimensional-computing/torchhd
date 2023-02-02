@@ -87,10 +87,10 @@ This example is from the paper [What We Mean When We Say "What's the Dollar of M
 ## Supported HDC/VSA models
 Currently, the library supports the following HDC/VSA models:
 
-- [Multiply-Add-Permute](https://torchhd.readthedocs.io/en/stable/generated/torchhd.MAP.html)
-- [Binary Spatter Codes](https://torchhd.readthedocs.io/en/stable/generated/torchhd.BSC.html)
-- [Holographic Reduced Representations](https://torchhd.readthedocs.io/en/stable/generated/torchhd.HRR.html)
-- [Fourier Holographic Reduced Representations](https://torchhd.readthedocs.io/en/stable/generated/torchhd.FHRR.html)
+- [Multiply-Add-Permute (MAP)](https://torchhd.readthedocs.io/en/stable/generated/torchhd.MAP.html)
+- [Binary Spatter Codes (BSC)](https://torchhd.readthedocs.io/en/stable/generated/torchhd.BSC.html)
+- [Holographic Reduced Representations (HRR)](https://torchhd.readthedocs.io/en/stable/generated/torchhd.HRR.html)
+- [Fourier Holographic Reduced Representations (FHRR)](https://torchhd.readthedocs.io/en/stable/generated/torchhd.FHRR.html)
 
 We welcome anyone to help with contributing more models to the library!
 
