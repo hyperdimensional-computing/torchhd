@@ -11,14 +11,13 @@ from .utils import download_file_from_google_drive
 
 
 class UCIClassificationBenchmark:
-    """Class that performs the transformation of input data into hypervectors according to intRVFL model. See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
+    """Class for iterating over all datasets used in `Do we Need Hundreds of Classifiers to Solve Real World Classification Problems? <https://jmlr.org/papers/v15/delgado14a.html>`_.
 
     Args:
-        dimensions (int): Dimensionality of vectors used when transforming input data.
-        num_feat (int): Number of features in the dataset.
-        kappa (int): Parameter of the clipping function used as the part of transforming input data.
-        key (torchhd.map.MAP): A set of random vectors used as unique IDs for features of the dataset.
-        density_encoding (torchhd.embeddings.Thermometer): Thermometer encoding used for transforming input data.
+        root (string): Root directory containing the files of the dataset.
+        download (bool, optional): If True, downloads the dataset from the internet and
+            puts it in root directory. If dataset is already downloaded, it is not
+            downloaded again.
     """
 
     # All datasets included in the collection
@@ -163,6 +162,8 @@ class UCIClassificationBenchmark:
         self.statistics = {key: [] for key in self.dataset_names}
 
     def datasets(self) -> Generator[DatasetEntry, None, None]:
+        """Returns an iterator over all datasets in the benchmark."""
+
         # For all datasets in the collection
         for dataset_name in self.dataset_names:
             # Fetch the current dataset
@@ -188,6 +189,7 @@ class UCIClassificationBenchmark:
                 yield self.DatasetEntry(dataset_name, train_ds, test_ds)
 
     def report(self, dataset: DatasetEntry, metric: float) -> None:
+        """Report the metric, e.g., accuracy, of the current dataset."""
         # Update statistics for the current run if the dataset uses cross-validation
         if hasattr(dataset.train, "num_folds"):
             num_folds = dataset.train.num_folds
@@ -204,6 +206,7 @@ class UCIClassificationBenchmark:
             self.statistics[dataset.name].append(metric)
 
     def score(self) -> Dict[str, List[float]]:
+        """Get the score on each dataset, averaged over cross-fold validation."""
         results = {}
         for key in self.statistics:
             # If applicable average over folds
