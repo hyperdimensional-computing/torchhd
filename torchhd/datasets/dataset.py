@@ -11,7 +11,7 @@ from .utils import download_file_from_google_drive
 
 
 class UCIClassificationBenchmark:
-    """Class for iterating over all datasets used in `Do we Need Hundreds of Classifiers to Solve Real World Classification Problems? <https://jmlr.org/papers/v15/delgado14a.html>`_.
+    """Class for iterating over all datasets used in `Do we Need Hundreds of Classifiers to Solve Real World Classification Problems? <https://jmlr.org/papers/v15/delgado14a.html>`_ from the `UCI Machine Learning Repository <https://archive.ics.uci.edu/ml/index.php>`_.
 
     Args:
         root (string): Root directory containing the files of the dataset.
