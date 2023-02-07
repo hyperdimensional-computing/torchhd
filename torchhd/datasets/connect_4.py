@@ -5,7 +5,7 @@ from torchhd.datasets import DatasetFourFold
 class Connect4(DatasetFourFold):
     """`Connect-4 <https://archive.ics.uci.edu/ml/datasets/connect-4>`_ dataset.
 
-    
+
     .. list-table::
        :widths: 10 10 10 10
        :align: center
@@ -20,7 +20,7 @@ class Connect4(DatasetFourFold):
          - Classification
          - Game
 
-         
+
     Args:
         root (string): Root directory containing the files of the dataset.
         train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by fold and hyper_search variables.

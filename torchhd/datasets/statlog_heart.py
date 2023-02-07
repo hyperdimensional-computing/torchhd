@@ -4,7 +4,7 @@ from torchhd.datasets import DatasetFourFold
 
 class StatlogHeart(DatasetFourFold):
     """`Statlog (Heart) <https://archive.ics.uci.edu/ml/datasets/statlog+(heart)>`_ dataset.
-    
+
     .. list-table::
        :widths: 10 10 10 10
        :align: center

@@ -26,7 +26,7 @@ class UCIHAR(data.Dataset):
          - 561
          - Classification
          - N/A
-         
+
     Args:
         root (string): Root directory of dataset where the training and testing samples are located.
         train (bool, optional): If True, creates dataset from UCIHAR-training data,

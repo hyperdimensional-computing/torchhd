@@ -18,7 +18,7 @@ class HeartHungarian(DatasetFourFold):
          - 75
          - Classification
          - Life
-         
+
     Args:
         root (string): Root directory containing the files of the dataset.
         train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by fold and hyper_search variables.

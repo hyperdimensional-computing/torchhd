@@ -4,7 +4,7 @@ from torchhd.datasets import DatasetFourFold
 
 class Blood(DatasetFourFold):
     """`Blood Transfusion Service Center <https://archive.ics.uci.edu/ml/datasets/Blood+Transfusion+Service+Center>`_ dataset.
-    
+
     .. list-table::
        :widths: 10 10 10 10
        :align: center

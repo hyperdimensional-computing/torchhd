@@ -4,7 +4,7 @@ from torchhd.datasets import DatasetFourFold
 
 class PlantMargin(DatasetFourFold):
     """`One-hundred Plant Species Leaves <https://archive.ics.uci.edu/ml/datasets/One-hundred+plant+species+leaves+data+set>`_ dataset.
-    
+
     .. list-table::
        :widths: 10 10 10 10
        :align: center

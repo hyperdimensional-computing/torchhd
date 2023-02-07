@@ -4,7 +4,7 @@ from torchhd.datasets import DatasetFourFold
 
 class Echocardiogram(DatasetFourFold):
     """`Echocardiogram <https://archive.ics.uci.edu/ml/datasets/echocardiogram>`_ dataset.
-    
+
     .. list-table::
        :widths: 10 10 10 10
        :align: center
@@ -19,7 +19,7 @@ class Echocardiogram(DatasetFourFold):
          - Classification
          - Life
 
-         
+
     Args:
         root (string): Root directory containing the files of the dataset.
         train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by fold and hyper_search variables.
