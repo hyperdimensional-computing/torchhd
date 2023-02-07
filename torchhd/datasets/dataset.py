@@ -499,7 +499,6 @@ class DatasetTrainTest(CollectionDataset):
 
         # Load fold used in hyperparameter search if necessary
         if self.hyper_search:
-
             # Files with pre-generated folds with indices
             hyper_split_path = os.path.join(self.root, "conxuntos.dat")
             line_idx = 0 if self.train else 1

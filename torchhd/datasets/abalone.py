@@ -40,8 +40,6 @@ class Abalone(DatasetFourFold):
 
     """
 
-
-
     name = "abalone"
     classes: List[str] = [
         "0",

@@ -127,7 +127,6 @@ class BeijingAirQuality(data.Dataset):
         return False
 
     def _load_data(self):
-
         files = os.listdir(self.root)
         csv_files = [file for file in files if file.endswith(".csv")]
 

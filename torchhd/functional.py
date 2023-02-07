@@ -662,7 +662,6 @@ def permute(input: VSA_Model, *, shifts=1) -> VSA_Model:
     return input.permute(shifts)
 
 
-
 def create_random_permute(dim: int) -> Callable[[VSA_Model, int], VSA_Model]:
     r"""Creates random permutation functions.
 
@@ -701,9 +700,8 @@ def create_random_permute(dim: int) -> Callable[[VSA_Model, int], VSA_Model]:
             for _ in range(shifts):
                 y = y[..., backward]
         return y
-    
-    return permute
 
+    return permute
 
 
 def inverse(input: VSA_Model) -> VSA_Model:

@@ -50,6 +50,7 @@ train_ds, test_ds = data.random_split(ds, [train_size, test_size])
 train_dl = data.DataLoader(train_ds, batch_size=1, shuffle=True)
 test_dl = data.DataLoader(test_ds, batch_size=1)
 
+
 # Model based on RegHD application for Single model regression
 class SingleModel(nn.Module):
     def __init__(self, num_classes, size):
