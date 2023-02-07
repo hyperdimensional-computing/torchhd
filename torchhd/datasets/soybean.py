@@ -18,7 +18,7 @@ class Soybean(DatasetTrainTest):
          - 35
          - Classification
          - Life
-         
+
     Args:
         root (string): Root directory containing the files of the dataset.
         train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by hyper_search variable.

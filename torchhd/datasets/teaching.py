@@ -4,7 +4,7 @@ from torchhd.datasets import DatasetFourFold
 
 class Teaching(DatasetFourFold):
     """`Teaching Assistant Evaluation <https://archive.ics.uci.edu/ml/datasets/teaching+assistant+evaluation>`_ dataset.
-    
+
     .. list-table::
        :widths: 10 10 10 10
        :align: center

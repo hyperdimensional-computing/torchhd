@@ -25,7 +25,7 @@ class ISOLET(data.Dataset):
          - Classification
          - Computer
 
-         
+
     Args:
         root (string): Root directory of dataset where ``isolet1+2+3+4.data``
             and  ``isolet5.data`` exist.

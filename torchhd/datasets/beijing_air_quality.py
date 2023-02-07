@@ -29,7 +29,7 @@ class BeijingAirQuality(data.Dataset):
          - 18
          - Regression
          - Physical
-         
+
     .. warning::
         The data contains NaN values that need to be taken into account.
 

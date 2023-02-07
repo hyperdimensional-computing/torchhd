@@ -25,7 +25,7 @@ class PAMAP(data.Dataset):
          - 52
          - Classification
          - Computer
-         
+
     Args:
         root (string): Root directory of dataset.
         subjects (list): List of subjects to be loaded in dataset
