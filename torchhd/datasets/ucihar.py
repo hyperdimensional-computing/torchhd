@@ -24,6 +24,22 @@ class UCIHAR(data.Dataset):
             and returns a transformed version.
         target_transform (callable, optional): A function/transform that takes in the
             target and transforms it.
+
+    **STATS**
+
+    .. list-table::
+       :widths: 10 10 10 10
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 10299
+         - 561
+         - Classification
+         - N/A
+
     """
 
     classes: List[str] = [

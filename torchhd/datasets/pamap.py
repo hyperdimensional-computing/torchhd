@@ -23,6 +23,22 @@ class PAMAP(data.Dataset):
             and returns a transformed version.
         target_transform (callable, optional): A function/transform that takes in the
             target and transforms it.
+
+    **STATS**
+
+    .. list-table::
+       :widths: 10 10 10 10
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 3850505
+         - 52
+         - Classification
+         - Computer
+
     """
 
     classes: List[str] = [

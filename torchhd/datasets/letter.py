@@ -22,6 +22,22 @@ class Letter(DatasetFourFold):
         download (bool, optional): If True, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
+
+    **STATS**
+
+    .. list-table::
+       :widths: 10 10 10 10
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 20000
+         - 16
+         - Classification
+         - Computer
+
     """
 
     name = "letter"

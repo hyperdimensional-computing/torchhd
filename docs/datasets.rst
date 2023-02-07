@@ -7,7 +7,7 @@ The Torchhd library provides many popular built-in datasets to work with.
 
 .. currentmodule:: torchhd.datasets
 
-.. autosummary:: 
+.. autosummary::
     :toctree: generated/
     :template: class_dataset.rst
 
@@ -21,7 +21,7 @@ The Torchhd library provides many popular built-in datasets to work with.
     CyclePowerPlant
     Abalone
     Adult
-    AcuteInflammation    
+    AcuteInflammation
     AcuteNephritis
     Annealing
     Arrhythmia
@@ -140,6 +140,11 @@ The Torchhd library provides many popular built-in datasets to work with.
     WineQualityWhite
     Yeast
     Zoo
+
+.. automodule:: torchhd.datasets
+    :members:
+    :exclude-members: download, process, processed_file_names, raw_file_names, num_classes
+    :noindex:
 
 Base classes
 ------------------------
