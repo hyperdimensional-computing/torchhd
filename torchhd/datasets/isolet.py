@@ -11,6 +11,21 @@ from .utils import download_file_from_google_drive, unzip_file
 class ISOLET(data.Dataset):
     """`ISOLET <https://archive.ics.uci.edu/ml/datasets/isolet>`_ dataset.
 
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 7797
+         - 617
+         - Classification
+         - Computer
+
+         
     Args:
         root (string): Root directory of dataset where ``isolet1+2+3+4.data``
             and  ``isolet5.data`` exist.
@@ -23,21 +38,6 @@ class ISOLET(data.Dataset):
             and returns a transformed version.
         target_transform (callable, optional): A function/transform that takes in the
             target and transforms it.
-
-    **STATS**
-
-    .. list-table::
-       :widths: 10 10 10 10
-       :header-rows: 1
-
-       * - Instances
-         - Attributes
-         - Task
-         - Area
-       * - 7797
-         - 617
-         - Classification
-         - Computer
 
     """
 

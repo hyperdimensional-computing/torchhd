@@ -4,6 +4,20 @@ from torchhd.datasets import DatasetFourFold
 
 class Teaching(DatasetFourFold):
     """`Teaching Assistant Evaluation <https://archive.ics.uci.edu/ml/datasets/teaching+assistant+evaluation>`_ dataset.
+    
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 151
+         - 5
+         - Classification
+         - N/A
 
     Args:
         root (string): Root directory containing the files of the dataset.
@@ -22,21 +36,6 @@ class Teaching(DatasetFourFold):
         download (bool, optional): If True, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
-
-    **STATS**
-
-    .. list-table::
-       :widths: 10 10 10 10
-       :header-rows: 1
-
-       * - Instances
-         - Attributes
-         - Task
-         - Area
-       * - 151
-         - 5
-         - Classification
-         - N/A
 
     """
 

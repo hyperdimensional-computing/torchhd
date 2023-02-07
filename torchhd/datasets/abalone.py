@@ -5,6 +5,20 @@ from torchhd.datasets import DatasetFourFold
 class Abalone(DatasetFourFold):
     """`Abalone <https://archive.ics.uci.edu/ml/datasets/abalone>`_ dataset.
 
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 4177
+         - 8
+         - Classification
+         - Life
+
     Args:
         root (string): Root directory containing the files of the dataset.
         train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by fold and hyper_search variables.
@@ -22,21 +36,6 @@ class Abalone(DatasetFourFold):
         download (bool, optional): If True, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
-
-    **STATS**
-
-    .. list-table::
-       :widths: 10 10 10 10
-       :header-rows: 1
-
-       * - Instances
-         - Attributes
-         - Task
-         - Area
-       * - 4177
-         - 8
-         - Classification
-         - Life
 
     """
 

@@ -5,6 +5,20 @@ from torchhd.datasets import DatasetFourFold
 class StatlogImage(DatasetFourFold):
     """`Statlog (Image Segmentation) <https://archive.ics.uci.edu/ml/datasets/Statlog+(Image+Segmentation)>`_ dataset.
 
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 2310
+         - 19
+         - Classification
+         - N/A
+         
     Args:
         root (string): Root directory containing the files of the dataset.
         train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by fold and hyper_search variables.
@@ -23,20 +37,6 @@ class StatlogImage(DatasetFourFold):
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
 
-    **STATS**
-
-    .. list-table::
-       :widths: 10 10 10 10
-       :header-rows: 1
-
-       * - Instances
-         - Attributes
-         - Task
-         - Area
-       * - 2310
-         - 19
-         - Classification
-         - N/A
 
     """
 

@@ -5,6 +5,20 @@ from torchhd.datasets import DatasetTrainTest
 class Optical(DatasetTrainTest):
     """`Optical Recognition of Handwritten Digits <https://archive.ics.uci.edu/ml/datasets/optical+recognition+of+handwritten+digits>`_ dataset.
 
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 5620
+         - 64
+         - Classification
+         - Computer
+         
     Args:
         root (string): Root directory containing the files of the dataset.
         train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by hyper_search variable.
@@ -19,20 +33,6 @@ class Optical(DatasetTrainTest):
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
 
-    **STATS**
-
-    .. list-table::
-       :widths: 10 10 10 10
-       :header-rows: 1
-
-       * - Instances
-         - Attributes
-         - Task
-         - Area
-       * - 5620
-         - 64
-         - Classification
-         - Computer
 
     """
 

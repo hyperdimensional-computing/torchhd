@@ -5,6 +5,20 @@ from torchhd.datasets import DatasetFourFold
 class StatlogAustralianCredit(DatasetFourFold):
     """`Statlog (Australian Credit Approval) <https://archive.ics.uci.edu/ml/datasets/statlog+(australian+credit+approval)>`_ dataset.
 
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 690
+         - 14
+         - Classification
+         - Financial
+         
     Args:
         root (string): Root directory containing the files of the dataset.
         train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by fold and hyper_search variables.
@@ -23,20 +37,6 @@ class StatlogAustralianCredit(DatasetFourFold):
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
 
-    **STATS**
-
-    .. list-table::
-       :widths: 10 10 10 10
-       :header-rows: 1
-
-       * - Instances
-         - Attributes
-         - Task
-         - Area
-       * - 690
-         - 14
-         - Classification
-         - Financial
 
     """
 

@@ -4,7 +4,21 @@ from torchhd.datasets import DatasetFourFold
 
 class SyntheticControl(DatasetFourFold):
     """`Synthetic Control Chart Time Series <https://archive.ics.uci.edu/ml/datasets/synthetic+control+chart+time+series>`_ dataset.
+    
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
 
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 600
+         - N/A
+         - Classification
+         - N/A
+         
     Args:
         root (string): Root directory containing the files of the dataset.
         train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by fold and hyper_search variables.
@@ -23,20 +37,6 @@ class SyntheticControl(DatasetFourFold):
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
 
-    **STATS**
-
-    .. list-table::
-       :widths: 10 10 10 10
-       :header-rows: 1
-
-       * - Instances
-         - Attributes
-         - Task
-         - Area
-       * - 600
-         - N/A
-         - Classification
-         - N/A
 
     """
 

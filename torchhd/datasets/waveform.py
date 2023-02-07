@@ -5,6 +5,20 @@ from torchhd.datasets import DatasetFourFold
 class Waveform(DatasetFourFold):
     """`Waveform Database Generator (Version 1) <https://archive.ics.uci.edu/ml/datasets/Waveform+Database+Generator+(Version+1)>`_ dataset.
 
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 5000
+         - 21
+         - Classification
+         - Physical
+         
     Args:
         root (string): Root directory containing the files of the dataset.
         train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by fold and hyper_search variables.
@@ -22,21 +36,6 @@ class Waveform(DatasetFourFold):
         download (bool, optional): If True, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
-
-    **STATS**
-
-    .. list-table::
-       :widths: 10 10 10 10
-       :header-rows: 1
-
-       * - Instances
-         - Attributes
-         - Task
-         - Area
-       * - 5000
-         - 21
-         - Classification
-         - Physical
 
     """
 

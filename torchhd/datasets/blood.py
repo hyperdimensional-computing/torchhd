@@ -4,6 +4,21 @@ from torchhd.datasets import DatasetFourFold
 
 class Blood(DatasetFourFold):
     """`Blood Transfusion Service Center <https://archive.ics.uci.edu/ml/datasets/Blood+Transfusion+Service+Center>`_ dataset.
+    
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 748
+         - 5
+         - Classification
+         - Business
+
 
     Args:
         root (string): Root directory containing the files of the dataset.
@@ -22,22 +37,6 @@ class Blood(DatasetFourFold):
         download (bool, optional): If True, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
-
-
-    **STATS**
-
-    .. list-table::
-       :widths: 10 10 10 10
-       :header-rows: 1
-
-       * - Instances
-         - Attributes
-         - Task
-         - Area
-       * - 748
-         - 5
-         - Classification
-         - Business
 
     """
 

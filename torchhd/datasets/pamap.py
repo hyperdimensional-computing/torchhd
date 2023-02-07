@@ -12,6 +12,20 @@ from .utils import download_file, unzip_file
 class PAMAP(data.Dataset):
     """`PAMAP <https://archive.ics.uci.edu/ml/datasets/pamap2+physical+activity+monitoring>`_ dataset.
 
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 3850505
+         - 52
+         - Classification
+         - Computer
+         
     Args:
         root (string): Root directory of dataset.
         subjects (list): List of subjects to be loaded in dataset
@@ -24,20 +38,6 @@ class PAMAP(data.Dataset):
         target_transform (callable, optional): A function/transform that takes in the
             target and transforms it.
 
-    **STATS**
-
-    .. list-table::
-       :widths: 10 10 10 10
-       :header-rows: 1
-
-       * - Instances
-         - Attributes
-         - Task
-         - Area
-       * - 3850505
-         - 52
-         - Classification
-         - Computer
 
     """
 

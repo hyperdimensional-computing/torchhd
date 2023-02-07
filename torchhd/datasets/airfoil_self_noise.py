@@ -13,21 +13,9 @@ class AirfoilSelfNoise(data.Dataset):
     Dataset is obtained from a series of aerodynamic and acoustic tests of two and three-dimensional
     airfoil blade sections conducted in an anechoic wind tunnel.
 
-
-    Args:
-        root (string): Root directory of dataset where ``airfoil_self_noise.dat`` exists
-        download (bool, optional): If True, downloads the dataset from the internet and
-            puts it in root directory. If dataset is already downloaded, it is not
-            downloaded again.
-        transform (callable, optional): A function/transform that takes in an torch.FloatTensor
-            and returns a transformed version.
-        target_transform (callable, optional): A function/transform that takes in the
-            target and transforms it.
-
-    **STATS**
-
     .. list-table::
        :widths: 10 10 10 10
+       :align: center
        :header-rows: 1
 
        * - Instances
@@ -38,6 +26,16 @@ class AirfoilSelfNoise(data.Dataset):
          - 6
          - Regression
          - Physical
+
+    Args:
+        root (string): Root directory of dataset where ``airfoil_self_noise.dat`` exists
+        download (bool, optional): If True, downloads the dataset from the internet and
+            puts it in root directory. If dataset is already downloaded, it is not
+            downloaded again.
+        transform (callable, optional): A function/transform that takes in an torch.FloatTensor
+            and returns a transformed version.
+        target_transform (callable, optional): A function/transform that takes in the
+            target and transforms it.
 
     """
 
