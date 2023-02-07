@@ -5,6 +5,20 @@ from torchhd.datasets import DatasetFourFold
 class Spambase(DatasetFourFold):
     """`Spambase <https://archive.ics.uci.edu/ml/datasets/spambase>`_ dataset.
 
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 4601
+         - 57
+         - Classification
+         - Computer
+
     Args:
         root (string): Root directory containing the files of the dataset.
         train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by fold and hyper_search variables.
@@ -22,6 +36,8 @@ class Spambase(DatasetFourFold):
         download (bool, optional): If True, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
+
+
     """
 
     name = "spambase"

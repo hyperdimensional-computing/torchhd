@@ -13,6 +13,20 @@ class UCIHAR(data.Dataset):
     """`UCI Human Activity Recognition <https://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones>`_ dataset.
     As found in the paper `"Human Activity Recognition Using Smartphones" <https://ieeexplore.ieee.org/document/8567275>`_.
 
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 10299
+         - 561
+         - Classification
+         - N/A
+
     Args:
         root (string): Root directory of dataset where the training and testing samples are located.
         train (bool, optional): If True, creates dataset from UCIHAR-training data,
@@ -24,6 +38,8 @@ class UCIHAR(data.Dataset):
             and returns a transformed version.
         target_transform (callable, optional): A function/transform that takes in the
             target and transforms it.
+
+
     """
 
     classes: List[str] = [

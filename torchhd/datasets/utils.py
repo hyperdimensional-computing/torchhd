@@ -18,7 +18,6 @@ def download_file_from_google_drive(file_id, destination):
     params = dict(id=file_id, export="download")
 
     with requests.Session() as session:
-
         response = session.get(URL, params=params, stream=True)
 
         # downloads right away

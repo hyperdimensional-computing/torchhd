@@ -27,7 +27,6 @@ class TestEmpty_hv:
     @pytest.mark.parametrize("dtype", torch_dtypes)
     @pytest.mark.parametrize("model", vsa_models)
     def test_value(self, dtype, model):
-
         if not supported_dtype(dtype, model):
             with pytest.raises(ValueError):
                 functional.empty_hv(3, 26, model, dtype=dtype)

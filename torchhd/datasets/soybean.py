@@ -5,6 +5,20 @@ from torchhd.datasets import DatasetTrainTest
 class Soybean(DatasetTrainTest):
     """`Soybean (Large) <https://archive.ics.uci.edu/ml/datasets/Soybean+(Large)>`_ dataset.
 
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 307
+         - 35
+         - Classification
+         - Life
+
     Args:
         root (string): Root directory containing the files of the dataset.
         train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by hyper_search variable.
@@ -18,6 +32,8 @@ class Soybean(DatasetTrainTest):
         download (bool, optional): If True, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
+
+
     """
 
     name = "soybean"

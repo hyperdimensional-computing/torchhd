@@ -48,10 +48,10 @@ a:hover {
 
 html.writer-html4 .rst-content dl:not(.docutils)>dt,
 html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(.footnote):not(.glossary):not(.simple)>dt {
-    background: #f3f4f7;
-    color: #6c6c6d;
-    border-top: none;
-    border-left: 3px solid #ee4c2c;
+    background: #f3f4f7 !important;
+    color: #6c6c6d !important;
+    border-top: none !important;
+    border-left: 3px solid #ee4c2c !important;
     padding: 0.5rem;
     padding-right: 100px;
     word-wrap: break-word;

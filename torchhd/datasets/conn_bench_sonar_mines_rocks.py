@@ -5,6 +5,22 @@ from torchhd.datasets import DatasetFourFold
 class ConnBenchSonarMinesRocks(DatasetFourFold):
     """`Connectionist Bench (Sonar, Mines vs. Rocks) <https://archive.ics.uci.edu/ml/datasets/connectionist+bench+(sonar,+mines+vs.+rocks)>`_ dataset.
 
+
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 208
+         - 60
+         - Classification
+         - Physical
+
+
     Args:
         root (string): Root directory containing the files of the dataset.
         train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by fold and hyper_search variables.
@@ -22,6 +38,7 @@ class ConnBenchSonarMinesRocks(DatasetFourFold):
         download (bool, optional): If True, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
+
     """
 
     name = "conn-bench-sonar-mines-rocks"

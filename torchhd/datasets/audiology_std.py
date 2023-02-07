@@ -5,6 +5,21 @@ from torchhd.datasets import DatasetTrainTest
 class AudiologyStd(DatasetTrainTest):
     """`Audiology (Standardized) <https://archive.ics.uci.edu/ml/datasets/Audiology+%28Standardized%29>`_ dataset.
 
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 226
+         - 69
+         - Classification
+         - Life
+
+
     Args:
         root (string): Root directory containing the files of the dataset.
         train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by hyper_search variable.
@@ -18,6 +33,7 @@ class AudiologyStd(DatasetTrainTest):
         download (bool, optional): If True, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
+
     """
 
     name = "audiology-std"

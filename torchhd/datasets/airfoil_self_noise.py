@@ -13,6 +13,19 @@ class AirfoilSelfNoise(data.Dataset):
     Dataset is obtained from a series of aerodynamic and acoustic tests of two and three-dimensional
     airfoil blade sections conducted in an anechoic wind tunnel.
 
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 1503
+         - 6
+         - Regression
+         - Physical
 
     Args:
         root (string): Root directory of dataset where ``airfoil_self_noise.dat`` exists
@@ -23,6 +36,7 @@ class AirfoilSelfNoise(data.Dataset):
             and returns a transformed version.
         target_transform (callable, optional): A function/transform that takes in the
             target and transforms it.
+
     """
 
     def __init__(

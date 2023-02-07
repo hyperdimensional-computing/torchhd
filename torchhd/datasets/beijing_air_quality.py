@@ -16,6 +16,20 @@ class BeijingAirQualityDataSample(NamedTuple):
 class BeijingAirQuality(data.Dataset):
     """`Beijing Multi-Site Air-Quality <https://archive.ics.uci.edu/ml/datasets/Beijing+Multi-Site+Air-Quality+Data>`_ dataset.
 
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 420768
+         - 18
+         - Regression
+         - Physical
+
     .. warning::
         The data contains NaN values that need to be taken into account.
 
@@ -27,6 +41,7 @@ class BeijingAirQuality(data.Dataset):
         download (bool, optional): If true, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
+
     """
 
     wind_directions: List[str]
@@ -111,7 +126,6 @@ class BeijingAirQuality(data.Dataset):
         return False
 
     def _load_data(self):
-
         files = os.listdir(self.root)
         csv_files = [file for file in files if file.endswith(".csv")]
 

@@ -81,7 +81,6 @@ class Empty(nn.Embedding):
         device=None,
         dtype=None,
     ) -> None:
-
         factory_kwargs = {"device": device, "dtype": dtype}
         # Have to call Module init explicitly in order not to use the Embedding init
         nn.Module.__init__(self)
@@ -190,7 +189,6 @@ class Identity(nn.Embedding):
         device=None,
         dtype=None,
     ) -> None:
-
         factory_kwargs = {"device": device, "dtype": dtype}
         # Have to call Module init explicitly in order not to use the Embedding init
         nn.Module.__init__(self)
@@ -311,7 +309,6 @@ class Random(nn.Embedding):
         device=None,
         dtype=None,
     ) -> None:
-
         factory_kwargs = {"device": device, "dtype": dtype}
         # Have to call Module init explicitly in order not to use the Embedding init
         nn.Module.__init__(self)
@@ -451,7 +448,6 @@ class Level(nn.Embedding):
         device=None,
         dtype=None,
     ) -> None:
-
         factory_kwargs = {"device": device, "dtype": dtype}
         # Have to call Module init explicitly in order not to use the Embedding init
         nn.Module.__init__(self)
@@ -574,7 +570,6 @@ class Thermometer(nn.Embedding):
         device=None,
         dtype=None,
     ) -> None:
-
         factory_kwargs = {"device": device, "dtype": dtype}
         # Have to call Module init explicitly in order not to use the Embedding init
         nn.Module.__init__(self)
@@ -689,7 +684,6 @@ class Circular(nn.Embedding):
         device=None,
         dtype=None,
     ) -> None:
-
         factory_kwargs = {"device": device, "dtype": dtype}
         # Have to call Module init explicitly in order not to use the Embedding init
         nn.Module.__init__(self)

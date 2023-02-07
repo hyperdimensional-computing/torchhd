@@ -5,6 +5,20 @@ from torchhd.datasets import DatasetFourFold
 class MolecBiolPromoter(DatasetFourFold):
     """`Molecular Biology (Promoter Gene Sequences) <https://archive.ics.uci.edu/ml/datasets/Molecular+Biology+(Promoter+Gene+Sequences)>`_ dataset.
 
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 106
+         - 58
+         - Classification
+         - Life
+
     Args:
         root (string): Root directory containing the files of the dataset.
         train (bool, optional): If True, returns training (sub)set from the file storing training data as further determined by fold and hyper_search variables.
@@ -22,6 +36,7 @@ class MolecBiolPromoter(DatasetFourFold):
         download (bool, optional): If True, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
+
     """
 
     name = "molec-biol-promoter"

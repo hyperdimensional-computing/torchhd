@@ -28,7 +28,6 @@ def classifier_ridge_regression(
     data_type: torch.dtype,
     device: torch.device,
 ):
-
     # Get number of training samples
     num_train = len(train_ld.dataset)
     # Collects high-dimensional represetations of data in the train data
@@ -49,7 +48,6 @@ def classifier_ridge_regression(
     with torch.no_grad():
         count = 0
         for samples, labels in tqdm(train_ld, desc="Training"):
-
             samples = samples.to(device)
             labels = labels.to(device)
             # Make one-hot encoding
