@@ -13,8 +13,10 @@ from torchhd.datasets import UCIClassificationBenchmark
 
 # Note: this example requires the prototorch library: https://github.com/si-cim/prototorch
 import prototorch as pt
+
 # Note: this example requires the prototorch-models library: https://github.com/si-cim/prototorch_models
 from prototorch.models import GLVQ
+
 # Note: this example requires the pytorch-lightning library: https://www.pytorchlightning.ai
 import pytorch_lightning as pl
 from pytorch_lightning.utilities.warnings import PossibleUserWarning
@@ -300,7 +302,7 @@ for dataset in benchmark.datasets():
                 # Make prediction
                 predictions = model(samples)
                 accuracy.update(predictions.cpu(), targets)
-        
+
         print(f"Accuracy: {(accuracy.compute().item() * 100):.3f}%")
         benchmark.report(dataset, accuracy.compute().item())
 
