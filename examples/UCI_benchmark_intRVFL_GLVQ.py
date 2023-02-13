@@ -1,3 +1,5 @@
+import copy
+import warnings
 import torch
 import torch.nn as nn
 import torch.utils.data as data
@@ -9,14 +11,14 @@ import torchmetrics
 import torchhd
 from torchhd.datasets import UCIClassificationBenchmark
 
-import copy
-import warnings
+# Note: this example requires the prototorch library: https://github.com/si-cim/prototorch
 import prototorch as pt
-import pytorch_lightning as pl
+# Note: this example requires the prototorch-models library: https://github.com/si-cim/prototorch_models
 from prototorch.models import GLVQ
+# Note: this example requires the pytorch-lightning library: https://www.pytorchlightning.ai
+import pytorch_lightning as pl
 from pytorch_lightning.utilities.warnings import PossibleUserWarning
 from torch.optim.lr_scheduler import ExponentialLR
-from torch.optim.lr_scheduler import LinearLR
 from pytorch_lightning.callbacks import TQDMProgressBar
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -256,7 +258,6 @@ benchmark = UCIClassificationBenchmark("../data", download=True)
 for dataset in benchmark.datasets():
     print(dataset.name)
 
-    # if dataset.name != 'Abalone':
     # Number of features in the dataset.
     num_feat = dataset.train[0][0].size(-1)
     # Number of classes in the dataset.
@@ -289,7 +290,9 @@ for dataset in benchmark.datasets():
 
         # Obtain the classifier for the model
         model.fit(train_loader)
-        accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
+        accuracy = torchmetrics.Accuracy(
+            task="multiclass", top_k=1, num_classes=num_classes
+        )
 
         with torch.no_grad():
             for samples, targets in tqdm(test_loader, desc="Testing"):
@@ -297,6 +300,8 @@ for dataset in benchmark.datasets():
                 # Make prediction
                 predictions = model(samples)
                 accuracy.update(predictions.cpu(), targets)
+        
+        print(f"Accuracy: {(accuracy.compute().item() * 100):.3f}%")
         benchmark.report(dataset, accuracy.compute().item())
 
 # Returns a dictionary with names of the datasets and their respective accuracy that is averaged over folds (if applicable) and repeats

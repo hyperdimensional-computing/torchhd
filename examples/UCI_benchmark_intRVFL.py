@@ -308,7 +308,9 @@ for dataset in benchmark.datasets():
 
         # Obtain the classifier for the model
         model.fit(train_loader)
-        accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
+        accuracy = torchmetrics.Accuracy(
+            task="multiclass", top_k=1, num_classes=num_classes
+        )
 
         with torch.no_grad():
             for samples, targets in tqdm(test_loader, desc="Testing"):
@@ -317,6 +319,7 @@ for dataset in benchmark.datasets():
                 predictions = model(samples)
                 accuracy.update(predictions.cpu(), targets)
 
+        print(f"Accuracy: {(accuracy.compute().item() * 100):.3f}%")
         benchmark.report(dataset, accuracy.compute().item())
 
 # Returns a dictionary with names of the datasets and their respective accuracy that is averaged over folds (if applicable) and repeats
