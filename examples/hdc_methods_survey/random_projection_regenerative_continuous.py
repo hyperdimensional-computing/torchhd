@@ -15,14 +15,17 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
 
 
-def experiment(DIMENSIONS=10000, method='RandomProjectionRegenerativeContinuous', epochs = 5, drop_rate = 0.2):
-
+def experiment(
+    DIMENSIONS=10000,
+    method="RandomProjectionRegenerativeContinuous",
+    epochs=5,
+    drop_rate=0.2,
+):
     def create_min_max_normalize(min, max):
         def normalize(input):
             return torch.nan_to_num((input - min) / (max - min))
 
         return normalize
-
 
     class Encoder(nn.Module):
         def __init__(self, size):
@@ -35,15 +38,16 @@ def experiment(DIMENSIONS=10000, method='RandomProjectionRegenerativeContinuous'
             sample_hv = self.embed(x).sign()
             return torchhd.hard_quantize(sample_hv)
 
-
     benchmark = UCIClassificationBenchmark("../data", download=True)
-    results_file = 'results/results'+str(time.time())+'.csv'
-    with open(results_file, 'w', newline='') as file:
+    results_file = "results/results" + str(time.time()) + ".csv"
+    with open(results_file, "w", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(['Name','Accuracy','Time','Size','Classes','Dimensions','Method'])
+        writer.writerow(
+            ["Name", "Accuracy", "Time", "Size", "Classes", "Dimensions", "Method"]
+        )
 
     for dataset in benchmark.datasets():
-        #print(dataset.name)
+        # print(dataset.name)
 
         # Number of features in the dataset.
         num_feat = dataset.train[0][0].size(-1)
@@ -58,7 +62,9 @@ def experiment(DIMENSIONS=10000, method='RandomProjectionRegenerativeContinuous'
         dataset.test.transform = transform
 
         # Set up data loaders
-        train_loader = data.DataLoader(dataset.train, batch_size=BATCH_SIZE, shuffle=True)
+        train_loader = data.DataLoader(
+            dataset.train, batch_size=BATCH_SIZE, shuffle=True
+        )
         test_loader = data.DataLoader(dataset.test, batch_size=BATCH_SIZE)
 
         encode = Encoder(dataset.train[0][0].size(-1))
@@ -78,7 +84,7 @@ def experiment(DIMENSIONS=10000, method='RandomProjectionRegenerativeContinuous'
                     model.add_online(samples_hv, labels)
             model.normalize()
 
-            if i < epochs-1:
+            if i < epochs - 1:
                 model.regenerate_continuous(encode, drop_rate, num_classes)
 
         accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
@@ -91,6 +97,16 @@ def experiment(DIMENSIONS=10000, method='RandomProjectionRegenerativeContinuous'
                 outputs = model(samples_hv, dot=True)
                 accuracy.update(outputs.cpu(), labels)
 
-        with open(results_file, 'a', newline='') as file:
+        with open(results_file, "a", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow([dataset.name, accuracy.compute().item(), time.time()-t, len(dataset.train)+len(dataset.train), num_classes, DIMENSIONS, method])
+            writer.writerow(
+                [
+                    dataset.name,
+                    accuracy.compute().item(),
+                    time.time() - t,
+                    len(dataset.train) + len(dataset.train),
+                    num_classes,
+                    DIMENSIONS,
+                    method,
+                ]
+            )

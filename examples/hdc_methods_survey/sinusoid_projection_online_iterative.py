@@ -16,7 +16,7 @@ print("Using {} device".format(device))
 
 DIMENSIONS = 10000
 BATCH_SIZE = 1
-method = 'SinusoidProjectionOnlineIterative'
+method = "SinusoidProjectionOnlineIterative"
 
 
 def create_min_max_normalize(min, max):
@@ -25,12 +25,12 @@ def create_min_max_normalize(min, max):
 
     return normalize
 
+
 class Encoder(nn.Module):
     def __init__(self, size):
         super(Encoder, self).__init__()
         self.embed = embeddings.Sinusoid(size, DIMENSIONS)
         self.flatten = torch.nn.Flatten()
-
 
     def forward(self, x):
         x = self.flatten(x)
@@ -39,13 +39,15 @@ class Encoder(nn.Module):
 
 
 benchmark = UCIClassificationBenchmark("../data", download=True)
-results_file = 'results/results'+str(time.time())+'.csv'
-with open(results_file, 'w', newline='') as file:
+results_file = "results/results" + str(time.time()) + ".csv"
+with open(results_file, "w", newline="") as file:
     writer = csv.writer(file)
-    writer.writerow(['Name','Accuracy','Time','Size','Classes','Dimensions','Method'])
+    writer.writerow(
+        ["Name", "Accuracy", "Time", "Size", "Classes", "Dimensions", "Method"]
+    )
 
 for dataset in benchmark.datasets():
-    #print(dataset.name)
+    # print(dataset.name)
 
     # Number of features in the dataset.
     num_feat = dataset.train[0][0].size(-1)
@@ -89,6 +91,16 @@ for dataset in benchmark.datasets():
             outputs = model(samples_hv, dot=True)
             accuracy.update(outputs.cpu(), labels)
 
-    with open(results_file, 'a', newline='') as file:
+    with open(results_file, "a", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow([dataset.name, accuracy.compute().item(), time.time()-t, len(dataset.train)+len(dataset.train), num_classes, DIMENSIONS, method])
+        writer.writerow(
+            [
+                dataset.name,
+                accuracy.compute().item(),
+                time.time() - t,
+                len(dataset.train) + len(dataset.train),
+                num_classes,
+                DIMENSIONS,
+                method,
+            ]
+        )
