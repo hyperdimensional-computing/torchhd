@@ -117,3 +117,27 @@ class Centroid(nn.Module):
         return "in_features={}, out_features={}".format(
             self.in_features, self.out_features is not None
         )
+
+    def regen_continuous(self, encode, x, size, classes):
+        # F.normalize(self.weight.data)
+        encode.embed.weight[x, :] = torch.normal(0, 1, size=(1, size))
+        self.weight[:,x] = torch.zeros((1, classes))
+
+    @torch.no_grad()
+    def regenerate_continuous(self, encode, drop_rate, classes) -> None:
+        dimensions = encode.embed.weight.shape[0]
+        indices = torch.topk(1/torch.var(self.weight, dim=0), int(dimensions*drop_rate)).indices
+        size = encode.embed.weight.shape[1]
+        for i in indices:
+            self.regen_continuous(encode, i, size, classes)
+
+    def regen_reset(self, encode, x, size):
+        encode.embed.weight[x, :] = torch.normal(0, 1, size=(1, size))
+
+    @torch.no_grad()
+    def regenerate_reset(self, encode, drop_rate) -> None:
+        dimensions = encode.embed.weight.shape[0]
+        indices = torch.topk(1/torch.var(self.weight, dim=0), int(dimensions*drop_rate)).indices
+        size = encode.embed.weight.shape[1]
+        for i in indices:
+            self.regen_reset(encode, i, size)
