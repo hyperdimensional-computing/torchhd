@@ -11,8 +11,9 @@ from torchhd import embeddings
 from torchhd.models import Centroid
 from torchhd.datasets import UCIClassificationBenchmark
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print("Using {} device".format(device))
+device = "cpu"
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# print("Using {} device".format(device))
 
 
 def experiment(DIMENSIONS=10000, method='RandomProjectionRegenerativeContinuous', epochs = 5, drop_rate = 0.2):

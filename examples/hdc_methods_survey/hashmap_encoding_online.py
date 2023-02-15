@@ -10,8 +10,8 @@ import torchhd
 from torchhd import embeddings
 from torchhd.models import Centroid
 from torchhd.datasets import UCIClassificationBenchmark
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cpu"
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
 BATCH_SIZE = 1
 
