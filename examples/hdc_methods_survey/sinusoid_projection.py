@@ -16,9 +16,9 @@ device = "cpu"
 # print("Using {} device".format(device))
 
 BATCH_SIZE = 1
-def experiment(DIMENSIONS=10000, method='SinusoidProjection'):
 
 
+def experiment(DIMENSIONS=10000, method="SinusoidProjection"):
     def create_min_max_normalize(min, max):
         def normalize(input):
             return torch.nan_to_num((input - min) / (max - min))
@@ -31,21 +31,21 @@ def experiment(DIMENSIONS=10000, method='SinusoidProjection'):
             self.embed = embeddings.Sinusoid(size, DIMENSIONS)
             self.flatten = torch.nn.Flatten()
 
-
         def forward(self, x):
             x = self.flatten(x)
             sample_hv = self.embed(x).sign()
             return torchhd.hard_quantize(sample_hv)
 
-
     benchmark = UCIClassificationBenchmark("../data", download=True)
-    results_file = 'results/results'+str(time.time())+'.csv'
-    with open(results_file, 'w', newline='') as file:
+    results_file = "results/results" + str(time.time()) + ".csv"
+    with open(results_file, "w", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(['Name','Accuracy','Time','Size','Classes','Dimensions','Method'])
+        writer.writerow(
+            ["Name", "Accuracy", "Time", "Size", "Classes", "Dimensions", "Method"]
+        )
 
     for dataset in benchmark.datasets():
-        #print(dataset.name)
+        # print(dataset.name)
 
         # Number of features in the dataset.
         num_feat = dataset.train[0][0].size(-1)
@@ -60,7 +60,9 @@ def experiment(DIMENSIONS=10000, method='SinusoidProjection'):
         dataset.test.transform = transform
 
         # Set up data loaders
-        train_loader = data.DataLoader(dataset.train, batch_size=BATCH_SIZE, shuffle=True)
+        train_loader = data.DataLoader(
+            dataset.train, batch_size=BATCH_SIZE, shuffle=True
+        )
         test_loader = data.DataLoader(dataset.test, batch_size=BATCH_SIZE)
 
         encode = Encoder(dataset.train[0][0].size(-1))
@@ -89,6 +91,16 @@ def experiment(DIMENSIONS=10000, method='SinusoidProjection'):
                 outputs = model(samples_hv, dot=True)
                 accuracy.update(outputs.cpu(), labels)
 
-        with open(results_file, 'a', newline='') as file:
+        with open(results_file, "a", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow([dataset.name, accuracy.compute().item(), time.time()-t, len(dataset.train)+len(dataset.train), num_classes, DIMENSIONS, method])
+            writer.writerow(
+                [
+                    dataset.name,
+                    accuracy.compute().item(),
+                    time.time() - t,
+                    len(dataset.train) + len(dataset.train),
+                    num_classes,
+                    DIMENSIONS,
+                    method,
+                ]
+            )
