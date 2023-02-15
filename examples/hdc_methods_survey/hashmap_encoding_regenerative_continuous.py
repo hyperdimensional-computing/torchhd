@@ -85,7 +85,9 @@ def experiment(
                     samples_hv = encode(samples)
                     model.add_online(samples_hv, labels)
             if i < epochs - 1:
-                model.regenerate_continuous(encode.embed.weight.T, drop_rate, num_classes)
+                model.regenerate_continuous(
+                    encode.embed.weight.T, drop_rate, num_classes
+                )
 
         accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
@@ -112,4 +114,6 @@ def experiment(
                     method,
                 ]
             )
+
+
 experiment()
