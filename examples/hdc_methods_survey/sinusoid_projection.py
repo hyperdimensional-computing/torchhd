@@ -104,3 +104,5 @@ def experiment(DIMENSIONS=10000, method="SinusoidProjection"):
                     method,
                 ]
             )
+
+experiment()

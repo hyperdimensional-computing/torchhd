@@ -105,3 +105,5 @@ def experiment(DIMENSIONS=10000, method="RandomProjectionOnlineIterative", epoch
                     method,
                 ]
             )
+
+experiment()

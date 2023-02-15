@@ -106,3 +106,5 @@ def experiment(
                     method,
                 ]
             )
+
+experiment()

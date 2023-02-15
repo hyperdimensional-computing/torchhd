@@ -87,7 +87,7 @@ def experiment(
             model.normalize()
 
             if i < epochs - 1:
-                model.regenerate_reset(encode, drop_rate)
+                model.regenerate_reset(encode.embed.weight, drop_rate)
 
         accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
@@ -112,3 +112,5 @@ def experiment(
                     method,
                 ]
             )
+
+experiment()

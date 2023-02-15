@@ -14,7 +14,7 @@ from torchhd.datasets import UCIClassificationBenchmark
 device = "cpu"
 #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # print("Using {} device".format(device))
-
+BATCH_SIZE=1
 
 def experiment(
     DIMENSIONS=10000,
@@ -86,7 +86,7 @@ def experiment(
             model.normalize()
 
             if i < epochs - 1:
-                model.regenerate_continuous(encode, drop_rate, num_classes)
+                model.regenerate_continuous(encode.embed.weight, drop_rate, num_classes)
 
         accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
@@ -111,3 +111,5 @@ def experiment(
                     method,
                 ]
             )
+
+experiment()

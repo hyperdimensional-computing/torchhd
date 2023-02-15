@@ -32,18 +32,18 @@ def experiment(
     class Encoder(nn.Module):
         def __init__(self, size, levels):
             super(Encoder, self).__init__()
-            self.keys = embeddings.Random(size, DIMENSIONS)
+            self.embed = embeddings.Random(size, DIMENSIONS)
             self.values = embeddings.Level(levels, DIMENSIONS)
             self.flatten = torch.nn.Flatten()
 
         def forward(self, x):
             x = self.flatten(x)
-            sample_hv = torchhd.hash_table(self.keys.weight, self.values(x))
+            sample_hv = torchhd.hash_table(self.embed.weight, self.values(x))
             return torchhd.hard_quantize(sample_hv)
 
     benchmark = UCIClassificationBenchmark("../data", download=True)
     results_file = "results/results" + str(time.time()) + ".csv"
-    with open(results_file, "w", newline="") as file:
+    with open(results_file, "w+", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(
             ["Name", "Accuracy", "Time", "Size", "Classes", "Dimensions", "Method"]
@@ -83,9 +83,8 @@ def experiment(
 
                     samples_hv = encode(samples)
                     model.add_online(samples_hv, labels)
-
             if i < epochs - 1:
-                model.regenerate_continuous(encode, drop_rate, num_classes)
+                model.regenerate_continuous(encode.embed.weight.T, drop_rate, num_classes)
 
         accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
@@ -112,3 +111,4 @@ def experiment(
                     method,
                 ]
             )
+experiment()
