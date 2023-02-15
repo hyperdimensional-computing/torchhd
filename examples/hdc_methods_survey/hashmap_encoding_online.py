@@ -103,4 +103,6 @@ def experiment(DIMENSIONS=10000, method="HashmapProjectionOnline", levels=100):
                     method,
                 ]
             )
+
+
 experiment()

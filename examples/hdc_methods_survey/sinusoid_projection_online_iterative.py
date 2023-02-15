@@ -16,14 +16,14 @@ device = "cpu"
 # print("Using {} device".format(device))
 
 BATCH_SIZE = 1
-def experiment(DIMENSIONS=10000, method="SinusoidProjectionOnlineIterative", epochs=5):
 
+
+def experiment(DIMENSIONS=10000, method="SinusoidProjectionOnlineIterative", epochs=5):
     def create_min_max_normalize(min, max):
         def normalize(input):
             return torch.nan_to_num((input - min) / (max - min))
 
         return normalize
-
 
     class Encoder(nn.Module):
         def __init__(self, size):
@@ -35,7 +35,6 @@ def experiment(DIMENSIONS=10000, method="SinusoidProjectionOnlineIterative", epo
             x = self.flatten(x)
             sample_hv = self.embed(x).sign()
             return torchhd.hard_quantize(sample_hv)
-
 
     benchmark = UCIClassificationBenchmark("../data", download=True)
     results_file = "results/results" + str(time.time()) + ".csv"
@@ -61,7 +60,9 @@ def experiment(DIMENSIONS=10000, method="SinusoidProjectionOnlineIterative", epo
         dataset.test.transform = transform
 
         # Set up data loaders
-        train_loader = data.DataLoader(dataset.train, batch_size=BATCH_SIZE, shuffle=True)
+        train_loader = data.DataLoader(
+            dataset.train, batch_size=BATCH_SIZE, shuffle=True
+        )
         test_loader = data.DataLoader(dataset.test, batch_size=BATCH_SIZE)
 
         encode = Encoder(dataset.train[0][0].size(-1))
@@ -104,5 +105,6 @@ def experiment(DIMENSIONS=10000, method="SinusoidProjectionOnlineIterative", epo
                     method,
                 ]
             )
+
 
 experiment()
