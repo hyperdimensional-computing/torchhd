@@ -1,2 +1,0 @@
-Name,Accuracy,Time,Size,Classes,Dimensions,Method
-Abalone,0.44731801748275757,2.6036641597747803,6266,3,10000,SinusoidProjectionOnlineIterative

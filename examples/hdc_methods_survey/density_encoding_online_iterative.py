@@ -18,7 +18,7 @@ device = "cpu"
 # print("Using {} device".format(device))
 
 
-def experiment(DIMENSIONS=10000, method="DensityEncodingOnline"):
+def experiment(DIMENSIONS=10000, method="DensityEncodingOnlineIterative", epochs=5):
     def create_min_max_normalize(min, max):
         def normalize(input):
             return torch.nan_to_num((input - min) / (max - min))
@@ -71,13 +71,14 @@ def experiment(DIMENSIONS=10000, method="DensityEncodingOnline"):
         model = Centroid(DIMENSIONS, num_classes)
         model = model.to(device)
         t = time.time()
-        with torch.no_grad():
-            for samples, labels in tqdm(train_loader, desc="Training"):
-                samples = samples.to(device)
-                labels = labels.to(device)
+        for i in range(epochs):
+            with torch.no_grad():
+                for samples, labels in tqdm(train_loader, desc="Training"):
+                    samples = samples.to(device)
+                    labels = labels.to(device)
 
-                samples_hv = encode(samples)
-                model.add_online(samples_hv, labels)
+                    samples_hv = encode(samples)
+                    model.add_online(samples_hv, labels)
 
         accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
