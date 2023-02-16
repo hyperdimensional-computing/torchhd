@@ -106,4 +106,5 @@ def experiment(DIMENSIONS=10000, method="DensityEncodingOnlineIterative", epochs
                 ]
             )
 
+
 experiment()

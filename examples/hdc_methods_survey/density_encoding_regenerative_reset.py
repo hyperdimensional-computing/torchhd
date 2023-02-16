@@ -19,6 +19,7 @@ device = "cpu"
 
 
 def experiment(DIMENSIONS=10000, method="DensityEncodingRegenerativeReset", epochs=5, drop_rate=0.2):
+
     def create_min_max_normalize(min, max):
         def normalize(input):
             return torch.nan_to_num((input - min) / (max - min))
@@ -81,6 +82,7 @@ def experiment(DIMENSIONS=10000, method="DensityEncodingRegenerativeReset", epoc
                     model.add_online(samples_hv, labels)
             if i < epochs - 1:
                 model.regenerate_reset(encode.embed.density_encoding.weight, drop_rate)
+
         accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
         with torch.no_grad():
@@ -106,5 +108,6 @@ def experiment(DIMENSIONS=10000, method="DensityEncodingRegenerativeReset", epoc
                     method,
                 ]
             )
+
 
 experiment()

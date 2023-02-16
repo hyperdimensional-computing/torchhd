@@ -107,4 +107,5 @@ def experiment(DIMENSIONS=10000, method="DensityEncodingRegenerativeContinuous",
                 ]
             )
 
+
 experiment()
