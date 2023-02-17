@@ -1,0 +1,12 @@
+Name,Accuracy,Time,Size,Classes,Dimensions,Method
+Abalone,0.5555555820465088,5.214029312133789,6266,3,10000,HashmapProjection
+Abalone,0.5354406237602234,4.6450066566467285,6266,3,10000,HashmapProjection
+Abalone,0.5478927493095398,4.63140082359314,6266,3,10000,HashmapProjection
+Abalone,0.5411877632141113,4.626527547836304,6266,3,10000,HashmapProjection
+AcuteInflammation,1.0,0.15820789337158203,180,2,10000,HashmapProjection
+AcuteInflammation,1.0,0.1540999412536621,180,2,10000,HashmapProjection
+AcuteInflammation,1.0,0.136399507522583,180,2,10000,HashmapProjection
+AcuteInflammation,1.0,0.13643574714660645,180,2,10000,HashmapProjection
+AcuteNephritis,1.0,0.13725543022155762,180,2,10000,HashmapProjection
+AcuteNephritis,1.0,0.1372227668762207,180,2,10000,HashmapProjection
+AcuteNephritis,1.0,0.1366269588470459,180,2,10000,HashmapProjection

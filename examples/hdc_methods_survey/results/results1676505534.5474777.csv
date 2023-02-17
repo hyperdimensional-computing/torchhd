@@ -1,0 +1,2 @@
+Name,Accuracy,Time,Size,Classes,Dimensions,Method
+Abalone,0.5555555820465088,5.221459627151489,6266,3,10000,HashmapProjection
