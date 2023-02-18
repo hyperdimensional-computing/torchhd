@@ -320,7 +320,9 @@ class MAP(VSA_Model):
     def dot_similarity(self, others: "MAP") -> Tensor:
         """Inner product with other hypervectors"""
         dtype = torch.get_default_dtype()
-        return F.linear(self.to(dtype), others.to(dtype))
+        if others.dim() >= 2:
+            others = others.mT
+        return torch.matmul(self.to(dtype), others.to(dtype))
 
     def cos_similarity(self, others: "MAP", *, eps=1e-08) -> Tensor:
         """Cosine similarity with other hypervectors"""
@@ -332,10 +334,10 @@ class MAP(VSA_Model):
         others_dot = torch.sum(others * others, dim=-1, dtype=dtype)
         others_mag = others_dot.sqrt()
 
-        if self.dim() > 1:
+        if self.dim() >= 2:
             magnitude = self_mag.unsqueeze(-1) * others_mag.unsqueeze(0)
         else:
             magnitude = self_mag * others_mag
 
         magnitude = magnitude.clamp(min=eps)
-        return F.linear(self.to(dtype), others.to(dtype)) / magnitude
+        return self.dot_similarity(others) / magnitude
