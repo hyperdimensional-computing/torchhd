@@ -354,7 +354,9 @@ class FHRR(VSA_Model):
 
     def dot_similarity(self, others: "FHRR") -> Tensor:
         """Inner product with other hypervectors"""
-        return F.linear(self, others.conj()).real
+        if others.dim() >= 2:
+            others = others.mT
+        return torch.matmul(self, others.conj()).real
 
     def cos_similarity(self, others: "FHRR", *, eps=1e-08) -> Tensor:
         """Cosine similarity with other hypervectors"""

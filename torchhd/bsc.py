@@ -406,14 +406,17 @@ class BSC(VSA_Model):
     def dot_similarity(self, others: "BSC") -> Tensor:
         """Inner product with other hypervectors."""
         dtype = torch.get_default_dtype()
+        device = self.device
 
-        min_one = torch.tensor(-1.0, dtype=dtype)
-        plus_one = torch.tensor(1.0, dtype=dtype)
+        min_one = torch.tensor(-1.0, dtype=dtype, device=device)
+        plus_one = torch.tensor(1.0, dtype=dtype, device=device)
 
         self_as_bipolar = torch.where(self.bool(), min_one, plus_one)
         others_as_bipolar = torch.where(others.bool(), min_one, plus_one)
 
-        return F.linear(self_as_bipolar, others_as_bipolar)
+        if others.dim() >= 2:
+            others_as_bipolar = others_as_bipolar.mT
+        return torch.matmul(self_as_bipolar, others_as_bipolar)
 
     def cos_similarity(self, others: "BSC") -> Tensor:
         """Cosine similarity with other hypervectors."""
