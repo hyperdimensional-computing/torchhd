@@ -30,6 +30,8 @@ test:
     - torchhd.functional
     - torchhd.embeddings
     - torchhd.structures
+    - torchhd.models
+    - torchhd.memory
     - torchhd.datasets
 
 about:
