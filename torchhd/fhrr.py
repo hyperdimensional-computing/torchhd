@@ -175,9 +175,8 @@ class FHRR(VSA_Model):
         size = (num_vectors, dimensions)
         angle = torch.empty(size, dtype=dtype, device=device)
         angle.uniform_(-math.pi, math.pi, generator=generator)
-        magnitude = torch.ones_like(angle)
 
-        result = torch.polar(magnitude, angle)
+        result = torch.complex(angle.cos(), angle.sin())
         result.requires_grad = requires_grad
         return result.as_subclass(cls)
 

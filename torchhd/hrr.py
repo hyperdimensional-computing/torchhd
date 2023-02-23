@@ -1,8 +1,8 @@
 import torch
 from torch import Tensor
-import torch.nn.functional as F
 from torch.fft import fft, ifft
 from typing import Set
+import math
 
 from torchhd.base import VSA_Model
 
@@ -164,7 +164,7 @@ class HRR(VSA_Model):
 
         size = (num_vectors, dimensions)
         result = torch.empty(size, dtype=dtype, device=device)
-        result.normal_(0, 1.0 / dimensions, generator=generator)
+        result.normal_(0, 1.0 / math.sqrt(dimensions), generator=generator)
 
         result.requires_grad = requires_grad
         return result.as_subclass(cls)

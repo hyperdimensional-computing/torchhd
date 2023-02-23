@@ -438,6 +438,13 @@ def circular_hv(
     Implements circular-hypervectors based on level-hypervectors as described in `An Extension to Basis-Hypervectors for Learning from Circular Data in Hyperdimensional Computing <https://arxiv.org/abs/2205.07920>`_.
     Any hypervector is quasi-orthogonal to the hypervector opposite site of the circle.
 
+    .. note::
+        Circular hypervectors cannot be created directly with Holographic Reduced Representations (HRR) because of imprecisions inherent to HRR. 
+        One way around this is to use FHRR for the creation of circular hypervectors and then transform them to HRR vectors. Example:
+
+        >>> hv = torchhd.circular_hv(10, 6, torchhd.FHRR)
+        >>> hv = torch.real(torch.fft.ifft(hv)).as_subclass(torchhd.HRR)
+
     Args:
         num_vectors (int): the number of hypervectors to generate.
         dimensions (int): the dimensionality of the hypervectors.

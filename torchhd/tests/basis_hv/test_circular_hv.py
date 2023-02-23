@@ -69,12 +69,6 @@ class TestCircular_hv:
         elif model == torchhd.MAP:
             assert torch.all((hv == -1) | (hv == 1)).item()
 
-        elif model == torchhd.HRR:
-            std, mean = torch.std_mean(hv)
-            assert torch.allclose(
-                mean, torch.tensor(0.0, dtype=mean.dtype), atol=0.0001
-            )
-
         elif model == torchhd.FHRR:
             mag = hv.abs()
             assert torch.allclose(mag, torch.tensor(1.0, dtype=mag.dtype))
@@ -140,14 +134,10 @@ class TestCircular_hv:
         torch.set_default_dtype(torch.float32)
         hv = functional.circular_hv(3, 52, torchhd.MAP)
         assert hv.dtype == torch.float32
-        # hv = functional.circular_hv(3, 52, torchhd.HRR)
-        # assert hv.dtype == torch.float32
 
         torch.set_default_dtype(torch.float64)
         hv = functional.circular_hv(3, 52, torchhd.MAP)
         assert hv.dtype == torch.float64
-        # hv = functional.circular_hv(3, 52, torchhd.HRR)
-        # assert hv.dtype == torch.float64
 
         hv = functional.circular_hv(3, 52, torchhd.FHRR)
         assert hv.dtype == torch.complex64
@@ -155,9 +145,6 @@ class TestCircular_hv:
     def test_requires_grad(self):
         hv = functional.circular_hv(3, 52, torchhd.MAP, requires_grad=True)
         assert hv.requires_grad == True
-
-        # hv = functional.circular_hv(3, 52, torchhd.HRR, requires_grad=True)
-        # assert hv.requires_grad == True
 
         hv = functional.circular_hv(3, 52, torchhd.FHRR, requires_grad=True)
         assert hv.requires_grad == True
