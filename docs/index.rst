@@ -1,7 +1,7 @@
 Welcome to the Torchhd documentation!
 =====================================
 
-Torchhd is a Python library dedicated to *Hyperdimensional Computing* (also known as *Vector Symbolic Architectures*).
+Torchhd is a Python library dedicated to *Hyperdimensional Computing* also known as *Vector Symbolic Architectures*.
 
 .. toctree::
    :glob:
@@ -19,6 +19,7 @@ Torchhd is a Python library dedicated to *Hyperdimensional Computing* (also know
    embeddings
    structures
    models
+   memory
    datasets
    utils
 

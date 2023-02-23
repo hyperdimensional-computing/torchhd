@@ -1,12 +1,12 @@
-.. _models:
+.. _memory:
 
-torchhd.models
+torchhd.memory
 ==================
 
-.. currentmodule:: torchhd.models
+.. currentmodule:: torchhd.memory
 
 .. autosummary::
     :toctree: generated/
     :template: class.rst
 
-    Centroid
+    SDM

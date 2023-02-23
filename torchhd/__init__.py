@@ -2,6 +2,7 @@ import torchhd.functional as functional
 import torchhd.embeddings as embeddings
 import torchhd.structures as structures
 import torchhd.models as models
+import torchhd.memory as memory
 import torchhd.datasets as datasets
 import torchhd.utils as utils
 
@@ -42,6 +43,7 @@ from torchhd.functional import (
     cross_product,
     ngrams,
     graph,
+    resonator,
     map_range,
     value_to_index,
     index_to_value,
@@ -60,6 +62,7 @@ __all__ = [
     "embeddings",
     "structures",
     "models",
+    "memory",
     "datasets",
     "utils",
     "as_vsa_model",
@@ -92,6 +95,7 @@ __all__ = [
     "cross_product",
     "ngrams",
     "graph",
+    "resonator",
     "map_range",
     "value_to_index",
     "index_to_value",

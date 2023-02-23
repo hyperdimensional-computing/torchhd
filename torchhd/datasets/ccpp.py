@@ -12,6 +12,20 @@ class CyclePowerPlant(data.Dataset):
     """`Combined cycle power planet <https://archive.ics.uci.edu/ml/datasets/combined+cycle+power+plant>`_ dataset.
         Features consist of hourly average ambient variables Temperature (T), Ambient Pressure (AP), Relative Humidity (RH) and Exhaust Vacuum (V) to predict the net hourly electrical energy output (EP) of the plant.
 
+    .. list-table::
+       :widths: 10 10 10 10
+       :align: center
+       :header-rows: 1
+   
+       * - Instances
+         - Attributes
+         - Task
+         - Area
+       * - 9568
+         - 4
+         - Regression
+         - Computer
+        
     Args:
         root (string): Root directory of dataset where downloaded dataset exists
         download (bool, optional): If True, downloads the dataset from the internet and

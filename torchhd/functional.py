@@ -1,5 +1,5 @@
 import math
-from typing import Type, Union, Callable
+from typing import Type, Callable
 import torch
 from torch import LongTensor, FloatTensor, Tensor
 from collections import deque
@@ -39,6 +39,7 @@ __all__ = [
     "ngrams",
     "hash_table",
     "graph",
+    "resonator",
     "map_range",
     "value_to_index",
     "index_to_value",
@@ -1392,6 +1393,97 @@ def cleanup(input: VSA_Model, memory: VSA_Model, threshold=0.0) -> VSA_Model:
         )
 
     return torch.index_select(memory, -2, index)
+
+
+def resonator(input: VSA_Model, estimates: VSA_Model, domains: VSA_Model) -> VSA_Model:
+    """A step of the resonator network that factorizes the input.
+
+    Given current estimates for each factor, it returns the next estimates for those factors.
+
+    Shapes:
+        - Input: :math:`(*, d)`
+        - Estimates: :math:`(*, n, d)`
+        - Domains: :math:`(*, n, m, d)`
+        - Output: :math:`(*, n, d)`
+
+    Examples::
+
+        >>> X = torchhd.random_hv(5, 100)
+        >>> Y = torchhd.random_hv(5, 100)
+        >>> Z = torchhd.random_hv(5, 100)
+        >>> domains = torch.stack((X, Y, Z), dim=0)
+        >>> domains.shape
+        torch.Size([3, 5, 100])
+        >>> x_hat = torchhd.multiset(X)
+        >>> y_hat = torchhd.multiset(Y)
+        >>> z_hat = torchhd.multiset(Z)
+        >>> estimates = torch.stack((x_hat, y_hat, z_hat), dim=0)
+        >>> estimates.shape
+        torch.Size([3, 100])
+        >>> # look at similarity of estimates with the domain
+        >>> print(torchhd.dot_similarity(estimates.unsqueeze(-2), domains).squeeze(-2))
+        MAP([[112.,  80., 136., 106., 106.],
+            [ 98., 102., 100., 110.,  74.],
+            [116.,  94., 104., 112.,  82.]])
+        >>> # Create the combined symbol
+        >>> s = X[0].bind(Y[1]).bind(Z[3])
+        MAP([[100.,   8.,   8.,  -2.,  -2.],
+            [-18.,  70.,  44.,  -6.,  14.],
+            [  8.,   2.,   4., 100.,  -2.]])
+        >>> # resonator step
+        >>> estimates = torchhd.resonator(s, estimates, domains)
+        >>> # look at similarity of new estimates with the domain
+        >>> print(torchhd.dot_similarity(estimates.unsqueeze(-2), domains).squeeze(-2))
+        MAP([[100.,   8.,   8.,  -2.,  -2.],
+            [  4., 100.,  14.,   0., -16.],
+            [  8.,   2.,   4., 100.,  -2.]])
+
+    """
+    input = as_vsa_model(input)
+    estimates = as_vsa_model(estimates)
+    domains = as_vsa_model(domains)
+
+    if not isinstance(input, MAP):
+        raise ValueError(
+            f"Resonator currently only supports Multiply-Add-Permute (MAP) VSA model, provided: {input.__class__.__name__}"
+        )
+
+    if not isinstance(estimates, MAP):
+        raise ValueError(
+            f"Resonator currently only supports Multiply-Add-Permute (MAP) VSA model, provided: {estimates.__class__.__name__}"
+        )
+
+    if not isinstance(domains, MAP):
+        raise ValueError(
+            f"Resonator currently only supports Multiply-Add-Permute (MAP) VSA model, provided: {domains.__class__.__name__}"
+        )
+
+    n = estimates.size(-2)
+
+    # Get binding inverse of the estimates
+    inv_estimates = estimates.inverse()
+
+    # Roll over the number of estimates to align each row with the other symbols
+    # Example: for factorizing x, y, z the stacked matrix has the following estimates:
+    # [[z, y],
+    #  [x, z],
+    #  [y, x]]
+    rolled = []
+    for i in range(1, n):
+        rolled.append(inv_estimates.roll(i, -2))
+
+    inv_estimates = torch.stack(rolled, dim=-2)
+
+    # First bind all the other estimates together: z * y, x * z, y * z
+    inv_others = multibind(inv_estimates)
+    # Then unbind all other estimates from the input: s * (x * y), s * (x * z), s * (y * z)
+    new_estimates = bind(input.unsqueeze(-2), inv_others)
+
+    similarity = dot_similarity(new_estimates.unsqueeze(-2), domains)
+    output = dot_similarity(similarity, domains.mT).squeeze(-2)
+
+    # normalize the output vector with a non-linearity
+    return output.sign()
 
 
 def map_range(
