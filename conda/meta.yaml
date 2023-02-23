@@ -20,6 +20,7 @@ requirements:
   run:
     - python>=3.6
     - pytorch
+    - scipy
     - pandas
     - requests
     - tqdm

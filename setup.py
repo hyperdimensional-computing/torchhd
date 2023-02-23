@@ -20,6 +20,7 @@ setup(
     license="MIT",
     install_requires=[
         "torch>=1.9.0",
+        "scipy",
         "pandas",
         "numpy",
         "requests",
