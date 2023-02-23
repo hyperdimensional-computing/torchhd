@@ -57,7 +57,6 @@ class SDM(nn.Module):
         device=None,
         requires_grad=False,
     ) -> None:
-
         super().__init__()
 
         radius = int(binom.ppf(p, address_dim, 0.5))

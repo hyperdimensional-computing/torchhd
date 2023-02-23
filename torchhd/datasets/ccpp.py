@@ -16,7 +16,7 @@ class CyclePowerPlant(data.Dataset):
        :widths: 10 10 10 10
        :align: center
        :header-rows: 1
-   
+
        * - Instances
          - Attributes
          - Task
@@ -25,7 +25,7 @@ class CyclePowerPlant(data.Dataset):
          - 4
          - Regression
          - Computer
-        
+
     Args:
         root (string): Root directory of dataset where downloaded dataset exists
         download (bool, optional): If True, downloads the dataset from the internet and
