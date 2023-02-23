@@ -1,6 +1,7 @@
 torch
 torchvision
 pandas
+scipy
 requests
 tqdm
 numpy

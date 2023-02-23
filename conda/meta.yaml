@@ -20,6 +20,7 @@ requirements:
   run:
     - python>=3.6
     - pytorch
+    - scipy
     - pandas
     - requests
     - tqdm
@@ -30,6 +31,8 @@ test:
     - torchhd.functional
     - torchhd.embeddings
     - torchhd.structures
+    - torchhd.models
+    - torchhd.memory
     - torchhd.datasets
 
 about:

@@ -38,6 +38,7 @@ Operations
     randsel
     multirandsel
     create_random_permute
+    resonator
     soft_quantize
     hard_quantize
 
