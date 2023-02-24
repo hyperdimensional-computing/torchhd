@@ -39,9 +39,9 @@ class TestDotSimilarity:
         similarity = functional.dot_similarity(hv, hv2)
         assert similarity.shape == (2, 4)
 
-        hv1 = functional.random(
-            6, 100, model, generator=generator, dtype=dtype
-        ).view(2, 3, 100)
+        hv1 = functional.random(6, 100, model, generator=generator, dtype=dtype).view(
+            2, 3, 100
+        )
         hv2 = functional.random(4, 100, model, generator=generator, dtype=dtype)
         similarity = functional.dot_similarity(hv1, hv2)
         assert similarity.shape == (2, 3, 4)
@@ -182,9 +182,9 @@ class TestCosSimilarity:
         similarity = functional.cosine_similarity(hv, hv2)
         assert similarity.shape == (2, 4)
 
-        hv1 = functional.random(
-            6, 100, model, generator=generator, dtype=dtype
-        ).view(2, 3, 100)
+        hv1 = functional.random(6, 100, model, generator=generator, dtype=dtype).view(
+            2, 3, 100
+        )
         hv2 = functional.random(4, 100, model, generator=generator, dtype=dtype)
         similarity = functional.cosine_similarity(hv1, hv2)
         assert similarity.shape == (2, 3, 4)
@@ -325,9 +325,9 @@ class TestHammingSimilarity:
         similarity = functional.hamming_similarity(hv, hv2)
         assert similarity.shape == (2, 4)
 
-        hv1 = functional.random(
-            6, 100, model, generator=generator, dtype=dtype
-        ).view(2, 3, 100)
+        hv1 = functional.random(6, 100, model, generator=generator, dtype=dtype).view(
+            2, 3, 100
+        )
         hv2 = functional.random(4, 100, model, generator=generator, dtype=dtype)
         similarity = functional.hamming_similarity(hv1, hv2)
         assert similarity.shape == (2, 3, 4)

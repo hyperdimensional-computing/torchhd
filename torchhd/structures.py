@@ -161,7 +161,12 @@ class Multiset:
 
     @overload
     def __init__(
-        self, dimensions: int, model: Type[VSATensor] = MAPTensor, *, device=None, dtype=None
+        self,
+        dimensions: int,
+        model: Type[VSATensor] = MAPTensor,
+        *,
+        device=None,
+        dtype=None
     ):
         ...
 
@@ -309,7 +314,12 @@ class HashTable:
 
     @overload
     def __init__(
-        self, dimensions: int, model: Type[VSATensor] = MAPTensor, *, device=None, dtype=None
+        self,
+        dimensions: int,
+        model: Type[VSATensor] = MAPTensor,
+        *,
+        device=None,
+        dtype=None
     ):
         ...
 
@@ -476,7 +486,12 @@ class BundleSequence:
 
     @overload
     def __init__(
-        self, dimensions: int, model: Type[VSATensor] = MAPTensor, *, device=None, dtype=None
+        self,
+        dimensions: int,
+        model: Type[VSATensor] = MAPTensor,
+        *,
+        device=None,
+        dtype=None
     ):
         ...
 
@@ -668,7 +683,12 @@ class BindSequence:
 
     @overload
     def __init__(
-        self, dimensions: int, model: Type[VSATensor] = MAPTensor, *, device=None, dtype=None
+        self,
+        dimensions: int,
+        model: Type[VSATensor] = MAPTensor,
+        *,
+        device=None,
+        dtype=None
     ):
         ...
 
