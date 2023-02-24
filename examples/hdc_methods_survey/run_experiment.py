@@ -13,7 +13,7 @@ import sinusoid_projection_online
 import sinusoid_projection_online_iterative
 import sinusoid_projection_regenerative_contiuous
 import sinusoid_projection_regenerative_reset
-
+import time
 dimensions = [10000]
 epochs = [5]
 drop_rate = [0.2]
@@ -38,4 +38,5 @@ files = [
 ]
 
 for i in files:
-    i.experiment()
+    t = time.time()
+    i.experiment(filename=t)

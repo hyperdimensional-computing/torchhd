@@ -27,6 +27,17 @@ SUBSAMPLES = torch.arange(0, WINDOW, int(WINDOW / DOWNSAMPLE))
 def transform(x):
     return x[SUBSAMPLES]
 
+def ngram(input, n, permute_hv):
+    input = torchhd.as_vsa_model(input)
+    n_gram = torchhd.bind(input[..., : -(n - 1), :], torch.unsqueeze(permute_hv[n - 2].repeat((input.shape[1]-(n-1)),1), 0))
+    for i in range(1, n):
+        stop = None if i == (n - 1) else -(n - i - 1)
+        if n - i - 1 == 0:
+            sample = input[..., i:stop, :]
+        else:
+            sample = torchhd.bind(input[..., i:stop, :], torch.unsqueeze(permute_hv[n - i - 2].repeat((input.shape[1]-(n-1)),1), 0))
+        n_gram = torchhd.bind(n_gram, sample)
+    return torchhd.multiset(n_gram)
 
 class Encoder(nn.Module):
     def __init__(self, out_features, timestamps, channels):
@@ -35,6 +46,7 @@ class Encoder(nn.Module):
         self.channels = embeddings.Random(channels, out_features)
         self.timestamps = embeddings.Random(timestamps, out_features)
         self.signals = embeddings.Level(NUM_LEVELS, out_features, high=20)
+        self.permute_hv = torchhd.circular_hv(N_GRAM_SIZE-1, out_features)
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         signal = self.signals(input)
@@ -42,7 +54,9 @@ class Encoder(nn.Module):
         samples = torchhd.bind(signal, self.timestamps.weight.unsqueeze(1))
 
         samples = torchhd.multiset(samples)
-        sample_hv = torchhd.ngrams(samples, n=N_GRAM_SIZE)
+        #sample_hv = torchhd.ngrams(samples, n=N_GRAM_SIZE)
+        sample_hv = ngram(samples, N_GRAM_SIZE, self.permute_hv)
+
         return torchhd.hard_quantize(sample_hv)
 
 

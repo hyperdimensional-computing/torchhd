@@ -5,11 +5,13 @@ import time
 import torchmetrics
 from tqdm import tqdm
 import torch.utils.data as data
-
+import json
+import os
 import torchhd
 from torchhd import embeddings
 from torchhd.models import Centroid
 from torchhd.datasets import UCIClassificationBenchmark
+import numpy as np
 
 device = "cpu"
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -17,7 +19,7 @@ print("Using {} device".format(device))
 BATCH_SIZE = 1
 
 
-def experiment(DIMENSIONS=10000, method="HashmapProjection", levels=100):
+def experiment(DIMENSIONS=10000, method="HashmapProjection", levels=100, filename='exp'):
     def create_min_max_normalize(min, max):
         def normalize(input):
             return torch.nan_to_num((input - min) / (max - min))
@@ -69,6 +71,10 @@ def experiment(DIMENSIONS=10000, method="HashmapProjection", levels=100):
 
         model = Centroid(DIMENSIONS, num_classes)
         model = model.to(device)
+
+        added_classes = {}
+        wrong_inferred = {}
+
         t = time.time()
         with torch.no_grad():
             for samples, labels in tqdm(train_loader, desc="Training"):
@@ -77,6 +83,10 @@ def experiment(DIMENSIONS=10000, method="HashmapProjection", levels=100):
 
                 samples_hv = encode(samples)
                 model.add(samples_hv, labels)
+                if labels.item() not in added_classes:
+                    added_classes[labels.item()] = 1
+                else:
+                    added_classes[labels.item()] += 1
 
         accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
@@ -88,8 +98,56 @@ def experiment(DIMENSIONS=10000, method="HashmapProjection", levels=100):
 
                 samples_hv = encode(samples)
                 outputs = model(samples_hv, dot=True)
+                out = outputs.cpu()
+                if np.argmax(out).item() != labels.item():
+                    if labels.item() not in wrong_inferred:
+                        wrong_inferred[labels.item()] = 1
+                    wrong_inferred[labels.item()] += 1
                 accuracy.update(outputs.cpu(), labels)
 
+            op = 'r+'
+            if (os.path.exists("results/missclassified" + filename + ".json") == False):
+                op = "x+"
+
+            with open("results/missclassified" + filename + ".json", op) as outfile:
+                try:
+                    file_data = json.load(outfile)
+                except:
+                    file_data = {}
+                if method not in file_data:
+                    file_data[method] = {}
+                    file_data = json.loads(json.dumps(file_data))
+                if dataset.name not in file_data[method]:
+                    file_data[method][dataset.name] = {}
+
+                for i in wrong_inferred.keys():
+                    if str(i) not in file_data[method][dataset.name]:
+                        file_data[method][dataset.name][str(i)] = wrong_inferred[i]
+                    else:
+                        file_data[method][dataset.name][str(i)] += wrong_inferred[i]
+                outfile.seek(0)
+                # convert back to json.
+                json.dump(file_data, outfile, indent=4)
+
+            with open("results/trainsamples" + filename + ".json", op) as outfile:
+                try:
+                    file_data = json.load(outfile)
+                except:
+                    file_data = {}
+                if method not in file_data:
+                    file_data[method] = {}
+                    file_data = json.loads(json.dumps(file_data))
+                if dataset.name not in file_data[method]:
+                    file_data[method][dataset.name] = {}
+
+                for i in added_classes.keys():
+                    if str(i) not in file_data[method][dataset.name]:
+                        file_data[method][dataset.name][str(i)] = added_classes[i]
+                    else:
+                        file_data[method][dataset.name][str(i)] += added_classes[i]
+                outfile.seek(0)
+                # convert back to json.
+                json.dump(file_data, outfile, indent=4)
         with open(results_file, "a", newline="") as file:
             writer = csv.writer(file)
             writer.writerow(

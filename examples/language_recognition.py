@@ -15,7 +15,7 @@ from torchhd.datasets import EuropeanLanguages as Languages
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
 
-DIMENSIONS = 10000
+DIMENSIONS = 512
 BATCH_SIZE = 1  # for GPUs with enough memory we can process multiple images at ones
 # cap maximum sample size to 128 characters (including spaces)
 MAX_INPUT_SIZE = 128
@@ -55,14 +55,29 @@ test_ds = Languages("../data", train=False, transform=transform, download=True)
 test_ld = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
 
+def ngram(input, n, permute_hv):
+    input = torchhd.as_vsa_model(input)
+    n_gram = torchhd.bind(input[..., : -(n - 1), :], torch.unsqueeze(permute_hv[n - 2].repeat((input.shape[1]-(n-1)),1), 0))
+    for i in range(1, n):
+        stop = None if i == (n - 1) else -(n - i - 1)
+        if n - i - 1 == 0:
+            sample = input[..., i:stop, :]
+        else:
+            sample = torchhd.bind(input[..., i:stop, :], torch.unsqueeze(permute_hv[n - i - 2].repeat((input.shape[1]-(n-1)),1), 0))
+        n_gram = torchhd.bind(n_gram, sample)
+    return torchhd.multiset(n_gram)
+
+
 class Encoder(nn.Module):
     def __init__(self, out_features, size):
         super(Encoder, self).__init__()
         self.symbol = embeddings.Random(size, out_features, padding_idx=PADDING_IDX)
+        self.permute_hv = torchhd.circular_hv(2, out_features)
 
     def forward(self, x):
         symbols = self.symbol(x)
-        sample_hv = torchhd.ngrams(symbols, n=3)
+        #sample_hv = torchhd.ngrams(symbols, n=3)
+        sample_hv = ngram(symbols, 3, self.permute_hv)
         return torchhd.hard_quantize(sample_hv)
 
 
