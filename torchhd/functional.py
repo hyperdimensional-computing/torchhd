@@ -1460,19 +1460,23 @@ def resonator(input: VSATensor, estimates: VSATensor, domains: VSATensor) -> VSA
         >>> estimates.shape
         torch.Size([3, 100])
         >>> # look at similarity of estimates with the domain
-        >>> print(torchhd.dot_similarity(estimates.unsqueeze(-2), domains).squeeze(-2))
+        >>> torchhd.dot_similarity(estimates.unsqueeze(-2), domains).squeeze(-2)
         MAPTensor([[112.,  80., 136., 106., 106.],
                    [ 98., 102., 100., 110.,  74.],
                    [116.,  94., 104., 112.,  82.]])
         >>> # Create the combined symbol
         >>> s = X[0].bind(Y[1]).bind(Z[3])
+        >>> # resonator step
+        >>> estimates = torchhd.resonator(s, estimates, domains)
+        >>> # look at similarity of new estimates with the domain
+        >>> torchhd.dot_similarity(estimates.unsqueeze(-2), domains).squeeze(-2)
         MAPTensor([[100.,   8.,   8.,  -2.,  -2.],
                    [-18.,  70.,  44.,  -6.,  14.],
                    [  8.,   2.,   4., 100.,  -2.]])
         >>> # resonator step
         >>> estimates = torchhd.resonator(s, estimates, domains)
         >>> # look at similarity of new estimates with the domain
-        >>> print(torchhd.dot_similarity(estimates.unsqueeze(-2), domains).squeeze(-2))
+        >>> torchhd.dot_similarity(estimates.unsqueeze(-2), domains).squeeze(-2)
         MAPTensor([[100.,   8.,   8.,  -2.,  -2.],
                    [  4., 100.,  14.,   0., -16.],
                    [  8.,   2.,   4., 100.,  -2.]])

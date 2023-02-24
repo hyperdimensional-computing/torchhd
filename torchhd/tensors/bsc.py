@@ -231,7 +231,6 @@ class BSCTensor(VSATensor):
             tensor([1, 0, 1, 0, 0, 0, 1, 1, 0, 1])
 
         """
-
         tiebreaker = torch.empty_like(other)
         tiebreaker.bernoulli_(0.5, generator=generator)
 
@@ -294,7 +293,6 @@ class BSCTensor(VSATensor):
             tensor([1, 0, 0, 0, 0, 1, 1, 0, 1, 0])
 
         """
-
         return self.logical_xor(other).to(other.dtype)
 
     def multibind(self) -> "BSCTensor":
