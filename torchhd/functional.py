@@ -459,7 +459,7 @@ def circular(
     Any hypervector is quasi-orthogonal to the hypervector opposite site of the circle.
 
     .. note::
-        Circular hypervectors cannot be created directly with Holographic Reduced Representations (HRRTensor) because of imprecisions inherent to HRRTensor. 
+        Circular hypervectors cannot be created directly with Holographic Reduced Representations (HRRTensor) because of imprecisions inherent to HRRTensor.
         One way around this is to use FHRRTensor for the creation of circular hypervectors and then transform them to HRRTensor vectors. Example:
 
         >>> hv = torchhd.circular(10, 6, torchhd.FHRRTensor)
@@ -894,13 +894,15 @@ def dot_similarity(input: VSATensor, others: VSATensor) -> VSATensor:
     others = ensure_vsa_tensor(others)
     return input.dot_similarity(others)
 
+
 dot = dot_similarity
+
 
 def cosine_similarity(input: VSATensor, others: VSATensor) -> VSATensor:
     """Cosine similarity between the input vector and each vector in others.
 
     Aliased as ``torchhd.cos``.
-    
+
     Args:
         input (Tensor): hypervectors to compare against others
         others (Tensor): hypervectors to compare with
@@ -941,7 +943,9 @@ def cosine_similarity(input: VSATensor, others: VSATensor) -> VSATensor:
     others = ensure_vsa_tensor(others)
     return input.cosine_similarity(others)
 
+
 cos = cosine_similarity
+
 
 def hamming_similarity(input: VSATensor, others: VSATensor) -> LongTensor:
     """Hamming similarity is the number of equal elements between the input vectors and each vector in others.

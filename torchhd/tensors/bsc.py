@@ -192,7 +192,9 @@ class BSCTensor(VSATensor):
         result.requires_grad = requires_grad
         return result.as_subclass(cls)
 
-    def bundle(self, other: "BSCTensor", *, generator: torch.Generator = None) -> "BSCTensor":
+    def bundle(
+        self, other: "BSCTensor", *, generator: torch.Generator = None
+    ) -> "BSCTensor":
         r"""Bundle the hypervector with other using majority voting.
 
         This produces a hypervector maximally similar to both.
