@@ -11,6 +11,7 @@ __all__ = [
     "SparseDistributed",
 ]
 
+
 class SparseDistributed(nn.Module):
     r"""`Sparse Distributed Memory <https://redwood.berkeley.edu/wp-content/uploads/2020/08/KanervaP_SDMrelated_models1993.pdf>`_
 
