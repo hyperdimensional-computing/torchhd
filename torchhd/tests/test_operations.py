@@ -5,25 +5,25 @@ from torchhd import functional
 
 from .utils import (
     torch_dtypes,
-    VSATensors,
+    vsa_tensors,
     supported_dtype,
 )
 
 
 class TestBind:
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_value(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_value(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
-        hv = functional.empty(2, 10, model, dtype=dtype)
+        hv = functional.empty(2, 10, vsa, dtype=dtype)
         res = functional.bind(hv[0], hv[1])
-        if model == torchhd.BSCTensor:
+        if vsa == "BSC":
             assert torch.all(res == torch.logical_xor(hv[0], hv[1])).item()
-        elif model == torchhd.FHRRTensor or model == torchhd.MAPTensor:
+        elif vsa == "FHRR" or vsa == "MAP":
             assert torch.all(res == torch.mul(hv[0], hv[1])).item()
-        elif model == torchhd.HRRTensor:
+        elif vsa == "HRR":
             from torch.fft import fft, ifft
 
             assert torch.all(res == ifft(torch.mul(fft(hv[0]), fft(hv[1])))).item()
@@ -43,16 +43,16 @@ class TestBind:
 
 
 class TestBundle:
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_value(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_value(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
-        hv = functional.random(2, 10, model, dtype=dtype)
+        hv = functional.random(2, 10, vsa, dtype=dtype)
         res = functional.bundle(hv[0], hv[1])
 
-        if model == torchhd.BSCTensor:
+        if vsa == "BSC":
             hv[0] = torch.tensor(
                 [False, False, True, False, False, True, True, True, False, False]
             )
@@ -76,7 +76,7 @@ class TestBundle:
                     or (hv[0][i].item() != hv[1][i].item())
                 )
 
-        if model == torchhd.MAPTensor:
+        if vsa == "MAP":
             hv[0] = torch.tensor([1, 1, -1, -1, 1, 1, 1, 1, -1, -1])
             hv[1] = torch.tensor([1, 1, -1, -1, -1, -1, -1, -1, 1, -1])
 
@@ -84,7 +84,7 @@ class TestBundle:
             assert torch.all(
                 res == torch.tensor([2, 2, -2, -2, 0, 0, 0, 0, 0, -2], dtype=dtype)
             ).item()
-        if model == torchhd.FHRRTensor:
+        if vsa == "FHRR":
             assert torch.all(res == hv[0].add(hv[1])).item()
         assert res.dtype == dtype
 
@@ -102,19 +102,19 @@ class TestBundle:
 
 
 class TestPermute:
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_value(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_value(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
-        hv = functional.random(2, 100, model, dtype=dtype)
+        hv = functional.random(2, 100, vsa, dtype=dtype)
         res = functional.permute(hv[0])
 
         assert res.dtype == hv.dtype
         assert res.dim() == 1
         assert res.size(0) == 100
-        if model == torchhd.BSCTensor:
+        if vsa == "BSC":
             assert torch.all((hv == 0) | (hv == 1)).item(), "values are either -1 or +1"
             assert torch.sum(res == hv[0]) != res.size(
                 0
@@ -126,11 +126,11 @@ class TestPermute:
                 0
             ), "all element must not be the same"
 
-            hv = functional.random(1, 10000, model, dtype=dtype)
+            hv = functional.random(1, 10000, vsa, dtype=dtype)
             a = functional.permute(hv, shifts=5)
             b = functional.permute(a, shifts=-5)
             assert torch.all(hv == b).item(), "can undo shifts"
-        if model == torchhd.MAPTensor:
+        if vsa == "MAP":
             assert torch.all(
                 (hv == -1) | (hv == 1)
             ).item(), "values are either -1 or +1"
@@ -144,12 +144,12 @@ class TestPermute:
                 0
             ), "all element must not be the same"
 
-            hv = functional.random(1, 10000, model, dtype=dtype)
+            hv = functional.random(1, 10000, vsa, dtype=dtype)
             a = functional.permute(hv, shifts=5)
             b = functional.permute(a, shifts=-5)
             assert torch.all(hv == b).item(), "can undo shifts"
-        if model == torchhd.HRRTensor or model == torchhd.FHRRTensor:
-            hv = functional.random(1, 10000, model, dtype=dtype)
+        if vsa == "HRR" or vsa == "FHRR":
+            hv = functional.random(1, 10000, vsa, dtype=dtype)
             a = functional.permute(hv, shifts=5)
             b = functional.permute(a, shifts=-5)
             assert torch.all(hv == b).item(), "can undo shifts"
@@ -169,76 +169,76 @@ class TestPermute:
 
 
 class TestCleanup:
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_value(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_value(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        hv = functional.random(5, 100, model, dtype=dtype, generator=generator)
-        noise = functional.random(1, 100, model, dtype=dtype, generator=generator)
+        hv = functional.random(5, 100, vsa, dtype=dtype, generator=generator)
+        noise = functional.random(1, 100, vsa, dtype=dtype, generator=generator)
         res = functional.cleanup(functional.bundle(hv[0], noise), hv)
         assert torch.all(hv[0] == res).item()
 
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_threshold(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_threshold(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        hv = functional.random(5, 100, model, dtype=dtype, generator=generator)
-        noise = functional.random(1, 100, model, dtype=dtype, generator=generator)
+        hv = functional.random(5, 100, vsa, dtype=dtype, generator=generator)
+        noise = functional.random(1, 100, vsa, dtype=dtype, generator=generator)
         res = functional.cleanup(functional.bundle(hv[0], noise), hv, threshold=0.3)
         assert torch.all(hv[0] == res).item()
 
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_device(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_device(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        hv = functional.random(5, 100, model, dtype=dtype)
+        hv = functional.random(5, 100, vsa, dtype=dtype)
         res = functional.cleanup(hv[0], hv)
         assert res.device == device
 
 
 class TestRandsel:
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_value(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_value(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        a, b = functional.random(2, 1000, model, dtype=dtype, generator=generator)
+        a, b = functional.random(2, 1000, vsa, dtype=dtype, generator=generator)
         res = functional.randsel(a, b, p=0, generator=generator)
         assert torch.all(a == res)
 
-        a, b = functional.random(2, 1000, model, dtype=dtype, generator=generator)
+        a, b = functional.random(2, 1000, vsa, dtype=dtype, generator=generator)
         res = functional.randsel(a, b, p=1, generator=generator)
         assert torch.all(b == res)
 
-        a, b = functional.random(2, 1000, model, dtype=dtype, generator=generator)
+        a, b = functional.random(2, 1000, vsa, dtype=dtype, generator=generator)
         res = functional.randsel(a, b, generator=generator)
         assert torch.all((b == res) | (a == res))
         assert res.dtype == dtype
 
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_device(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_device(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        a, b = functional.random(2, 100, model, dtype=dtype)
+        a, b = functional.random(2, 100, vsa, dtype=dtype)
         res = functional.randsel(a, b)
 
         assert res.dtype == a.dtype
@@ -248,28 +248,28 @@ class TestRandsel:
 
 
 class TestMultiRandsel:
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_value(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_value(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        x = functional.random(4, 1000, model, dtype=dtype)
+        x = functional.random(4, 1000, vsa, dtype=dtype)
 
         res = functional.multirandsel(
             x, p=torch.tensor([0.0, 0.0, 1.0, 0.0]), generator=generator
         )
         assert torch.all(x[2] == res)
 
-        x = functional.random(4, 1000, model, dtype=dtype)
+        x = functional.random(4, 1000, vsa, dtype=dtype)
         res = functional.multirandsel(
             x, p=torch.tensor([0.5, 0.0, 0.5, 0.0]), generator=generator
         )
         assert torch.all((x[0] == res) | (x[2] == res))
 
-        x = functional.random(4, 1000, model, dtype=dtype)
+        x = functional.random(4, 1000, vsa, dtype=dtype)
         res = functional.multirandsel(x, generator=generator)
         assert torch.all((x[0] == res) | (x[1] == res) | (x[2] == res) | (x[3] == res))
         assert res.dtype == dtype

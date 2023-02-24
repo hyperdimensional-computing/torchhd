@@ -1,6 +1,7 @@
 from typing import Union, Type
 import torch
 import torchhd
+from torchhd.types import VSAOptions
 
 number = Union[float, int]
 
@@ -49,11 +50,16 @@ torch_dtypes = {
 }
 
 
-def supported_dtype(dtype: torch.dtype, model: Type[torchhd.VSATensor]) -> bool:
-    if not issubclass(model, torchhd.VSATensor):
+def supported_dtype(dtype: torch.dtype, vsa: Union[Type[torchhd.VSATensor], VSAOptions]) -> bool:
+    if isinstance(vsa, str):
+        vsa_tensor = torchhd.functional.get_vsa_tensor_class(vsa)
+    else:
+        vsa_tensor = vsa
+
+    if not issubclass(vsa_tensor, torchhd.VSATensor):
         raise ValueError("Must provide a VSATensor class")
 
-    if model == torchhd.BSCTensor:
+    if vsa_tensor == torchhd.BSCTensor:
         return dtype not in {
             torch.complex64,
             torch.complex128,
@@ -61,21 +67,21 @@ def supported_dtype(dtype: torch.dtype, model: Type[torchhd.VSATensor]) -> bool:
             torch.bfloat16,
         }
 
-    elif model == torchhd.MAPTensor:
+    elif vsa_tensor == torchhd.MAPTensor:
         return dtype not in {torch.uint8, torch.bool, torch.float16, torch.bfloat16}
 
-    elif model == torchhd.HRRTensor:
+    elif vsa_tensor == torchhd.HRRTensor:
         return dtype in {torch.float32, torch.float64}
 
-    elif model == torchhd.FHRRTensor:
+    elif vsa_tensor == torchhd.FHRRTensor:
         return dtype in {torch.complex64, torch.complex128}
 
     return False
 
 
-VSATensors = [
-    torchhd.BSCTensor,
-    torchhd.MAPTensor,
-    torchhd.HRRTensor,
-    torchhd.FHRRTensor,
+vsa_tensors = [
+    "BSC",
+    "MAP",
+    "HRR",
+    "FHRR",
 ]

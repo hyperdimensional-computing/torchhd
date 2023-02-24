@@ -7,19 +7,19 @@ from torchhd.tensors.map import MAPTensor
 
 from .utils import (
     torch_dtypes,
-    VSATensors,
+    vsa_tensors,
     supported_dtype,
 )
 
 
 class TestMultiset:
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_value(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_value(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
-        if model == BSCTensor:
+        if vsa == "BSC":
             hv = torch.tensor(
                 [
                     [1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -39,7 +39,7 @@ class TestMultiset:
                 )
             ).item()
 
-        elif model == MAPTensor:
+        elif vsa == "MAP":
             hv = torch.tensor(
                 [
                     [1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
@@ -71,13 +71,13 @@ class TestMultiset:
 
 
 class TestMultibind:
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_value(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_value(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
-        if model == BSCTensor:
+        if vsa == "BSC":
             hv = torch.tensor(
                 [
                     [1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -97,7 +97,7 @@ class TestMultibind:
                 )
             ).item()
 
-        elif model == MAPTensor:
+        elif vsa == "MAP":
             hv = torch.tensor(
                 [
                     [1, 1, -1, 1, -1, 1, -1, 1, -1, 1],

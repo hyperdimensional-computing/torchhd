@@ -9,7 +9,7 @@ from torchhd import HRRTensor
 
 from .utils import (
     torch_dtypes,
-    VSATensors,
+    vsa_tensors,
     supported_dtype,
 )
 
@@ -17,45 +17,45 @@ seed = 2147483644
 
 
 class TestDotSimilarity:
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_shape(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_shape(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(2, 100, model, generator=generator, dtype=dtype)
+        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.dot_similarity(hv[0], hv[1])
         assert similarity.shape == ()
 
-        hv = functional.random(2, 100, model, generator=generator, dtype=dtype)
+        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.dot_similarity(hv[0], hv)
         assert similarity.shape == (2,)
 
-        hv = functional.random(2, 100, model, generator=generator, dtype=dtype)
-        hv2 = functional.random(4, 100, model, generator=generator, dtype=dtype)
+        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.dot_similarity(hv, hv2)
         assert similarity.shape == (2, 4)
 
         hv1 = functional.random(
-            6, 100, model, generator=generator, dtype=dtype
+            6, 100, vsa, generator=generator, dtype=dtype
         ).view(2, 3, 100)
-        hv2 = functional.random(4, 100, model, generator=generator, dtype=dtype)
+        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.dot_similarity(hv1, hv2)
         assert similarity.shape == (2, 3, 4)
 
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_value(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_value(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        if model == BSCTensor:
+        if vsa == "BSC":
             hv = torch.tensor(
                 [
                     [1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -68,7 +68,7 @@ class TestDotSimilarity:
             exp = torch.tensor([[10, 4], [4, 10]], dtype=torch.long)
             assert torch.all(res == exp).item()
 
-        elif model == FHRRTensor:
+        elif vsa == "FHRR":
             hv = torch.tensor(
                 [
                     [
@@ -104,7 +104,7 @@ class TestDotSimilarity:
             exp = torch.tensor([[10.0, -1.5274], [-1.5274, 10.0]], dtype=out_dtype)
             assert torch.allclose(res, exp)
 
-        elif model == MAPTensor:
+        elif vsa == "MAP":
             hv = torch.tensor(
                 [
                     [1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
@@ -117,33 +117,33 @@ class TestDotSimilarity:
             exp = torch.tensor([[10, -4], [-4, 10]], dtype=dtype)
             assert torch.all(res == exp).item()
 
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_dtype(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_dtype(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(3, 100, model, generator=generator, dtype=dtype)
+        hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
 
         similarity = functional.dot_similarity(hv, hv)
 
-        if model == FHRRTensor:
+        if vsa == "FHRR":
             if dtype == torch.complex64:
                 assert similarity.dtype == torch.float
             elif dtype == torch.complex128:
                 assert similarity.dtype == torch.double
-        elif model == HRRTensor:
+        elif vsa == "HRR":
             assert similarity.dtype == dtype
         else:
             assert similarity.dtype == torch.get_default_dtype()
 
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_device(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_device(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
         generator = torch.Generator()
@@ -151,7 +151,7 @@ class TestDotSimilarity:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         hv = functional.random(
-            3, 100, model, generator=generator, dtype=dtype, device=device
+            3, 100, vsa, generator=generator, dtype=dtype, device=device
         )
 
         similarity = functional.dot_similarity(hv, hv)
@@ -160,45 +160,45 @@ class TestDotSimilarity:
 
 
 class TestCosSimilarity:
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_shape(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_shape(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(2, 100, model, generator=generator, dtype=dtype)
+        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.cosine_similarity(hv[0], hv[1])
         assert similarity.shape == ()
 
-        hv = functional.random(2, 100, model, generator=generator, dtype=dtype)
+        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.cosine_similarity(hv[0], hv)
         assert similarity.shape == (2,)
 
-        hv = functional.random(2, 100, model, generator=generator, dtype=dtype)
-        hv2 = functional.random(4, 100, model, generator=generator, dtype=dtype)
+        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.cosine_similarity(hv, hv2)
         assert similarity.shape == (2, 4)
 
         hv1 = functional.random(
-            6, 100, model, generator=generator, dtype=dtype
+            6, 100, vsa, generator=generator, dtype=dtype
         ).view(2, 3, 100)
-        hv2 = functional.random(4, 100, model, generator=generator, dtype=dtype)
+        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.cosine_similarity(hv1, hv2)
         assert similarity.shape == (2, 3, 4)
 
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_value(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_value(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        if model == BSCTensor:
+        if vsa == "BSC":
             hv = torch.tensor(
                 [
                     [1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -211,7 +211,7 @@ class TestCosSimilarity:
             exp = torch.tensor([[1, 0.4], [0.4, 1]], dtype=torch.float)
             assert torch.allclose(res, exp)
 
-        elif model == FHRRTensor:
+        elif vsa == "FHRR":
             hv = torch.tensor(
                 [
                     [
@@ -247,7 +247,7 @@ class TestCosSimilarity:
             exp = torch.tensor([[1.0, -0.15274], [-0.15274, 1.0]], dtype=result_dtype)
             assert torch.allclose(res, exp)
 
-        elif model == MAPTensor:
+        elif vsa == "MAP":
             hv = torch.tensor(
                 [
                     [1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
@@ -260,33 +260,33 @@ class TestCosSimilarity:
             exp = torch.tensor([[1, -0.4], [-0.4, 1]], dtype=torch.float)
             assert torch.allclose(res, exp)
 
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_dtype(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_dtype(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(3, 100, model, generator=generator, dtype=dtype)
+        hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
 
         similarity = functional.cosine_similarity(hv, hv)
 
-        if model == FHRRTensor:
+        if vsa == "FHRR":
             if dtype == torch.complex64:
                 assert similarity.dtype == torch.float
             elif dtype == torch.complex128:
                 assert similarity.dtype == torch.double
-        elif model == HRRTensor:
+        elif vsa == "HRR":
             assert similarity.dtype == dtype
         else:
             assert similarity.dtype == torch.get_default_dtype()
 
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_device(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_device(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
         generator = torch.Generator()
@@ -294,7 +294,7 @@ class TestCosSimilarity:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         hv = functional.random(
-            3, 100, model, generator=generator, dtype=dtype, device=device
+            3, 100, vsa, generator=generator, dtype=dtype, device=device
         )
 
         similarity = functional.cosine_similarity(hv, hv)
@@ -303,45 +303,45 @@ class TestCosSimilarity:
 
 
 class TestHammingSimilarity:
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_shape(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_shape(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(2, 100, model, generator=generator, dtype=dtype)
+        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.hamming_similarity(hv[0], hv[1])
         assert similarity.shape == ()
 
-        hv = functional.random(2, 100, model, generator=generator, dtype=dtype)
+        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.hamming_similarity(hv[0], hv)
         assert similarity.shape == (2,)
 
-        hv = functional.random(2, 100, model, generator=generator, dtype=dtype)
-        hv2 = functional.random(4, 100, model, generator=generator, dtype=dtype)
+        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.hamming_similarity(hv, hv2)
         assert similarity.shape == (2, 4)
 
         hv1 = functional.random(
-            6, 100, model, generator=generator, dtype=dtype
+            6, 100, vsa, generator=generator, dtype=dtype
         ).view(2, 3, 100)
-        hv2 = functional.random(4, 100, model, generator=generator, dtype=dtype)
+        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.hamming_similarity(hv1, hv2)
         assert similarity.shape == (2, 3, 4)
 
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_value(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_value(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        if model == BSCTensor:
+        if vsa == "BSC":
             hv = torch.tensor(
                 [
                     [1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -354,7 +354,7 @@ class TestHammingSimilarity:
             exp = torch.tensor([[10, 7], [7, 10]], dtype=torch.long)
             assert torch.all(res == exp).item()
 
-        elif model == FHRRTensor:
+        elif vsa == "FHRR":
             hv = torch.tensor(
                 [
                     [
@@ -389,7 +389,7 @@ class TestHammingSimilarity:
             exp = torch.tensor([[10, 0], [0, 10]], dtype=torch.long)
             assert torch.all(res == exp).item()
 
-        elif model == MAPTensor:
+        elif vsa == "MAP":
             hv = torch.tensor(
                 [
                     [1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
@@ -402,25 +402,25 @@ class TestHammingSimilarity:
             exp = torch.tensor([[10, 3], [3, 10]], dtype=torch.long)
             assert torch.all(res == exp).item()
 
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_dtype(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_dtype(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(3, 100, model, generator=generator, dtype=dtype)
+        hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
 
         similarity = functional.hamming_similarity(hv, hv)
 
         assert similarity.dtype == torch.long
 
-    @pytest.mark.parametrize("model", VSATensors)
+    @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
-    def test_device(self, model, dtype):
-        if not supported_dtype(dtype, model):
+    def test_device(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
             return
 
         generator = torch.Generator()
@@ -428,7 +428,7 @@ class TestHammingSimilarity:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         hv = functional.random(
-            3, 100, model, generator=generator, dtype=dtype, device=device
+            3, 100, vsa, generator=generator, dtype=dtype, device=device
         )
 
         similarity = functional.hamming_similarity(hv, hv)

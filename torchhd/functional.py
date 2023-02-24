@@ -9,6 +9,7 @@ from torchhd.tensors.bsc import BSCTensor
 from torchhd.tensors.map import MAPTensor
 from torchhd.tensors.hrr import HRRTensor
 from torchhd.tensors.fhrr import FHRRTensor
+from torchhd.types import VSAOptions
 
 
 __all__ = [
@@ -47,10 +48,23 @@ __all__ = [
     "index_to_value",
 ]
 
+def get_vsa_tensor_class(vsa: VSAOptions) -> Type[VSATensor]:
+    if vsa == "BSC":
+        return BSCTensor
+    elif vsa == "MAP":
+        return MAPTensor
+    elif vsa == "HRR":
+        return HRRTensor
+    elif vsa == "FHRR":
+        return FHRRTensor
+    
+    raise ValueError(f"Provided VSA model is not supported, specified: {vsa}")
+    
+
 
 def ensure_vsa_tensor(
     data,
-    model: Type[VSATensor] = None,
+    vsa: VSAOptions = None,
     dtype: torch.dtype = None,
     device: torch.device = None,
 ) -> VSATensor:
@@ -63,7 +77,7 @@ def ensure_vsa_tensor(
 
     Args:
         data (array_like): Initial data for the tensor. Can be a list, tuple, NumPy ndarray, scalar, and other types.
-        model: (``Type[VSATensor]``, optional): specifies the hypervector type to be instantiated.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor.
         device (``torch.device``, optional): the desired device of returned tensor.
 
@@ -88,13 +102,14 @@ def ensure_vsa_tensor(
     """
     input = torch.as_tensor(data, dtype=dtype, device=device)
 
-    if model is not None:
-        if input.dtype not in model.supported_dtypes:
-            name = model.__name__
-            options = ", ".join([str(x) for x in model.supported_dtypes])
+    if vsa is not None:
+        vsa_tensor = get_vsa_tensor_class(vsa)
+        if input.dtype not in vsa_tensor.supported_dtypes:
+            name = vsa_tensor.__name__
+            options = ", ".join([str(x) for x in vsa_tensor.supported_dtypes])
             raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
-        return input.as_subclass(model)
+        return input.as_subclass(vsa_tensor)
 
     if isinstance(input, VSATensor):
         return input
@@ -112,7 +127,7 @@ def ensure_vsa_tensor(
 def empty(
     num_vectors: int,
     dimensions: int,
-    model: Type[VSATensor] = MAPTensor,
+    vsa: VSAOptions = "MAP",
     **kwargs,
 ) -> VSATensor:
     """Creates a set of hypervectors representing empty sets.
@@ -122,7 +137,7 @@ def empty(
     Args:
         num_vectors (int): the number of hypervectors to generate.
         dimensions (int): the dimensionality of the hypervectors.
-        model: (``Type[VSATensor]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAPTensor``.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
@@ -145,13 +160,14 @@ def empty(
                 [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j]])
 
     """
-    return model.empty(num_vectors, dimensions, **kwargs)
+    vsa_tensor = get_vsa_tensor_class(vsa)
+    return vsa_tensor.empty(num_vectors, dimensions, **kwargs)
 
 
 def identity(
     num_vectors: int,
     dimensions: int,
-    model: Type[VSATensor] = MAPTensor,
+    vsa: VSAOptions = "MAP",
     **kwargs,
 ) -> VSATensor:
     """Creates a set of identity hypervectors.
@@ -161,7 +177,7 @@ def identity(
     Args:
         num_vectors (int): the number of hypervectors to generate.
         dimensions (int): the dimensionality of the hypervectors.
-        model: (``Type[VSATensor]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAPTensor``.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
@@ -184,13 +200,14 @@ def identity(
                 [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j]])
 
     """
-    return model.identity(num_vectors, dimensions, **kwargs)
+    vsa_tensor = get_vsa_tensor_class(vsa)
+    return vsa_tensor.identity(num_vectors, dimensions, **kwargs)
 
 
 def random(
     num_vectors: int,
     dimensions: int,
-    model: Type[VSATensor] = MAPTensor,
+    vsa: VSAOptions = "MAP",
     **kwargs,
 ) -> VSATensor:
     """Creates a set of random independent hypervectors.
@@ -200,7 +217,7 @@ def random(
     Args:
         num_vectors (int): the number of hypervectors to generate.
         dimensions (int): the dimensionality of the hypervectors.
-        model: (``Type[VSATensor]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAPTensor``.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
@@ -224,17 +241,14 @@ def random(
                 [-0.690+0.723j,  0.981-0.190j,  0.971+0.236j, -0.356-0.934j,  0.788-0.615j,  0.360-0.932j]])
 
     """
-    return model.random(
-        num_vectors,
-        dimensions,
-        **kwargs,
-    )
+    vsa_tensor = get_vsa_tensor_class(vsa)
+    return vsa_tensor.random(num_vectors, dimensions, **kwargs)
 
 
 def level(
     num_vectors: int,
     dimensions: int,
-    model: Type[VSATensor] = MAPTensor,
+    vsa: VSAOptions = "MAP",
     *,
     randomness: float = 0.0,
     requires_grad=False,
@@ -248,7 +262,7 @@ def level(
     Args:
         num_vectors (int): the number of hypervectors to generate.
         dimensions (int): the dimensionality of the hypervectors.
-        model: (``Type[VSATensor]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAPTensor``.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
         randomness (float, optional): r-value to interpolate between level at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
@@ -279,6 +293,8 @@ def level(
                 [-0.886-0.462j,  0.507+0.861j, -0.146-0.989j, -0.611-0.791j, -0.350-0.936j, -0.886+0.462j]])
 
     """
+    vsa_tensor = get_vsa_tensor_class(vsa)
+
     # convert from normalized "randomness" variable r to number of orthogonal vectors sets "span"
     levels_per_span = (1 - randomness) * (num_vectors - 1) + randomness * 1
     # must be at least one to deal with the case that num_vectors is less than 2
@@ -286,7 +302,7 @@ def level(
     span = (num_vectors - 1) / levels_per_span
 
     # generate the set of orthogonal vectors within the level vector set
-    span_hv = model.random(
+    span_hv = vsa_tensor.random(
         int(math.ceil(span + 1)),
         dimensions,
         **kwargs,
@@ -329,13 +345,13 @@ def level(
             hv[i] = torch.where(threshold_v[span_idx] < t, span_start_hv, span_end_hv)
 
     hv.requires_grad = requires_grad
-    return hv.as_subclass(model)
+    return hv.as_subclass(vsa_tensor)
 
 
 def thermometer(
     num_vectors: int,
     dimensions: int,
-    model: Type[VSATensor] = MAPTensor,
+    vsa: VSAOptions = "MAP",
     *,
     requires_grad=False,
     **kwargs,
@@ -347,7 +363,7 @@ def thermometer(
     Args:
         num_vectors (int): the number of hypervectors to generate.
         dimensions (int): the dimensionality of the hypervectors.
-        model: (``Type[VSATensor]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAPTensor``.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
@@ -378,6 +394,8 @@ def thermometer(
                 [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j, -1.+-0.j]])
 
     """
+    vsa_tensor = get_vsa_tensor_class(vsa)
+    
     # Check if the requested number of vectors can be accommodated
     if num_vectors > dimensions + 1:
         raise ValueError(
@@ -390,13 +408,13 @@ def thermometer(
             step = (dimensions) // (num_vectors - 1)
 
     # generate a random vector as a placeholder to get dtype and device
-    rand_hv = model.random(
+    rand_hv = vsa_tensor.random(
         1,
         dimensions,
         **kwargs,
     )
 
-    if model == BSCTensor:
+    if vsa_tensor == BSCTensor:
         # Use binary vectors
         hv = torch.zeros(
             num_vectors,
@@ -404,7 +422,7 @@ def thermometer(
             dtype=rand_hv.dtype,
             device=rand_hv.device,
         )
-    elif (model == MAPTensor) | (model == FHRRTensor):
+    elif (vsa_tensor == MAPTensor) | (vsa_tensor == FHRRTensor):
         # Use bipolar vectors
         hv = torch.full(
             (
@@ -416,20 +434,20 @@ def thermometer(
             device=rand_hv.device,
         )
     else:
-        raise ValueError(f"{model} HD/VSA model is not defined.")
+        raise ValueError(f"{vsa_tensor} HD/VSA model is not defined.")
 
     # Create hypervectors using the obtained step
     for i in range(1, num_vectors):
         hv[i, 0 : i * step] = 1
 
     hv.requires_grad = requires_grad
-    return hv.as_subclass(model)
+    return hv.as_subclass(vsa_tensor)
 
 
 def circular(
     num_vectors: int,
     dimensions: int,
-    model: Type[VSATensor] = MAPTensor,
+    vsa: VSAOptions = "MAP",
     *,
     randomness: float = 0.0,
     requires_grad=False,
@@ -450,7 +468,7 @@ def circular(
     Args:
         num_vectors (int): the number of hypervectors to generate.
         dimensions (int): the dimensionality of the hypervectors.
-        model: (``Type[VSATensor]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAPTensor``.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
         randomness (float, optional): r-value to interpolate between circular at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
@@ -496,9 +514,11 @@ def circular(
                 [-0.887-0.460j, -0.906+0.421j, -0.727-0.686j, -0.271+0.962j, -0.705-0.709j,  0.562-0.827j]])
 
     """
-    if model == HRRTensor:
+    vsa_tensor = get_vsa_tensor_class(vsa)
+
+    if vsa_tensor == HRRTensor:
         raise ValueError(
-            "The circular hypervectors don't currently work with the HRRTensor model. We are not sure why, if you have any insight that could help please share it at: https://github.com/hyperdimensional-computing/torchhd/issues/108."
+            "The circular hypervectors don't currently work with the HRR model. We are not sure why, if you have any insight that could help please share it at: https://github.com/hyperdimensional-computing/torchhd/issues/108."
         )
 
     # convert from normalized "randomness" variable r to
@@ -507,7 +527,7 @@ def circular(
     span = num_vectors / levels_per_span
 
     # generate the set of orthogonal vectors within the level vector set
-    span_hv = model.random(
+    span_hv = vsa_tensor.random(
         int(math.ceil(span + 1)),
         dimensions,
         **kwargs,
@@ -571,7 +591,7 @@ def circular(
             hv[i // 2] = mutation_hv
 
     hv.requires_grad = requires_grad
-    return hv.as_subclass(model)
+    return hv.as_subclass(vsa_tensor)
 
 
 def bind(input: VSATensor, other: VSATensor) -> VSATensor:

@@ -5,6 +5,7 @@ from torch import Tensor
 import torchhd.functional as functional
 from torchhd.tensors.base import VSATensor
 from torchhd.tensors.map import MAPTensor
+from torchhd.types import VSAOptions
 
 __all__ = [
     "Memory",
@@ -142,7 +143,7 @@ class Multiset:
 
     Args:
         dimensions (int): number of dimensions of the multiset.
-        model: (``VSATensor``, optional): specifies the hypervector type and operations used (Default: MAPTensor).
+        vsa: (``VSAOptions``, optional): specifies the hypervector type and operations used (Default: ``"MAP"``).
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
 
@@ -161,7 +162,7 @@ class Multiset:
 
     @overload
     def __init__(
-        self, dimensions: int, model: Type[VSATensor] = MAPTensor, *, device=None, dtype=None
+        self, dimensions: int, vsa: VSAOptions = "MAP", *, device=None, dtype=None
     ):
         ...
 
@@ -169,7 +170,7 @@ class Multiset:
     def __init__(self, input: VSATensor, *, size=0):
         ...
 
-    def __init__(self, dim_or_input: Any, model: Type[VSATensor] = MAPTensor, **kwargs):
+    def __init__(self, dim_or_input: Any, vsa: VSAOptions = "MAP", **kwargs):
         self.size = kwargs.get("size", 0)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
@@ -177,7 +178,7 @@ class Multiset:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
             self.value = functional.empty(
-                1, dim_or_input, model, dtype=dtype, device=device
+                1, dim_or_input, vsa, dtype=dtype, device=device
             ).squeeze(0)
 
     def add(self, input: VSATensor) -> None:
@@ -291,7 +292,7 @@ class HashTable:
 
     Args:
         dimensions (int): number of dimensions of the hash table.
-        model: (``VSATensor``, optional): specifies the hypervector type and operations used (Default: MAPTensor).
+        vsa: (``VSAOptions``, optional): specifies the hypervector type and operations used (Default: ``"MAP"``).
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
 
@@ -309,7 +310,7 @@ class HashTable:
 
     @overload
     def __init__(
-        self, dimensions: int, model: Type[VSATensor] = MAPTensor, *, device=None, dtype=None
+        self, dimensions: int, vsa: VSAOptions = "MAP", *, device=None, dtype=None
     ):
         ...
 
@@ -317,7 +318,7 @@ class HashTable:
     def __init__(self, input: VSATensor, *, size=0):
         ...
 
-    def __init__(self, dim_or_input: int, model: Type[VSATensor] = MAPTensor, **kwargs):
+    def __init__(self, dim_or_input: int, vsa: VSAOptions = "MAP", **kwargs):
         self.size = kwargs.get("size", 0)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
@@ -325,7 +326,7 @@ class HashTable:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
             self.value = functional.empty(
-                1, dim_or_input, model, dtype=dtype, device=device
+                1, dim_or_input, vsa, dtype=dtype, device=device
             ).squeeze(0)
 
     def add(self, key: VSATensor, value: VSATensor) -> None:
@@ -456,7 +457,7 @@ class BundleSequence:
 
     Args:
         dimensions (int): number of dimensions of the sequence.
-        model: (``VSATensor``, optional): specifies the hypervector type and operations used (Default: MAPTensor).
+        vsa: (``VSAOptions``, optional): specifies the hypervector type and operations used (Default: ``"MAP"``).
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
 
@@ -476,7 +477,7 @@ class BundleSequence:
 
     @overload
     def __init__(
-        self, dimensions: int, model: Type[VSATensor] = MAPTensor, *, device=None, dtype=None
+        self, dimensions: int, vsa: VSAOptions = "MAP", *, device=None, dtype=None
     ):
         ...
 
@@ -484,7 +485,7 @@ class BundleSequence:
     def __init__(self, input: VSATensor, *, size=0):
         ...
 
-    def __init__(self, dim_or_input: int, model: Type[VSATensor] = MAPTensor, **kwargs):
+    def __init__(self, dim_or_input: int, vsa: VSAOptions = "MAP", **kwargs):
         self.size = kwargs.get("size", 0)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
@@ -492,7 +493,7 @@ class BundleSequence:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
             self.value = functional.empty(
-                1, dim_or_input, model, dtype=dtype, device=device
+                1, dim_or_input, vsa, dtype=dtype, device=device
             ).squeeze(0)
 
     def append(self, input: VSATensor) -> None:
@@ -653,7 +654,7 @@ class BindSequence:
 
     Args:
         dimensions (int): number of dimensions of the sequence.
-        model: (``VSATensor``, optional): specifies the hypervector type and operations used (Default: MAPTensor).
+        vsa: (``VSAOptions``, optional): specifies the hypervector type and operations used (Default: ``"MAP"``).
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
 
@@ -668,7 +669,7 @@ class BindSequence:
 
     @overload
     def __init__(
-        self, dimensions: int, model: Type[VSATensor] = MAPTensor, *, device=None, dtype=None
+        self, dimensions: int, vsa: VSAOptions = "MAP", *, device=None, dtype=None
     ):
         ...
 
@@ -676,7 +677,7 @@ class BindSequence:
     def __init__(self, input: VSATensor, *, size=0):
         ...
 
-    def __init__(self, dim_or_input: int, model: Type[VSATensor] = MAPTensor, **kwargs):
+    def __init__(self, dim_or_input: int, vsa: VSAOptions = "MAP", **kwargs):
         self.size = kwargs.get("size", 0)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
@@ -684,7 +685,7 @@ class BindSequence:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
             self.value = functional.identity(
-                1, dim_or_input, model, dtype=dtype, device=device
+                1, dim_or_input, vsa, dtype=dtype, device=device
             ).squeeze(0)
 
     def append(self, input: VSATensor) -> None:
@@ -816,7 +817,7 @@ class Graph:
 
     Args:
         dimensions (int): number of dimensions of the graph.
-        model: (``VSATensor``, optional): specifies the hypervector type and operations used (Default: MAPTensor).
+        vsa: (``VSAOptions``, optional): specifies the hypervector type and operations used (Default: ``"MAP"``).
         directed (bool, optional): specify if the graph is directed or not. Default: ``False``.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
@@ -832,7 +833,7 @@ class Graph:
     def __init__(
         self,
         dimensions: int,
-        model: Type[VSATensor] = MAPTensor,
+        vsa: VSAOptions = "MAP",
         *,
         directed=False,
         device=None,
@@ -844,7 +845,7 @@ class Graph:
     def __init__(self, input: VSATensor, *, directed=False):
         ...
 
-    def __init__(self, dim_or_input: int, model: Type[VSATensor] = MAPTensor, **kwargs):
+    def __init__(self, dim_or_input: int, vsa: VSAOptions = "MAP", **kwargs):
         self.is_directed = kwargs.get("directed", False)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
@@ -852,7 +853,7 @@ class Graph:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
             self.value = functional.empty(
-                1, dim_or_input, model, dtype=dtype, device=device
+                1, dim_or_input, vsa, dtype=dtype, device=device
             ).squeeze(0)
 
     def add_edge(self, node1: VSATensor, node2: VSATensor) -> None:
@@ -970,7 +971,7 @@ class Tree:
 
     Args:
         dimensions (int): dimensions of the tree.
-        model: (``VSATensor``, optional): specifies the hypervector type and operations used (Default: MAPTensor).
+        vsa: (``VSAOptions``, optional): specifies the hypervector type and operations used (Default: ``"MAP"``).
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
 
@@ -981,12 +982,12 @@ class Tree:
     """
 
     def __init__(
-        self, dimensions, model: Type[VSATensor] = MAPTensor, device=None, dtype=None
+        self, dimensions, vsa: VSAOptions = "MAP", device=None, dtype=None
     ):
         self.dimensions = dimensions
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
         self.value = functional.empty(
-            1, dimensions, model, dtype=dtype, device=device
+            1, dimensions, vsa, dtype=dtype, device=device
         ).squeeze(0)
         self.l_r = functional.random(2, dimensions, dtype=dtype, device=device)
 
@@ -1088,7 +1089,7 @@ class FiniteStateAutomata:
 
     Args:
         dimensions (int): dimensions of the automata.
-        model: (``VSATensor``, optional): specifies the hypervector type and operations used (Default: MAPTensor).
+        vsa: (``VSAOptions``, optional): specifies the hypervector type and operations used (Default: ``"MAP"``).
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
 
@@ -1099,11 +1100,11 @@ class FiniteStateAutomata:
     """
 
     def __init__(
-        self, dimensions, model: Type[VSATensor] = MAPTensor, device=None, dtype=None
+        self, dimensions, vsa: VSAOptions = "MAP", device=None, dtype=None
     ):
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
         self.value = functional.empty(
-            1, dimensions, model, dtype=dtype, device=device
+            1, dimensions, vsa, dtype=dtype, device=device
         ).squeeze(0)
 
     def add_transition(
