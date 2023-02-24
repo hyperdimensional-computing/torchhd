@@ -48,6 +48,7 @@ __all__ = [
     "index_to_value",
 ]
 
+
 def get_vsa_tensor_class(vsa: VSAOptions) -> Type[VSATensor]:
     if vsa == "BSC":
         return BSCTensor
@@ -57,9 +58,8 @@ def get_vsa_tensor_class(vsa: VSAOptions) -> Type[VSATensor]:
         return HRRTensor
     elif vsa == "FHRR":
         return FHRRTensor
-    
+
     raise ValueError(f"Provided VSA model is not supported, specified: {vsa}")
-    
 
 
 def ensure_vsa_tensor(
@@ -395,7 +395,7 @@ def thermometer(
 
     """
     vsa_tensor = get_vsa_tensor_class(vsa)
-    
+
     # Check if the requested number of vectors can be accommodated
     if num_vectors > dimensions + 1:
         raise ValueError(

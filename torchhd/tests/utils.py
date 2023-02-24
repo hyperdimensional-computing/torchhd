@@ -50,7 +50,9 @@ torch_dtypes = {
 }
 
 
-def supported_dtype(dtype: torch.dtype, vsa: Union[Type[torchhd.VSATensor], VSAOptions]) -> bool:
+def supported_dtype(
+    dtype: torch.dtype, vsa: Union[Type[torchhd.VSATensor], VSAOptions]
+) -> bool:
     if isinstance(vsa, str):
         vsa_tensor = torchhd.functional.get_vsa_tensor_class(vsa)
     else:

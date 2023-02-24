@@ -981,9 +981,7 @@ class Tree:
 
     """
 
-    def __init__(
-        self, dimensions, vsa: VSAOptions = "MAP", device=None, dtype=None
-    ):
+    def __init__(self, dimensions, vsa: VSAOptions = "MAP", device=None, dtype=None):
         self.dimensions = dimensions
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
         self.value = functional.empty(
@@ -1099,9 +1097,7 @@ class FiniteStateAutomata:
 
     """
 
-    def __init__(
-        self, dimensions, vsa: VSAOptions = "MAP", device=None, dtype=None
-    ):
+    def __init__(self, dimensions, vsa: VSAOptions = "MAP", device=None, dtype=None):
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
         self.value = functional.empty(
             1, dimensions, vsa, dtype=dtype, device=device
