@@ -47,11 +47,11 @@ class VSATensor(Tensor):
     ) -> "VSATensor":
         """Creates random or uncorrelated hypervectors"""
         raise NotImplementedError
-    
+
     def __add__(self, other: Any):
         if isinstance(other, VSATensor):
             return self.bundle(other)
-        
+
         return super().__add__(other)
 
     def bundle(self, other: "VSATensor") -> "VSATensor":
@@ -81,9 +81,9 @@ class VSATensor(Tensor):
     def __mul__(self, other: Any):
         if isinstance(other, VSATensor):
             return self.bind(other)
-        
+
         return super().__mul__(other)
-    
+
     def bind(self, other: "VSATensor") -> "VSATensor":
         """Bind the hypervector with other"""
         raise NotImplementedError
@@ -107,21 +107,21 @@ class VSATensor(Tensor):
             output = output.bind(tensors[i])
 
         return output
-    
+
     def __truediv__(self, other: Any) -> Tensor:
         if isinstance(other, VSATensor):
             return self.bind(other.inverse())
-        
+
         return super().__truediv__(other)
 
     def inverse(self) -> "VSATensor":
         """Inverse the hypervector for binding"""
         raise NotImplementedError
-    
+
     def __sub__(self, other: Any) -> Tensor:
         if isinstance(other, VSATensor):
             return self.bundle(other.negative())
-        
+
         return super().__sub__(other)
 
     def negative(self) -> "VSATensor":
