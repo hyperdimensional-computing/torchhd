@@ -144,17 +144,17 @@ def empty(
 
     Examples::
 
-        >>> torchhd.empty(3, 6, torchhd.BSCTensor)
+        >>> torchhd.empty(3, 6, "BSC")
         tensor([[False, False, False, False, False, False],
                 [False, False, False, False, False, False],
                 [False, False, False, False, False, False]])
 
-        >>> torchhd.empty(3, 6, torchhd.MAPTensor)
+        >>> torchhd.empty(3, 6, "MAP")
         tensor([[0., 0., 0., 0., 0., 0.],
                 [0., 0., 0., 0., 0., 0.],
                 [0., 0., 0., 0., 0., 0.]])
 
-        >>> torchhd.empty(3, 6, torchhd.FHRRTensor)
+        >>> torchhd.empty(3, 6, "FHRR")
         tensor([[0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
                 [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
                 [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j]])
@@ -184,17 +184,17 @@ def identity(
 
     Examples::
 
-        >>> torchhd.identity(3, 6, torchhd.BSCTensor)
+        >>> torchhd.identity(3, 6, "BSC")
         tensor([[False, False, False, False, False, False],
                 [False, False, False, False, False, False],
                 [False, False, False, False, False, False]])
 
-        >>> torchhd.identity(3, 6, torchhd.MAPTensor)
+        >>> torchhd.identity(3, 6, "MAP")
         tensor([[1., 1., 1., 1., 1., 1.],
                 [1., 1., 1., 1., 1., 1.],
                 [1., 1., 1., 1., 1., 1.]])
 
-        >>> torchhd.identity(3, 6, torchhd.FHRRTensor)
+        >>> torchhd.identity(3, 6, "FHRR")
         tensor([[1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
                 [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
                 [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j]])
@@ -225,17 +225,17 @@ def random(
 
     Examples::
 
-        >>> torchhd.random(3, 6, torchhd.BSCTensor)
+        >>> torchhd.random(3, 6, "BSC")
         tensor([[ True,  True,  True,  True,  True,  True],
                 [False,  True, False, False,  True,  True],
                 [ True,  True, False, False,  True,  True]])
 
-        >>> torchhd.random(3, 6, torchhd.MAPTensor)
+        >>> torchhd.random(3, 6, "MAP")
         tensor([[ 1.,  1., -1.,  1., -1.,  1.],
                 [ 1., -1.,  1., -1., -1., -1.],
                 [ 1., -1.,  1.,  1.,  1., -1.]])
 
-        >>> torchhd.random(3, 6, torchhd.FHRRTensor)
+        >>> torchhd.random(3, 6, "FHRR")
         tensor([[-0.830-0.557j, -0.411+0.911j,  0.980-0.197j, -0.202+0.979j, -0.792+0.609j, -0.932-0.360j],
                 [-0.977-0.212j,  0.191-0.981j,  0.340-0.940j,  0.902-0.431j,  0.141+0.990j, -0.661+0.749j],
                 [-0.690+0.723j,  0.981-0.190j,  0.971+0.236j, -0.356-0.934j,  0.788-0.615j,  0.360-0.932j]])
@@ -271,21 +271,21 @@ def level(
 
     Examples::
 
-        >>> torchhd.level(5, 6, torchhd.BSCTensor)
+        >>> torchhd.level(5, 6, "BSC")
         tensor([[ True,  True,  True,  True, False, False],
                 [ True,  True,  True,  True, False, False],
                 [False,  True,  True,  True,  True, False],
                 [False,  True,  True,  True,  True, False],
                 [False,  True,  True,  True,  True, False]])
 
-        >>> torchhd.level(5, 6, torchhd.MAPTensor)
+        >>> torchhd.level(5, 6, "MAP")
         tensor([[ 1.,  1., -1.,  1., -1.,  1.],
                 [ 1.,  1.,  1.,  1., -1.,  1.],
                 [ 1.,  1.,  1.,  1., -1.,  1.],
                 [ 1.,  1.,  1.,  1.,  1.,  1.],
                 [ 1., -1.,  1.,  1.,  1., -1.]])
 
-        >>> torchhd.level(5, 6, torchhd.FHRRTensor)
+        >>> torchhd.level(5, 6, "FHRR")
         tensor([[-0.996+0.079j,  0.447+0.894j, -0.840-0.541j, -0.999+0.020j, -0.742+0.669j, -0.999+0.042j],
                 [-0.886-0.462j,  0.447+0.894j, -0.840-0.541j, -0.999+0.020j, -0.742+0.669j, -0.886+0.462j],
                 [-0.886-0.462j,  0.447+0.894j, -0.146-0.989j, -0.999+0.020j, -0.350-0.936j, -0.886+0.462j],
@@ -370,7 +370,7 @@ def thermometer(
 
     Examples::
 
-        >>> torchhd.thermometer(7, 6, torchhd.BSCTensor)
+        >>> torchhd.thermometer(7, 6, "BSC")
         tensor([[False, False, False, False, False, False],
                 [ True, False, False, False, False, False],
                 [ True,  True, False, False, False, False],
@@ -379,13 +379,13 @@ def thermometer(
                 [ True,  True,  True,  True,  True, False],
                 [ True,  True,  True,  True,  True,  True]])
 
-        >>> torchhd.thermometer(4, 6, torchhd.MAPTensor)
+        >>> torchhd.thermometer(4, 6, "MAP")
         tensor([[-1., -1., -1., -1., -1., -1.],
                 [ 1.,  1., -1., -1., -1., -1.],
                 [ 1.,  1.,  1.,  1., -1., -1.],
                 [ 1.,  1.,  1.,  1.,  1.,  1.]])
 
-        >>> torchhd.thermometer(6, 6, torchhd.FHRRTensor)
+        >>> torchhd.thermometer(6, 6, "FHRR")
         tensor([[-1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
                 [ 1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
                 [ 1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
@@ -477,7 +477,7 @@ def circular(
 
     Examples::
 
-        >>> torchhd.circular(10, 6, torchhd.BSCTensor)
+        >>> torchhd.circular(10, 6, "BSC")
         tensor([[False, False,  True, False,  True,  True],
                 [False, False,  True, False,  True,  True],
                 [False, False,  True, False,  True,  True],
@@ -489,7 +489,7 @@ def circular(
                 [ True, False,  True, False,  True,  True],
                 [False, False,  True, False,  True,  True]])
 
-        >>> torchhd.circular(10, 6, torchhd.MAPTensor)
+        >>> torchhd.circular(10, 6, "MAP")
         tensor([[-1., -1., -1., -1., -1.,  1.],
                 [-1., -1., -1., -1., -1.,  1.],
                 [-1., -1., -1.,  1., -1.,  1.],
@@ -501,7 +501,7 @@ def circular(
                 [-1., -1.,  1., -1., -1.,  1.],
                 [-1., -1.,  1., -1., -1.,  1.]])
 
-        >>> torchhd.circular(10, 6, torchhd.FHRRTensor)
+        >>> torchhd.circular(10, 6, "FHRR")
         tensor([[-0.887-0.460j, -0.906+0.421j, -0.727-0.686j, -0.271+0.962j, -0.387+0.921j, -0.895-0.445j],
                 [-0.887-0.460j, -0.906+0.421j, -0.727-0.686j, -0.947+0.319j, -0.387+0.921j, -0.895-0.445j],
                 [-0.887-0.460j, -0.906+0.421j, -0.828+0.560j, -0.947+0.319j, -0.387+0.921j, -0.895-0.445j],

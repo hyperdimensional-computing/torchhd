@@ -7,8 +7,11 @@ from scipy.stats import binom
 import torchhd.functional as functional
 from torchhd.tensors.base import VSATensor
 
+__all__ = [
+    "SparseDistributed",
+]
 
-class SDM(nn.Module):
+class SparseDistributed(nn.Module):
     r"""`Sparse Distributed Memory <https://redwood.berkeley.edu/wp-content/uploads/2020/08/KanervaP_SDMrelated_models1993.pdf>`_
 
     The Sparse Distributed Memory (SDM) is specified by its (typically random) addresses and its content.
@@ -29,7 +32,7 @@ class SDM(nn.Module):
 
     Examples::
         >>> address = torchhd.random(6, 512)
-        >>> sdm = torchhd.memory.SDM(100000, 512, 512)
+        >>> sdm = torchhd.memory.SparseDistributed(100000, 512, 512)
         >>> # use as associative memory
         >>> sdm.write(address, address)
         >>> read = sdm.read(address)

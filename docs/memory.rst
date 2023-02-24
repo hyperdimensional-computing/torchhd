@@ -9,4 +9,4 @@ torchhd.memory
     :toctree: generated/
     :template: class.rst
 
-    SDM
+    SparseDistributed
