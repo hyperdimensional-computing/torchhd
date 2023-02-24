@@ -3,10 +3,10 @@ from torch import Tensor
 import torch.nn.functional as F
 from typing import Set
 
-from torchhd.base import VSA_Model
+from torchhd.tensors.base import VSATensor
 
 
-class MAP(VSA_Model):
+class MAPTensor(VSATensor):
     """Multiply Add Permute
 
     Proposed in `Multiplicative Binding, Representation Operators & Analogy <https://www.researchgate.net/publication/215992330_Multiplicative_Binding_Representation_Operators_Analogy>`_, this model works with dense bipolar hypervectors with elements from :math:`\{-1,1\}`.
@@ -24,7 +24,7 @@ class MAP(VSA_Model):
     }
 
     @classmethod
-    def empty_hv(
+    def empty(
         cls,
         num_vectors: int,
         dimensions: int,
@@ -32,7 +32,7 @@ class MAP(VSA_Model):
         dtype=None,
         device=None,
         requires_grad=False,
-    ) -> "MAP":
+    ) -> "MAPTensor":
         """Creates a set of hypervectors representing empty sets.
 
         When bundled with a hypervector :math:`x`, the result is :math:`x`.
@@ -40,13 +40,13 @@ class MAP(VSA_Model):
         Args:
             num_vectors (int): the number of hypervectors to generate.
             dimensions (int): the dimensionality of the hypervectors.
-            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
             device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
             requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
         Examples::
 
-            >>> torchhd.MAP.empty_hv(3, 6)
+            >>> torchhd.MAPTensor.empty(3, 6)
             tensor([[0., 0., 0., 0., 0., 0.],
                     [0., 0., 0., 0., 0., 0.],
                     [0., 0., 0., 0., 0., 0.]])
@@ -71,7 +71,7 @@ class MAP(VSA_Model):
         return result.as_subclass(cls)
 
     @classmethod
-    def identity_hv(
+    def identity(
         cls,
         num_vectors: int,
         dimensions: int,
@@ -79,7 +79,7 @@ class MAP(VSA_Model):
         dtype=None,
         device=None,
         requires_grad=False,
-    ) -> "MAP":
+    ) -> "MAPTensor":
         """Creates a set of identity hypervectors.
 
         When bound with a random-hypervector :math:`x`, the result is :math:`x`.
@@ -87,13 +87,13 @@ class MAP(VSA_Model):
         Args:
             num_vectors (int): the number of hypervectors to generate.
             dimensions (int): the dimensionality of the hypervectors.
-            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
             device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
             requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
         Examples::
 
-            >>> torchhd.MAP.identity_hv(3, 6)
+            >>> torchhd.MAPTensor.identity(3, 6)
             tensor([[1., 1., 1., 1., 1., 1.],
                     [1., 1., 1., 1., 1., 1.],
                     [1., 1., 1., 1., 1., 1.]])
@@ -118,7 +118,7 @@ class MAP(VSA_Model):
         return result.as_subclass(cls)
 
     @classmethod
-    def random_hv(
+    def random(
         cls,
         num_vectors: int,
         dimensions: int,
@@ -127,7 +127,7 @@ class MAP(VSA_Model):
         dtype=None,
         device=None,
         requires_grad=False,
-    ) -> "MAP":
+    ) -> "MAPTensor":
         """Creates a set of random independent hypervectors.
 
         The resulting hypervectors are sampled uniformly at random from the ``dimensions``-dimensional hyperspace.
@@ -136,17 +136,17 @@ class MAP(VSA_Model):
             num_vectors (int): the number of hypervectors to generate.
             dimensions (int): the dimensionality of the hypervectors.
             generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
-            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
             device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
             requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
         Examples::
 
-            >>> torchhd.MAP.random_hv(3, 6)
+            >>> torchhd.MAPTensor.random(3, 6)
             tensor([[-1.,  1., -1.,  1.,  1., -1.],
                     [ 1., -1.,  1.,  1.,  1.,  1.],
                     [-1.,  1.,  1.,  1., -1., -1.]])
-            >>> torchhd.MAP.random_hv(3, 6, dtype=torch.long)
+            >>> torchhd.MAPTensor.random(3, 6, dtype=torch.long)
             tensor([[-1,  1, -1, -1,  1,  1],
                     [ 1,  1, -1, -1, -1, -1],
                     [-1, -1, -1,  1, -1, -1]])
@@ -168,7 +168,7 @@ class MAP(VSA_Model):
         result.requires_grad = requires_grad
         return result.as_subclass(cls)
 
-    def bundle(self, other: "MAP") -> "MAP":
+    def bundle(self, other: "MAPTensor") -> "MAPTensor":
         r"""Bundle the hypervector with other using element-wise sum.
 
         This produces a hypervector maximally similar to both.
@@ -176,7 +176,7 @@ class MAP(VSA_Model):
         The bundling operation is used to aggregate information into a single hypervector.
 
         Args:
-            other (MAP): other input hypervector
+            other (MAPTensor): other input hypervector
 
         Shapes:
             - Self: :math:`(*)`
@@ -185,7 +185,7 @@ class MAP(VSA_Model):
 
         Examples::
 
-            >>> a, b = torchhd.MAP.random_hv(2, 10)
+            >>> a, b = torchhd.MAPTensor.random(2, 10)
             >>> a
             tensor([-1., -1., -1., -1., -1.,  1., -1.,  1.,  1.,  1.])
             >>> b
@@ -196,11 +196,11 @@ class MAP(VSA_Model):
         """
         return self.add(other)
 
-    def multibundle(self) -> "MAP":
+    def multibundle(self) -> "MAPTensor":
         """Bundle multiple hypervectors"""
         return self.sum(dim=-2, dtype=self.dtype)
 
-    def bind(self, other: "MAP") -> "MAP":
+    def bind(self, other: "MAPTensor") -> "MAPTensor":
         r"""Bind the hypervector with other using element-wise multiplication.
 
         This produces a hypervector dissimilar to both.
@@ -208,7 +208,7 @@ class MAP(VSA_Model):
         Binding is used to associate information, for instance, to assign values to variables.
 
         Args:
-            other (MAP): other input hypervector
+            other (MAPTensor): other input hypervector
 
         Shapes:
             - Self: :math:`(*)`
@@ -217,7 +217,7 @@ class MAP(VSA_Model):
 
         Examples::
 
-            >>> a, b = torchhd.MAP.random_hv(2, 10)
+            >>> a, b = torchhd.MAPTensor.random(2, 10)
             >>> a
             tensor([ 1., -1.,  1.,  1., -1.,  1.,  1., -1.,  1.,  1.])
             >>> b
@@ -229,11 +229,11 @@ class MAP(VSA_Model):
 
         return self.mul(other)
 
-    def multibind(self) -> "MAP":
+    def multibind(self) -> "MAPTensor":
         """Bind multiple hypervectors"""
         return self.prod(dim=-2, dtype=self.dtype)
 
-    def inverse(self) -> "MAP":
+    def inverse(self) -> "MAPTensor":
         r"""Invert the hypervector for binding.
 
         Each hypervector in MAP is its own inverse, so this returns a copy of self.
@@ -244,7 +244,7 @@ class MAP(VSA_Model):
 
         Examples::
 
-            >>> a = torchhd.MAP.random_hv(1, 10)
+            >>> a = torchhd.MAPTensor.random(1, 10)
             >>> a
             tensor([[-1., -1., -1.,  1.,  1.,  1., -1.,  1., -1.,  1.]])
             >>> a.inverse()
@@ -254,7 +254,7 @@ class MAP(VSA_Model):
 
         return self.clone()
 
-    def negative(self) -> "MAP":
+    def negative(self) -> "MAPTensor":
         """Negate the hypervector for the bundling inverse
 
         Shapes:
@@ -263,7 +263,7 @@ class MAP(VSA_Model):
 
         Examples::
 
-            >>> a = torchhd.MAP.random_hv(1, 10)
+            >>> a = torchhd.MAPTensor.random(1, 10)
             >>> a
             tensor([[-1., -1.,  1.,  1.,  1., -1.,  1., -1., -1., -1.]])
             >>> a.negative()
@@ -272,7 +272,7 @@ class MAP(VSA_Model):
 
         return torch.negative(self)
 
-    def permute(self, shifts: int = 1) -> "MAP":
+    def permute(self, shifts: int = 1) -> "MAPTensor":
         r"""Permute the hypervector.
 
         The permutation operator is commonly used to assign an order to hypervectors.
@@ -286,7 +286,7 @@ class MAP(VSA_Model):
 
         Examples::
 
-            >>> a = torchhd.MAP.random_hv(1, 10)
+            >>> a = torchhd.MAPTensor.random(1, 10)
             >>> a
             tensor([[ 1.,  1.,  1., -1., -1., -1.,  1., -1., -1.,  1.]])
             >>> a.permute()
@@ -295,7 +295,7 @@ class MAP(VSA_Model):
         """
         return self.roll(shifts=shifts, dims=-1)
 
-    def clipping(self, kappa) -> "MAP":
+    def clipping(self, kappa) -> "MAPTensor":
         """Performs the clipping function that clips the lower and upper values.
 
         Args:
@@ -307,7 +307,7 @@ class MAP(VSA_Model):
 
         Examples::
 
-            >>> a = torchhd.MAP.random_hv(30, 10).multibundle()
+            >>> a = torchhd.MAPTensor.random(30, 10).multibundle()
             >>> a
             MAP([-8.,  0.,  6.,  8.,  4., -6.,  0., -2.,  0., -4.])
             >>> a.clipping(4)
@@ -317,14 +317,14 @@ class MAP(VSA_Model):
 
         return self.clamp(min=-kappa, max=kappa)
 
-    def dot_similarity(self, others: "MAP") -> Tensor:
+    def dot_similarity(self, others: "MAPTensor") -> Tensor:
         """Inner product with other hypervectors"""
         dtype = torch.get_default_dtype()
         if others.dim() >= 2:
             others = others.mT
         return torch.matmul(self.to(dtype), others.to(dtype))
 
-    def cos_similarity(self, others: "MAP", *, eps=1e-08) -> Tensor:
+    def cosine_similarity(self, others: "MAPTensor", *, eps=1e-08) -> Tensor:
         """Cosine similarity with other hypervectors"""
         dtype = torch.get_default_dtype()
 

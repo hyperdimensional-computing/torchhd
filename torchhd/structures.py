@@ -3,8 +3,8 @@ import torch
 from torch import Tensor
 
 import torchhd.functional as functional
-from torchhd.base import VSA_Model
-from torchhd.map import MAP
+from torchhd.tensors.base import VSATensor
+from torchhd.tensors.map import MAPTensor
 
 __all__ = [
     "Memory",
@@ -34,7 +34,7 @@ class Memory:
 
     def __init__(self, threshold=0.5):
         self.threshold = threshold
-        self.keys: List[VSA_Model] = []
+        self.keys: List[VSATensor] = []
         self.values: List[Any] = []
 
     def __len__(self) -> int:
@@ -48,28 +48,28 @@ class Memory:
         """
         return len(self.values)
 
-    def add(self, key: VSA_Model, value: Any) -> None:
+    def add(self, key: VSATensor, value: Any) -> None:
         """Adds one (key, value) pair to memory.
 
         Args:
-            key (VSA_Model): Hypervector used as key for adding the key-value pair.
+            key (VSATensor): Hypervector used as key for adding the key-value pair.
             value (Any): Value to be added to the memory.
 
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random_hv(len(letters), 10000)
+            >>> letters_hv = functional.random(len(letters), 10000)
             >>> memory.add(letters_hv[0], letters[0])
 
         """
         self.keys.append(key)
         self.values.append(value)
 
-    def index(self, key: VSA_Model) -> int:
+    def index(self, key: VSATensor) -> int:
         """Returns the index of the tensor in memory from an approximate key.
 
         Args:
-            key (VSA_Model): Hypervector key used for index lookup position.
+            key (VSATensor): Hypervector key used for index lookup position.
 
         Examples::
 
@@ -80,7 +80,7 @@ class Memory:
         if len(self.keys) == 0:
             raise Exception("No elements in memory")
         key_stack = torch.stack(self.keys, dim=0)
-        sim = functional.cos_similarity(key, key_stack)
+        sim = functional.cosine_similarity(key, key_stack)
         value, index = torch.max(sim, 0)
 
         if value.item() < self.threshold:
@@ -88,11 +88,11 @@ class Memory:
 
         return index
 
-    def __getitem__(self, key: VSA_Model) -> Tuple[VSA_Model, Any]:
+    def __getitem__(self, key: VSATensor) -> Tuple[VSATensor, Any]:
         """Get the (key, value) pair from an approximate key.
 
         Args:
-            key (VSA_Model): Hypervector key used for item lookup.
+            key (VSATensor): Hypervector key used for item lookup.
 
         Examples::
 
@@ -103,11 +103,11 @@ class Memory:
         index = self.index(key)
         return self.keys[index], self.values[index]
 
-    def __setitem__(self, key: VSA_Model, value: Any) -> None:
+    def __setitem__(self, key: VSATensor, value: Any) -> None:
         """Set the value of an (key, value) pair from an approximate key.
 
         Args:
-            key (VSA_Model): Hypervector key used for item lookup.
+            key (VSATensor): Hypervector key used for item lookup.
 
         Examples::
 
@@ -118,11 +118,11 @@ class Memory:
         index = self.index(key)
         self.values[index] = value
 
-    def __delitem__(self, key: VSA_Model) -> None:
+    def __delitem__(self, key: VSATensor) -> None:
         """Delete the (key, value) pair from an approximate key.
 
         Args:
-            key (VSA_Model): Hypervector key used for item lookup.
+            key (VSATensor): Hypervector key used for item lookup.
 
         Examples::
 
@@ -142,65 +142,65 @@ class Multiset:
 
     Args:
         dimensions (int): number of dimensions of the multiset.
-        model: (``VSA_Model``, optional): specifies the hypervector type and operations used (Default: MAP).
+        model: (``VSATensor``, optional): specifies the hypervector type and operations used (Default: MAPTensor).
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
 
     Args:
-        input (VSA_Model): tensor representing a multiset.
+        input (VSATensor): tensor representing a multiset.
         size (int, optional): the size of the multiset provided as input. Default: ``0``.
 
     Examples::
 
         >>> M = structures.Multiset(10000)
 
-        >>> x = functional.random_hv(1, 10000)
+        >>> x = functional.random(1, 10000)
         >>> M = structures.Multiset(x[0], size=1)
 
     """
 
     @overload
     def __init__(
-        self, dimensions: int, model: Type[VSA_Model] = MAP, *, device=None, dtype=None
+        self, dimensions: int, model: Type[VSATensor] = MAPTensor, *, device=None, dtype=None
     ):
         ...
 
     @overload
-    def __init__(self, input: VSA_Model, *, size=0):
+    def __init__(self, input: VSATensor, *, size=0):
         ...
 
-    def __init__(self, dim_or_input: Any, model: Type[VSA_Model] = MAP, **kwargs):
+    def __init__(self, dim_or_input: Any, model: Type[VSATensor] = MAPTensor, **kwargs):
         self.size = kwargs.get("size", 0)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
         else:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
-            self.value = functional.empty_hv(
+            self.value = functional.empty(
                 1, dim_or_input, model, dtype=dtype, device=device
             ).squeeze(0)
 
-    def add(self, input: VSA_Model) -> None:
+    def add(self, input: VSATensor) -> None:
         """Adds a new hypervector (input) to the multiset.
 
         Args:
-            input (VSA_Model): Hypervector to add to the multiset.
+            input (VSATensor): Hypervector to add to the multiset.
 
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random_hv(len(letters), 10000)
+            >>> letters_hv = functional.random(len(letters), 10000)
             >>> M.add(letters_hv[0])
 
         """
         self.value = functional.bundle(self.value, input)
         self.size += 1
 
-    def remove(self, input: VSA_Model) -> None:
+    def remove(self, input: VSATensor) -> None:
         """Removes a hypervector (input) from the multiset.
 
         Args:
-            input (VSA_Model): Hypervector to be removed from the multiset.
+            input (VSATensor): Hypervector to be removed from the multiset.
 
         Examples::
 
@@ -210,11 +210,11 @@ class Multiset:
         self.value = functional.bundle(self.value, -input)
         self.size -= 1
 
-    def contains(self, input: VSA_Model) -> VSA_Model:
+    def contains(self, input: VSATensor) -> VSATensor:
         """Returns the cosine similarity of the input vector against the multiset.
 
         Args:
-            input (VSA_Model): Hypervector to compare against the multiset.
+            input (VSATensor): Hypervector to compare against the multiset.
 
         Examples::
 
@@ -222,7 +222,7 @@ class Multiset:
             tensor(0.4575)
 
         """
-        return functional.cos_similarity(input, self.value)
+        return functional.cosine_similarity(input, self.value)
 
     def __len__(self) -> int:
         """Returns the size of the multiset.
@@ -247,18 +247,18 @@ class Multiset:
         self.value.fill_(0.0)
 
     @classmethod
-    def from_ngrams(cls, input: VSA_Model, n=3):
+    def from_ngrams(cls, input: VSATensor, n=3):
         r"""Creates a multiset from the ngrams of a set of hypervectors.
 
         See: :func:`~torchhd.functional.ngrams`.
 
         Args:
-            input (VSA_Model): Set of hypervectors to convert in a multiset.
+            input (VSATensor): Set of hypervectors to convert in a multiset.
             n (int, optional): The size of each :math:`n`-gram, :math:`1 \leq n \leq m`. Default: ``3``.
 
         Examples::
 
-            >>> x = functional.random_hv(5, 3)
+            >>> x = functional.random(5, 3)
             >>> M = structures.Multiset.from_ngrams(x)
 
         """
@@ -266,17 +266,17 @@ class Multiset:
         return cls(value, size=input.size(-2) - n + 1)
 
     @classmethod
-    def from_tensor(cls, input: VSA_Model):
+    def from_tensor(cls, input: VSATensor):
         """Creates a multiset from a set of hypervectors.
 
         See: :func:`~torchhd.functional.multiset`.
 
         Args:
-            input (VSA_Model): Set of hypervectors to convert in a multiset.
+            input (VSATensor): Set of hypervectors to convert in a multiset.
 
         Examples::
 
-            >>> x = functional.random_hv(3, 3)
+            >>> x = functional.random(3, 3)
             >>> M = structures.Multiset.from_tensor(x)
 
         """
@@ -291,55 +291,55 @@ class HashTable:
 
     Args:
         dimensions (int): number of dimensions of the hash table.
-        model: (``VSA_Model``, optional): specifies the hypervector type and operations used (Default: MAP).
+        model: (``VSATensor``, optional): specifies the hypervector type and operations used (Default: MAPTensor).
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
 
     Args:
-        input (VSA_Model): tensor representing a hash table.
+        input (VSATensor): tensor representing a hash table.
         size (int, optional): the size of the hash table provided as input. Default: ``0``.
 
     Examples::
 
         >>> H = structures.HashTable(10000)
 
-        >>> x = functional.random_hv(3, 10000)
+        >>> x = functional.random(3, 10000)
         >>> M = structures.HashTable(x)
     """
 
     @overload
     def __init__(
-        self, dimensions: int, model: Type[VSA_Model] = MAP, *, device=None, dtype=None
+        self, dimensions: int, model: Type[VSATensor] = MAPTensor, *, device=None, dtype=None
     ):
         ...
 
     @overload
-    def __init__(self, input: VSA_Model, *, size=0):
+    def __init__(self, input: VSATensor, *, size=0):
         ...
 
-    def __init__(self, dim_or_input: int, model: Type[VSA_Model] = MAP, **kwargs):
+    def __init__(self, dim_or_input: int, model: Type[VSATensor] = MAPTensor, **kwargs):
         self.size = kwargs.get("size", 0)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
         else:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
-            self.value = functional.empty_hv(
+            self.value = functional.empty(
                 1, dim_or_input, model, dtype=dtype, device=device
             ).squeeze(0)
 
-    def add(self, key: VSA_Model, value: VSA_Model) -> None:
+    def add(self, key: VSATensor, value: VSATensor) -> None:
         """Adds one (key, value) pair to the hash table.
 
         Args:
-            key (VSA_Model): Hypervector used as key for adding the key-value pair.
-            value (VSA_Model): Tensor to be added as value to the hash table
+            key (VSATensor): Hypervector used as key for adding the key-value pair.
+            value (VSATensor): Tensor to be added as value to the hash table
 
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random_hv(len(letters), 10000)
-            >>> values = functional.random_hv(2, 10000)
+            >>> letters_hv = functional.random(len(letters), 10000)
+            >>> values = functional.random(2, 10000)
             >>> H.add(letters_hv[0], values[0])
 
         """
@@ -347,12 +347,12 @@ class HashTable:
         self.value = functional.bundle(self.value, pair)
         self.size += 1
 
-    def remove(self, key: VSA_Model, value: VSA_Model) -> None:
+    def remove(self, key: VSATensor, value: VSATensor) -> None:
         """Removes one (key, value) pair from the hash table.
 
         Args:
-            key (VSA_Model): Hypervector used as key for removing the key-value pair.
-            value (VSA_Model): Tensor to be removed linked to the key
+            key (VSATensor): Hypervector used as key for removing the key-value pair.
+            value (VSATensor): Tensor to be removed linked to the key
 
         Examples::
 
@@ -363,11 +363,11 @@ class HashTable:
         self.value = functional.bundle(self.value, -pair)
         self.size -= 1
 
-    def get(self, key: VSA_Model) -> VSA_Model:
+    def get(self, key: VSATensor) -> VSATensor:
         """Gets the approximate value from the key in the hash table.
 
         Args:
-            key (VSA_Model): Hypervector used as key for looking its value.
+            key (VSATensor): Hypervector used as key for looking its value.
 
         Examples::
 
@@ -377,13 +377,13 @@ class HashTable:
         """
         return functional.bind(self.value, key.inverse())
 
-    def replace(self, key: VSA_Model, old: VSA_Model, new: VSA_Model) -> None:
+    def replace(self, key: VSATensor, old: VSATensor, new: VSATensor) -> None:
         """Replace the value from key-value pair in the hash table.
 
         Args:
-            key (VSA_Model): Hypervector used as key for looking its value.
-            old (VSA_Model): Old value hypervector.
-            new (VSA_Model): New value hypervector.
+            key (VSATensor): Hypervector used as key for looking its value.
+            old (VSATensor): Old value hypervector.
+            new (VSATensor): New value hypervector.
 
         Examples::
 
@@ -393,11 +393,11 @@ class HashTable:
         self.remove(key, old)
         self.add(key, new)
 
-    def __getitem__(self, key: VSA_Model) -> VSA_Model:
+    def __getitem__(self, key: VSATensor) -> VSATensor:
         """Gets the approximate value from the key in the hash table.
 
         Args:
-            key (VSA_Model): Hypervector used as key for looking its value.
+            key (VSATensor): Hypervector used as key for looking its value.
 
         Examples::
 
@@ -430,18 +430,18 @@ class HashTable:
         self.value.fill_(0.0)
 
     @classmethod
-    def from_tensors(cls, keys: VSA_Model, values: VSA_Model):
+    def from_tensors(cls, keys: VSATensor, values: VSATensor):
         """Creates a hash table from a set of keys and values hypervectors.
 
         See: :func:`~torchhd.functional.hash_table`.
 
         Args:
-            keys (VSA_Model): Set of key hypervectors to add in the hash table.
-            values (VSA_Model): Set of value hypervectors to add in the hash table.
+            keys (VSATensor): Set of key hypervectors to add in the hash table.
+            values (VSATensor): Set of value hypervectors to add in the hash table.
 
         Examples::
-            >>> letters_hv = functional.random_hv(len(letters), 10000)
-            >>> values = functional.random_hv(len(letters), 10000)
+            >>> letters_hv = functional.random(len(letters), 10000)
+            >>> values = functional.random(len(letters), 10000)
             >>> H = structures.HashTable.from_tensors(letters_hv, values)
 
         """
@@ -456,12 +456,12 @@ class BundleSequence:
 
     Args:
         dimensions (int): number of dimensions of the sequence.
-        model: (``VSA_Model``, optional): specifies the hypervector type and operations used (Default: MAP).
+        model: (``VSATensor``, optional): specifies the hypervector type and operations used (Default: MAPTensor).
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
 
     Args:
-        input (VSA_Model): tensor representing a sequence.
+        input (VSATensor): tensor representing a sequence.
         size (int, optional): the length of the sequence provided as input. Default: ``0``.
 
     Examples::
@@ -469,42 +469,42 @@ class BundleSequence:
         >>> S = structures.BundleSequence(10000)
 
         >>> letters = list(string.ascii_lowercase)
-        >>> letters_hv = functional.random_hv(len(letters), 10000)
+        >>> letters_hv = functional.random(len(letters), 10000)
         >>> S = structures.BundleSequence(letters_hv[0], size=1)
 
     """
 
     @overload
     def __init__(
-        self, dimensions: int, model: Type[VSA_Model] = MAP, *, device=None, dtype=None
+        self, dimensions: int, model: Type[VSATensor] = MAPTensor, *, device=None, dtype=None
     ):
         ...
 
     @overload
-    def __init__(self, input: VSA_Model, *, size=0):
+    def __init__(self, input: VSATensor, *, size=0):
         ...
 
-    def __init__(self, dim_or_input: int, model: Type[VSA_Model] = MAP, **kwargs):
+    def __init__(self, dim_or_input: int, model: Type[VSATensor] = MAPTensor, **kwargs):
         self.size = kwargs.get("size", 0)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
         else:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
-            self.value = functional.empty_hv(
+            self.value = functional.empty(
                 1, dim_or_input, model, dtype=dtype, device=device
             ).squeeze(0)
 
-    def append(self, input: VSA_Model) -> None:
+    def append(self, input: VSATensor) -> None:
         """Appends the input tensor to the right of the sequence.
 
         Args:
-            input (VSA_Model): Hypervector to append to the sequence.
+            input (VSATensor): Hypervector to append to the sequence.
 
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random_hv(len(letters), 10000)
+            >>> letters_hv = functional.random(len(letters), 10000)
             >>> S.append(letters_hv[0])
 
         """
@@ -512,11 +512,11 @@ class BundleSequence:
         self.value = functional.bundle(input, rotated_value)
         self.size += 1
 
-    def appendleft(self, input: VSA_Model) -> None:
+    def appendleft(self, input: VSATensor) -> None:
         """Appends the input tensor to the left of the sequence.
 
         Args:
-            input (VSA_Model): Hypervector to append to the right of the sequence.
+            input (VSATensor): Hypervector to append to the right of the sequence.
 
         Examples::
 
@@ -527,11 +527,11 @@ class BundleSequence:
         self.value = functional.bundle(self.value, rotated_input)
         self.size += 1
 
-    def pop(self, input: VSA_Model) -> None:
+    def pop(self, input: VSATensor) -> None:
         """Pops the input tensor from the right of the sequence.
 
         Args:
-            input (VSA_Model): Hypervector to pop from the sequence.
+            input (VSATensor): Hypervector to pop from the sequence.
 
         Examples::
 
@@ -542,11 +542,11 @@ class BundleSequence:
         self.value = functional.bundle(self.value, -input)
         self.value = functional.permute(self.value, shifts=-1)
 
-    def popleft(self, input: VSA_Model) -> None:
+    def popleft(self, input: VSATensor) -> None:
         """Pops the input tensor from the left of the sequence.
 
         Args:
-            input (VSA_Model): Hypervector to pop left from the sequence.
+            input (VSATensor): Hypervector to pop left from the sequence.
 
         Examples::
 
@@ -557,13 +557,13 @@ class BundleSequence:
         rotated_input = functional.permute(input, shifts=len(self))
         self.value = functional.bundle(self.value, -rotated_input)
 
-    def replace(self, index: int, old: VSA_Model, new: VSA_Model) -> None:
+    def replace(self, index: int, old: VSATensor, new: VSATensor) -> None:
         """Replace the old hypervector value from the given index, for the new hypervector value.
 
         Args:
             index (int): Index from the sequence to replace its value.
-            old (VSA_Model): Old value hypervector.
-            new (VSA_Model): New value hypervector.
+            old (VSATensor): Old value hypervector.
+            new (VSATensor): New value hypervector.
 
         Examples::
 
@@ -592,7 +592,7 @@ class BundleSequence:
         value = functional.bundle(value, seq.value)
         return BundleSequence(value, size=len(self) + len(seq))
 
-    def __getitem__(self, index: int) -> VSA_Model:
+    def __getitem__(self, index: int) -> VSATensor:
         """Gets the approximate value from given index.
 
         Args:
@@ -629,16 +629,16 @@ class BundleSequence:
         self.size = 0
 
     @classmethod
-    def from_tensor(cls, input: VSA_Model):
+    def from_tensor(cls, input: VSATensor):
         """Creates a sequence from hypervectors.
 
         See: :func:`~torchhd.functional.bundle_sequence`.
 
         Args:
-            input (VSA_Model): Tensor containing hypervectors that form the sequence.
+            input (VSATensor): Tensor containing hypervectors that form the sequence.
 
         Examples::
-            >>> letters_hv = functional.random_hv(len(letters), 10000)
+            >>> letters_hv = functional.random(len(letters), 10000)
             >>> S = structures.BundleSequence.from_tensor(letters_hv)
 
         """
@@ -653,12 +653,12 @@ class BindSequence:
 
     Args:
         dimensions (int): number of dimensions of the sequence.
-        model: (``VSA_Model``, optional): specifies the hypervector type and operations used (Default: MAP).
+        model: (``VSATensor``, optional): specifies the hypervector type and operations used (Default: MAPTensor).
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
 
     Args:
-        input (VSA_Model): tensor representing a binding-based sequence.
+        input (VSATensor): tensor representing a binding-based sequence.
         size (int, optional): the length of the sequence provided as input. Default: ``0``.
 
     Examples::
@@ -668,35 +668,35 @@ class BindSequence:
 
     @overload
     def __init__(
-        self, dimensions: int, model: Type[VSA_Model] = MAP, *, device=None, dtype=None
+        self, dimensions: int, model: Type[VSATensor] = MAPTensor, *, device=None, dtype=None
     ):
         ...
 
     @overload
-    def __init__(self, input: VSA_Model, *, size=0):
+    def __init__(self, input: VSATensor, *, size=0):
         ...
 
-    def __init__(self, dim_or_input: int, model: Type[VSA_Model] = MAP, **kwargs):
+    def __init__(self, dim_or_input: int, model: Type[VSATensor] = MAPTensor, **kwargs):
         self.size = kwargs.get("size", 0)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
         else:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
-            self.value = functional.identity_hv(
+            self.value = functional.identity(
                 1, dim_or_input, model, dtype=dtype, device=device
             ).squeeze(0)
 
-    def append(self, input: VSA_Model) -> None:
+    def append(self, input: VSATensor) -> None:
         """Appends the input tensor to the right of the sequence.
 
         Args:
-            input (VSA_Model): Hypervector to append to the sequence.
+            input (VSATensor): Hypervector to append to the sequence.
 
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random_hv(len(letters), 10000)
+            >>> letters_hv = functional.random(len(letters), 10000)
             >>> DS.append(letters_hv[0])
 
         """
@@ -704,11 +704,11 @@ class BindSequence:
         self.value = functional.bind(input, rotated_value)
         self.size += 1
 
-    def appendleft(self, input: VSA_Model) -> None:
+    def appendleft(self, input: VSATensor) -> None:
         """Appends the input tensor to the left of the sequence.
 
         Args:
-            input (VSA_Model): Hypervector to append to the right of the sequence.
+            input (VSATensor): Hypervector to append to the right of the sequence.
 
         Examples::
 
@@ -719,11 +719,11 @@ class BindSequence:
         self.value = functional.bind(self.value, rotated_input)
         self.size += 1
 
-    def pop(self, input: VSA_Model) -> None:
+    def pop(self, input: VSATensor) -> None:
         """Pops the input tensor from the right of the sequence.
 
         Args:
-            input (VSA_Model): Hypervector to pop from the sequence.
+            input (VSATensor): Hypervector to pop from the sequence.
 
         Examples::
 
@@ -734,11 +734,11 @@ class BindSequence:
         self.value = functional.bind(self.value, input.inverse())
         self.value = functional.permute(self.value, shifts=-1)
 
-    def popleft(self, input: VSA_Model) -> None:
+    def popleft(self, input: VSATensor) -> None:
         """Pops the input tensor from the left of the sequence.
 
         Args:
-            input (VSA_Model): Hypervector to pop left from the sequence.
+            input (VSATensor): Hypervector to pop left from the sequence.
 
         Examples::
 
@@ -749,13 +749,13 @@ class BindSequence:
         rotated_input = functional.permute(input, shifts=len(self))
         self.value = functional.bind(self.value, rotated_input.inverse())
 
-    def replace(self, index: int, old: VSA_Model, new: VSA_Model) -> None:
+    def replace(self, index: int, old: VSATensor, new: VSATensor) -> None:
         """Replace the old hypervector value from the given index, for the new hypervector value.
 
         Args:
             index (int): Index from the sequence to replace its value.
-            old (VSA_Model): Old value hypervector.
-            new (VSA_Model): New value hypervector.
+            old (VSATensor): Old value hypervector.
+            new (VSATensor): New value hypervector.
 
         Examples::
 
@@ -792,16 +792,16 @@ class BindSequence:
         self.size = 0
 
     @classmethod
-    def from_tensor(cls, input: VSA_Model):
+    def from_tensor(cls, input: VSATensor):
         """Creates a sequence from tensor.
 
         See: :func:`~torchhd.functional.bind_sequence`.
 
         Args:
-            input (VSA_Model): Tensor containing hypervectors that form the sequence.
+            input (VSATensor): Tensor containing hypervectors that form the sequence.
 
         Examples::
-            >>> letters_hv = functional.random_hv(len(letters), 10000)
+            >>> letters_hv = functional.random(len(letters), 10000)
             >>> DS = structures.BindSequence.from_tensor(letters_hv)
 
         """
@@ -816,11 +816,11 @@ class Graph:
 
     Args:
         dimensions (int): number of dimensions of the graph.
-        model: (``VSA_Model``, optional): specifies the hypervector type and operations used (Default: MAP).
+        model: (``VSATensor``, optional): specifies the hypervector type and operations used (Default: MAPTensor).
         directed (bool, optional): specify if the graph is directed or not. Default: ``False``.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
-        input (VSA_Model): tensor representing a graph hypervector.
+        input (VSATensor): tensor representing a graph hypervector.
 
     Examples::
 
@@ -832,7 +832,7 @@ class Graph:
     def __init__(
         self,
         dimensions: int,
-        model: Type[VSA_Model] = MAP,
+        model: Type[VSATensor] = MAPTensor,
         *,
         directed=False,
         device=None,
@@ -841,52 +841,52 @@ class Graph:
         ...
 
     @overload
-    def __init__(self, input: VSA_Model, *, directed=False):
+    def __init__(self, input: VSATensor, *, directed=False):
         ...
 
-    def __init__(self, dim_or_input: int, model: Type[VSA_Model] = MAP, **kwargs):
+    def __init__(self, dim_or_input: int, model: Type[VSATensor] = MAPTensor, **kwargs):
         self.is_directed = kwargs.get("directed", False)
         if torch.is_tensor(dim_or_input):
             self.value = dim_or_input
         else:
             dtype = kwargs.get("dtype", torch.get_default_dtype())
             device = kwargs.get("device", None)
-            self.value = functional.empty_hv(
+            self.value = functional.empty(
                 1, dim_or_input, model, dtype=dtype, device=device
             ).squeeze(0)
 
-    def add_edge(self, node1: VSA_Model, node2: VSA_Model) -> None:
+    def add_edge(self, node1: VSATensor, node2: VSATensor) -> None:
         """Adds an edge to the graph.
 
         If directed the direction goes from the first node to the second one.
 
         Args:
-            node1 (VSA_Model): Hypervector representing the first node of the edge.
-            node2 (VSA_Model): Hypervector representing the second node of the edge.
+            node1 (VSATensor): Hypervector representing the first node of the edge.
+            node2 (VSATensor): Hypervector representing the second node of the edge.
 
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random_hv(len(letters), 10000)
+            >>> letters_hv = functional.random(len(letters), 10000)
             >>> G.add_edge(letters_hv[0], letters_hv[1])
 
         """
         edge = self.encode_edge(node1, node2)
         self.value = functional.bundle(self.value, edge)
 
-    def encode_edge(self, node1: VSA_Model, node2: VSA_Model) -> VSA_Model:
+    def encode_edge(self, node1: VSATensor, node2: VSATensor) -> VSATensor:
         """Returns the encoding of an edge.
 
         If directed the direction goes from the first node to the second one.
 
         Args:
-            node1 (VSA_Model): Hypervector representing the first node of the edge.
-            node2 (VSA_Model): Hypervector representing the second node of the edge.
+            node1 (VSATensor): Hypervector representing the first node of the edge.
+            node2 (VSATensor): Hypervector representing the second node of the edge.
 
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random_hv(len(letters), 10000)
+            >>> letters_hv = functional.random(len(letters), 10000)
             >>> G.encode_edge(letters_hv[0], letters_hv[1])
             tensor([-1.,  1., -1.,  ...,  1., -1., -1.])
 
@@ -896,11 +896,11 @@ class Graph:
         else:
             return functional.bind(node1, node2)
 
-    def node_neighbors(self, input: VSA_Model, outgoing=True) -> VSA_Model:
+    def node_neighbors(self, input: VSATensor, outgoing=True) -> VSATensor:
         """Returns the multiset of node neighbors of the input node.
 
         Args:
-            input (VSA_Model): Hypervector representing the node.
+            input (VSATensor): Hypervector representing the node.
             outgoing (bool, optional): if ``True``, returns the neighboring nodes that ``input`` has an edge to. If ``False``, returns the neighboring nodes that ``input`` has an edge from. This only has effect for directed graphs. Default: ``True``.
 
         Examples::
@@ -919,7 +919,7 @@ class Graph:
         else:
             return functional.bind(self.value, input.inverse())
 
-    def contains(self, input: VSA_Model) -> Tensor:
+    def contains(self, input: VSATensor) -> Tensor:
         """Returns the cosine similarity of the input vector against the graph.
 
         Args:
@@ -931,7 +931,7 @@ class Graph:
             >>> G.contains(e)
             tensor(1.)
         """
-        return functional.cos_similarity(input, self.value)
+        return functional.cosine_similarity(input, self.value)
 
     def clear(self) -> None:
         """Empties the graph.
@@ -943,13 +943,13 @@ class Graph:
         self.value.fill_(0.0)
 
     @classmethod
-    def from_edges(cls, input: VSA_Model, directed=False):
-        """Creates a graph from a VSA_Model
+    def from_edges(cls, input: VSATensor, directed=False):
+        """Creates a graph from a VSATensor
 
         See: :func:`~torchhd.functional.graph`.
 
         Args:
-            input (VSA_Model): tensor containing pairs of node hypervectors that share an edge.
+            input (VSATensor): tensor containing pairs of node hypervectors that share an edge.
             directed (bool, optional): specify if the graph is directed or not. Default: ``False``.
 
         Examples::
@@ -970,7 +970,7 @@ class Tree:
 
     Args:
         dimensions (int): dimensions of the tree.
-        model: (``VSA_Model``, optional): specifies the hypervector type and operations used (Default: MAP).
+        model: (``VSATensor``, optional): specifies the hypervector type and operations used (Default: MAPTensor).
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
 
@@ -981,26 +981,26 @@ class Tree:
     """
 
     def __init__(
-        self, dimensions, model: Type[VSA_Model] = MAP, device=None, dtype=None
+        self, dimensions, model: Type[VSATensor] = MAPTensor, device=None, dtype=None
     ):
         self.dimensions = dimensions
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
-        self.value = functional.empty_hv(
+        self.value = functional.empty(
             1, dimensions, model, dtype=dtype, device=device
         ).squeeze(0)
-        self.l_r = functional.random_hv(2, dimensions, dtype=dtype, device=device)
+        self.l_r = functional.random(2, dimensions, dtype=dtype, device=device)
 
-    def add_leaf(self, value: VSA_Model, path: List[str]) -> None:
+    def add_leaf(self, value: VSATensor, path: List[str]) -> None:
         """Adds a leaf to the tree.
 
         Args:
-            value (VSA_Model): Hypervector representing the first node of the edge.
+            value (VSATensor): Hypervector representing the first node of the edge.
             path (List[str]): Path of the leaf, using 'l' to refer as left and right 'r'.
 
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random_hv(len(letters), 10000)
+            >>> letters_hv = functional.random(len(letters), 10000)
             >>> T.add_leaf(letters_hv[0], ['l','l'])
 
         """
@@ -1017,7 +1017,7 @@ class Tree:
         self.value = functional.bundle(self.value, value)
 
     @property
-    def left(self) -> VSA_Model:
+    def left(self) -> VSATensor:
         """Returns the left branch of the tree at the corresponding level.
 
         Examples::
@@ -1029,7 +1029,7 @@ class Tree:
         return self.l_r[0]
 
     @property
-    def right(self) -> VSA_Model:
+    def right(self) -> VSATensor:
         """Returns the right branch of the tree at the corresponding level.
 
         Examples::
@@ -1040,7 +1040,7 @@ class Tree:
         """
         return self.l_r[1]
 
-    def get_leaf(self, path: List[str]) -> VSA_Model:
+    def get_leaf(self, path: List[str]) -> VSATensor:
         """Returns the value, either subtree or node given by the path.
 
         Args:
@@ -1088,7 +1088,7 @@ class FiniteStateAutomata:
 
     Args:
         dimensions (int): dimensions of the automata.
-        model: (``VSA_Model``, optional): specifies the hypervector type and operations used (Default: MAP).
+        model: (``VSATensor``, optional): specifies the hypervector type and operations used (Default: MAPTensor).
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
 
@@ -1099,30 +1099,30 @@ class FiniteStateAutomata:
     """
 
     def __init__(
-        self, dimensions, model: Type[VSA_Model] = MAP, device=None, dtype=None
+        self, dimensions, model: Type[VSATensor] = MAPTensor, device=None, dtype=None
     ):
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
-        self.value = functional.empty_hv(
+        self.value = functional.empty(
             1, dimensions, model, dtype=dtype, device=device
         ).squeeze(0)
 
     def add_transition(
         self,
-        token: VSA_Model,
-        initial_state: VSA_Model,
-        final_state: VSA_Model,
+        token: VSATensor,
+        initial_state: VSATensor,
+        final_state: VSATensor,
     ) -> None:
         """Adds a transition to the automata.
 
         Args:
-            token (VSA_Model): token used for changing state.
-            initial_state (VSA_Model): initial state of the transition.
-            final_state (VSA_Model): final state of the transition.
+            token (VSATensor): token used for changing state.
+            initial_state (VSATensor): initial state of the transition.
+            final_state (VSATensor): final state of the transition.
 
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random_hv(len(letters), 10000)
+            >>> letters_hv = functional.random(len(letters), 10000)
             >>> T.add_transition(letters_hv[0], letters_hv[1], letters_hv[2])
 
         """
@@ -1132,12 +1132,12 @@ class FiniteStateAutomata:
         transition = functional.bind(token, transition_edge)
         self.value = functional.bundle(self.value, transition)
 
-    def transition(self, state: VSA_Model, action: VSA_Model) -> VSA_Model:
+    def transition(self, state: VSATensor, action: VSATensor) -> VSATensor:
         """Returns the next state off the automata plus some noise.
 
         Args:
-            state (VSA_Model): initial state of the transition.
-            action (VSA_Model): token used for changing state.
+            state (VSATensor): initial state of the transition.
+            action (VSATensor): token used for changing state.
 
         Examples::
 

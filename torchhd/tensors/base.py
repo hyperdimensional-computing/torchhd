@@ -1,9 +1,9 @@
-import torch
 from typing import List, Set
+import torch
 from torch import Tensor
 
 
-class VSA_Model(Tensor):
+class VSATensor(Tensor):
     """Base class
 
     Each model must implement the methods specified on this base class.
@@ -12,31 +12,31 @@ class VSA_Model(Tensor):
     supported_dtypes: Set[torch.dtype]
 
     @classmethod
-    def empty_hv(
+    def empty(
         cls,
         num_vectors: int,
         dimensions: int,
         *,
         dtype=None,
         device=None,
-    ) -> "VSA_Model":
+    ) -> "VSATensor":
         """Creates hypervectors representing empty sets"""
         raise NotImplementedError
 
     @classmethod
-    def identity_hv(
+    def identity(
         cls,
         num_vectors: int,
         dimensions: int,
         *,
         dtype=None,
         device=None,
-    ) -> "VSA_Model":
+    ) -> "VSATensor":
         """Creates identity hypervectors for binding"""
         raise NotImplementedError
 
     @classmethod
-    def random_hv(
+    def random(
         cls,
         num_vectors: int,
         dimensions: int,
@@ -44,15 +44,15 @@ class VSA_Model(Tensor):
         dtype=None,
         device=None,
         generator=None,
-    ) -> "VSA_Model":
+    ) -> "VSATensor":
         """Creates random or uncorrelated hypervectors"""
         raise NotImplementedError
 
-    def bundle(self, other: "VSA_Model") -> "VSA_Model":
+    def bundle(self, other: "VSATensor") -> "VSATensor":
         """Bundle the hypervector with other"""
         raise NotImplementedError
 
-    def multibundle(self) -> "VSA_Model":
+    def multibundle(self) -> "VSATensor":
         """Bundle multiple hypervectors"""
         if self.dim() < 2:
             class_name = self.__class__.__name__
@@ -64,7 +64,7 @@ class VSA_Model(Tensor):
         if n == 1:
             return self.unsqueeze(-2)
 
-        tensors: List[VSA_Model] = torch.unbind(self, dim=-2)
+        tensors: List[VSATensor] = torch.unbind(self, dim=-2)
         print(type(tensors[0]))
 
         output = tensors[0].bundle(tensors[1])
@@ -73,11 +73,11 @@ class VSA_Model(Tensor):
 
         return output
 
-    def bind(self, other: "VSA_Model") -> "VSA_Model":
+    def bind(self, other: "VSATensor") -> "VSATensor":
         """Bind the hypervector with other"""
         raise NotImplementedError
 
-    def multibind(self) -> "VSA_Model":
+    def multibind(self) -> "VSATensor":
         """Bind multiple hypervectors"""
         if self.dim() < 2:
             class_name = self.__class__.__name__
@@ -89,7 +89,7 @@ class VSA_Model(Tensor):
         if n == 1:
             return self.unsqueeze(-2)
 
-        tensors: List[VSA_Model] = torch.unbind(self, dim=-2)
+        tensors: List[VSATensor] = torch.unbind(self, dim=-2)
 
         output = tensors[0].bind(tensors[1])
         for i in range(2, n):
@@ -97,22 +97,22 @@ class VSA_Model(Tensor):
 
         return output
 
-    def inverse(self) -> "VSA_Model":
+    def inverse(self) -> "VSATensor":
         """Inverse the hypervector for binding"""
         raise NotImplementedError
 
-    def negative(self) -> "VSA_Model":
+    def negative(self) -> "VSATensor":
         """Negate the hypervector for the bundling inverse"""
         raise NotImplementedError
 
-    def permute(self, n: int = 1) -> "VSA_Model":
+    def permute(self, shifts: int = 1) -> "VSATensor":
         """Permute the hypervector"""
-        raise NotImplementedError
+        return super().roll(shifts=shifts, dims=-1)
 
-    def dot_similarity(self, others: "VSA_Model") -> Tensor:
+    def dot_similarity(self, others: "VSATensor") -> Tensor:
         """Inner product with other hypervectors"""
         raise NotImplementedError
 
-    def cos_similarity(self, others: "VSA_Model") -> Tensor:
+    def cosine_similarity(self, others: "VSATensor") -> Tensor:
         """Cosine similarity with other hypervectors"""
         raise NotImplementedError

@@ -14,7 +14,7 @@ class HDHashing:
         self.dimensions = dimensions
         self.device = device
 
-        self.hvs = torchhd.circular_hv(levels, dimensions, device=device)
+        self.hvs = torchhd.circular(levels, dimensions, device=device)
         self.servers = []
         self.server_hvs = []
         self.weight_by_server = {}

@@ -49,11 +49,11 @@ torch_dtypes = {
 }
 
 
-def supported_dtype(dtype: torch.dtype, model: Type[torchhd.VSA_Model]) -> bool:
-    if not issubclass(model, torchhd.VSA_Model):
-        raise ValueError("Must provide a VSA_Model class")
+def supported_dtype(dtype: torch.dtype, model: Type[torchhd.VSATensor]) -> bool:
+    if not issubclass(model, torchhd.VSATensor):
+        raise ValueError("Must provide a VSATensor class")
 
-    if model == torchhd.BSC:
+    if model == torchhd.BSCTensor:
         return dtype not in {
             torch.complex64,
             torch.complex128,
@@ -61,21 +61,21 @@ def supported_dtype(dtype: torch.dtype, model: Type[torchhd.VSA_Model]) -> bool:
             torch.bfloat16,
         }
 
-    elif model == torchhd.MAP:
+    elif model == torchhd.MAPTensor:
         return dtype not in {torch.uint8, torch.bool, torch.float16, torch.bfloat16}
 
-    elif model == torchhd.HRR:
+    elif model == torchhd.HRRTensor:
         return dtype in {torch.float32, torch.float64}
 
-    elif model == torchhd.FHRR:
+    elif model == torchhd.FHRRTensor:
         return dtype in {torch.complex64, torch.complex128}
 
     return False
 
 
-vsa_models = [
-    torchhd.BSC,
-    torchhd.MAP,
-    torchhd.HRR,
-    torchhd.FHRR,
+VSATensors = [
+    torchhd.BSCTensor,
+    torchhd.MAPTensor,
+    torchhd.HRRTensor,
+    torchhd.FHRRTensor,
 ]

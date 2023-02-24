@@ -14,12 +14,12 @@ Basis-hypervector sets
     :toctree: generated/
     :template: function.rst
 
-    empty_hv
-    identity_hv
-    random_hv
-    level_hv
-    thermometer_hv
-    circular_hv
+    empty
+    identity
+    random
+    level
+    thermometer
+    circular
     
 
 Operations
@@ -50,7 +50,7 @@ Similarities
     :toctree: generated/
     :template: function.rst
     
-    cos_similarity
+    cosine_similarity
     dot_similarity
     hamming_similarity
 
@@ -79,11 +79,11 @@ VSA Models
     :toctree: generated/
     :template: class.rst
 
-    VSA_Model
-    BSC
-    MAP
-    HRR
-    FHRR
+    VSATensor
+    BSCTensor
+    MAPTensor
+    HRRTensor
+    FHRRTensor
 
 
 Utilities
@@ -93,7 +93,7 @@ Utilities
     :toctree: generated/
     :template: function.rst
     
-    as_vsa_model
+    ensure_vsa_tensor
     map_range
     value_to_index
     index_to_value

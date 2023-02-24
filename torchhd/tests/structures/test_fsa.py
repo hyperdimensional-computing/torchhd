@@ -17,11 +17,11 @@ class TestFSA:
     def test_generator(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        hv1 = functional.random_hv(60, 10000, generator=generator)
+        hv1 = functional.random(60, 10000, generator=generator)
 
         generator = torch.Generator()
         generator.manual_seed(seed)
-        hv2 = functional.random_hv(60, 10000, generator=generator)
+        hv2 = functional.random(60, 10000, generator=generator)
 
         assert (hv1 == hv2).min().item()
 
@@ -30,8 +30,8 @@ class TestFSA:
         generator1 = torch.Generator()
         generator.manual_seed(seed)
         generator1.manual_seed(seed1)
-        tokens = functional.random_hv(10, 10, generator=generator)
-        actions = functional.random_hv(10, 10, generator=generator1)
+        tokens = functional.random(10, 10, generator=generator)
+        actions = functional.random(10, 10, generator=generator1)
 
         F = structures.FiniteStateAutomata(10)
 
@@ -55,8 +55,8 @@ class TestFSA:
         generator1 = torch.Generator()
         generator.manual_seed(seed)
         generator1.manual_seed(seed1)
-        tokens = functional.random_hv(10, 10, generator=generator)
-        states = functional.random_hv(10, 10, generator=generator1)
+        tokens = functional.random(10, 10, generator=generator)
+        states = functional.random(10, 10, generator=generator1)
 
         F = structures.FiniteStateAutomata(10)
 
@@ -66,19 +66,19 @@ class TestFSA:
 
         assert (
             torch.argmax(
-                functional.cos_similarity(F.transition(states[1], tokens[0]), states)
+                functional.cosine_similarity(F.transition(states[1], tokens[0]), states)
             ).item()
             == 2
         )
         assert (
             torch.argmax(
-                functional.cos_similarity(F.transition(states[1], tokens[1]), states)
+                functional.cosine_similarity(F.transition(states[1], tokens[1]), states)
             ).item()
             == 3
         )
         assert (
             torch.argmax(
-                functional.cos_similarity(F.transition(states[1], tokens[2]), states)
+                functional.cosine_similarity(F.transition(states[1], tokens[2]), states)
             ).item()
             == 5
         )
@@ -88,8 +88,8 @@ class TestFSA:
         generator1 = torch.Generator()
         generator.manual_seed(seed)
         generator1.manual_seed(seed1)
-        tokens = functional.random_hv(10, 10, generator=generator)
-        states = functional.random_hv(10, 10, generator=generator1)
+        tokens = functional.random(10, 10, generator=generator)
+        states = functional.random(10, 10, generator=generator1)
 
         F = structures.FiniteStateAutomata(10)
 

@@ -33,13 +33,13 @@ The first step to encode these records is to define the basis-hypervectors for e
 
 .. code-block:: python
 
-	from torchhd import functional
+	import torchhd
 
 	d = 10000 # dimensions
-	fruits = functional.random_hv(3, d)
-	weights = functional.level_hv(10, d)
-	seasons = functional.circular_hv(4, d)
-	var = functional.random_hv(3, d)
+	fruits = torchhd.random(3, d)
+	weights = torchhd.level(10, d)
+	seasons = torchhd.circular(4, d)
+	var = torchhd.random(3, d)
 
 which creates hypervectors for the 3 fruit types, 10 weight levels, 4 seasons and the 3 variables. The figure below illustrates the distance between the pairs of hypervectors in each set:
 
@@ -55,7 +55,7 @@ Similar behavior can be achieved using the classes in the :ref:`embeddings` modu
 
 	weight = torch.tensor([149.0])
 	# explicit mapping of the fruit weight to an index
-	w_i = functional.value_to_index(weight, 0, 200, 10)
+	w_i = torchhd.functional.value_to_index(weight, 0, 200, 10)
 	weights[w_i]  # select representation of 149
 
 whereas the :ref:`embeddings<embeddings>` have this common behavior built-in:
@@ -75,10 +75,10 @@ Once the basis-hypervectors are defined, we can use the MAP operations from :ref
 
 .. code-block:: python
 
-	f = functional.bind(var[0], fruits[0])   # fruit = apple
-	w = functional.bind(var[1], weights[w_i]) # weight = 149
-	s = functional.bind(var[2], seasons[3])   # season = fall
-	r1 = functional.bundle(functional.bundle(f, w), s)
+	f = torchhd.bind(var[0], fruits[0])   # fruit = apple
+	w = torchhd.bind(var[1], weights[w_i]) # weight = 149
+	s = torchhd.bind(var[2], seasons[3])   # season = fall
+	r1 = torchhd.bundle(torchhd.bundle(f, w), s)
 
 which is equivalent to using the following shortened syntax:
 
@@ -95,7 +95,7 @@ Alternatively, we can use one of the commonly used encodings provided in the :re
 
 	# combine values in one tensor of shape (3, d)
 	values = torch.stack([fruits[0], weights[w_i], seasons[3]])
-	r1 = functional.hash_table(var, values)
+	r1 = torchhd.hash_table(var, values)
 
 The :ref:`structures` module contains the same encoding patterns in addition to binary trees and finite state automata, but provides them as data structures. This module provides class-based implementations of HDC data structures. Using the hash table class, record :math:`r_1` can be represented as follows:
 
