@@ -25,7 +25,8 @@ def experiment(
     method="DensityEncodingRegenerativeContinuous",
     epochs=5,
     drop_rate=0.2,
-    filename='exp'):
+    filename="exp",
+):
     def create_min_max_normalize(min, max):
         def normalize(input):
             return torch.nan_to_num((input - min) / (max - min))
@@ -115,8 +116,8 @@ def experiment(
                     wrong_inferred[labels.item()] += 1
                 accuracy.update(outputs.cpu(), labels)
 
-            op = 'r+'
-            if (os.path.exists("results/missclassified" + filename + ".json") == False):
+            op = "r+"
+            if os.path.exists("results/missclassified" + filename + ".json") == False:
                 op = "x+"
 
             with open("results/missclassified" + filename + ".json", op) as outfile:

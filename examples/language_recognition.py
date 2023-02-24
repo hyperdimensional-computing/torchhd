@@ -57,13 +57,21 @@ test_ld = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
 def ngram(input, n, permute_hv):
     input = torchhd.as_vsa_model(input)
-    n_gram = torchhd.bind(input[..., : -(n - 1), :], torch.unsqueeze(permute_hv[n - 2].repeat((input.shape[1]-(n-1)),1), 0))
+    n_gram = torchhd.bind(
+        input[..., : -(n - 1), :],
+        torch.unsqueeze(permute_hv[n - 2].repeat((input.shape[1] - (n - 1)), 1), 0),
+    )
     for i in range(1, n):
         stop = None if i == (n - 1) else -(n - i - 1)
         if n - i - 1 == 0:
             sample = input[..., i:stop, :]
         else:
-            sample = torchhd.bind(input[..., i:stop, :], torch.unsqueeze(permute_hv[n - i - 2].repeat((input.shape[1]-(n-1)),1), 0))
+            sample = torchhd.bind(
+                input[..., i:stop, :],
+                torch.unsqueeze(
+                    permute_hv[n - i - 2].repeat((input.shape[1] - (n - 1)), 1), 0
+                ),
+            )
         n_gram = torchhd.bind(n_gram, sample)
     return torchhd.multiset(n_gram)
 
@@ -76,7 +84,7 @@ class Encoder(nn.Module):
 
     def forward(self, x):
         symbols = self.symbol(x)
-        #sample_hv = torchhd.ngrams(symbols, n=3)
+        # sample_hv = torchhd.ngrams(symbols, n=3)
         sample_hv = ngram(symbols, 3, self.permute_hv)
         return torchhd.hard_quantize(sample_hv)
 

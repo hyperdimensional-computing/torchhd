@@ -14,6 +14,7 @@ import sinusoid_projection_online_iterative
 import sinusoid_projection_regenerative_contiuous
 import sinusoid_projection_regenerative_reset
 import time
+
 dimensions = [10000]
 epochs = [5]
 drop_rate = [0.2]

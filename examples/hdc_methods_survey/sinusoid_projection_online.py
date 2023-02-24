@@ -20,7 +20,12 @@ device = "cpu"
 BATCH_SIZE = 1
 
 
-def experiment(DIMENSIONS=10000, method="SinusoidProjectionOnlineIterative", epochs=5, filename='exp'):
+def experiment(
+    DIMENSIONS=10000,
+    method="SinusoidProjectionOnlineIterative",
+    epochs=5,
+    filename="exp",
+):
     def create_min_max_normalize(min, max):
         def normalize(input):
             return torch.nan_to_num((input - min) / (max - min))
@@ -107,8 +112,8 @@ def experiment(DIMENSIONS=10000, method="SinusoidProjectionOnlineIterative", epo
                     wrong_inferred[labels.item()] += 1
                 accuracy.update(outputs.cpu(), labels)
 
-            op = 'r+'
-            if (os.path.exists("results/missclassified" + filename + ".json") == False):
+            op = "r+"
+            if os.path.exists("results/missclassified" + filename + ".json") == False:
                 op = "x+"
 
             with open("results/missclassified" + filename + ".json", op) as outfile:

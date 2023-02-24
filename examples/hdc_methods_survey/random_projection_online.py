@@ -105,8 +105,8 @@ def experiment(DIMENSIONS=10000, method="RandomProjectionOnline", filename="exp"
                     wrong_inferred[labels.item()] += 1
                 accuracy.update(outputs.cpu(), labels)
 
-            op = 'r+'
-            if (os.path.exists("results/missclassified" + filename + ".json") == False):
+            op = "r+"
+            if os.path.exists("results/missclassified" + filename + ".json") == False:
                 op = "x+"
 
             with open("results/missclassified" + filename + ".json", op) as outfile:
