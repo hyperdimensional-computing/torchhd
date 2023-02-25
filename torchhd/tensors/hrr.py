@@ -203,11 +203,11 @@ class HRRTensor(VSATensor):
             HRR([ 0.4618, -0.0758,  0.4866, -0.1053, -0.1281,  0.1434], dtype=torch.float64)
 
         """
-        return self.add(other)
+        return torch.add(self, other)
 
     def multibundle(self) -> "HRRTensor":
         """Bundle multiple hypervectors"""
-        return self.sum(dim=-2, dtype=self.dtype)
+        return torch.sum(self, dim=-2, dtype=self.dtype)
 
     def bind(self, other: "HRRTensor") -> "HRRTensor":
         r"""Bind the hypervector with other using circular convolution.
@@ -253,7 +253,7 @@ class HRRTensor(VSATensor):
 
     def exact_inverse(self) -> "HRRTensor":
         """Unstable, but exact, inverse"""
-        result = ifft(1.0 / fft(self).conj())
+        result = ifft(1.0 / torch.conj(fft(self)))
         result = torch.real(result)
         return torch.nan_to_num(result)
 
@@ -281,7 +281,7 @@ class HRRTensor(VSATensor):
             HRR([[ 0.0090, -0.1744, -0.2351,  0.0441,  0.0836,  0.2620]], dtype=torch.float64)
 
         """
-        result = ifft(fft(self).conj())
+        result = ifft(torch.conj(fft(self)))
         return torch.real(result)
 
     def negative(self) -> "HRRTensor":
@@ -335,7 +335,7 @@ class HRRTensor(VSATensor):
             HRR([[ 0.1926, -0.0495, -0.0318,  0.3923, -0.3205,  0.1587]], dtype=torch.float64)
 
         """
-        return self.roll(shifts=shifts, dims=-1)
+        return torch.roll(self, shifts=shifts, dims=-1)
 
     def dot_similarity(self, others: "HRRTensor") -> Tensor:
         """Inner product with other hypervectors"""
@@ -346,15 +346,15 @@ class HRRTensor(VSATensor):
     def cosine_similarity(self, others: "HRRTensor", *, eps=1e-08) -> Tensor:
         """Cosine similarity with other hypervectors"""
         self_dot = torch.sum(self * self, dim=-1)
-        self_mag = self_dot.sqrt()
+        self_mag = torch.sqrt(self_dot)
 
         others_dot = torch.sum(others * others, dim=-1)
-        others_mag = others_dot.sqrt()
+        others_mag = torch.sqrt(others_dot)
 
         if self.dim() > 1:
             magnitude = self_mag.unsqueeze(-1) * others_mag.unsqueeze(0)
         else:
             magnitude = self_mag * others_mag
 
-        magnitude = magnitude.clamp(min=eps)
+        magnitude = torch.clamp(magnitude, min=eps)
         return self.dot_similarity(others) / magnitude

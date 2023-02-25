@@ -217,11 +217,11 @@ class FHRRTensor(VSATensor):
             dtype=torch.complex128)
 
         """
-        return self.add(other)
+        return torch.add(self, other)
 
     def multibundle(self) -> "FHRRTensor":
         """Bundle multiple hypervectors"""
-        return self.sum(dim=-2, dtype=self.dtype)
+        return torch.sum(self, dim=-2, dtype=self.dtype)
 
     def bind(self, other: "FHRRTensor") -> "FHRRTensor":
         r"""Bind the hypervector with other using element-wise multiplication.
@@ -260,11 +260,11 @@ class FHRRTensor(VSATensor):
             dtype=torch.complex128)
 
         """
-        return self.mul(other)
+        return torch.mul(self, other)
 
     def multibind(self) -> "FHRRTensor":
         """Bind multiple hypervectors"""
-        return self.prod(dim=-2, dtype=self.dtype)
+        return torch.prod(self, dim=-2, dtype=self.dtype)
 
     def inverse(self) -> "FHRRTensor":
         r"""Invert the hypervector for binding.
@@ -293,7 +293,7 @@ class FHRRTensor(VSATensor):
             dtype=torch.complex128)
 
         """
-        return self.conj()
+        return torch.conj(self)
 
     def negative(self) -> "FHRRTensor":
         r"""Negate the hypervector for the bundling inverse.
@@ -349,26 +349,26 @@ class FHRRTensor(VSATensor):
             dtype=torch.complex128)
 
         """
-        return self.roll(shifts=shifts, dims=-1)
+        return torch.roll(self, shifts=shifts, dims=-1)
 
     def dot_similarity(self, others: "FHRRTensor") -> Tensor:
         """Inner product with other hypervectors"""
         if others.dim() >= 2:
             others = others.mT
-        return torch.matmul(self, others.conj()).real
+        return torch.real(torch.matmul(self, torch.conj(others)))
 
     def cosine_similarity(self, others: "FHRRTensor", *, eps=1e-08) -> Tensor:
         """Cosine similarity with other hypervectors"""
-        self_dot = torch.real(self * self.conj()).sum(dim=-1)
-        self_mag = self_dot.sqrt()
+        self_dot = torch.sum(torch.real(self * torch.conj(self)), dim=-1)
+        self_mag = torch.sqrt(self_dot)
 
-        others_dot = torch.real(others * others.conj()).sum(dim=-1)
-        others_mag = others_dot.sqrt()
+        others_dot = torch.sum(torch.real(others * torch.conj(others)), dim=-1)
+        others_mag = torch.sqrt(others_dot)
 
         if self.dim() > 1:
             magnitude = self_mag.unsqueeze(-1) * others_mag.unsqueeze(0)
         else:
             magnitude = self_mag * others_mag
 
-        magnitude = magnitude.clamp(min=eps)
+        magnitude = torch.clamp(magnitude, min=eps)
         return self.dot_similarity(others) / magnitude

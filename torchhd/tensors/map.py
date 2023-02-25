@@ -194,11 +194,11 @@ class MAPTensor(VSATensor):
             tensor([ 0., -2.,  0., -2., -2.,  2., -2.,  0.,  2.,  2.])
 
         """
-        return self.add(other)
+        return torch.add(self, other)
 
     def multibundle(self) -> "MAPTensor":
         """Bundle multiple hypervectors"""
-        return self.sum(dim=-2, dtype=self.dtype)
+        return torch.sum(self, dim=-2, dtype=self.dtype)
 
     def bind(self, other: "MAPTensor") -> "MAPTensor":
         r"""Bind the hypervector with other using element-wise multiplication.
@@ -227,11 +227,11 @@ class MAPTensor(VSATensor):
 
         """
 
-        return self.mul(other)
+        return torch.mul(self, other)
 
     def multibind(self) -> "MAPTensor":
         """Bind multiple hypervectors"""
-        return self.prod(dim=-2, dtype=self.dtype)
+        return torch.prod(self, dim=-2, dtype=self.dtype)
 
     def inverse(self) -> "MAPTensor":
         r"""Invert the hypervector for binding.
@@ -252,7 +252,7 @@ class MAPTensor(VSATensor):
 
         """
 
-        return self.clone()
+        return torch.clone(self)
 
     def negative(self) -> "MAPTensor":
         """Negate the hypervector for the bundling inverse
@@ -293,7 +293,7 @@ class MAPTensor(VSATensor):
             tensor([[ 1.,  1.,  1.,  1., -1., -1., -1.,  1., -1., -1.]])
 
         """
-        return self.roll(shifts=shifts, dims=-1)
+        return torch.roll(self, shifts=shifts, dims=-1)
 
     def clipping(self, kappa) -> "MAPTensor":
         """Performs the clipping function that clips the lower and upper values.
@@ -315,7 +315,7 @@ class MAPTensor(VSATensor):
 
         """
 
-        return self.clamp(min=-kappa, max=kappa)
+        return torch.clamp(self, min=-kappa, max=kappa)
 
     def dot_similarity(self, others: "MAPTensor") -> Tensor:
         """Inner product with other hypervectors"""
@@ -329,15 +329,15 @@ class MAPTensor(VSATensor):
         dtype = torch.get_default_dtype()
 
         self_dot = torch.sum(self * self, dim=-1, dtype=dtype)
-        self_mag = self_dot.sqrt()
+        self_mag = torch.sqrt(self_dot)
 
         others_dot = torch.sum(others * others, dim=-1, dtype=dtype)
-        others_mag = others_dot.sqrt()
+        others_mag = torch.sqrt(others_dot)
 
         if self.dim() >= 2:
             magnitude = self_mag.unsqueeze(-1) * others_mag.unsqueeze(0)
         else:
             magnitude = self_mag * others_mag
 
-        magnitude = magnitude.clamp(min=eps)
+        magnitude = torch.clamp(magnitude, min=eps)
         return self.dot_similarity(others) / magnitude
