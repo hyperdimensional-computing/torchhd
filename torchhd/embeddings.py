@@ -58,7 +58,7 @@ class Empty(nn.Embedding):
     __constants__ = [
         "num_embeddings",
         "embedding_dim",
-        "vsa_tensor",
+        "vsa",
         "padding_idx",
         "max_norm",
         "norm_type",
@@ -66,7 +66,7 @@ class Empty(nn.Embedding):
         "sparse",
     ]
 
-    vsa_tensor: Type[VSATensor]
+    vsa: VSAOptions
 
     def __init__(
         self,
@@ -88,7 +88,7 @@ class Empty(nn.Embedding):
 
         self.num_embeddings = num_embeddings
         self.embedding_dim = embedding_dim
-        self.vsa_tensor = functional.get_vsa_tensor_class(vsa)
+        self.vsa = vsa
 
         if padding_idx is not None:
             if padding_idx > 0:
@@ -108,7 +108,7 @@ class Empty(nn.Embedding):
         self.sparse = sparse
 
         embeddings = functional.empty(
-            num_embeddings, embedding_dim, VSATensor, **factory_kwargs
+            num_embeddings, embedding_dim, self.vsa, **factory_kwargs
         )
         # Have to provide requires grad at the creation of the parameters to
         # prevent errors when instantiating a non-float embedding
@@ -123,13 +123,14 @@ class Empty(nn.Embedding):
             embeddings = functional.empty(
                 self.num_embeddings,
                 self.embedding_dim,
-                self.vsa_tensor,
+                self.vsa,
                 **factory_kwargs
             )
             self.weight.copy_(embeddings)
 
     def forward(self, input: Tensor) -> Tensor:
-        return super().forward(input).as_subclass(self.vsa_tensor)
+        vsa_tensor = functional.get_vsa_tensor_class(self.vsa)
+        return super().forward(input).as_subclass(vsa_tensor)
 
 
 class Identity(nn.Embedding):
@@ -166,7 +167,7 @@ class Identity(nn.Embedding):
     __constants__ = [
         "num_embeddings",
         "embedding_dim",
-        "vsa_tensor",
+        "vsa",
         "padding_idx",
         "max_norm",
         "norm_type",
@@ -174,7 +175,7 @@ class Identity(nn.Embedding):
         "sparse",
     ]
 
-    vsa_tensor: Type[VSATensor]
+    vsa: VSAOptions
 
     def __init__(
         self,
@@ -196,7 +197,7 @@ class Identity(nn.Embedding):
 
         self.num_embeddings = num_embeddings
         self.embedding_dim = embedding_dim
-        self.vsa_tensor = functional.get_vsa_tensor_class(vsa)
+        self.vsa = vsa
 
         if padding_idx is not None:
             if padding_idx > 0:
@@ -216,7 +217,7 @@ class Identity(nn.Embedding):
         self.sparse = sparse
 
         embeddings = functional.identity(
-            num_embeddings, embedding_dim, VSATensor, **factory_kwargs
+            num_embeddings, embedding_dim, self.vsa, **factory_kwargs
         )
         # Have to provide requires grad at the creation of the parameters to
         # prevent errors when instantiating a non-float embedding
@@ -231,7 +232,7 @@ class Identity(nn.Embedding):
             embeddings = functional.identity(
                 self.num_embeddings,
                 self.embedding_dim,
-                self.vsa_tensor,
+                self.vsa,
                 **factory_kwargs
             )
             self.weight.copy_(embeddings)
@@ -244,12 +245,13 @@ class Identity(nn.Embedding):
         if self.padding_idx is not None:
             with torch.no_grad():
                 empty = functional.empty(
-                    1, self.embedding_dim, self.vsa_tensor, **factory_kwargs
+                    1, self.embedding_dim, self.vsa, **factory_kwargs
                 )
                 self.weight[self.padding_idx].copy_(empty.squeeze(0))
 
     def forward(self, input: Tensor) -> Tensor:
-        return super().forward(input).as_subclass(self.vsa_tensor)
+        vsa_tensor = functional.get_vsa_tensor_class(self.vsa)
+        return super().forward(input).as_subclass(vsa_tensor)
 
 
 class Random(nn.Embedding):
@@ -286,7 +288,7 @@ class Random(nn.Embedding):
     __constants__ = [
         "num_embeddings",
         "embedding_dim",
-        "vsa_tensor",
+        "vsa",
         "padding_idx",
         "max_norm",
         "norm_type",
@@ -294,7 +296,7 @@ class Random(nn.Embedding):
         "sparse",
     ]
 
-    vsa_tensor: Type[VSATensor]
+    vsa: VSAOptions
 
     def __init__(
         self,
@@ -316,7 +318,7 @@ class Random(nn.Embedding):
 
         self.num_embeddings = num_embeddings
         self.embedding_dim = embedding_dim
-        self.vsa_tensor = functional.get_vsa_tensor_class(vsa)
+        self.vsa = vsa
 
         if padding_idx is not None:
             if padding_idx > 0:
@@ -336,7 +338,7 @@ class Random(nn.Embedding):
         self.sparse = sparse
 
         embeddings = functional.random(
-            num_embeddings, embedding_dim, VSATensor, **factory_kwargs
+            num_embeddings, embedding_dim, self.vsa, **factory_kwargs
         )
         # Have to provide requires grad at the creation of the parameters to
         # prevent errors when instantiating a non-float embedding
@@ -351,7 +353,7 @@ class Random(nn.Embedding):
             embeddings = functional.random(
                 self.num_embeddings,
                 self.embedding_dim,
-                self.vsa_tensor,
+                self.vsa,
                 **factory_kwargs
             )
             self.weight.copy_(embeddings)
@@ -364,12 +366,13 @@ class Random(nn.Embedding):
         if self.padding_idx is not None:
             with torch.no_grad():
                 empty = functional.empty(
-                    1, self.embedding_dim, self.vsa_tensor, **factory_kwargs
+                    1, self.embedding_dim, self.vsa, **factory_kwargs
                 )
                 self.weight[self.padding_idx].copy_(empty.squeeze(0))
 
     def forward(self, input: Tensor) -> Tensor:
-        return super().forward(input).as_subclass(self.vsa_tensor)
+        vsa_tensor = functional.get_vsa_tensor_class(self.vsa)
+        return super().forward(input).as_subclass(vsa_tensor)
 
 
 class Level(nn.Embedding):
@@ -417,7 +420,7 @@ class Level(nn.Embedding):
     __constants__ = [
         "num_embeddings",
         "embedding_dim",
-        "vsa_tensor",
+        "vsa",
         "low",
         "high",
         "randomness",
@@ -431,7 +434,7 @@ class Level(nn.Embedding):
     low: float
     high: float
     randomness: float
-    vsa_tensor: Type[VSATensor]
+    vsa: VSAOptions
 
     def __init__(
         self,
@@ -455,7 +458,7 @@ class Level(nn.Embedding):
 
         self.num_embeddings = num_embeddings
         self.embedding_dim = embedding_dim
-        self.vsa_tensor = functional.get_vsa_tensor_class(vsa)
+        self.vsa = vsa
         self.low = low
         self.high = high
         self.randomness = randomness
@@ -469,7 +472,7 @@ class Level(nn.Embedding):
         embeddings = functional.level(
             num_embeddings,
             embedding_dim,
-            VSATensor,
+            self.vsa,
             randomness=randomness,
             **factory_kwargs
         )
@@ -484,7 +487,7 @@ class Level(nn.Embedding):
             embeddings = functional.level(
                 self.num_embeddings,
                 self.embedding_dim,
-                self.vsa_tensor,
+                self.vsa,
                 randomness=self.randomness,
                 **factory_kwargs
             )
@@ -495,7 +498,8 @@ class Level(nn.Embedding):
             input, self.low, self.high, self.num_embeddings
         )
         index = index.clamp(min=0, max=self.num_embeddings - 1)
-        return super().forward(index).as_subclass(self.vsa_tensor)
+        vsa_tensor = functional.get_vsa_tensor_class(self.vsa)
+        return super().forward(index).as_subclass(vsa_tensor)
 
 
 class Thermometer(nn.Embedding):
@@ -542,7 +546,7 @@ class Thermometer(nn.Embedding):
     __constants__ = [
         "num_embeddings",
         "embedding_dim",
-        "vsa_tensor",
+        "vsa",
         "low",
         "high",
         "padding_idx",
@@ -554,7 +558,7 @@ class Thermometer(nn.Embedding):
 
     low: float
     high: float
-    vsa_tensor: Type[VSATensor]
+    vsa: VSAOptions
 
     def __init__(
         self,
@@ -577,7 +581,7 @@ class Thermometer(nn.Embedding):
 
         self.num_embeddings = num_embeddings
         self.embedding_dim = embedding_dim
-        self.vsa_tensor = functional.get_vsa_tensor_class(vsa)
+        self.vsa = vsa
         self.low = low
         self.high = high
 
@@ -588,7 +592,7 @@ class Thermometer(nn.Embedding):
         self.sparse = sparse
 
         embeddings = functional.thermometer(
-            num_embeddings, embedding_dim, VSATensor, **factory_kwargs
+            num_embeddings, embedding_dim, self.vsa, **factory_kwargs
         )
         # Have to provide requires grad at the creation of the parameters to
         # prevent errors when instantiating a non-float embedding
@@ -601,7 +605,7 @@ class Thermometer(nn.Embedding):
             embeddings = functional.thermometer(
                 self.num_embeddings,
                 self.embedding_dim,
-                self.vsa_tensor,
+                self.vsa,
                 **factory_kwargs
             )
             self.weight.copy_(embeddings)
@@ -611,7 +615,8 @@ class Thermometer(nn.Embedding):
             input, self.low, self.high, self.num_embeddings
         )
         index = index.clamp(min=0, max=self.num_embeddings - 1)
-        return super().forward(index).as_subclass(self.vsa_tensor)
+        vsa_tensor = functional.get_vsa_tensor_class(self.vsa)
+        return super().forward(index).as_subclass(vsa_tensor)
 
 
 class Circular(nn.Embedding):
@@ -653,7 +658,7 @@ class Circular(nn.Embedding):
     __constants__ = [
         "num_embeddings",
         "embedding_dim",
-        "vsa_tensor",
+        "vsa",
         "phase",
         "period",
         "randomness",
@@ -691,7 +696,7 @@ class Circular(nn.Embedding):
 
         self.num_embeddings = num_embeddings
         self.embedding_dim = embedding_dim
-        self.vsa_tensor = functional.get_vsa_tensor_class(vsa)
+        self.vsa = vsa
         self.phase = phase
         self.period = period
         self.randomness = randomness
@@ -705,7 +710,7 @@ class Circular(nn.Embedding):
         embeddings = functional.circular(
             num_embeddings,
             embedding_dim,
-            VSATensor,
+            self.vsa,
             randomness=randomness,
             **factory_kwargs
         )
@@ -720,7 +725,7 @@ class Circular(nn.Embedding):
             embeddings = functional.circular(
                 self.num_embeddings,
                 self.embedding_dim,
-                self.vsa_tensor,
+                self.vsa,
                 randomness=self.randomness,
                 **factory_kwargs
             )
@@ -731,7 +736,8 @@ class Circular(nn.Embedding):
             input, self.phase, self.period, 0, self.num_embeddings
         )
         index = mapped.round().long() % self.num_embeddings
-        return super().forward(index).as_subclass(self.vsa_tensor)
+        vsa_tensor = functional.get_vsa_tensor_class(self.vsa)
+        return super().forward(index).as_subclass(vsa_tensor)
 
 
 class Projection(nn.Module):
@@ -744,6 +750,7 @@ class Projection(nn.Module):
     Args:
         in_features (int): the dimensionality of the input feature vector.
         out_features (int): the dimensionality of the hypervectors.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
@@ -763,18 +770,25 @@ class Projection(nn.Module):
 
     """
 
-    __constants__ = ["in_features", "out_features"]
+    __constants__ = ["in_features", "out_features", "vsa"]
     in_features: int
     out_features: int
+    vsa: VSAOptions
     weight: torch.Tensor
 
     def __init__(
-        self, in_features, out_features, requires_grad=False, device=None, dtype=None
+        self, in_features, out_features, 
+        vsa: VSAOptions = "MAP",
+        requires_grad=False, device=None, dtype=None
     ):
         factory_kwargs = {"device": device, "dtype": dtype}
         super(Projection, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
+        self.vsa = vsa
+
+        if vsa not in {"MAP", "HRR"}:
+            raise ValueError(f"Projection embedding only supports MAP and HRR but provided: {vsa}")
 
         self.weight = nn.parameter.Parameter(
             torch.empty((out_features, in_features), **factory_kwargs),
@@ -787,7 +801,8 @@ class Projection(nn.Module):
         self.weight.data.copy_(F.normalize(self.weight.data))
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
-        return F.linear(input, self.weight).as_subclass(MAPTensor)
+        vsa_tensor = functional.get_vsa_tensor_class(self.vsa)
+        return F.linear(input, self.weight).as_subclass(vsa_tensor)
 
 
 class Sinusoid(nn.Module):
@@ -799,6 +814,7 @@ class Sinusoid(nn.Module):
     Args:
         in_features (int): the dimensionality of the input feature vector.
         out_features (int): the dimensionality of the hypervectors.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None``, uses a global default (see ``torch.set_default_tensor_type()``).
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
@@ -818,19 +834,26 @@ class Sinusoid(nn.Module):
 
     """
 
-    __constants__ = ["in_features", "out_features"]
+    __constants__ = ["in_features", "out_features", "vsa"]
     in_features: int
     out_features: int
+    vsa: VSAOptions
     weight: torch.Tensor
     bias: torch.Tensor
 
     def __init__(
-        self, in_features, out_features, requires_grad=False, device=None, dtype=None
+        self, in_features, out_features, 
+        vsa: VSAOptions = "MAP",
+        requires_grad=False, device=None, dtype=None
     ):
         factory_kwargs = {"device": device, "dtype": dtype}
         super(Sinusoid, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
+        self.vsa = vsa
+
+        if vsa not in {"MAP", "HRR"}:
+            raise ValueError(f"Sinusoid embedding only supports MAP and HRR but provided: {vsa}")
 
         self.weight = nn.parameter.Parameter(
             torch.empty((out_features, in_features), **factory_kwargs),
@@ -851,7 +874,8 @@ class Sinusoid(nn.Module):
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         projected = F.linear(input, self.weight)
         output = torch.cos(projected + self.bias) * torch.sin(projected)
-        return output.as_subclass(MAPTensor)
+        vsa_tensor = functional.get_vsa_tensor_class(self.vsa)
+        return output.as_subclass(vsa_tensor)
 
 
 class Density(nn.Module):
