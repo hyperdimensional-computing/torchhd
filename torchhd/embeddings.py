@@ -121,10 +121,7 @@ class Empty(nn.Embedding):
 
         with torch.no_grad():
             embeddings = functional.empty(
-                self.num_embeddings,
-                self.embedding_dim,
-                self.vsa,
-                **factory_kwargs
+                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs
             )
             self.weight.copy_(embeddings)
 
@@ -230,10 +227,7 @@ class Identity(nn.Embedding):
 
         with torch.no_grad():
             embeddings = functional.identity(
-                self.num_embeddings,
-                self.embedding_dim,
-                self.vsa,
-                **factory_kwargs
+                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs
             )
             self.weight.copy_(embeddings)
 
@@ -351,10 +345,7 @@ class Random(nn.Embedding):
 
         with torch.no_grad():
             embeddings = functional.random(
-                self.num_embeddings,
-                self.embedding_dim,
-                self.vsa,
-                **factory_kwargs
+                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs
             )
             self.weight.copy_(embeddings)
 
@@ -474,7 +465,7 @@ class Level(nn.Embedding):
             embedding_dim,
             self.vsa,
             randomness=randomness,
-            **factory_kwargs
+            **factory_kwargs,
         )
         # Have to provide requires grad at the creation of the parameters to
         # prevent errors when instantiating a non-float embedding
@@ -489,7 +480,7 @@ class Level(nn.Embedding):
                 self.embedding_dim,
                 self.vsa,
                 randomness=self.randomness,
-                **factory_kwargs
+                **factory_kwargs,
             )
             self.weight.copy_(embeddings)
 
@@ -603,10 +594,7 @@ class Thermometer(nn.Embedding):
 
         with torch.no_grad():
             embeddings = functional.thermometer(
-                self.num_embeddings,
-                self.embedding_dim,
-                self.vsa,
-                **factory_kwargs
+                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs
             )
             self.weight.copy_(embeddings)
 
@@ -712,7 +700,7 @@ class Circular(nn.Embedding):
             embedding_dim,
             self.vsa,
             randomness=randomness,
-            **factory_kwargs
+            **factory_kwargs,
         )
         # Have to provide requires grad at the creation of the parameters to
         # prevent errors when instantiating a non-float embedding
@@ -727,7 +715,7 @@ class Circular(nn.Embedding):
                 self.embedding_dim,
                 self.vsa,
                 randomness=self.randomness,
-                **factory_kwargs
+                **factory_kwargs,
             )
             self.weight.copy_(embeddings)
 
@@ -777,9 +765,13 @@ class Projection(nn.Module):
     weight: torch.Tensor
 
     def __init__(
-        self, in_features, out_features, 
+        self,
+        in_features,
+        out_features,
         vsa: VSAOptions = "MAP",
-        requires_grad=False, device=None, dtype=None
+        requires_grad=False,
+        device=None,
+        dtype=None,
     ):
         factory_kwargs = {"device": device, "dtype": dtype}
         super(Projection, self).__init__()
@@ -788,7 +780,9 @@ class Projection(nn.Module):
         self.vsa = vsa
 
         if vsa not in {"MAP", "HRR"}:
-            raise ValueError(f"Projection embedding only supports MAP and HRR but provided: {vsa}")
+            raise ValueError(
+                f"Projection embedding only supports MAP and HRR but provided: {vsa}"
+            )
 
         self.weight = nn.parameter.Parameter(
             torch.empty((out_features, in_features), **factory_kwargs),
@@ -842,9 +836,13 @@ class Sinusoid(nn.Module):
     bias: torch.Tensor
 
     def __init__(
-        self, in_features, out_features, 
+        self,
+        in_features,
+        out_features,
         vsa: VSAOptions = "MAP",
-        requires_grad=False, device=None, dtype=None
+        requires_grad=False,
+        device=None,
+        dtype=None,
     ):
         factory_kwargs = {"device": device, "dtype": dtype}
         super(Sinusoid, self).__init__()
@@ -853,7 +851,9 @@ class Sinusoid(nn.Module):
         self.vsa = vsa
 
         if vsa not in {"MAP", "HRR"}:
-            raise ValueError(f"Sinusoid embedding only supports MAP and HRR but provided: {vsa}")
+            raise ValueError(
+                f"Sinusoid embedding only supports MAP and HRR but provided: {vsa}"
+            )
 
         self.weight = nn.parameter.Parameter(
             torch.empty((out_features, in_features), **factory_kwargs),
