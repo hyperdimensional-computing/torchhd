@@ -115,7 +115,9 @@ with torch.no_grad():
         samples_hv = encode(samples).unsqueeze(0)
         model.add(samples_hv, samples.y)
 
-accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
+accuracy = torchmetrics.Accuracy(
+    task="multiclass", top_k=1, num_classes=graphs.num_classes
+)
 
 with torch.no_grad():
     model.normalize()
