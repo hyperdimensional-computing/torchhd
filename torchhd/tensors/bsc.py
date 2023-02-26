@@ -3,7 +3,7 @@ from typing import Set
 from torch import Tensor
 import torch.nn.functional as F
 
-from torchhd.base import VSA_Model
+from torchhd.tensors.base import VSATensor
 
 
 def biggest_power_two(n):
@@ -16,7 +16,7 @@ def biggest_power_two(n):
     return int("1" + (len(bin(n)) - 3) * "0", 2)
 
 
-class BSC(VSA_Model):
+class BSCTensor(VSATensor):
     """Binary Spatter Codes
 
     Proposed in `Binary spatter-coding of ordered K-tuples <https://link.springer.com/chapter/10.1007/3-540-61510-5_146>`_, this model works with binary valued hypervectors.
@@ -34,7 +34,7 @@ class BSC(VSA_Model):
     }
 
     @classmethod
-    def empty_hv(
+    def empty(
         cls,
         num_vectors: int,
         dimensions: int,
@@ -43,7 +43,7 @@ class BSC(VSA_Model):
         dtype=torch.bool,
         device=None,
         requires_grad=False,
-    ) -> "BSC":
+    ) -> "BSCTensor":
         """Creates a set of hypervectors representing empty sets.
 
         When bundled with a random-hypervector :math:`x`, the result is :math:`\sim x`.
@@ -53,18 +53,18 @@ class BSC(VSA_Model):
             num_vectors (int): the number of hypervectors to generate.
             dimensions (int): the dimensionality of the hypervectors.
             generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
-            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
             device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
             requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
         Examples::
 
-            >>> torchhd.BSC.empty_hv(3, 6)
+            >>> torchhd.BSCTensor.empty(3, 6)
             tensor([[False, False, False, False,  True,  True],
                     [False,  True, False, False,  True,  True],
                     [ True, False,  True,  True, False, False]])
 
-            >>> torchhd.BSC.empty_hv(3, 6, dtype=torch.long)
+            >>> torchhd.BSCTensor.empty(3, 6, dtype=torch.long)
             tensor([[0, 1, 0, 1, 0, 1],
                     [0, 0, 1, 1, 0, 1],
                     [0, 1, 1, 0, 1, 1]])
@@ -85,7 +85,7 @@ class BSC(VSA_Model):
         return result.as_subclass(cls)
 
     @classmethod
-    def identity_hv(
+    def identity(
         cls,
         num_vectors: int,
         dimensions: int,
@@ -93,7 +93,7 @@ class BSC(VSA_Model):
         dtype=torch.bool,
         device=None,
         requires_grad=False,
-    ) -> "BSC":
+    ) -> "BSCTensor":
         """Creates a set of identity hypervectors.
 
         When bound with a random-hypervector :math:`x`, the result is :math:`x`.
@@ -101,18 +101,18 @@ class BSC(VSA_Model):
         Args:
             num_vectors (int): the number of hypervectors to generate.
             dimensions (int): the dimensionality of the hypervectors.
-            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
             device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
             requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
         Examples::
 
-            >>> torchhd.BSC.identity_hv(3, 6)
+            >>> torchhd.BSCTensor.identity(3, 6)
             tensor([[False, False, False, False, False, False],
                     [False, False, False, False, False, False],
                     [False, False, False, False, False, False]])
 
-            >>> torchhd.BSC.identity_hv(3, 6, dtype=torch.long)
+            >>> torchhd.BSCTensor.identity(3, 6, dtype=torch.long)
             tensor([[0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0]])
@@ -136,7 +136,7 @@ class BSC(VSA_Model):
         return result.as_subclass(cls)
 
     @classmethod
-    def random_hv(
+    def random(
         cls,
         num_vectors: int,
         dimensions: int,
@@ -146,7 +146,7 @@ class BSC(VSA_Model):
         dtype=torch.bool,
         device=None,
         requires_grad=False,
-    ) -> "BSC":
+    ) -> "BSCTensor":
         """Creates a set of random independent hypervectors.
 
         The resulting hypervectors are sampled uniformly at random from the ``dimensions``-dimensional hyperspace.
@@ -156,23 +156,23 @@ class BSC(VSA_Model):
             dimensions (int): the dimensionality of the hypervectors.
             sparsity (float, optional): the expected fraction of elements to be in-active. Has no effect on complex hypervectors. Default: ``0.5``.
             generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
-            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
             device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
             requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
         Examples::
 
-            >>> torchhd.BSC.random_hv(3, 6)
+            >>> torchhd.BSCTensor.random(3, 6)
             tensor([[ True, False, False, False,  True,  True],
                     [False, False,  True, False, False, False],
                     [False, False,  True,  True, False, False]])
 
-            >>> torchhd.BSC.random_hv(3, 6, sparsity=0.1)
+            >>> torchhd.BSCTensor.random(3, 6, sparsity=0.1)
             tensor([[ True,  True,  True,  True,  True,  True],
                     [False,  True,  True,  True,  True,  True],
                     [ True,  True,  True,  True,  True,  True]])
 
-            >>> torchhd.BSC.random_hv(3, 6, dtype=torch.long)
+            >>> torchhd.BSCTensor.random(3, 6, dtype=torch.long)
             tensor([[1, 1, 0, 0, 0, 1],
                     [0, 1, 0, 0, 1, 1],
                     [0, 1, 1, 0, 0, 0]])
@@ -192,7 +192,9 @@ class BSC(VSA_Model):
         result.requires_grad = requires_grad
         return result.as_subclass(cls)
 
-    def bundle(self, other: "BSC", *, generator: torch.Generator = None) -> "BSC":
+    def bundle(
+        self, other: "BSCTensor", *, generator: torch.Generator = None
+    ) -> "BSCTensor":
         r"""Bundle the hypervector with other using majority voting.
 
         This produces a hypervector maximally similar to both.
@@ -212,7 +214,7 @@ class BSC(VSA_Model):
 
         Examples::
 
-            >>> a, b = torchhd.BSC.random_hv(2, 10)
+            >>> a, b = torchhd.BSCTensor.random(2, 10)
             >>> a
             tensor([ True, False,  True, False, False,  True,  True, False,  True, False])
             >>> b
@@ -220,7 +222,7 @@ class BSC(VSA_Model):
             >>> a.bundle(b)
             tensor([ True, False,  True,  True, False,  True,  True, False, False, False])
 
-            >>> a, b = torchhd.BSC.random_hv(2, 10, dtype=torch.long)
+            >>> a, b = torchhd.BSCTensor.random(2, 10, dtype=torch.long)
             >>> a
             tensor([1, 0, 1, 1, 1, 0, 1, 1, 1, 1])
             >>> b
@@ -229,14 +231,13 @@ class BSC(VSA_Model):
             tensor([1, 0, 1, 0, 0, 0, 1, 1, 0, 1])
 
         """
-
         tiebreaker = torch.empty_like(other)
         tiebreaker.bernoulli_(0.5, generator=generator)
 
         is_majority = self == other
         return self.where(is_majority, tiebreaker)
 
-    def multibundle(self, *, generator: torch.Generator = None) -> "BSC":
+    def multibundle(self, *, generator: torch.Generator = None) -> "BSCTensor":
         r"""Bundle multiple hypervectors."""
         if self.dim() < 2:
             class_name = self.__class__.__name__
@@ -258,7 +259,7 @@ class BSC(VSA_Model):
         threshold = n // 2
         return torch.greater(count, threshold).to(self.dtype)
 
-    def bind(self, other: "BSC") -> "BSC":
+    def bind(self, other: "BSCTensor") -> "BSCTensor":
         r"""Bind the hypervector with other using XOR.
 
         This produces a hypervector dissimilar to both.
@@ -275,7 +276,7 @@ class BSC(VSA_Model):
 
         Examples::
 
-            >>> a, b = torchhd.BSC.random_hv(2, 10)
+            >>> a, b = torchhd.BSCTensor.random(2, 10)
             >>> a
             tensor([ True, False,  True,  True, False,  True, False, False,  True, False])
             >>> b
@@ -283,7 +284,7 @@ class BSC(VSA_Model):
             >>> a.bind(b)
             tensor([False, False,  True,  True, False, False, False, False,  True, False])
 
-            >>> a, b = torchhd.BSC.random_hv(2, 10, dtype=torch.long)
+            >>> a, b = torchhd.BSCTensor.random(2, 10, dtype=torch.long)
             >>> a
             tensor([1, 0, 0, 1, 0, 1, 0, 0, 0, 0])
             >>> b
@@ -292,10 +293,9 @@ class BSC(VSA_Model):
             tensor([1, 0, 0, 0, 0, 1, 1, 0, 1, 0])
 
         """
-
         return self.logical_xor(other).to(other.dtype)
 
-    def multibind(self) -> "BSC":
+    def multibind(self) -> "BSCTensor":
         """Bind multiple hypervectors."""
         if self.dim() < 2:
             class_name = self.__class__.__name__
@@ -322,7 +322,7 @@ class BSC(VSA_Model):
 
         return output.to(self.dtype)
 
-    def inverse(self) -> "BSC":
+    def inverse(self) -> "BSCTensor":
         r"""Invert the hypervector for binding.
 
         Each hypervector in BSC is its own inverse, so this returns a copy of self.
@@ -333,13 +333,13 @@ class BSC(VSA_Model):
 
         Examples::
 
-            >>> a = torchhd.BSC.random_hv(1, 10)
+            >>> a = torchhd.BSCTensor.random(1, 10)
             >>> a
             tensor([[False, False, False,  True,  True, False, False,  True,  True, False]])
             >>> a.inverse()
             tensor([[False, False, False,  True,  True, False, False,  True,  True, False]])
 
-            >>> a = torchhd.BSC.random_hv(1, 10, dtype=torch.long)
+            >>> a = torchhd.BSCTensor.random(1, 10, dtype=torch.long)
             >>> a
             tensor([[0, 1, 0, 1, 1, 1, 1, 0, 1, 1]])
             >>> a.inverse()
@@ -349,7 +349,7 @@ class BSC(VSA_Model):
 
         return self.clone()
 
-    def negative(self) -> "BSC":
+    def negative(self) -> "BSCTensor":
         r"""Negate the hypervector for the bundling inverse.
 
         Shapes:
@@ -358,23 +358,23 @@ class BSC(VSA_Model):
 
         Examples::
 
-            >>> a = torchhd.BSC.random_hv(1, 10)
+            >>> a = torchhd.BSCTensor.random(1, 10)
             >>> a
             tensor([[ True,  True,  True,  True, False, False, False,  True,  True,  True]])
             >>> a.negative()
             tensor([[False, False, False, False,  True,  True,  True, False, False, False]])
 
-            >>> a = torchhd.BSC.random_hv(1, 10, dtype=torch.long)
+            >>> a = torchhd.BSCTensor.random(1, 10, dtype=torch.long)
             >>> a
             tensor([[0, 1, 0, 1, 0, 0, 1, 1, 0, 1]])
             >>> a.negative()
             tensor([[1, 0, 1, 0, 1, 1, 0, 0, 1, 0]])
 
         """
-        out = torch.empty_like(self).as_subclass(BSC)
+        out = torch.empty_like(self).as_subclass(BSCTensor)
         return torch.logical_not(self, out=out)
 
-    def permute(self, shifts: int = 1) -> "BSC":
+    def permute(self, shifts: int = 1) -> "BSCTensor":
         r"""Permute the hypervector.
 
         The permutation operator is commonly used to assign an order to hypervectors.
@@ -388,22 +388,22 @@ class BSC(VSA_Model):
 
         Examples::
 
-            >>> a = torchhd.BSC.random_hv(1, 10)
+            >>> a = torchhd.BSCTensor.random(1, 10)
             >>> a
             tensor([[ True, False, False, False, False, False, False, False, False, False]])
             >>> a.permute()
             tensor([[False,  True, False, False, False, False, False, False, False, False]])
 
-            >>> a = torchhd.BSC.random_hv(1, 10, dtype=torch.long)
+            >>> a = torchhd.BSCTensor.random(1, 10, dtype=torch.long)
             >>> a
             tensor([[1, 1, 0, 0, 1, 1, 0, 0, 1, 1]])
             >>> a.permute()
             tensor([[1, 1, 1, 0, 0, 1, 1, 0, 0, 1]])
 
         """
-        return self.roll(shifts=shifts, dims=-1)
+        return super().roll(shifts=shifts, dims=-1)
 
-    def dot_similarity(self, others: "BSC") -> Tensor:
+    def dot_similarity(self, others: "BSCTensor") -> Tensor:
         """Inner product with other hypervectors."""
         dtype = torch.get_default_dtype()
         device = self.device
@@ -418,7 +418,7 @@ class BSC(VSA_Model):
             others_as_bipolar = others_as_bipolar.mT
         return torch.matmul(self_as_bipolar, others_as_bipolar)
 
-    def cos_similarity(self, others: "BSC") -> Tensor:
+    def cosine_similarity(self, others: "BSCTensor") -> Tensor:
         """Cosine similarity with other hypervectors."""
         d = self.size(-1)
         return self.dot_similarity(others) / d

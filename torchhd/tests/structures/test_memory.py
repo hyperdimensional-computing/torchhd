@@ -18,18 +18,18 @@ class TestMemory:
     def test_generator(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        hv1 = functional.random_hv(60, 10000, generator=generator)
+        hv1 = functional.random(60, 10000, generator=generator)
 
         generator = torch.Generator()
         generator.manual_seed(seed)
-        hv2 = functional.random_hv(60, 10000, generator=generator)
+        hv2 = functional.random(60, 10000, generator=generator)
 
         assert (hv1 == hv2).min().item()
 
     def test_add(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 10000, generator=generator)
+        keys_hv = functional.random(len(letters), 10000, generator=generator)
 
         M = structures.Memory()
         M.add(keys_hv[0], letters[0])
@@ -46,7 +46,7 @@ class TestMemory:
     def test_index(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 10000, generator=generator)
+        keys_hv = functional.random(len(letters), 10000, generator=generator)
 
         M = structures.Memory()
         M.add(keys_hv[0], letters[0])
@@ -60,7 +60,7 @@ class TestMemory:
     def test_length(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 10000, generator=generator)
+        keys_hv = functional.random(len(letters), 10000, generator=generator)
 
         M = structures.Memory()
         M.add(keys_hv[0], letters[0])
@@ -78,7 +78,7 @@ class TestMemory:
     def test_getitem(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 10000, generator=generator)
+        keys_hv = functional.random(len(letters), 10000, generator=generator)
 
         M = structures.Memory()
         M.add(keys_hv[0], letters[0])
@@ -92,7 +92,7 @@ class TestMemory:
     def test_setitem(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 10000, generator=generator)
+        keys_hv = functional.random(len(letters), 10000, generator=generator)
 
         M = structures.Memory()
         M.add(keys_hv[0], letters[0])
@@ -111,7 +111,7 @@ class TestMemory:
     def test_delitem(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 10000, generator=generator)
+        keys_hv = functional.random(len(letters), 10000, generator=generator)
 
         M = structures.Memory()
         M.add(keys_hv[0], letters[0])

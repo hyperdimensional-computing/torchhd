@@ -4,7 +4,7 @@ from typing import Set
 from torch import Tensor
 import torch.nn.functional as F
 
-from torchhd.base import VSA_Model
+from torchhd.tensors.base import VSATensor
 
 type_conversion = {
     torch.complex64: torch.float32,
@@ -12,7 +12,7 @@ type_conversion = {
 }
 
 
-class FHRR(VSA_Model):
+class FHRRTensor(VSATensor):
     """Fourier Holographic Reduced Representation
 
     Proposed in `Holographic Reduced Representation: Distributed Representation for Cognitive Structures <https://philpapers.org/rec/PLAHRR/>`_, this model uses complex phaser hypervectors.
@@ -21,7 +21,7 @@ class FHRR(VSA_Model):
     supported_dtypes: Set[torch.dtype] = {torch.complex64, torch.complex128}
 
     @classmethod
-    def empty_hv(
+    def empty(
         cls,
         num_vectors: int,
         dimensions: int,
@@ -29,7 +29,7 @@ class FHRR(VSA_Model):
         dtype=torch.complex64,
         device=None,
         requires_grad=False,
-    ) -> "FHRR":
+    ) -> "FHRRTensor":
         """Creates a set of hypervectors representing empty sets.
 
         When bundled with a random-hypervector :math:`x`, the result is :math:`x`.
@@ -44,12 +44,12 @@ class FHRR(VSA_Model):
 
         Examples::
 
-            >>> torchhd.FHRR.empty_hv(3, 6)
+            >>> torchhd.FHRRTensor.empty(3, 6)
             FHRR([[0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
                     [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
                     [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j]])
 
-            >>> torchhd.FHRR.empty_hv(3, 6, dtype=torch.complex128)
+            >>> torchhd.FHRRTensor.empty(3, 6, dtype=torch.complex128)
             FHRR([[0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
                     [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
                     [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j]],
@@ -73,7 +73,7 @@ class FHRR(VSA_Model):
         return result.as_subclass(cls)
 
     @classmethod
-    def identity_hv(
+    def identity(
         cls,
         num_vectors: int,
         dimensions: int,
@@ -81,7 +81,7 @@ class FHRR(VSA_Model):
         dtype=torch.complex64,
         device=None,
         requires_grad=False,
-    ) -> "FHRR":
+    ) -> "FHRRTensor":
         """Creates a set of identity hypervectors.
 
         When bound with a random-hypervector :math:`x`, the result is :math:`x`.
@@ -95,12 +95,12 @@ class FHRR(VSA_Model):
 
         Examples::
 
-            >>> torchhd.FHRR.identity_hv(3, 6)
+            >>> torchhd.FHRRTensor.identity(3, 6)
             FHRR([[1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
                     [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
                     [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j]])
 
-            >>> torchhd.FHRR.identity_hv(3, 6, dtype=torch.complex128)
+            >>> torchhd.FHRRTensor.identity(3, 6, dtype=torch.complex128)
             FHRR([[1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
                     [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
                     [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j]],
@@ -126,7 +126,7 @@ class FHRR(VSA_Model):
         return result.as_subclass(cls)
 
     @classmethod
-    def random_hv(
+    def random(
         cls,
         num_vectors: int,
         dimensions: int,
@@ -135,7 +135,7 @@ class FHRR(VSA_Model):
         device=None,
         requires_grad=False,
         generator=None,
-    ) -> "FHRR":
+    ) -> "FHRRTensor":
         """Creates a set of random independent hypervectors.
 
         The resulting hypervectors are sampled uniformly at random from the ``angle`` between -pi and +pi.
@@ -150,12 +150,12 @@ class FHRR(VSA_Model):
 
         Examples::
 
-            >>> torchhd.FHRR.random_hv(3, 6)
+            >>> torchhd.FHRRTensor.random(3, 6)
             FHRR([[ 0.2082-0.9781j,  0.7038-0.7104j, -0.6297-0.7768j, -0.9632-0.2689j, -0.4941+0.8694j,  0.9771-0.2128j],
                     [ 0.9820-0.1887j, -0.0395+0.9992j, -0.5139+0.8579j, -0.8415-0.5402j, -0.6696-0.7427j,  0.2312+0.9729j],
                     [-0.9786+0.2057j,  0.1714+0.9852j, -0.5925-0.8056j, -0.5698-0.8218j, -0.4632-0.8863j,  0.6996-0.7145j]])
 
-            >>> torchhd.FHRR.random_hv(3, 6, dtype=torch.long)
+            >>> torchhd.FHRRTensor.random(3, 6, dtype=torch.long)
             FHRR([[-0.9996-0.0285j, -0.0688-0.9976j,  0.6900-0.7238j,  0.9519-0.3064j, 0.8131-0.5821j,  0.9942-0.1077j],
                     [-0.9199-0.3922j,  0.8073-0.5902j,  0.8683+0.4960j,  0.1250+0.9922j, 0.6248+0.7808j, -0.2495+0.9684j],
                     [ 0.0178+0.9998j, -0.3006-0.9538j, -0.9346+0.3557j,  0.9017-0.4324j, 0.4029-0.9153j,  0.4818-0.8763j]],
@@ -180,7 +180,7 @@ class FHRR(VSA_Model):
         result.requires_grad = requires_grad
         return result.as_subclass(cls)
 
-    def bundle(self, other: "FHRR") -> "FHRR":
+    def bundle(self, other: "FHRRTensor") -> "FHRRTensor":
         r"""Bundle the hypervector with other using element-wise sum.
 
         This produces a hypervector maximally similar to both.
@@ -197,7 +197,7 @@ class FHRR(VSA_Model):
 
         Examples::
 
-            >>> a, b = torchhd.FHRR.random_hv(2, 6)
+            >>> a, b = torchhd.FHRRTensor.random(2, 6)
             >>> a
             FHRR([ 0.9556-0.2948j,  0.1746+0.9846j, -0.6270-0.7790j, -0.2423-0.9702j, 0.6358+0.7719j,  0.9965-0.0834j])
             >>> b
@@ -205,7 +205,7 @@ class FHRR(VSA_Model):
             >>> a.bundle(b)
             FHRR([-1.6885+0.4104j, -0.4094-1.4874j,  0.0090-0.0058j,  0.1039-0.9365j, 0.0413-1.8657j,  0.6276+1.8385j])
 
-            >>> a, b = torchhd.FHRR.random_hv(2, 10, dtype=torch.complex128)
+            >>> a, b = torchhd.FHRRTensor.random(2, 10, dtype=torch.complex128)
             >>> a
             FHRR([ 0.4521-0.8920j,  0.7917-0.6109j,  0.5414-0.8408j, -0.9550-0.2967j, 0.9320+0.3626j, -0.8509-0.5253j],
             dtype=torch.complex128)
@@ -217,13 +217,13 @@ class FHRR(VSA_Model):
             dtype=torch.complex128)
 
         """
-        return self.add(other)
+        return torch.add(self, other)
 
-    def multibundle(self) -> "FHRR":
+    def multibundle(self) -> "FHRRTensor":
         """Bundle multiple hypervectors"""
-        return self.sum(dim=-2, dtype=self.dtype)
+        return torch.sum(self, dim=-2, dtype=self.dtype)
 
-    def bind(self, other: "FHRR") -> "FHRR":
+    def bind(self, other: "FHRRTensor") -> "FHRRTensor":
         r"""Bind the hypervector with other using element-wise multiplication.
 
         This produces a hypervector dissimilar to both.
@@ -240,7 +240,7 @@ class FHRR(VSA_Model):
 
         Examples::
 
-            >>> a, b = torchhd.FHRR.random_hv(2, 6)
+            >>> a, b = torchhd.FHRRTensor.random(2, 6)
             >>> a
             FHRR([ 0.9317-0.3632j,  0.7320+0.6813j, -0.8588+0.5123j, -0.9723-0.2339j, -0.9631-0.2692j, -0.4093-0.9124j])
             >>> b
@@ -248,7 +248,7 @@ class FHRR(VSA_Model):
             >>> a.bind(b)
             FHRR([ 0.9511-0.3087j,  0.2191-0.9757j, -0.0450+0.9990j, -0.9073-0.4204j, -0.8600-0.5102j, -0.5257+0.8507j])
 
-            >>> a, b = torchhd.FHRR.random_hv(2, 6, dtype=torch.complex128)
+            >>> a, b = torchhd.FHRRTensor.random(2, 6, dtype=torch.complex128)
             >>> a
             FHRR([ 0.7838-0.6210j, -0.0258+0.9997j,  0.0263+0.9997j,  0.9617+0.2742j, 0.1281-0.9918j, -0.4321+0.9018j],
             dtype=torch.complex128)
@@ -260,13 +260,13 @@ class FHRR(VSA_Model):
             dtype=torch.complex128)
 
         """
-        return self.mul(other)
+        return torch.mul(self, other)
 
-    def multibind(self) -> "FHRR":
+    def multibind(self) -> "FHRRTensor":
         """Bind multiple hypervectors"""
-        return self.prod(dim=-2, dtype=self.dtype)
+        return torch.prod(self, dim=-2, dtype=self.dtype)
 
-    def inverse(self) -> "FHRR":
+    def inverse(self) -> "FHRRTensor":
         r"""Invert the hypervector for binding.
 
         For FHRR the inverse of hypervector is its conjugate, this returns the conjugate of the hypervector.
@@ -277,13 +277,13 @@ class FHRR(VSA_Model):
 
         Examples::
 
-            >>> a = torchhd.FHRR.random_hv(1, 6)
+            >>> a = torchhd.FHRRTensor.random(1, 6)
             >>> a
             FHRR([[ 0.9855+0.1698j, -0.0927-0.9957j, -0.8316-0.5554j, -0.1433-0.9897j, 0.8328+0.5536j,  0.2071+0.9783j]])
             >>> a.inverse()
             FHRR([[ 0.9855-0.1698j, -0.0927+0.9957j, -0.8316+0.5554j, -0.1433+0.9897j, 0.8328-0.5536j,  0.2071-0.9783j]])
 
-            >>> a = torchhd.FHRR.random_hv(1, 6, dtype=torch.complex128)
+            >>> a = torchhd.FHRRTensor.random(1, 6, dtype=torch.complex128)
             >>> a
             FHRR([[-0.9983-0.0574j, -0.4825+0.8759j,  0.9631-0.2692j,  0.9066-0.4219j, 0.7099-0.7044j, -0.1313-0.9913j]],
             dtype=torch.complex128)
@@ -293,9 +293,10 @@ class FHRR(VSA_Model):
             dtype=torch.complex128)
 
         """
-        return self.conj()
+        # Resolve conj to ensure the the returned tensor does not share the same memory
+        return torch.conj(self).resolve_conj()
 
-    def negative(self) -> "FHRR":
+    def negative(self) -> "FHRRTensor":
         r"""Negate the hypervector for the bundling inverse.
 
         Shapes:
@@ -304,13 +305,13 @@ class FHRR(VSA_Model):
 
         Examples::
 
-            >>> a = torchhd.FHRR.random_hv(1, 6)
+            >>> a = torchhd.FHRRTensor.random(1, 6)
             >>> a
             FHRR([[-0.0187-0.9998j,  0.1950-0.9808j,  0.5203+0.8540j,  0.8587+0.5124j, 0.9998+0.0203j, -0.6237-0.7816j]])
             >>> a.negative()
             FHRR([[ 0.0187+0.9998j, -0.1950+0.9808j, -0.5203-0.8540j, -0.8587-0.5124j, -0.9998-0.0203j,  0.6237+0.7816j]])
 
-            >>> a = torchhd.FHRR.random_hv(1, 6, dtype=torch.complex128)
+            >>> a = torchhd.FHRRTensor.random(1, 6, dtype=torch.complex128)
             >>> a
             FHRR([[ 0.8255+0.5644j, -0.8352-0.5500j,  0.9751-0.2218j, -0.9808-0.1950j, -0.3840-0.9233j,  0.4106-0.9118j]],
             dtype=torch.complex128)
@@ -320,7 +321,7 @@ class FHRR(VSA_Model):
         """
         return torch.negative(self)
 
-    def permute(self, shifts: int = 1) -> "FHRR":
+    def permute(self, shifts: int = 1) -> "FHRRTensor":
         r"""Permute the hypervector.
 
         The permutation operator is used to assign an order to hypervectors.
@@ -334,13 +335,13 @@ class FHRR(VSA_Model):
 
         Examples::
 
-            >>> a = torchhd.FHRR.random_hv(1, 6)
+            >>> a = torchhd.FHRRTensor.random(1, 6)
             >>> a
             FHRR([[-0.3286-0.9445j,  0.2161-0.9764j, -0.6484+0.7613j, -0.4020+0.9156j, 0.8282-0.5605j, -0.9869+0.1613j]])
             >>> a.permute()
             FHRR([[-0.9869+0.1613j, -0.3286-0.9445j,  0.2161-0.9764j, -0.6484+0.7613j, -0.4020+0.9156j,  0.8282-0.5605j]])
 
-            >>> a = torchhd.FHRR.random_hv(1, 6, dtype=torch.complex128)
+            >>> a = torchhd.FHRRTensor.random(1, 6, dtype=torch.complex128)
             >>> a
             FHRR([[-0.9500-0.3123j, -0.0234+0.9997j, -0.1071-0.9943j, -0.8558-0.5174j, 0.9631-0.2690j,  0.5470-0.8371j]],
             dtype=torch.complex128)
@@ -349,26 +350,26 @@ class FHRR(VSA_Model):
             dtype=torch.complex128)
 
         """
-        return self.roll(shifts=shifts, dims=-1)
+        return torch.roll(self, shifts=shifts, dims=-1)
 
-    def dot_similarity(self, others: "FHRR") -> Tensor:
+    def dot_similarity(self, others: "FHRRTensor") -> Tensor:
         """Inner product with other hypervectors"""
         if others.dim() >= 2:
             others = others.mT
-        return torch.matmul(self, others.conj()).real
+        return torch.real(torch.matmul(self, torch.conj(others)))
 
-    def cos_similarity(self, others: "FHRR", *, eps=1e-08) -> Tensor:
+    def cosine_similarity(self, others: "FHRRTensor", *, eps=1e-08) -> Tensor:
         """Cosine similarity with other hypervectors"""
-        self_dot = torch.real(self * self.conj()).sum(dim=-1)
-        self_mag = self_dot.sqrt()
+        self_dot = torch.sum(torch.real(self * torch.conj(self)), dim=-1)
+        self_mag = torch.sqrt(self_dot)
 
-        others_dot = torch.real(others * others.conj()).sum(dim=-1)
-        others_mag = others_dot.sqrt()
+        others_dot = torch.sum(torch.real(others * torch.conj(others)), dim=-1)
+        others_mag = torch.sqrt(others_dot)
 
         if self.dim() > 1:
             magnitude = self_mag.unsqueeze(-1) * others_mag.unsqueeze(0)
         else:
             magnitude = self_mag * others_mag
 
-        magnitude = magnitude.clamp(min=eps)
+        magnitude = torch.clamp(magnitude, min=eps)
         return self.dot_similarity(others) / magnitude

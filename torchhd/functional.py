@@ -1,24 +1,25 @@
-import math
 from typing import Type, Callable
+import math
 import torch
 from torch import LongTensor, FloatTensor, Tensor
 from collections import deque
 
-from torchhd.base import VSA_Model
-from torchhd.bsc import BSC
-from torchhd.map import MAP
-from torchhd.hrr import HRR
-from torchhd.fhrr import FHRR
+from torchhd.tensors.base import VSATensor
+from torchhd.tensors.bsc import BSCTensor
+from torchhd.tensors.map import MAPTensor
+from torchhd.tensors.hrr import HRRTensor
+from torchhd.tensors.fhrr import FHRRTensor
+from torchhd.types import VSAOptions
 
 
 __all__ = [
-    "as_vsa_model",
-    "empty_hv",
-    "identity_hv",
-    "random_hv",
-    "level_hv",
-    "thermometer_hv",
-    "circular_hv",
+    "ensure_vsa_tensor",
+    "empty",
+    "identity",
+    "random",
+    "level",
+    "thermometer",
+    "circular",
     "bind",
     "bundle",
     "permute",
@@ -29,8 +30,10 @@ __all__ = [
     "hard_quantize",
     "soft_quantize",
     "hamming_similarity",
-    "cos_similarity",
+    "cosine_similarity",
+    "cos",
     "dot_similarity",
+    "dot",
     "multiset",
     "multibind",
     "cross_product",
@@ -46,12 +49,25 @@ __all__ = [
 ]
 
 
-def as_vsa_model(
+def get_vsa_tensor_class(vsa: VSAOptions) -> Type[VSATensor]:
+    if vsa == "BSC":
+        return BSCTensor
+    elif vsa == "MAP":
+        return MAPTensor
+    elif vsa == "HRR":
+        return HRRTensor
+    elif vsa == "FHRR":
+        return FHRRTensor
+
+    raise ValueError(f"Provided VSA model is not supported, specified: {vsa}")
+
+
+def ensure_vsa_tensor(
     data,
-    model: Type[VSA_Model] = None,
+    vsa: VSAOptions = None,
     dtype: torch.dtype = None,
     device: torch.device = None,
-) -> VSA_Model:
+) -> VSATensor:
     """Converts data into a VSA model tensor.
 
     If data is already a VSA model of the correct model, dtype and device then data itself is returned.
@@ -61,58 +77,59 @@ def as_vsa_model(
 
     Args:
         data (array_like): Initial data for the tensor. Can be a list, tuple, NumPy ndarray, scalar, and other types.
-        model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor.
         device (``torch.device``, optional): the desired device of returned tensor.
 
     Examples::
 
         >>> x = [True, False, False, True, False, False]
-        >>> x = torchhd.as_vsa_model(x)
+        >>> x = torchhd.ensure_vsa_tensor(x)
         >>> x
         tensor([ True, False, False,  True, False, False])
         >>> type(x)
-        <class 'torchhd.bsc.BSC'>
+        <class 'torchhd.tensors.bsc.BSCTensor'>
 
         >>> x = torch.rand(6)
         >>> x
         tensor([0.2083, 0.0665, 0.6302, 0.8650, 0.6618, 0.0886])
-        >>> x = torchhd.as_vsa_model(x)
+        >>> x = torchhd.ensure_vsa_tensor(x)
         >>> x
         tensor([0.2083, 0.0665, 0.6302, 0.8650, 0.6618, 0.0886])
         >>> type(x)
-        <class 'torchhd.map.MAP'>
+        <class 'torchhd.tensors.map.MAPTensor'>
 
     """
     input = torch.as_tensor(data, dtype=dtype, device=device)
 
-    if model is not None:
-        if input.dtype not in model.supported_dtypes:
-            name = model.__name__
-            options = ", ".join([str(x) for x in model.supported_dtypes])
+    if vsa is not None:
+        vsa_tensor = get_vsa_tensor_class(vsa)
+        if input.dtype not in vsa_tensor.supported_dtypes:
+            name = vsa_tensor.__name__
+            options = ", ".join([str(x) for x in vsa_tensor.supported_dtypes])
             raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
-        return input.as_subclass(model)
+        return input.as_subclass(vsa_tensor)
 
-    if isinstance(input, VSA_Model):
+    if isinstance(input, VSATensor):
         return input
 
     if input.dtype == torch.bool:
-        return input.as_subclass(BSC)
+        return input.as_subclass(BSCTensor)
 
     elif torch.is_complex(input):
-        return input.as_subclass(FHRR)
+        return input.as_subclass(FHRRTensor)
 
     else:
-        return input.as_subclass(MAP)
+        return input.as_subclass(MAPTensor)
 
 
-def empty_hv(
+def empty(
     num_vectors: int,
     dimensions: int,
-    model: Type[VSA_Model] = MAP,
+    vsa: VSAOptions = "MAP",
     **kwargs,
-) -> VSA_Model:
+) -> VSATensor:
     """Creates a set of hypervectors representing empty sets.
 
     When bundled with a random-hypervector :math:`x`, the result is :math:`x`.
@@ -120,38 +137,39 @@ def empty_hv(
     Args:
         num_vectors (int): the number of hypervectors to generate.
         dimensions (int): the dimensionality of the hypervectors.
-        model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAP``.
-        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
     Examples::
 
-        >>> torchhd.empty_hv(3, 6, torchhd.BSC)
+        >>> torchhd.empty(3, 6, "BSC")
         tensor([[False, False, False, False, False, False],
                 [False, False, False, False, False, False],
                 [False, False, False, False, False, False]])
 
-        >>> torchhd.empty_hv(3, 6, torchhd.MAP)
+        >>> torchhd.empty(3, 6, "MAP")
         tensor([[0., 0., 0., 0., 0., 0.],
                 [0., 0., 0., 0., 0., 0.],
                 [0., 0., 0., 0., 0., 0.]])
 
-        >>> torchhd.empty_hv(3, 6, torchhd.FHRR)
+        >>> torchhd.empty(3, 6, "FHRR")
         tensor([[0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
                 [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
                 [0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j]])
 
     """
-    return model.empty_hv(num_vectors, dimensions, **kwargs)
+    vsa_tensor = get_vsa_tensor_class(vsa)
+    return vsa_tensor.empty(num_vectors, dimensions, **kwargs)
 
 
-def identity_hv(
+def identity(
     num_vectors: int,
     dimensions: int,
-    model: Type[VSA_Model] = MAP,
+    vsa: VSAOptions = "MAP",
     **kwargs,
-) -> VSA_Model:
+) -> VSATensor:
     """Creates a set of identity hypervectors.
 
     When bound with a random-hypervector :math:`x`, the result is :math:`x`.
@@ -159,38 +177,39 @@ def identity_hv(
     Args:
         num_vectors (int): the number of hypervectors to generate.
         dimensions (int): the dimensionality of the hypervectors.
-        model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAP``.
-        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
     Examples::
 
-        >>> torchhd.identity_hv(3, 6, torchhd.BSC)
+        >>> torchhd.identity(3, 6, "BSC")
         tensor([[False, False, False, False, False, False],
                 [False, False, False, False, False, False],
                 [False, False, False, False, False, False]])
 
-        >>> torchhd.identity_hv(3, 6, torchhd.MAP)
+        >>> torchhd.identity(3, 6, "MAP")
         tensor([[1., 1., 1., 1., 1., 1.],
                 [1., 1., 1., 1., 1., 1.],
                 [1., 1., 1., 1., 1., 1.]])
 
-        >>> torchhd.identity_hv(3, 6, torchhd.FHRR)
+        >>> torchhd.identity(3, 6, "FHRR")
         tensor([[1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
                 [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j],
                 [1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j, 1.+0.j]])
 
     """
-    return model.identity_hv(num_vectors, dimensions, **kwargs)
+    vsa_tensor = get_vsa_tensor_class(vsa)
+    return vsa_tensor.identity(num_vectors, dimensions, **kwargs)
 
 
-def random_hv(
+def random(
     num_vectors: int,
     dimensions: int,
-    model: Type[VSA_Model] = MAP,
+    vsa: VSAOptions = "MAP",
     **kwargs,
-) -> VSA_Model:
+) -> VSATensor:
     """Creates a set of random independent hypervectors.
 
     The resulting hypervectors are sampled uniformly at random from the ``dimensions``-dimensional hyperspace.
@@ -198,46 +217,43 @@ def random_hv(
     Args:
         num_vectors (int): the number of hypervectors to generate.
         dimensions (int): the dimensionality of the hypervectors.
-        model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAP``.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
-        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
     Examples::
 
-        >>> torchhd.random_hv(3, 6, torchhd.BSC)
+        >>> torchhd.random(3, 6, "BSC")
         tensor([[ True,  True,  True,  True,  True,  True],
                 [False,  True, False, False,  True,  True],
                 [ True,  True, False, False,  True,  True]])
 
-        >>> torchhd.random_hv(3, 6, torchhd.MAP)
+        >>> torchhd.random(3, 6, "MAP")
         tensor([[ 1.,  1., -1.,  1., -1.,  1.],
                 [ 1., -1.,  1., -1., -1., -1.],
                 [ 1., -1.,  1.,  1.,  1., -1.]])
 
-        >>> torchhd.random_hv(3, 6, torchhd.FHRR)
+        >>> torchhd.random(3, 6, "FHRR")
         tensor([[-0.830-0.557j, -0.411+0.911j,  0.980-0.197j, -0.202+0.979j, -0.792+0.609j, -0.932-0.360j],
                 [-0.977-0.212j,  0.191-0.981j,  0.340-0.940j,  0.902-0.431j,  0.141+0.990j, -0.661+0.749j],
                 [-0.690+0.723j,  0.981-0.190j,  0.971+0.236j, -0.356-0.934j,  0.788-0.615j,  0.360-0.932j]])
 
     """
-    return model.random_hv(
-        num_vectors,
-        dimensions,
-        **kwargs,
-    )
+    vsa_tensor = get_vsa_tensor_class(vsa)
+    return vsa_tensor.random(num_vectors, dimensions, **kwargs)
 
 
-def level_hv(
+def level(
     num_vectors: int,
     dimensions: int,
-    model: Type[VSA_Model] = MAP,
+    vsa: VSAOptions = "MAP",
     *,
     randomness: float = 0.0,
     requires_grad=False,
     **kwargs,
-) -> VSA_Model:
+) -> VSATensor:
     """Creates a set of level correlated hypervectors.
 
     Implements level-hypervectors as an interpolation between random-hypervectors as described in `An Extension to Basis-Hypervectors for Learning from Circular Data in Hyperdimensional Computing <https://arxiv.org/abs/2205.07920>`_.
@@ -246,30 +262,30 @@ def level_hv(
     Args:
         num_vectors (int): the number of hypervectors to generate.
         dimensions (int): the dimensionality of the hypervectors.
-        model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAP``.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
         randomness (float, optional): r-value to interpolate between level at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
-        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
     Examples::
 
-        >>> torchhd.level_hv(5, 6, torchhd.BSC)
+        >>> torchhd.level(5, 6, "BSC")
         tensor([[ True,  True,  True,  True, False, False],
                 [ True,  True,  True,  True, False, False],
                 [False,  True,  True,  True,  True, False],
                 [False,  True,  True,  True,  True, False],
                 [False,  True,  True,  True,  True, False]])
 
-        >>> torchhd.level_hv(5, 6, torchhd.MAP)
+        >>> torchhd.level(5, 6, "MAP")
         tensor([[ 1.,  1., -1.,  1., -1.,  1.],
                 [ 1.,  1.,  1.,  1., -1.,  1.],
                 [ 1.,  1.,  1.,  1., -1.,  1.],
                 [ 1.,  1.,  1.,  1.,  1.,  1.],
                 [ 1., -1.,  1.,  1.,  1., -1.]])
 
-        >>> torchhd.level_hv(5, 6, torchhd.FHRR)
+        >>> torchhd.level(5, 6, "FHRR")
         tensor([[-0.996+0.079j,  0.447+0.894j, -0.840-0.541j, -0.999+0.020j, -0.742+0.669j, -0.999+0.042j],
                 [-0.886-0.462j,  0.447+0.894j, -0.840-0.541j, -0.999+0.020j, -0.742+0.669j, -0.886+0.462j],
                 [-0.886-0.462j,  0.447+0.894j, -0.146-0.989j, -0.999+0.020j, -0.350-0.936j, -0.886+0.462j],
@@ -277,6 +293,8 @@ def level_hv(
                 [-0.886-0.462j,  0.507+0.861j, -0.146-0.989j, -0.611-0.791j, -0.350-0.936j, -0.886+0.462j]])
 
     """
+    vsa_tensor = get_vsa_tensor_class(vsa)
+
     # convert from normalized "randomness" variable r to number of orthogonal vectors sets "span"
     levels_per_span = (1 - randomness) * (num_vectors - 1) + randomness * 1
     # must be at least one to deal with the case that num_vectors is less than 2
@@ -284,7 +302,7 @@ def level_hv(
     span = (num_vectors - 1) / levels_per_span
 
     # generate the set of orthogonal vectors within the level vector set
-    span_hv = model.random_hv(
+    span_hv = vsa_tensor.random(
         int(math.ceil(span + 1)),
         dimensions,
         **kwargs,
@@ -327,17 +345,17 @@ def level_hv(
             hv[i] = torch.where(threshold_v[span_idx] < t, span_start_hv, span_end_hv)
 
     hv.requires_grad = requires_grad
-    return hv.as_subclass(model)
+    return hv.as_subclass(vsa_tensor)
 
 
-def thermometer_hv(
+def thermometer(
     num_vectors: int,
     dimensions: int,
-    model: Type[VSA_Model] = MAP,
+    vsa: VSAOptions = "MAP",
     *,
     requires_grad=False,
     **kwargs,
-) -> VSA_Model:
+) -> VSATensor:
     """Creates a thermometer code for given dimensionality.
 
     Implements similarity-preserving hypervectors as described in `Sparse Binary Distributed Encoding of Scalars <https://doi.org/10.1615/J%20Automat%20Inf%20Scien.v37.i6.20>`_.
@@ -345,14 +363,14 @@ def thermometer_hv(
     Args:
         num_vectors (int): the number of hypervectors to generate.
         dimensions (int): the dimensionality of the hypervectors.
-        model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAP``.
-        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
     Examples::
 
-        >>> torchhd.thermometer_hv(7, 6, torchhd.BSC)
+        >>> torchhd.thermometer(7, 6, "BSC")
         tensor([[False, False, False, False, False, False],
                 [ True, False, False, False, False, False],
                 [ True,  True, False, False, False, False],
@@ -361,13 +379,13 @@ def thermometer_hv(
                 [ True,  True,  True,  True,  True, False],
                 [ True,  True,  True,  True,  True,  True]])
 
-        >>> torchhd.thermometer_hv(4, 6, torchhd.MAP)
+        >>> torchhd.thermometer(4, 6, "MAP")
         tensor([[-1., -1., -1., -1., -1., -1.],
                 [ 1.,  1., -1., -1., -1., -1.],
                 [ 1.,  1.,  1.,  1., -1., -1.],
                 [ 1.,  1.,  1.,  1.,  1.,  1.]])
 
-        >>> torchhd.thermometer_hv(6, 6, torchhd.FHRR)
+        >>> torchhd.thermometer(6, 6, "FHRR")
         tensor([[-1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
                 [ 1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
                 [ 1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
@@ -376,6 +394,8 @@ def thermometer_hv(
                 [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j, -1.+-0.j]])
 
     """
+    vsa_tensor = get_vsa_tensor_class(vsa)
+
     # Check if the requested number of vectors can be accommodated
     if num_vectors > dimensions + 1:
         raise ValueError(
@@ -388,13 +408,13 @@ def thermometer_hv(
             step = (dimensions) // (num_vectors - 1)
 
     # generate a random vector as a placeholder to get dtype and device
-    rand_hv = model.random_hv(
+    rand_hv = vsa_tensor.random(
         1,
         dimensions,
         **kwargs,
     )
 
-    if model == BSC:
+    if vsa_tensor == BSCTensor:
         # Use binary vectors
         hv = torch.zeros(
             num_vectors,
@@ -402,7 +422,7 @@ def thermometer_hv(
             dtype=rand_hv.dtype,
             device=rand_hv.device,
         )
-    elif (model == MAP) | (model == FHRR):
+    elif (vsa_tensor == MAPTensor) | (vsa_tensor == FHRRTensor):
         # Use bipolar vectors
         hv = torch.full(
             (
@@ -414,50 +434,50 @@ def thermometer_hv(
             device=rand_hv.device,
         )
     else:
-        raise ValueError(f"{model} HD/VSA model is not defined.")
+        raise ValueError(f"{vsa_tensor} HD/VSA model is not defined.")
 
     # Create hypervectors using the obtained step
     for i in range(1, num_vectors):
         hv[i, 0 : i * step] = 1
 
     hv.requires_grad = requires_grad
-    return hv.as_subclass(model)
+    return hv.as_subclass(vsa_tensor)
 
 
-def circular_hv(
+def circular(
     num_vectors: int,
     dimensions: int,
-    model: Type[VSA_Model] = MAP,
+    vsa: VSAOptions = "MAP",
     *,
     randomness: float = 0.0,
     requires_grad=False,
     **kwargs,
-) -> VSA_Model:
+) -> VSATensor:
     """Creates a set of circularly correlated hypervectors.
 
     Implements circular-hypervectors based on level-hypervectors as described in `An Extension to Basis-Hypervectors for Learning from Circular Data in Hyperdimensional Computing <https://arxiv.org/abs/2205.07920>`_.
     Any hypervector is quasi-orthogonal to the hypervector opposite site of the circle.
 
     .. note::
-        Circular hypervectors cannot be created directly with Holographic Reduced Representations (HRR) because of imprecisions inherent to HRR. 
+        Circular hypervectors cannot be created directly with Holographic Reduced Representations (HRR) because of imprecisions inherent to HRR.
         One way around this is to use FHRR for the creation of circular hypervectors and then transform them to HRR vectors. Example:
 
-        >>> hv = torchhd.circular_hv(10, 6, torchhd.FHRR)
-        >>> hv = torch.real(torch.fft.ifft(hv)).as_subclass(torchhd.HRR)
+        >>> hv = torchhd.circular(10, 6, "FHRR")
+        >>> hv = torch.real(torch.fft.ifft(hv)).as_subclass("HRR")
 
     Args:
         num_vectors (int): the number of hypervectors to generate.
         dimensions (int): the dimensionality of the hypervectors.
-        model: (``Type[VSA_Model]``, optional): specifies the hypervector type to be instantiated. Default: ``torchhd.MAP``.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
         randomness (float, optional): r-value to interpolate between circular at ``0.0`` and random-hypervectors at ``1.0``. Default: ``0.0``.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
-        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
     Examples::
 
-        >>> torchhd.circular_hv(10, 6, torchhd.BSC)
+        >>> torchhd.circular(10, 6, "BSC")
         tensor([[False, False,  True, False,  True,  True],
                 [False, False,  True, False,  True,  True],
                 [False, False,  True, False,  True,  True],
@@ -469,7 +489,7 @@ def circular_hv(
                 [ True, False,  True, False,  True,  True],
                 [False, False,  True, False,  True,  True]])
 
-        >>> torchhd.circular_hv(10, 6, torchhd.MAP)
+        >>> torchhd.circular(10, 6, "MAP")
         tensor([[-1., -1., -1., -1., -1.,  1.],
                 [-1., -1., -1., -1., -1.,  1.],
                 [-1., -1., -1.,  1., -1.,  1.],
@@ -481,7 +501,7 @@ def circular_hv(
                 [-1., -1.,  1., -1., -1.,  1.],
                 [-1., -1.,  1., -1., -1.,  1.]])
 
-        >>> torchhd.circular_hv(10, 6, torchhd.FHRR)
+        >>> torchhd.circular(10, 6, "FHRR")
         tensor([[-0.887-0.460j, -0.906+0.421j, -0.727-0.686j, -0.271+0.962j, -0.387+0.921j, -0.895-0.445j],
                 [-0.887-0.460j, -0.906+0.421j, -0.727-0.686j, -0.947+0.319j, -0.387+0.921j, -0.895-0.445j],
                 [-0.887-0.460j, -0.906+0.421j, -0.828+0.560j, -0.947+0.319j, -0.387+0.921j, -0.895-0.445j],
@@ -494,7 +514,9 @@ def circular_hv(
                 [-0.887-0.460j, -0.906+0.421j, -0.727-0.686j, -0.271+0.962j, -0.705-0.709j,  0.562-0.827j]])
 
     """
-    if model == HRR:
+    vsa_tensor = get_vsa_tensor_class(vsa)
+
+    if vsa_tensor == HRRTensor:
         raise ValueError(
             "The circular hypervectors don't currently work with the HRR model. We are not sure why, if you have any insight that could help please share it at: https://github.com/hyperdimensional-computing/torchhd/issues/108."
         )
@@ -505,7 +527,7 @@ def circular_hv(
     span = num_vectors / levels_per_span
 
     # generate the set of orthogonal vectors within the level vector set
-    span_hv = model.random_hv(
+    span_hv = vsa_tensor.random(
         int(math.ceil(span + 1)),
         dimensions,
         **kwargs,
@@ -569,10 +591,10 @@ def circular_hv(
             hv[i // 2] = mutation_hv
 
     hv.requires_grad = requires_grad
-    return hv.as_subclass(model)
+    return hv.as_subclass(vsa_tensor)
 
 
-def bind(input: VSA_Model, other: VSA_Model) -> VSA_Model:
+def bind(input: VSATensor, other: VSATensor) -> VSATensor:
     r"""Binds two hypervectors which produces a hypervector dissimilar to both.
 
     Binding is used to associate information, for instance, to assign values to variables.
@@ -582,8 +604,8 @@ def bind(input: VSA_Model, other: VSA_Model) -> VSA_Model:
         \otimes: \mathcal{H} \times \mathcal{H} \to \mathcal{H}
 
     Args:
-        input (VSA_Model): input hypervector
-        other (VSA_Model): other input hypervector
+        input (VSATensor): input hypervector
+        other (VSATensor): other input hypervector
 
     Shapes:
         - Input: :math:`(*)`
@@ -592,7 +614,7 @@ def bind(input: VSA_Model, other: VSA_Model) -> VSA_Model:
 
     Examples::
 
-        >>> a, b = torchhd.random_hv(2, 10)
+        >>> a, b = torchhd.random(2, 10)
         >>> a
         tensor([ 1., -1., -1.,  1.,  1.,  1., -1., -1., -1., -1.])
         >>> b
@@ -601,12 +623,12 @@ def bind(input: VSA_Model, other: VSA_Model) -> VSA_Model:
         tensor([-1., -1., -1., -1., -1.,  1., -1., -1.,  1.,  1.])
 
     """
-    input = as_vsa_model(input)
-    other = as_vsa_model(other)
+    input = ensure_vsa_tensor(input)
+    other = ensure_vsa_tensor(other)
     return input.bind(other)
 
 
-def bundle(input: VSA_Model, other: VSA_Model) -> VSA_Model:
+def bundle(input: VSATensor, other: VSATensor) -> VSATensor:
     r"""Bundles two hypervectors which produces a hypervector maximally similar to both.
 
     The bundling operation is used to aggregate information into a single hypervector.
@@ -616,8 +638,8 @@ def bundle(input: VSA_Model, other: VSA_Model) -> VSA_Model:
         \oplus: \mathcal{H} \times \mathcal{H} \to \mathcal{H}
 
     Args:
-        input (VSA_Model): input hypervector
-        other (VSA_Model): other input hypervector
+        input (VSATensor): input hypervector
+        other (VSATensor): other input hypervector
 
     Shapes:
         - Input: :math:`(*)`
@@ -626,7 +648,7 @@ def bundle(input: VSA_Model, other: VSA_Model) -> VSA_Model:
 
     Examples::
 
-        >>> a, b = torchhd.random_hv(2, 10)
+        >>> a, b = torchhd.random(2, 10)
         >>> a
         tensor([-1., -1., -1., -1.,  1.,  1., -1., -1.,  1.,  1.])
         >>> b
@@ -635,12 +657,12 @@ def bundle(input: VSA_Model, other: VSA_Model) -> VSA_Model:
         tensor([-2.,  0., -2., -2.,  2.,  2., -2.,  0.,  0.,  2.])
 
     """
-    input = as_vsa_model(input)
-    other = as_vsa_model(other)
+    input = ensure_vsa_tensor(input)
+    other = ensure_vsa_tensor(other)
     return input.bundle(other)
 
 
-def permute(input: VSA_Model, *, shifts=1) -> VSA_Model:
+def permute(input: VSATensor, *, shifts=1) -> VSATensor:
     r"""Permutes hypervector by specified number of shifts.
 
     The permutation operator is used to assign an order to hypervectors.
@@ -650,7 +672,7 @@ def permute(input: VSA_Model, *, shifts=1) -> VSA_Model:
         \Pi: \mathcal{H} \to \mathcal{H}
 
     Args:
-        input (VSA_Model): input hypervector
+        input (VSATensor): input hypervector
         shifts (int, optional): The number of places by which the elements of the tensor are shifted.
 
     Shapes:
@@ -659,18 +681,18 @@ def permute(input: VSA_Model, *, shifts=1) -> VSA_Model:
 
     Examples::
 
-        >>> a = torchhd.random_hv(1, 10)
+        >>> a = torchhd.random(1, 10)
         >>> a
         tensor([[-1., -1., -1.,  1., -1., -1.,  1., -1., -1., -1.]])
         >>> torchhd.permute(a)
         tensor([[-1., -1., -1., -1.,  1., -1., -1.,  1., -1., -1.]])
 
     """
-    input = as_vsa_model(input)
+    input = ensure_vsa_tensor(input)
     return input.permute(shifts)
 
 
-def create_random_permute(dim: int) -> Callable[[VSA_Model, int], VSA_Model]:
+def create_random_permute(dim: int) -> Callable[[VSATensor, int], VSATensor]:
     r"""Creates random permutation functions.
 
     Args:
@@ -678,7 +700,7 @@ def create_random_permute(dim: int) -> Callable[[VSA_Model, int], VSA_Model]:
 
     Examples::
 
-        >>> a = torchhd.random_hv(3, 10)
+        >>> a = torchhd.random(3, 10)
         >>> a
         tensor([[-1.,  1.,  1.,  1., -1., -1., -1., -1.,  1., -1.],
                 [-1., -1., -1.,  1., -1.,  1., -1., -1.,  1., -1.],
@@ -699,7 +721,7 @@ def create_random_permute(dim: int) -> Callable[[VSA_Model, int], VSA_Model]:
     backward = torch.empty_like(forward)
     backward[forward] = torch.arange(dim)
 
-    def permute(input: VSA_Model, shifts: int = 1) -> VSA_Model:
+    def permute(input: VSATensor, shifts: int = 1) -> VSATensor:
         y = input
         if shifts > 0:
             for _ in range(shifts):
@@ -712,13 +734,13 @@ def create_random_permute(dim: int) -> Callable[[VSA_Model, int], VSA_Model]:
     return permute
 
 
-def inverse(input: VSA_Model) -> VSA_Model:
+def inverse(input: VSATensor) -> VSATensor:
     r"""Inverse for the binding operation.
 
     See :func:`~torchhd.functional.bind`.
 
     Args:
-        input (VSA_Model): input hypervector
+        input (VSATensor): input hypervector
 
     Shapes:
         - Input: :math:`(*)`
@@ -726,24 +748,24 @@ def inverse(input: VSA_Model) -> VSA_Model:
 
     Examples::
 
-        >>> a = torchhd.random_hv(1, 6, torchhd.FHRR)
+        >>> a = torchhd.random(1, 6, "FHRR")
         >>> a
         tensor([[ 0.879-0.476j,  0.995-0.090j, -0.279+0.960j, -0.752-0.658j, -0.874+0.485j, -0.527-0.849j]])
         >>> torchhd.inverse(a)
         tensor([[ 0.879+0.476j,  0.995+0.090j, -0.279-0.960j, -0.752+0.658j, -0.874-0.485j, -0.527+0.849j]])
 
     """
-    input = as_vsa_model(input)
+    input = ensure_vsa_tensor(input)
     return input.inverse()
 
 
-def negative(input: VSA_Model) -> VSA_Model:
+def negative(input: VSATensor) -> VSATensor:
     r"""Inverse for the bundling operation.
 
     See :func:`~torchhd.functional.bundle`.
 
     Args:
-        input (VSA_Model): input hypervector
+        input (VSATensor): input hypervector
 
     Shapes:
         - Input: :math:`(*)`
@@ -751,14 +773,14 @@ def negative(input: VSA_Model) -> VSA_Model:
 
     Examples::
 
-        >>> a = torchhd.random_hv(1, 10)
+        >>> a = torchhd.random(1, 10)
         >>> a
         tensor([[ 1.,  1., -1.,  1.,  1.,  1.,  1., -1.,  1.,  1.]])
         >>> torchhd.negative(a)
         tensor([[-1., -1.,  1., -1., -1., -1., -1.,  1., -1., -1.]])
 
     """
-    input = as_vsa_model(input)
+    input = ensure_vsa_tensor(input)
     return input.negative()
 
 
@@ -777,7 +799,7 @@ def soft_quantize(input: Tensor):
 
     Examples::
 
-        >>> x = torchhd.random_hv(2, 6)
+        >>> x = torchhd.random(2, 6)
         >>> x
         tensor([[ 1.,  1., -1.,  1.,  1.,  1.],
             [ 1., -1., -1., -1.,  1., -1.]])
@@ -806,7 +828,7 @@ def hard_quantize(input: Tensor):
 
     Examples::
 
-        >>> x = torchhd.random_hv(2, 6)
+        >>> x = torchhd.random(2, 6)
         >>> x
         tensor([[ 1.,  1., -1.,  1.,  1.,  1.],
             [ 1., -1., -1., -1.,  1., -1.]])
@@ -825,12 +847,14 @@ def hard_quantize(input: Tensor):
     return torch.where(input > 0, positive, negative)
 
 
-def dot_similarity(input: VSA_Model, others: VSA_Model) -> VSA_Model:
+def dot_similarity(input: VSATensor, others: VSATensor) -> VSATensor:
     """Dot product between the input vector and each vector in others.
 
+    Aliased as ``torchhd.dot``.
+
     Args:
-        input (VSA_Model): hypervectors to compare against others
-        others (VSA_Model): hypervectors to compare with
+        input (VSATensor): hypervectors to compare against others
+        others (VSATensor): hypervectors to compare with
 
     Shapes:
         - Input: :math:`(*, d)`
@@ -845,7 +869,7 @@ def dot_similarity(input: VSA_Model, others: VSA_Model) -> VSA_Model:
 
     Examples::
 
-        >>> x = torchhd.random_hv(3, 6)
+        >>> x = torchhd.random(3, 6)
         >>> x
         tensor([[ 1., -1.,  1.,  1.,  1.,  1.],
                 [-1., -1.,  1., -1., -1.,  1.],
@@ -855,7 +879,7 @@ def dot_similarity(input: VSA_Model, others: VSA_Model) -> VSA_Model:
                 [0., 6., 2.],
                 [0., 2., 6.]])
 
-        >>> x = torchhd.random_hv(3, 6, torchhd.FHRR)
+        >>> x = torchhd.random(3, 6, "FHRR")
         >>> x
         tensor([[-0.123-0.992j,  0.342-0.939j, -0.840-0.542j, -0.999+0.041j, -0.861-0.508j,  0.658-0.752j],
                 [-0.754+0.656j,  0.574-0.818j, -0.449+0.893j, -0.705-0.708j,  0.652-0.757j,  0.444-0.895j],
@@ -866,13 +890,18 @@ def dot_similarity(input: VSA_Model, others: VSA_Model) -> VSA_Model:
                 [ 1.0767, -0.3047,  6.0000]])
 
     """
-    input = as_vsa_model(input)
-    others = as_vsa_model(others)
+    input = ensure_vsa_tensor(input)
+    others = ensure_vsa_tensor(others)
     return input.dot_similarity(others)
 
 
-def cos_similarity(input: VSA_Model, others: VSA_Model) -> VSA_Model:
+dot = dot_similarity
+
+
+def cosine_similarity(input: VSATensor, others: VSATensor) -> VSATensor:
     """Cosine similarity between the input vector and each vector in others.
+
+    Aliased as ``torchhd.cos``.
 
     Args:
         input (Tensor): hypervectors to compare against others
@@ -889,38 +918,41 @@ def cos_similarity(input: VSA_Model, others: VSA_Model) -> VSA_Model:
 
     Examples::
 
-        >>> x = torchhd.random_hv(3, 6)
+        >>> x = torchhd.random(3, 6)
         >>> x
         tensor([[ 1., -1., -1., -1.,  1., -1.],
                 [-1., -1.,  1., -1.,  1.,  1.],
                 [ 1.,  1.,  1.,  1.,  1., -1.]])
-        >>> torchhd.cos_similarity(x, x)
+        >>> torchhd.cosine_similarity(x, x)
         tensor([[ 1.0000,  0.0000,  0.0000],
                 [ 0.0000,  1.0000, -0.3333],
                 [ 0.0000, -0.3333,  1.0000]])
 
-        >>> x = torchhd.random_hv(3, 6, torchhd.FHRR)
+        >>> x = torchhd.random(3, 6, "FHRR")
         >>> x
         tensor([[ 0.986+0.166j,  0.886+0.463j,  0.205+0.978j,  0.952+0.304j,  0.923+0.384j, -0.529+0.848j],
                 [-0.293+0.956j,  0.965+0.259j,  0.999-0.023j, -0.665-0.746j,  0.451-0.892j, -0.082+0.996j],
                 [-0.991-0.127j, -0.326-0.945j,  0.785+0.618j,  0.518-0.855j,  0.149+0.988j,  0.020-0.999j]])
-        >>> torchhd.cos_similarity(x, x)
+        >>> torchhd.cosine_similarity(x, x)
         tensor([[ 1.0000,  0.1884, -0.1779],
                 [ 0.1884,  1.0000, -0.1900],
                 [-0.1779, -0.1900,  1.0000]])
 
     """
-    input = as_vsa_model(input)
-    others = as_vsa_model(others)
-    return input.cos_similarity(others)
+    input = ensure_vsa_tensor(input)
+    others = ensure_vsa_tensor(others)
+    return input.cosine_similarity(others)
 
 
-def hamming_similarity(input: VSA_Model, others: VSA_Model) -> LongTensor:
-    """Number of equal elements between the input vectors and each vector in others.
+cos = cosine_similarity
+
+
+def hamming_similarity(input: VSATensor, others: VSATensor) -> LongTensor:
+    """Hamming similarity is the number of equal elements between the input vectors and each vector in others.
 
     Args:
-        input (VSA_Model): hypervectors to compare against others
-        others (VSA_Model): hypervectors to compare with
+        input (VSATensor): hypervectors to compare against others
+        others (VSATensor): hypervectors to compare with
 
     Shapes:
         - Input: :math:`(*, d)`
@@ -929,7 +961,7 @@ def hamming_similarity(input: VSA_Model, others: VSA_Model) -> LongTensor:
 
     Examples::
 
-        >>> x = torchhd.random_hv(3, 6)
+        >>> x = torchhd.random(3, 6)
         >>> x
         tensor([[ 1.,  1., -1., -1.,  1.,  1.],
                 [ 1.,  1.,  1.,  1., -1., -1.],
@@ -947,7 +979,7 @@ def hamming_similarity(input: VSA_Model, others: VSA_Model) -> LongTensor:
     return torch.sum(input == others, dim=-1, dtype=torch.long)
 
 
-def multiset(input: VSA_Model) -> VSA_Model:
+def multiset(input: VSATensor) -> VSATensor:
     r"""Multiset of input hypervectors.
 
     Bundles all the input hypervectors together.
@@ -957,7 +989,7 @@ def multiset(input: VSA_Model) -> VSA_Model:
         \bigoplus_{i=0}^{n-1} V_i
 
     Args:
-        input (VSA_Model): input hypervector tensor
+        input (VSATensor): input hypervector tensor
 
     Shapes:
         - Input: :math:`(*, n, d)`
@@ -965,7 +997,7 @@ def multiset(input: VSA_Model) -> VSA_Model:
 
     Examples::
 
-        >>> x = torchhd.random_hv(3, 6)
+        >>> x = torchhd.random(3, 6)
         >>> x
         tensor([[-1., -1.,  1., -1.,  1., -1.],
                 [-1.,  1., -1.,  1., -1.,  1.],
@@ -974,7 +1006,7 @@ def multiset(input: VSA_Model) -> VSA_Model:
         tensor([-3., -1.,  1., -1.,  1., -1.])
 
     """
-    input = as_vsa_model(input)
+    input = ensure_vsa_tensor(input)
     return input.multibundle()
 
 
@@ -982,12 +1014,12 @@ multibundle = multiset
 
 
 def randsel(
-    input: VSA_Model,
-    other: VSA_Model,
+    input: VSATensor,
+    other: VSATensor,
     *,
     p: float = 0.5,
     generator: torch.Generator = None,
-) -> VSA_Model:
+) -> VSATensor:
     r"""Bundles two hypervectors by selecting random elements.
 
     A bundling operation is used to aggregate information into a single hypervector.
@@ -998,8 +1030,8 @@ def randsel(
         \oplus: \mathcal{H} \times \mathcal{H} \to \mathcal{H}
 
     Args:
-        input (VSA_Model): input hypervector
-        other (VSA_Model): other input hypervector
+        input (VSATensor): input hypervector
+        other (VSATensor): other input hypervector
         p (float, optional): probability of selecting elements from the input hypervector. Default: 0.5.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
 
@@ -1010,7 +1042,7 @@ def randsel(
 
     Examples::
 
-        >>> a, b = torchhd.random_hv(2, 6, torchhd.FHRR)
+        >>> a, b = torchhd.random(2, 6, "FHRR")
         >>> a
         tensor([-0.7404-0.6721j,  0.8280-0.5608j, -0.5059+0.8626j, -0.9965-0.0841j, -0.7337+0.6795j, -0.9925-0.1223j])
         >>> b
@@ -1019,8 +1051,8 @@ def randsel(
         tensor([-0.7404-0.6721j,  0.8280-0.5608j, -0.5059+0.8626j, -0.9965-0.0841j, -0.7337+0.6795j, -0.9925-0.1223j])
 
     """
-    input = as_vsa_model(input)
-    other = as_vsa_model(other)
+    input = ensure_vsa_tensor(input)
+    other = ensure_vsa_tensor(other)
 
     select = torch.empty_like(input, dtype=torch.bool)
     select.bernoulli_(1 - p, generator=generator)
@@ -1028,8 +1060,8 @@ def randsel(
 
 
 def multirandsel(
-    input: VSA_Model, *, p: FloatTensor = None, generator: torch.Generator = None
-) -> VSA_Model:
+    input: VSATensor, *, p: FloatTensor = None, generator: torch.Generator = None
+) -> VSATensor:
     r"""Bundling multiple hypervectors by sampling random elements.
 
     Bundles all the input hypervectors together.
@@ -1040,7 +1072,7 @@ def multirandsel(
         \bigoplus_{i=0}^{n-1} V_i
 
     Args:
-        input (VSA_Model): input hypervector tensor
+        input (VSATensor): input hypervector tensor
         p (FloatTensor, optional): probability of selecting elements from the input hypervector. Default: uniform.
         generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
 
@@ -1051,7 +1083,7 @@ def multirandsel(
 
     Examples::
 
-        >>> x = torchhd.random_hv(4, 6, torchhd.FHRR)
+        >>> x = torchhd.random(4, 6, "FHRR")
         >>> x
         tensor([[-0.6344+0.7730j, -0.5673+0.8235j,  0.9051-0.4253j,  0.1355-0.9908j, -0.6559-0.7549j,  0.7526-0.6585j],
                 [ 0.9136+0.4067j,  0.7351+0.6780j,  0.9999-0.0108j, -0.5853+0.8108j, -0.8442-0.5361j,  0.9487-0.3162j],
@@ -1061,7 +1093,7 @@ def multirandsel(
         tensor([ 0.3632+0.9317j, -0.9836+0.1806j, -0.6542-0.7563j,  0.9815-0.1914j, -0.6559-0.7549j,  0.7526-0.6585j])
 
     """
-    input = as_vsa_model(input)
+    input = ensure_vsa_tensor(input)
 
     d = input.size(-1)
     device = input.device
@@ -1075,7 +1107,7 @@ def multirandsel(
     return input.gather(-2, select).squeeze(-2)
 
 
-def multibind(input: VSA_Model) -> VSA_Model:
+def multibind(input: VSATensor) -> VSATensor:
     r"""Binding of multiple hypervectors.
 
     Binds all the input hypervectors together.
@@ -1085,7 +1117,7 @@ def multibind(input: VSA_Model) -> VSA_Model:
         \bigotimes_{i=0}^{n-1} V_i
 
     Args:
-        input (VSA_Model): input hypervector tensor.
+        input (VSATensor): input hypervector tensor.
 
     Shapes:
         - Input: :math:`(*, n, d)`
@@ -1093,7 +1125,7 @@ def multibind(input: VSA_Model) -> VSA_Model:
 
     Examples::
 
-        >>> x = torchhd.random_hv(3, 6)
+        >>> x = torchhd.random(3, 6)
         >>> x
         tensor([[ 1., -1.,  1., -1., -1., -1.],
                 [-1., -1.,  1., -1., -1.,  1.],
@@ -1102,11 +1134,11 @@ def multibind(input: VSA_Model) -> VSA_Model:
         tensor([ 1., -1.,  1., -1., -1., -1.])
 
     """
-    input = as_vsa_model(input)
+    input = ensure_vsa_tensor(input)
     return input.multibind()
 
 
-def cross_product(input: VSA_Model, other: VSA_Model) -> VSA_Model:
+def cross_product(input: VSATensor, other: VSATensor) -> VSATensor:
     r"""Cross product between two sets of hypervectors.
 
     First creates a multiset from both tensors ``input`` (:math:`A`) and ``other`` (:math:`B`).
@@ -1117,8 +1149,8 @@ def cross_product(input: VSA_Model, other: VSA_Model) -> VSA_Model:
         \big( \bigoplus_{i=0}^{n-1} A_i \big) \otimes \big( \bigoplus_{i=0}^{m-1} B_i \big)
 
     Args:
-        input (VSA_Model): first set of input hypervectors
-        other (VSA_Model): second set of input hypervectors
+        input (VSATensor): first set of input hypervectors
+        other (VSATensor): second set of input hypervectors
 
     Shapes:
         - Input: :math:`(*, n, d)`
@@ -1127,11 +1159,11 @@ def cross_product(input: VSA_Model, other: VSA_Model) -> VSA_Model:
 
     Examples::
 
-        >>> a = torchhd.random_hv(2, 6)
+        >>> a = torchhd.random(2, 6)
         >>> a
         tensor([[ 1.,  1.,  1., -1.,  1.,  1.],
                 [-1., -1.,  1., -1., -1.,  1.]])
-        >>> b = torchhd.random_hv(5, 6)
+        >>> b = torchhd.random(5, 6)
         >>> b
         tensor([[ 1., -1.,  1.,  1., -1., -1.],
                 [-1.,  1.,  1., -1., -1.,  1.],
@@ -1142,12 +1174,12 @@ def cross_product(input: VSA_Model, other: VSA_Model) -> VSA_Model:
         tensor([ 0., -0., 10.,  2., -0., -2.])
 
     """
-    input = as_vsa_model(input)
-    other = as_vsa_model(other)
+    input = ensure_vsa_tensor(input)
+    other = ensure_vsa_tensor(other)
     return bind(multiset(input), multiset(other))
 
 
-def ngrams(input: VSA_Model, n: int = 3) -> VSA_Model:
+def ngrams(input: VSATensor, n: int = 3) -> VSATensor:
     r"""Creates a hypervector with the :math:`n`-gram statistics of the input.
 
     .. math::
@@ -1158,7 +1190,7 @@ def ngrams(input: VSA_Model, n: int = 3) -> VSA_Model:
         For :math:`n=1` use :func:`~torchhd.functional.multiset` instead and for :math:`n=m` use :func:`~torchhd.functional.bind_sequence` instead.
 
     Args:
-        input (VSA_Model): The value hypervectors.
+        input (VSATensor): The value hypervectors.
         n (int, optional): The size of each :math:`n`-gram, :math:`1 \leq n \leq m`. Default: ``3``.
 
     Shapes:
@@ -1167,7 +1199,7 @@ def ngrams(input: VSA_Model, n: int = 3) -> VSA_Model:
 
     Examples::
 
-        >>> x = torchhd.random_hv(5, 6)
+        >>> x = torchhd.random(5, 6)
         >>> x
         tensor([[-1., -1., -1.,  1.,  1.,  1.],
                 [ 1., -1.,  1.,  1.,  1.,  1.],
@@ -1178,7 +1210,7 @@ def ngrams(input: VSA_Model, n: int = 3) -> VSA_Model:
         tensor([-1., -1.,  1., -3., -1., -3.])
 
     """
-    input = as_vsa_model(input)
+    input = ensure_vsa_tensor(input)
 
     n_gram = permute(input[..., : -(n - 1), :], shifts=n - 1)
     for i in range(1, n):
@@ -1189,7 +1221,7 @@ def ngrams(input: VSA_Model, n: int = 3) -> VSA_Model:
     return multiset(n_gram)
 
 
-def hash_table(keys: VSA_Model, values: VSA_Model) -> VSA_Model:
+def hash_table(keys: VSATensor, values: VSATensor) -> VSATensor:
     r"""Hash table from keys-values hypervector pairs.
 
     .. math::
@@ -1197,8 +1229,8 @@ def hash_table(keys: VSA_Model, values: VSA_Model) -> VSA_Model:
         \bigoplus_{i = 0}^{n - 1} K_i \otimes V_i
 
     Args:
-        keys (VSA_Model): The keys hypervectors, must be the same shape as values.
-        values (VSA_Model): The values hypervectors, must be the same shape as keys.
+        keys (VSATensor): The keys hypervectors, must be the same shape as values.
+        values (VSATensor): The values hypervectors, must be the same shape as keys.
 
     Shapes:
         - Keys: :math:`(*, n, d)`
@@ -1207,11 +1239,11 @@ def hash_table(keys: VSA_Model, values: VSA_Model) -> VSA_Model:
 
     Examples::
 
-        >>> k = torchhd.random_hv(2, 6)
+        >>> k = torchhd.random(2, 6)
         >>> k
         tensor([[-1., -1., -1.,  1.,  1.,  1.],
                 [-1.,  1.,  1., -1., -1.,  1.]])
-        >>> v = torchhd.random_hv(2, 6)
+        >>> v = torchhd.random(2, 6)
         >>> v
         tensor([[-1.,  1.,  1.,  1., -1., -1.],
                 [-1., -1.,  1., -1., -1., -1.]])
@@ -1219,12 +1251,12 @@ def hash_table(keys: VSA_Model, values: VSA_Model) -> VSA_Model:
         tensor([ 2., -2.,  0.,  2.,  0., -2.])
 
     """
-    keys = as_vsa_model(keys)
-    values = as_vsa_model(values)
+    keys = ensure_vsa_tensor(keys)
+    values = ensure_vsa_tensor(values)
     return multiset(bind(keys, values))
 
 
-def bundle_sequence(input: VSA_Model) -> VSA_Model:
+def bundle_sequence(input: VSATensor) -> VSATensor:
     r"""Bundling-based sequence.
 
     The first value is permuted :math:`n-1` times, the last value is not permuted.
@@ -1234,7 +1266,7 @@ def bundle_sequence(input: VSA_Model) -> VSA_Model:
         \bigoplus_{i=0}^{n-1} \Pi^{n - i - 1}(V_i)
 
     Args:
-        input (VSA_Model): The hypervector values.
+        input (VSATensor): The hypervector values.
 
     Shapes:
         - Input: :math:`(*, n, d)`
@@ -1242,7 +1274,7 @@ def bundle_sequence(input: VSA_Model) -> VSA_Model:
 
     Examples::
 
-        >>> x = torchhd.random_hv(4, 6)
+        >>> x = torchhd.random(4, 6)
         >>> x
         tensor([[ 1., -1.,  1.,  1.,  1.,  1.],
                 [-1.,  1., -1., -1.,  1., -1.],
@@ -1252,7 +1284,7 @@ def bundle_sequence(input: VSA_Model) -> VSA_Model:
         tensor([ 2.,  0.,  2.,  0., -2.,  0.])
 
     """
-    input = as_vsa_model(input)
+    input = ensure_vsa_tensor(input)
 
     dim = -2
     n = input.size(dim)
@@ -1264,7 +1296,7 @@ def bundle_sequence(input: VSA_Model) -> VSA_Model:
     return multiset(permuted)
 
 
-def bind_sequence(input: VSA_Model) -> VSA_Model:
+def bind_sequence(input: VSATensor) -> VSATensor:
     r"""Binding-based sequence.
 
     The first value is permuted :math:`n-1` times, the last value is not permuted.
@@ -1274,7 +1306,7 @@ def bind_sequence(input: VSA_Model) -> VSA_Model:
         \bigotimes_{i=0}^{n-1} \Pi^{n - i - 1}(V_i)
 
     Args:
-        input (VSA_Model): The hypervector values.
+        input (VSATensor): The hypervector values.
 
     Shapes:
         - Input: :math:`(*, n, d)`
@@ -1282,7 +1314,7 @@ def bind_sequence(input: VSA_Model) -> VSA_Model:
 
     Examples::
 
-        >>> x = torchhd.random_hv(4, 6)
+        >>> x = torchhd.random(4, 6)
         >>> x
         tensor([[ 1.,  1.,  1., -1., -1.,  1.],
                 [ 1.,  1., -1., -1., -1., -1.],
@@ -1292,7 +1324,7 @@ def bind_sequence(input: VSA_Model) -> VSA_Model:
         tensor([-1., -1., -1., -1.,  1., -1.])
 
     """
-    input = as_vsa_model(input)
+    input = ensure_vsa_tensor(input)
 
     dim = -2
     n = input.size(dim)
@@ -1304,7 +1336,7 @@ def bind_sequence(input: VSA_Model) -> VSA_Model:
     return multibind(permuted)
 
 
-def graph(input: VSA_Model, *, directed=False) -> VSA_Model:
+def graph(input: VSATensor, *, directed=False) -> VSATensor:
     r"""Graph from node hypervector pairs.
 
     If ``directed=False`` this computes:
@@ -1320,7 +1352,7 @@ def graph(input: VSA_Model, *, directed=False) -> VSA_Model:
         \bigoplus_{i = 0}^{n - 1} V_{0,i} \otimes \Pi(V_{1,i})
 
     Args:
-        input (VSA_Model): tensor containing pairs of node hypervectors that share an edge.
+        input (VSATensor): tensor containing pairs of node hypervectors that share an edge.
         directed (bool, optional): specify if the graph is directed or not. Default: ``False``.
 
     Shapes:
@@ -1329,7 +1361,7 @@ def graph(input: VSA_Model, *, directed=False) -> VSA_Model:
 
     Examples::
 
-        >>> x = torchhd.random_hv(4, 6)
+        >>> x = torchhd.random(4, 6)
         >>> x
         tensor([[-1., -1.,  1.,  1.,  1., -1.],
                 [-1., -1., -1.,  1.,  1.,  1.],
@@ -1351,7 +1383,7 @@ def graph(input: VSA_Model, *, directed=False) -> VSA_Model:
         tensor([ 2.,  4., -2.,  0.,  4.,  0.])
 
     """
-    input = as_vsa_model(input)
+    input = ensure_vsa_tensor(input)
 
     to_nodes = input[..., 0, :, :]
     from_nodes = input[..., 1, :, :]
@@ -1362,14 +1394,14 @@ def graph(input: VSA_Model, *, directed=False) -> VSA_Model:
     return multiset(bind(to_nodes, from_nodes))
 
 
-def cleanup(input: VSA_Model, memory: VSA_Model, threshold=0.0) -> VSA_Model:
+def cleanup(input: VSATensor, memory: VSATensor, threshold=0.0) -> VSATensor:
     """Gets the most similar hypervector in memory.
 
     If the cosine similarity is less than threshold, raises a KeyError.
 
     Args:
-        input (VSA_Model): The hypervector to cleanup.
-        memory (VSA_Model): The hypervectors in memory.
+        input (VSATensor): The hypervector to cleanup.
+        memory (VSATensor): The hypervectors in memory.
         threshold (float, optional): minimal similarity between input and any hypervector in memory. Default: ``0.0``.
 
     Shapes:
@@ -1379,7 +1411,7 @@ def cleanup(input: VSA_Model, memory: VSA_Model, threshold=0.0) -> VSA_Model:
 
     Examples::
 
-        >>> x = torchhd.random_hv(4, 6)
+        >>> x = torchhd.random(4, 6)
         >>> x
         tensor([[-1.,  1.,  1., -1., -1., -1.],
                 [ 1.,  1., -1.,  1., -1.,  1.],
@@ -1389,9 +1421,9 @@ def cleanup(input: VSA_Model, memory: VSA_Model, threshold=0.0) -> VSA_Model:
         tensor([[-1.,  1.,  1., -1., -1., -1.]])
 
     """
-    input = as_vsa_model(input)
+    input = ensure_vsa_tensor(input)
 
-    scores = cos_similarity(input, memory)
+    scores = cosine_similarity(input, memory)
     value, index = torch.max(scores, dim=-1)
 
     if value.item() < threshold:
@@ -1402,7 +1434,7 @@ def cleanup(input: VSA_Model, memory: VSA_Model, threshold=0.0) -> VSA_Model:
     return torch.index_select(memory, -2, index)
 
 
-def resonator(input: VSA_Model, estimates: VSA_Model, domains: VSA_Model) -> VSA_Model:
+def resonator(input: VSATensor, estimates: VSATensor, domains: VSATensor) -> VSATensor:
     """A step of the resonator network that factorizes the input.
 
     Given current estimates for each factor, it returns the next estimates for those factors.
@@ -1415,9 +1447,9 @@ def resonator(input: VSA_Model, estimates: VSA_Model, domains: VSA_Model) -> VSA
 
     Examples::
 
-        >>> X = torchhd.random_hv(5, 100)
-        >>> Y = torchhd.random_hv(5, 100)
-        >>> Z = torchhd.random_hv(5, 100)
+        >>> X = torchhd.random(5, 100)
+        >>> Y = torchhd.random(5, 100)
+        >>> Z = torchhd.random(5, 100)
         >>> domains = torch.stack((X, Y, Z), dim=0)
         >>> domains.shape
         torch.Size([3, 5, 100])
@@ -1428,41 +1460,45 @@ def resonator(input: VSA_Model, estimates: VSA_Model, domains: VSA_Model) -> VSA
         >>> estimates.shape
         torch.Size([3, 100])
         >>> # look at similarity of estimates with the domain
-        >>> print(torchhd.dot_similarity(estimates.unsqueeze(-2), domains).squeeze(-2))
-        MAP([[112.,  80., 136., 106., 106.],
-            [ 98., 102., 100., 110.,  74.],
-            [116.,  94., 104., 112.,  82.]])
+        >>> torchhd.dot_similarity(estimates.unsqueeze(-2), domains).squeeze(-2)
+        MAPTensor([[112.,  80., 136., 106., 106.],
+                   [ 98., 102., 100., 110.,  74.],
+                   [116.,  94., 104., 112.,  82.]])
         >>> # Create the combined symbol
         >>> s = X[0].bind(Y[1]).bind(Z[3])
-        MAP([[100.,   8.,   8.,  -2.,  -2.],
-            [-18.,  70.,  44.,  -6.,  14.],
-            [  8.,   2.,   4., 100.,  -2.]])
         >>> # resonator step
         >>> estimates = torchhd.resonator(s, estimates, domains)
         >>> # look at similarity of new estimates with the domain
-        >>> print(torchhd.dot_similarity(estimates.unsqueeze(-2), domains).squeeze(-2))
-        MAP([[100.,   8.,   8.,  -2.,  -2.],
-            [  4., 100.,  14.,   0., -16.],
-            [  8.,   2.,   4., 100.,  -2.]])
+        >>> torchhd.dot_similarity(estimates.unsqueeze(-2), domains).squeeze(-2)
+        MAPTensor([[100.,   8.,   8.,  -2.,  -2.],
+                   [-18.,  70.,  44.,  -6.,  14.],
+                   [  8.,   2.,   4., 100.,  -2.]])
+        >>> # resonator step
+        >>> estimates = torchhd.resonator(s, estimates, domains)
+        >>> # look at similarity of new estimates with the domain
+        >>> torchhd.dot_similarity(estimates.unsqueeze(-2), domains).squeeze(-2)
+        MAPTensor([[100.,   8.,   8.,  -2.,  -2.],
+                   [  4., 100.,  14.,   0., -16.],
+                   [  8.,   2.,   4., 100.,  -2.]])
 
     """
-    input = as_vsa_model(input)
-    estimates = as_vsa_model(estimates)
-    domains = as_vsa_model(domains)
+    input = ensure_vsa_tensor(input)
+    estimates = ensure_vsa_tensor(estimates)
+    domains = ensure_vsa_tensor(domains)
 
-    if not isinstance(input, MAP):
+    if not isinstance(input, MAPTensor):
         raise ValueError(
-            f"Resonator currently only supports Multiply-Add-Permute (MAP) VSA model, provided: {input.__class__.__name__}"
+            f"Resonator currently only supports Multiply-Add-Permute (MAPTensor) VSA model, provided: {input.__class__.__name__}"
         )
 
-    if not isinstance(estimates, MAP):
+    if not isinstance(estimates, MAPTensor):
         raise ValueError(
-            f"Resonator currently only supports Multiply-Add-Permute (MAP) VSA model, provided: {estimates.__class__.__name__}"
+            f"Resonator currently only supports Multiply-Add-Permute (MAPTensor) VSA model, provided: {estimates.__class__.__name__}"
         )
 
-    if not isinstance(domains, MAP):
+    if not isinstance(domains, MAPTensor):
         raise ValueError(
-            f"Resonator currently only supports Multiply-Add-Permute (MAP) VSA model, provided: {domains.__class__.__name__}"
+            f"Resonator currently only supports Multiply-Add-Permute (MAPTensor) VSA model, provided: {domains.__class__.__name__}"
         )
 
     n = estimates.size(-2)

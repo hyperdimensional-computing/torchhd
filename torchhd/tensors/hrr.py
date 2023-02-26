@@ -1,13 +1,13 @@
+from typing import Set
 import torch
 from torch import Tensor
 from torch.fft import fft, ifft
-from typing import Set
 import math
 
-from torchhd.base import VSA_Model
+from torchhd.tensors.base import VSATensor
 
 
-class HRR(VSA_Model):
+class HRRTensor(VSATensor):
     """Holographic Reduced Representation
 
     Proposed in `Holographic reduced representations <https://ieeexplore.ieee.org/document/377968>`_, this model uses real valued hypervectors.
@@ -16,7 +16,7 @@ class HRR(VSA_Model):
     supported_dtypes: Set[torch.dtype] = {torch.float32, torch.float64}
 
     @classmethod
-    def empty_hv(
+    def empty(
         cls,
         num_vectors: int,
         dimensions: int,
@@ -24,7 +24,7 @@ class HRR(VSA_Model):
         dtype=None,
         device=None,
         requires_grad=False,
-    ) -> "HRR":
+    ) -> "HRRTensor":
         """Creates a set of hypervectors representing empty sets.
 
         When bundled with a random-hypervector :math:`x`, the result is :math:`x`.
@@ -39,11 +39,11 @@ class HRR(VSA_Model):
 
         Examples::
 
-            >>> torchhd.HRR.empty_hv(3, 6)
+            >>> torchhd.HRRTensor.empty(3, 6)
             HRR([[0., 0., 0., 0., 0., 0.],
                 [0., 0., 0., 0., 0., 0.],
                 [0., 0., 0., 0., 0., 0.]])
-            >>> torchhd.HRR.empty_hv(3, 6, dtype=torch.float64)
+            >>> torchhd.HRRTensor.empty(3, 6, dtype=torch.float64)
             HRR([[0., 0., 0., 0., 0., 0.],
                 [0., 0., 0., 0., 0., 0.],
                 [0., 0., 0., 0., 0., 0.]], dtype=torch.float64)
@@ -68,7 +68,7 @@ class HRR(VSA_Model):
         return result.as_subclass(cls)
 
     @classmethod
-    def identity_hv(
+    def identity(
         cls,
         num_vectors: int,
         dimensions: int,
@@ -76,7 +76,7 @@ class HRR(VSA_Model):
         dtype=None,
         device=None,
         requires_grad=False,
-    ) -> "HRR":
+    ) -> "HRRTensor":
         """Creates a set of identity hypervectors.
 
         When bound with a random-hypervector :math:`x`, the result is :math:`x`.
@@ -90,11 +90,11 @@ class HRR(VSA_Model):
 
         Examples::
 
-            >>> torchhd.HRR.identity_hv(3, 6)
+            >>> torchhd.HRRTensor.identity(3, 6)
             HRR([[1., 0., 0., 0., 0., 0.],
                  [1., 0., 0., 0., 0., 0.],
                  [1., 0., 0., 0., 0., 0.]])
-            >>> torchhd.HRR.identity_hv(3, 6, dtype=torch.float64)
+            >>> torchhd.HRRTensor.identity(3, 6, dtype=torch.float64)
             HRR([[1., 0., 0., 0., 0., 0.],
                  [1., 0., 0., 0., 0., 0.],
                  [1., 0., 0., 0., 0., 0.]], dtype=torch.float64)
@@ -120,7 +120,7 @@ class HRR(VSA_Model):
         return result.as_subclass(cls)
 
     @classmethod
-    def random_hv(
+    def random(
         cls,
         num_vectors: int,
         dimensions: int,
@@ -129,7 +129,7 @@ class HRR(VSA_Model):
         dtype=None,
         device=None,
         requires_grad=False,
-    ) -> "HRR":
+    ) -> "HRRTensor":
         """Creates a set of random independent hypervectors.
 
         The resulting hypervectors are sampled at random from a normal with mean 0 and standard deviation 1/dimensions.
@@ -144,11 +144,11 @@ class HRR(VSA_Model):
 
         Examples::
 
-            >>> torchhd.HRR.random_hv(3, 6)
+            >>> torchhd.HRRTensor.random(3, 6)
             HRR([[ 0.2520, -0.0048, -0.0351,  0.2067,  0.0638, -0.0729],
                  [-0.2695,  0.0815,  0.0103,  0.2211, -0.1202,  0.2134],
                  [ 0.0086, -0.1748, -0.1715,  0.3215, -0.1353,  0.0044]])
-            >>> torchhd.HRR.random_hv(3, 6, dtype=torch.float64)
+            >>> torchhd.HRRTensor.random(3, 6, dtype=torch.float64)
             HRR([[-0.1327, -0.0396, -0.0065,  0.0886, -0.4665,  0.2656],
                  [-0.2879, -0.1070, -0.0851, -0.4366, -0.1311,  0.3976],
                  [-0.0472,  0.2987, -0.1567,  0.1496, -0.0098,  0.0344]], dtype=torch.float64)
@@ -169,7 +169,7 @@ class HRR(VSA_Model):
         result.requires_grad = requires_grad
         return result.as_subclass(cls)
 
-    def bundle(self, other: "HRR") -> "HRR":
+    def bundle(self, other: "HRRTensor") -> "HRRTensor":
         r"""Bundle the hypervector with other using element-wise sum.
 
         This produces a hypervector maximally similar to both.
@@ -186,7 +186,7 @@ class HRR(VSA_Model):
 
         Examples::
 
-            >>> a, b = torchhd.HRR.random_hv(2, 6)
+            >>> a, b = torchhd.HRRTensor.random(2, 6)
             >>> a
             HRR([ 0.1916, -0.1451, -0.0678,  0.0829,  0.3816, -0.0906])
             >>> b
@@ -194,7 +194,7 @@ class HRR(VSA_Model):
             >>> a.bundle(b)
             HRR([-0.0909,  0.2336,  0.0207, -0.0440,  0.3336, -0.3935])
 
-            >>> a, b = torchhd.HRR.random_hv(2, 6, dtype=torch.float64)
+            >>> a, b = torchhd.HRRTensor.random(2, 6, dtype=torch.float64)
             >>> a
             HRR([ 0.3879, -0.0452, -0.0082, -0.2262, -0.2764,  0.0166], dtype=torch.float64)
             >>> b
@@ -203,13 +203,13 @@ class HRR(VSA_Model):
             HRR([ 0.4618, -0.0758,  0.4866, -0.1053, -0.1281,  0.1434], dtype=torch.float64)
 
         """
-        return self.add(other)
+        return torch.add(self, other)
 
-    def multibundle(self) -> "HRR":
+    def multibundle(self) -> "HRRTensor":
         """Bundle multiple hypervectors"""
-        return self.sum(dim=-2, dtype=self.dtype)
+        return torch.sum(self, dim=-2, dtype=self.dtype)
 
-    def bind(self, other: "HRR") -> "HRR":
+    def bind(self, other: "HRRTensor") -> "HRRTensor":
         r"""Bind the hypervector with other using circular convolution.
 
         This produces a hypervector dissimilar to both.
@@ -226,7 +226,7 @@ class HRR(VSA_Model):
 
         Examples::
 
-            >>> a, b = torchhd.HRR.random_hv(2, 6)
+            >>> a, b = torchhd.HRRTensor.random(2, 6)
             >>> a
             HRR([ 0.0101, -0.2474, -0.0097, -0.0788,  0.1541, -0.1766])
             >>> b
@@ -234,7 +234,7 @@ class HRR(VSA_Model):
             >>> a.bind(b)
             HRR([ 0.0786, -0.0260,  0.0591, -0.0706,  0.0799, -0.0216])
 
-            >>> a, b = torchhd.HRR.random_hv(2, 6, dtype=torch.float64)
+            >>> a, b = torchhd.HRRTensor.random(2, 6, dtype=torch.float64)
             >>> a
             HRR([ 0.0354, -0.0818,  0.0216,  0.0384,  0.2961,  0.1976], dtype=torch.float64)
             >>> b
@@ -246,18 +246,18 @@ class HRR(VSA_Model):
         result = ifft(torch.mul(fft(self), fft(other)))
         return torch.real(result)
 
-    def multibind(self) -> "HRR":
+    def multibind(self) -> "HRRTensor":
         """Bind multiple hypervectors"""
         result = ifft(torch.prod(fft(self), dim=-2, dtype=self.dtype))
         return torch.real(result)
 
-    def exact_inverse(self) -> "HRR":
+    def exact_inverse(self) -> "HRRTensor":
         """Unstable, but exact, inverse"""
-        result = ifft(1.0 / fft(self).conj())
+        result = ifft(1.0 / torch.conj(fft(self)))
         result = torch.real(result)
         return torch.nan_to_num(result)
 
-    def inverse(self) -> "HRR":
+    def inverse(self) -> "HRRTensor":
         r"""Stable inversion of the hypervector for binding.
 
         For HRR the stable inverse of hypervector is its conjugate in the frequency domain, this returns the conjugate of the hypervector.
@@ -268,23 +268,23 @@ class HRR(VSA_Model):
 
         Examples::
 
-            >>> a = torchhd.HRR.random_hv(1, 6)
+            >>> a = torchhd.HRRTensor.random(1, 6)
             >>> a
             HRR([[ 0.1406,  0.0014, -0.0502,  0.2888,  0.2969, -0.2637]])
             >>> a.inverse()
             HRR([[ 0.1406, -0.2637,  0.2969,  0.2888, -0.0502,  0.0014]])
 
-            >>> a = torchhd.HRR.random_hv(1, 6, dtype=torch.float64)
+            >>> a = torchhd.HRRTensor.random(1, 6, dtype=torch.float64)
             >>> a
             HRR([[ 0.0090,  0.2620,  0.0836,  0.0441, -0.2351, -0.1744]], dtype=torch.float64)
             >>> a.inverse()
             HRR([[ 0.0090, -0.1744, -0.2351,  0.0441,  0.0836,  0.2620]], dtype=torch.float64)
 
         """
-        result = ifft(fft(self).conj())
+        result = ifft(torch.conj(fft(self)))
         return torch.real(result)
 
-    def negative(self) -> "HRR":
+    def negative(self) -> "HRRTensor":
         r"""Negate the hypervector for the bundling inverse.
 
         Shapes:
@@ -293,13 +293,13 @@ class HRR(VSA_Model):
 
         Examples::
 
-            >>> a = torchhd.HRR.random_hv(1, 6)
+            >>> a = torchhd.HRRTensor.random(1, 6)
             >>> a
             HRR([[ 0.2658, -0.2808,  0.1436,  0.1131,  0.1567, -0.1426]])
             >>> a.negative()
             HRR([[-0.2658,  0.2808, -0.1436, -0.1131, -0.1567,  0.1426]])
 
-            >>> a = torchhd.HRR.random_hv(1, 6, dtype=torch.float64)
+            >>> a = torchhd.HRRTensor.random(1, 6, dtype=torch.float64)
             >>> a
             HRR([[ 0.0318,  0.1944,  0.1229,  0.0193,  0.0135, -0.2521]], dtype=torch.float64)
             >>> a.negative()
@@ -308,7 +308,7 @@ class HRR(VSA_Model):
         """
         return torch.negative(self)
 
-    def permute(self, shifts: int = 1) -> "HRR":
+    def permute(self, shifts: int = 1) -> "HRRTensor":
         r"""Permute the hypervector.
 
         The permutation operator is used to assign an order to hypervectors.
@@ -322,39 +322,39 @@ class HRR(VSA_Model):
 
         Examples::
 
-            >>> a = torchhd.HRR.random_hv(1, 6)
+            >>> a = torchhd.HRRTensor.random(1, 6)
             >>> a
             HRR([[-0.2521,  0.1140, -0.1647, -0.1490, -0.2091, -0.0618]])
             >>> a.permute()
             HRR([[-0.0618, -0.2521,  0.1140, -0.1647, -0.1490, -0.2091]])
 
-            >>> a = torchhd.HRR.random_hv(1, 6, dtype=torch.float64)
+            >>> a = torchhd.HRRTensor.random(1, 6, dtype=torch.float64)
             >>> a
             HRR([[-0.0495, -0.0318,  0.3923, -0.3205,  0.1587,  0.1926]], dtype=torch.float64)
             >>> a.permute()
             HRR([[ 0.1926, -0.0495, -0.0318,  0.3923, -0.3205,  0.1587]], dtype=torch.float64)
 
         """
-        return self.roll(shifts=shifts, dims=-1)
+        return torch.roll(self, shifts=shifts, dims=-1)
 
-    def dot_similarity(self, others: "HRR") -> Tensor:
+    def dot_similarity(self, others: "HRRTensor") -> Tensor:
         """Inner product with other hypervectors"""
         if others.dim() >= 2:
             others = others.mT
         return torch.matmul(self, others)
 
-    def cos_similarity(self, others: "HRR", *, eps=1e-08) -> Tensor:
+    def cosine_similarity(self, others: "HRRTensor", *, eps=1e-08) -> Tensor:
         """Cosine similarity with other hypervectors"""
         self_dot = torch.sum(self * self, dim=-1)
-        self_mag = self_dot.sqrt()
+        self_mag = torch.sqrt(self_dot)
 
         others_dot = torch.sum(others * others, dim=-1)
-        others_mag = others_dot.sqrt()
+        others_mag = torch.sqrt(others_dot)
 
         if self.dim() > 1:
             magnitude = self_mag.unsqueeze(-1) * others_mag.unsqueeze(0)
         else:
             magnitude = self_mag * others_mag
 
-        magnitude = magnitude.clamp(min=eps)
+        magnitude = torch.clamp(magnitude, min=eps)
         return self.dot_similarity(others) / magnitude

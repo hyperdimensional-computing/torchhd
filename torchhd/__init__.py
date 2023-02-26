@@ -6,20 +6,20 @@ import torchhd.memory as memory
 import torchhd.datasets as datasets
 import torchhd.utils as utils
 
-from torchhd.base import VSA_Model
-from torchhd.bsc import BSC
-from torchhd.map import MAP
-from torchhd.hrr import HRR
-from torchhd.fhrr import FHRR
+from torchhd.tensors.base import VSATensor
+from torchhd.tensors.bsc import BSCTensor
+from torchhd.tensors.map import MAPTensor
+from torchhd.tensors.hrr import HRRTensor
+from torchhd.tensors.fhrr import FHRRTensor
 
 from torchhd.functional import (
-    as_vsa_model,
-    empty_hv,
-    identity_hv,
-    random_hv,
-    level_hv,
-    thermometer_hv,
-    circular_hv,
+    ensure_vsa_tensor,
+    empty,
+    identity,
+    random,
+    level,
+    thermometer,
+    circular,
     bind,
     bundle,
     permute,
@@ -31,8 +31,10 @@ from torchhd.functional import (
     multirandsel,
     soft_quantize,
     hard_quantize,
-    cos_similarity,
+    cosine_similarity,
+    cos,
     dot_similarity,
+    dot,
     hamming_similarity,
     multiset,
     multibundle,
@@ -53,11 +55,11 @@ from torchhd.version import __version__
 
 __all__ = [
     "__version__",
-    "VSA_Model",
-    "BSC",
-    "MAP",
-    "HRR",
-    "FHRR",
+    "VSATensor",
+    "BSCTensor",
+    "MAPTensor",
+    "HRRTensor",
+    "FHRRTensor",
     "functional",
     "embeddings",
     "structures",
@@ -65,13 +67,13 @@ __all__ = [
     "memory",
     "datasets",
     "utils",
-    "as_vsa_model",
-    "empty_hv",
-    "identity_hv",
-    "random_hv",
-    "level_hv",
-    "thermometer_hv",
-    "circular_hv",
+    "ensure_vsa_tensor",
+    "empty",
+    "identity",
+    "random",
+    "level",
+    "thermometer",
+    "circular",
     "bind",
     "bundle",
     "permute",
@@ -83,8 +85,10 @@ __all__ = [
     "multirandsel",
     "soft_quantize",
     "hard_quantize",
-    "cos_similarity",
+    "cosine_similarity",
+    "cos",
     "dot_similarity",
+    "dot",
     "hamming_similarity",
     "multiset",
     "multibundle",

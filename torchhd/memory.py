@@ -5,9 +5,14 @@ import torch.nn as nn
 from scipy.stats import binom
 
 import torchhd.functional as functional
+from torchhd.tensors.base import VSATensor
+
+__all__ = [
+    "SparseDistributed",
+]
 
 
-class SDM(nn.Module):
+class SparseDistributed(nn.Module):
     r"""`Sparse Distributed Memory <https://redwood.berkeley.edu/wp-content/uploads/2020/08/KanervaP_SDMrelated_models1993.pdf>`_
 
     The Sparse Distributed Memory (SDM) is specified by its (typically random) addresses and its content.
@@ -18,7 +23,7 @@ class SDM(nn.Module):
         content_dim (int): The dimensionality of the content vectors.
         p (float, optional): The expected fraction of memory address that will contain any value. Default: ``0.000368``.
         kappa (int, optional): The maximum count for each memory cell, values are clipped between [-kappa, kappa]. Default: no clipping.
-        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSA_Model.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
         device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
@@ -27,22 +32,22 @@ class SDM(nn.Module):
         - Content: :math:`(n, d)`
 
     Examples::
-        >>> address = torchhd.random_hv(6, 512)
-        >>> sdm = torchhd.memory.SDM(100000, 512, 512)
+        >>> address = torchhd.random(6, 512)
+        >>> sdm = torchhd.memory.SparseDistributed(100000, 512, 512)
         >>> # use as associative memory
         >>> sdm.write(address, address)
         >>> read = sdm.read(address)
-        >>> torchhd.cos_similarity(read, address)
-        MAP([[ 1.0000,  0.0156, -0.0039, -0.0742,  0.0000, -0.0195],
-             [ 0.0156,  1.0000, -0.0352, -0.0586,  0.0000, -0.0039],
-             [-0.0039, -0.0352,  1.0000,  0.0156,  0.0820, -0.0234],
-             [-0.0742, -0.0586,  0.0156,  1.0000, -0.0039,  0.0000],
-             [ 0.0000,  0.0000,  0.0820, -0.0039,  1.0000,  0.0195],
-             [-0.0195, -0.0039, -0.0234,  0.0000,  0.0195,  1.0000]])
+        >>> torchhd.cosine_similarity(read, address)
+        MAPTensor([[ 1.0000,  0.0156, -0.0039, -0.0742,  0.0000, -0.0195],
+                   [ 0.0156,  1.0000, -0.0352, -0.0586,  0.0000, -0.0039],
+                   [-0.0039, -0.0352,  1.0000,  0.0156,  0.0820, -0.0234],
+                   [-0.0742, -0.0586,  0.0156,  1.0000, -0.0039,  0.0000],
+                   [ 0.0000,  0.0000,  0.0820, -0.0039,  1.0000,  0.0195],
+                   [-0.0195, -0.0039, -0.0234,  0.0000,  0.0195,  1.0000]])
     """
 
-    addresses: Tensor
-    content: Tensor
+    addresses: VSATensor
+    content: VSATensor
     threshold: int
     kappa: Optional[int]
 
@@ -63,12 +68,12 @@ class SDM(nn.Module):
         self.threshold = address_dim - 2 * radius
         self.kappa = kappa
 
-        addresses = functional.random_hv(
+        addresses = functional.random(
             num_addresses, address_dim, dtype=dtype, device=device
         )
         self.addresses = nn.Parameter(addresses, requires_grad)
 
-        content = functional.empty_hv(num_addresses, content_dim, device=device)
+        content = functional.empty(num_addresses, content_dim, device=device)
         self.content = nn.Parameter(content, requires_grad)
 
     def read(self, address: Tensor) -> Tensor:
@@ -87,7 +92,6 @@ class SDM(nn.Module):
 
         similarity = functional.dot_similarity(address, self.addresses)
         is_active = similarity >= self.threshold
-        print(is_active.sum(-1))
 
         # sparse matrix-vector multiplication
         r_indices, c_indices = is_active.nonzero().T
@@ -116,7 +120,6 @@ class SDM(nn.Module):
 
         similarity = functional.dot_similarity(address, self.addresses)
         is_active = similarity >= self.threshold
-        print(is_active.sum(-1))
 
         # sparse outer product and addition
         v_indices, c_indices = is_active.nonzero().T

@@ -35,7 +35,7 @@ class Centroid(nn.Module):
         >>> m = Centroid(20, 30)
         >>> input = torch.randn(128, 20)
         >>> output = m(input)
-        >>> print(output.size())
+        >>> output.size()
         torch.Size([128, 30])
     """
     __constants__ = ["in_features", "out_features"]
@@ -63,7 +63,7 @@ class Centroid(nn.Module):
         if dot:
             return functional.dot_similarity(input, self.weight)
 
-        return functional.cos_similarity(input, self.weight)
+        return functional.cosine_similarity(input, self.weight)
 
     @torch.no_grad()
     def add(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:

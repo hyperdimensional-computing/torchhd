@@ -16,7 +16,7 @@ class TestMultiset:
     def test_creation_tensor(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 10000, generator=generator)
+        keys_hv = functional.random(len(letters), 10000, generator=generator)
         multiset = functional.multiset(keys_hv)
 
         M = structures.Multiset(multiset)
@@ -25,18 +25,18 @@ class TestMultiset:
     def test_generator(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        hv1 = functional.random_hv(60, 10000, generator=generator)
+        hv1 = functional.random(60, 10000, generator=generator)
 
         generator = torch.Generator()
         generator.manual_seed(seed)
-        hv2 = functional.random_hv(60, 10000, generator=generator)
+        hv2 = functional.random(60, 10000, generator=generator)
 
         assert (hv1 == hv2).min().item()
 
     def test_add(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 4, generator=generator)
+        keys_hv = functional.random(len(letters), 4, generator=generator)
         M = structures.Multiset(4)
 
         M.add(keys_hv[0])
@@ -51,7 +51,7 @@ class TestMultiset:
     def test_remove(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 4, generator=generator)
+        keys_hv = functional.random(len(letters), 4, generator=generator)
         M = structures.Multiset(4)
 
         M.add(keys_hv[0])
@@ -67,7 +67,7 @@ class TestMultiset:
     def test_contains(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 4, generator=generator)
+        keys_hv = functional.random(len(letters), 4, generator=generator)
         M = structures.Multiset(4)
 
         M.add(keys_hv[0])
@@ -87,7 +87,7 @@ class TestMultiset:
     def test_length(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 4, generator=generator)
+        keys_hv = functional.random(len(letters), 4, generator=generator)
         M = structures.Multiset(4)
 
         M.add(keys_hv[0])
@@ -102,7 +102,7 @@ class TestMultiset:
     def test_clear(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 4, generator=generator)
+        keys_hv = functional.random(len(letters), 4, generator=generator)
         M = structures.Multiset(4)
 
         M.add(keys_hv[0])
@@ -120,7 +120,7 @@ class TestMultiset:
     def test_from_ngrams(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 3, generator=generator)
+        keys_hv = functional.random(len(letters), 3, generator=generator)
         M = structures.Multiset.from_ngrams(keys_hv)
 
         assert torch.equal(M.value, torch.tensor([0.0, 4.0, 0.0]))
@@ -128,6 +128,6 @@ class TestMultiset:
     def test_from_tensor(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        keys_hv = functional.random_hv(len(letters), 4, generator=generator)
+        keys_hv = functional.random(len(letters), 4, generator=generator)
         M = structures.Multiset.from_tensor(keys_hv)
         assert torch.equal(M.value, torch.tensor([2.0, 10.0, 4.0, 2.0]))

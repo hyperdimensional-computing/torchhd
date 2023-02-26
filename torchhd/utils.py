@@ -23,7 +23,7 @@ def plot_pair_similarity(memory: Tensor, ax=None, **kwargs):
     Examples::
 
         >>>  import matplotlib.pyplot as plt
-        >>>  hv = torchhd.level_hv(10, 10000)
+        >>>  hv = torchhd.level(10, 10000)
         >>>  utils.plot_pair_similarity(hv)
         >>>  plt.show()
     """
@@ -35,7 +35,7 @@ def plot_pair_similarity(memory: Tensor, ax=None, **kwargs):
         See https://matplotlib.org/stable/users/installing/index.html for more information."
         )
 
-    similarity = functional.cos_similarity(memory, memory).tolist()
+    similarity = functional.cosine_similarity(memory, memory).tolist()
 
     if ax is None:
         ax = plt.gca()
@@ -68,7 +68,7 @@ def plot_similarity(input: Tensor, memory: Tensor, ax=None, **kwargs):
     Examples::
 
         >>>  import matplotlib.pyplot as plt
-        >>>  hv = torchhd.level_hv(10, 10000)
+        >>>  hv = torchhd.level(10, 10000)
         >>>  utils.plot_similarity(hv[4], hv)
         >>>  plt.show()
 
@@ -81,7 +81,7 @@ def plot_similarity(input: Tensor, memory: Tensor, ax=None, **kwargs):
         See https://matplotlib.org/stable/users/installing/index.html for more information."
         )
 
-    similarity = functional.cos_similarity(input, memory).tolist()
+    similarity = functional.cosine_similarity(input, memory).tolist()
 
     if ax is None:
         ax = plt.gca()
