@@ -293,7 +293,8 @@ class FHRRTensor(VSATensor):
             dtype=torch.complex128)
 
         """
-        return torch.conj(self)
+        # Resolve conj to ensure the the returned tensor does not share the same memory
+        return torch.conj(self).resolve_conj()
 
     def negative(self) -> "FHRRTensor":
         r"""Negate the hypervector for the bundling inverse.

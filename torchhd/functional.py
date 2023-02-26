@@ -459,11 +459,11 @@ def circular(
     Any hypervector is quasi-orthogonal to the hypervector opposite site of the circle.
 
     .. note::
-        Circular hypervectors cannot be created directly with Holographic Reduced Representations (HRRTensor) because of imprecisions inherent to HRRTensor.
-        One way around this is to use FHRRTensor for the creation of circular hypervectors and then transform them to HRRTensor vectors. Example:
+        Circular hypervectors cannot be created directly with Holographic Reduced Representations (HRR) because of imprecisions inherent to HRR.
+        One way around this is to use FHRR for the creation of circular hypervectors and then transform them to HRR vectors. Example:
 
-        >>> hv = torchhd.circular(10, 6, torchhd.FHRRTensor)
-        >>> hv = torch.real(torch.fft.ifft(hv)).as_subclass(torchhd.HRRTensor)
+        >>> hv = torchhd.circular(10, 6, "FHRR")
+        >>> hv = torch.real(torch.fft.ifft(hv)).as_subclass("HRR")
 
     Args:
         num_vectors (int): the number of hypervectors to generate.
@@ -748,7 +748,7 @@ def inverse(input: VSATensor) -> VSATensor:
 
     Examples::
 
-        >>> a = torchhd.random(1, 6, torchhd.FHRRTensor)
+        >>> a = torchhd.random(1, 6, "FHRR")
         >>> a
         tensor([[ 0.879-0.476j,  0.995-0.090j, -0.279+0.960j, -0.752-0.658j, -0.874+0.485j, -0.527-0.849j]])
         >>> torchhd.inverse(a)
@@ -879,7 +879,7 @@ def dot_similarity(input: VSATensor, others: VSATensor) -> VSATensor:
                 [0., 6., 2.],
                 [0., 2., 6.]])
 
-        >>> x = torchhd.random(3, 6, torchhd.FHRRTensor)
+        >>> x = torchhd.random(3, 6, "FHRR")
         >>> x
         tensor([[-0.123-0.992j,  0.342-0.939j, -0.840-0.542j, -0.999+0.041j, -0.861-0.508j,  0.658-0.752j],
                 [-0.754+0.656j,  0.574-0.818j, -0.449+0.893j, -0.705-0.708j,  0.652-0.757j,  0.444-0.895j],
@@ -928,7 +928,7 @@ def cosine_similarity(input: VSATensor, others: VSATensor) -> VSATensor:
                 [ 0.0000,  1.0000, -0.3333],
                 [ 0.0000, -0.3333,  1.0000]])
 
-        >>> x = torchhd.random(3, 6, torchhd.FHRRTensor)
+        >>> x = torchhd.random(3, 6, "FHRR")
         >>> x
         tensor([[ 0.986+0.166j,  0.886+0.463j,  0.205+0.978j,  0.952+0.304j,  0.923+0.384j, -0.529+0.848j],
                 [-0.293+0.956j,  0.965+0.259j,  0.999-0.023j, -0.665-0.746j,  0.451-0.892j, -0.082+0.996j],
@@ -1042,7 +1042,7 @@ def randsel(
 
     Examples::
 
-        >>> a, b = torchhd.random(2, 6, torchhd.FHRRTensor)
+        >>> a, b = torchhd.random(2, 6, "FHRR")
         >>> a
         tensor([-0.7404-0.6721j,  0.8280-0.5608j, -0.5059+0.8626j, -0.9965-0.0841j, -0.7337+0.6795j, -0.9925-0.1223j])
         >>> b
@@ -1083,7 +1083,7 @@ def multirandsel(
 
     Examples::
 
-        >>> x = torchhd.random(4, 6, torchhd.FHRRTensor)
+        >>> x = torchhd.random(4, 6, "FHRR")
         >>> x
         tensor([[-0.6344+0.7730j, -0.5673+0.8235j,  0.9051-0.4253j,  0.1355-0.9908j, -0.6559-0.7549j,  0.7526-0.6585j],
                 [ 0.9136+0.4067j,  0.7351+0.6780j,  0.9999-0.0108j, -0.5853+0.8108j, -0.8442-0.5361j,  0.9487-0.3162j],
