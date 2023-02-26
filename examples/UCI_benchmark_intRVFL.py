@@ -18,7 +18,8 @@ def create_min_max_normalize(min: Tensor, max: Tensor):
 
     return normalize
 
- # These values of hyperparameters were found via the grid search for intRVFL model as described in the article.
+
+# These values of hyperparameters were found via the grid search for intRVFL model as described in the article.
 INT_RVFL_HYPER = {
     "abalone": (1450, 32, 15),
     "acute-inflammation": (50, 0.0009765625, 1),
