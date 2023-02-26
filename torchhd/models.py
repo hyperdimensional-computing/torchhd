@@ -17,7 +17,6 @@ import torchhd.embeddings as embeddings
 __all__ = [
     "Centroid",
     "IntRVFLRidge",
-    "classifier_ridge_regression",
 ]
 
 
@@ -148,7 +147,7 @@ class IntRVFLRidge(nn.Module):
     Attributes:
         weight: the trainable weights, or class prototypes, of the module of shape
             :math:`(n, d)`. The values are initialized as all zeros.
-                      
+
     """
 
     __constants__ = ["in_features", "dimensions", "out_features", "kappa"]
