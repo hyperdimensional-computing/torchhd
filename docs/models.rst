@@ -10,3 +10,5 @@ torchhd.models
     :template: class.rst
 
     Centroid
+    IntRVFLRidge
+    classifier_ridge_regression
