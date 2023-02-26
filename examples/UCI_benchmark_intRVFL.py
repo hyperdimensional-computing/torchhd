@@ -19,7 +19,6 @@ def create_min_max_normalize(min: Tensor, max: Tensor):
     return normalize
 
 
-
 # Specify device to be used for Torch.
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))

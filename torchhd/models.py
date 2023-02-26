@@ -20,6 +20,7 @@ __all__ = [
     "classifier_ridge_regression",
 ]
 
+
 class Centroid(nn.Module):
     r"""Implements the centroid classification model using class prototypes.
 
@@ -124,6 +125,7 @@ class Centroid(nn.Module):
         return "in_features={}, out_features={}".format(
             self.in_features, self.out_features is not None
         )
+
 
 class IntRVFLRidge(nn.Module):
     """Class implementing integer random vector functional link network (intRVFL) model as described in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
@@ -282,9 +284,7 @@ class IntRVFLRidge(nn.Module):
         self.classify = nn.Linear(self.dimensions, self.num_classes, bias=False)
         self.classify.weight.data.fill_(0.0)
         # Set up the encoding for the model as specified in "Density"
-        self.hypervector_encoding = embeddings.Density(
-            self.num_feat, self.dimensions
-        )
+        self.hypervector_encoding = embeddings.Density(self.num_feat, self.dimensions)
 
     # Specify encoding function for data samples
     def encode(self, x):
@@ -318,10 +318,10 @@ class IntRVFLRidge(nn.Module):
         # Assign the obtained classifier to the output
         with torch.no_grad():
             self.classify.weight.copy_(Wout)
-              
-   
-# 
-def classifier_ridge_regression(        
+
+
+#
+def classifier_ridge_regression(
     train_ld: data.DataLoader,
     dimensions: int,
     num_classes: int,
