@@ -106,7 +106,7 @@ class VSATensor(Tensor):
 
     def permute(self, shifts: int = 1) -> "VSATensor":
         """Permute the hypervector"""
-        return super().roll(shifts=shifts, dims=-1)
+        raise NotImplementedError
 
     def dot_similarity(self, others: "VSATensor") -> Tensor:
         """Inner product with other hypervectors"""
