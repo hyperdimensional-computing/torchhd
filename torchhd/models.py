@@ -137,13 +137,13 @@ class IntRVFLRidge(nn.Module):
         out_features (int): The number of output features, typically the number of classes.
         device (``torch.device``, optional):  the desired device of the weights. Default: if ``None``, uses the current device for the default tensor type (see ``torch.set_default_tensor_type()``). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         dtype (``torch.dtype``, optional): the desired data type of the weights. Default: if ``None``, uses ``torch.get_default_dtype()``.
-    
+
     Shape:
         - Input: :math:`(*, d)` where :math:`*` means any number of
           dimensions including none and ``d = in_features``.
         - Output: :math:`(*, n)` where all but the last dimension
           are the same shape as the input and ``n = out_features``.
-    
+
     Attributes:
         weight: the trainable weights, or class prototypes, of the module of shape
             :math:`(n, d)`. The values are initialized as all zeros.
@@ -158,7 +158,13 @@ class IntRVFLRidge(nn.Module):
     weight: Tensor
 
     def __init__(
-        self, in_features: int, dimensions: int,  out_features:int, kappa: Optional[int] = None, device=None, dtype=None
+        self,
+        in_features: int,
+        dimensions: int,
+        out_features: int,
+        kappa: Optional[int] = None,
+        device=None,
+        dtype=None,
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
         super(IntRVFLRidge, self).__init__()
@@ -168,7 +174,9 @@ class IntRVFLRidge(nn.Module):
         self.out_features = out_features
         self.kappa = kappa
 
-        self.encoding = embeddings.Density(in_features, self.dimensions, **factory_kwargs)
+        self.encoding = embeddings.Density(
+            in_features, self.dimensions, **factory_kwargs
+        )
 
         weight = torch.zeros((out_features, dimensions), **factory_kwargs)
         self.weight = Parameter(weight)
@@ -200,7 +208,7 @@ class IntRVFLRidge(nn.Module):
 
         It is a common way to form classifiers wihtin randomized neural networks see, e.g., `Randomness in Neural Networks: An Overview  <https://doi.org/10.1002/widm.1200>`_.
         """
-        
+
         encodings = self.encode(samples)
 
         # Compute the readout matrix using the ridge regression
@@ -212,6 +220,6 @@ class IntRVFLRidge(nn.Module):
                 + alpha * torch.diag(torch.var(encodings, 0))
             )
         )
-        
+
         # Assign the obtained classifier to the output
         self.weight.copy_(weights)
