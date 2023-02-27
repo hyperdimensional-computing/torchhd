@@ -1558,13 +1558,7 @@ def ridge_regression(
 
     variance = alpha * torch.diag(torch.var(samples, -2))
 
-    return (
-        labels.mT
-        @ samples
-        @ torch.linalg.pinv(
-            samples.mT @ samples + variance
-        )
-    )
+    return labels.mT @ samples @ torch.linalg.pinv(samples.mT @ samples + variance)
 
 
 def map_range(
