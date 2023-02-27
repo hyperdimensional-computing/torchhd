@@ -187,7 +187,9 @@ for dataset in benchmark.datasets():
         model = IntRVFLRidge(num_feat, dims, num_classes, kappa=kappa, device=device)
 
         # Obtain the classifier for the model
-        model.fit_ridge_regression(transform(dataset.train.data), one_hot_targets, alpha=alpha)
+        model.fit_ridge_regression(
+            transform(dataset.train.data), one_hot_targets, alpha=alpha
+        )
         accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
         with torch.no_grad():
