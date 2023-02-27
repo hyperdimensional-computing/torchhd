@@ -205,22 +205,12 @@ class IntRVFLRidge(nn.Module):
         labels: Tensor,
         alpha: Optional[float] = 1,
     ) -> None:
-        """Compute the weights (readout matrix) with ridge regression.
+        """Compute the weights (readout matrix) with :func:`~torchhd.ridge_regression`.
 
         It is a common way to form classifiers wihtin randomized neural networks see, e.g., `Randomness in Neural Networks: An Overview  <https://doi.org/10.1002/widm.1200>`_.
         """
-
         encodings = self.encode(samples)
-
         # Compute the readout matrix using the ridge regression
-        weights = (
-            torch.t(labels)
-            @ encodings
-            @ torch.linalg.pinv(
-                torch.t(encodings) @ encodings
-                + alpha * torch.diag(torch.var(encodings, 0))
-            )
-        )
-
+        weights = functional.ridge_regression(encodings, labels, alpha=alpha)
         # Assign the obtained classifier to the output
         self.weight.copy_(weights)

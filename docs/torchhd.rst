@@ -39,6 +39,7 @@ Operations
     multirandsel
     create_random_permute
     resonator
+    ridge_regression
     soft_quantize
     hard_quantize
 

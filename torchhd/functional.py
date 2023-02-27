@@ -1,4 +1,4 @@
-from typing import Type, Callable
+from typing import Type, Callable, Optional
 import math
 import torch
 from torch import LongTensor, FloatTensor, Tensor
@@ -43,6 +43,7 @@ __all__ = [
     "hash_table",
     "graph",
     "resonator",
+    "ridge_regression",
     "map_range",
     "value_to_index",
     "index_to_value",
@@ -1439,6 +1440,11 @@ def resonator(input: VSATensor, estimates: VSATensor, domains: VSATensor) -> VSA
 
     Given current estimates for each factor, it returns the next estimates for those factors.
 
+    Args:
+        input (VSATensor): The hypervector to be factorized.
+        estimates (VSATensor): The current estimates of the factors, typically starts as a multiset of the domain.
+        domains (VSATensor): The domains of each factor containing all possible factors.
+
     Shapes:
         - Input: :math:`(*, d)`
         - Estimates: :math:`(*, n, d)`
@@ -1527,6 +1533,38 @@ def resonator(input: VSATensor, estimates: VSATensor, domains: VSATensor) -> VSA
 
     # normalize the output vector with a non-linearity
     return output.sign()
+
+
+def ridge_regression(
+    samples: Tensor,
+    labels: Tensor,
+    alpha: Optional[float] = 1,
+):
+    """Compute weights (readout matrix) with ridge regression.
+
+    It is a common way to form classifiers within randomized neural networks see, e.g., `Randomness in Neural Networks: An Overview  <https://doi.org/10.1002/widm.1200>`_.
+
+    Args:
+        samples (VSATensor): The feature vectors.
+        labels (VSATensor): The target vectors, typically one-hot vectors for classification problems.
+        alpha (float, optional): Scalar for the variance of the samples. Default is 1.
+
+    Shapes:
+       - Samples: :math:`(n, d)`
+       - Labels: :math:`(n, c)`
+       - Output: :math:`(c, d)`
+
+    """
+
+    variance = alpha * torch.diag(torch.var(samples, -2))
+
+    return (
+        labels.mT
+        @ samples
+        @ torch.linalg.pinv(
+            samples.mT @ samples + variance
+        )
+    )
 
 
 def map_range(
