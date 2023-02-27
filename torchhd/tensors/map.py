@@ -335,7 +335,7 @@ class MAPTensor(VSATensor):
         others_mag = torch.sqrt(others_dot)
 
         if self.dim() >= 2:
-            magnitude = self_mag.unsqueeze(-1) * others_mag.unsqueeze(0)
+            magnitude = self_mag.unsqueeze(-1) * others_mag.unsqueeze(-2)
         else:
             magnitude = self_mag * others_mag
 
