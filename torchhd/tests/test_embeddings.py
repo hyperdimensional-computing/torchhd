@@ -309,15 +309,19 @@ class TestThermometer:
         dimensions = 1000000
         embedding = 4
         emb = embeddings.Thermometer(embedding, dimensions, vsa=vsa)
-        assert (abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.34 and abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) > 0.32 or
-                abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[2])) < 0.34 and abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[2])) > 0.32 or
-                abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[3])) > 0.99)
+        assert (
+            abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.34
+            and abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) > 0.32
+            or abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[2])) < 0.34
+            and abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[2])) > 0.32
+            or abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[3])) > 0.99
+        )
 
 
 class TestProjection:
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_in_features(self, vsa):
-        if vsa == 'BSC' or vsa == 'FHRR':
+        if vsa == "BSC" or vsa == "FHRR":
             return
         in_features = 1000
         out_features = 10
@@ -326,7 +330,7 @@ class TestProjection:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_out_features(self, vsa):
-        if vsa == 'BSC' or vsa == 'FHRR':
+        if vsa == "BSC" or vsa == "FHRR":
             return
         in_features = 1000
         out_features = 10
@@ -335,33 +339,33 @@ class TestProjection:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_dtype(self, vsa):
-        if vsa == 'BSC' or vsa == 'FHRR':
+        if vsa == "BSC" or vsa == "FHRR":
             return
         in_features = 1000
         out_features = 10
         emb = embeddings.Projection(in_features, out_features, vsa=vsa)
         x = torch.randn(1, in_features)
-        if vsa == 'MAP':
+        if vsa == "MAP":
             assert emb(x).dtype == torch.float
-        elif vsa == 'HRR':
+        elif vsa == "HRR":
             assert emb(x).dtype == torch.complex64 or emb(x).dtype == torch.complex32
         else:
             return
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_value(self, vsa):
-        if vsa == 'BSC' or vsa == 'FHRR':
+        if vsa == "BSC" or vsa == "FHRR":
             return
         in_features = 100000
         out_features = 100
         emb = embeddings.Projection(in_features, out_features, vsa=vsa)
-        assert (abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.5e-2)
+        assert abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.5e-2
 
 
 class TestSinusoid:
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_in_features(self, vsa):
-        if vsa == 'BSC' or vsa == 'FHRR':
+        if vsa == "BSC" or vsa == "FHRR":
             return
         in_features = 1000
         out_features = 10
@@ -370,7 +374,7 @@ class TestSinusoid:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_out_features(self, vsa):
-        if vsa == 'BSC' or vsa == 'FHRR':
+        if vsa == "BSC" or vsa == "FHRR":
             return
         in_features = 1000
         out_features = 10
@@ -379,33 +383,33 @@ class TestSinusoid:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_dtype(self, vsa):
-        if vsa == 'BSC' or vsa == 'FHRR':
+        if vsa == "BSC" or vsa == "FHRR":
             return
         in_features = 1000
         out_features = 10
         emb = embeddings.Sinusoid(in_features, out_features, vsa=vsa)
         x = torch.randn(1, in_features)
-        if vsa == 'MAP':
+        if vsa == "MAP":
             assert emb(x).dtype == torch.float
-        elif vsa == 'HRR':
+        elif vsa == "HRR":
             assert emb(x).dtype == torch.complex64 or emb(x).dtype == torch.complex32
         else:
             return
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_value(self, vsa):
-        if vsa == 'BSC' or vsa == 'FHRR':
+        if vsa == "BSC" or vsa == "FHRR":
             return
         in_features = 1000000
         out_features = 10
         emb = embeddings.Sinusoid(in_features, out_features, vsa=vsa)
-        assert (abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.5e-2)
+        assert abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.5e-2
 
 
 class TestDensity:
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_embedding_dim(self, vsa):
-        if vsa == 'HRR':
+        if vsa == "HRR":
             return
         dimensions = 1000
         embedding = 10
@@ -414,35 +418,42 @@ class TestDensity:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_num_embedings(self, vsa):
-        if vsa == 'HRR':
+        if vsa == "HRR":
             return
         dimensions = 1000
         embedding = 10
         emb = embeddings.Density(embedding, dimensions, vsa=vsa)
-        assert emb.density_encoding.num_embeddings == dimensions+1
+        assert emb.density_encoding.num_embeddings == dimensions + 1
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_dtype(self, vsa):
-        if vsa == 'HRR':
+        if vsa == "HRR":
             return
         dimensions = 1000
         embedding = 10
         emb = embeddings.Density(embedding, dimensions, vsa=vsa)
         x = torch.randn(1, embedding)
-        if vsa == 'BSC':
+        if vsa == "BSC":
             assert emb(x).dtype == torch.bool
-        elif vsa == 'MAP':
+        elif vsa == "MAP":
             assert emb(x).dtype == torch.float
-        elif vsa == 'FHRR':
+        elif vsa == "FHRR":
             assert emb(x).dtype == torch.complex64 or emb(x).dtype == torch.complex32
         else:
             return
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_value(self, vsa):
-        if vsa == 'HRR':
+        if vsa == "HRR":
             return
         dimensions = 10000
         embedding = 10
         emb = embeddings.Density(embedding, dimensions, vsa=vsa)
-        return abs(torchhd.cosine_similarity(emb.density_encoding.weight[0], emb.density_encoding.weight[1])) > 0.99
+        return (
+            abs(
+                torchhd.cosine_similarity(
+                    emb.density_encoding.weight[0], emb.density_encoding.weight[1]
+                )
+            )
+            > 0.99
+        )
