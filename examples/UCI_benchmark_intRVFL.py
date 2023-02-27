@@ -176,7 +176,6 @@ for dataset in benchmark.datasets():
     dataset.test.transform = transform
 
     # Set up data loaders
-    train_loader = data.DataLoader(dataset.train, batch_size=batch_size, shuffle=True)
     test_loader = data.DataLoader(dataset.test, batch_size=batch_size)
 
     one_hot_targets = torch.zeros(num_train_samples, num_classes, device=device)
@@ -188,7 +187,7 @@ for dataset in benchmark.datasets():
         model = IntRVFLRidge(num_feat, dims, num_classes, kappa=kappa, device=device)
 
         # Obtain the classifier for the model
-        model.fit_ridge_regression(dataset.train.data, one_hot_targets)
+        model.fit_ridge_regression(transform(dataset.train.data), one_hot_targets, alpha=alpha)
         accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
         with torch.no_grad():

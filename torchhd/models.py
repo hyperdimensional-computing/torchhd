@@ -135,6 +135,7 @@ class IntRVFLRidge(nn.Module):
         in_features (int): Size of each input sample.
         dimensions (int): The number of hidden dimensions to use.
         out_features (int): The number of output features, typically the number of classes.
+        kappa (int, optional): Parameter of the clipping function limiting the range of values; used as the part of transforming input data.
         device (``torch.device``, optional):  the desired device of the weights. Default: if ``None``, uses the current device for the default tensor type (see ``torch.set_default_tensor_type()``). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         dtype (``torch.dtype``, optional): the desired data type of the weights. Default: if ``None``, uses ``torch.get_default_dtype()``.
 
