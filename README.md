@@ -122,6 +122,8 @@ To create a clean build, remove the `/build` and `/docs/generated` directories.
 
 This library is [MIT licensed](https://github.com/hyperdimensional-computing/torchhd/blob/main/LICENSE).
 
+To add the license to all source files, first install [`licenseheaders`](https://github.com/johann-petrak/licenseheaders) and then use `licenseheaders -t ./LICENSE -d ./torchhd`.
+
 
 ## Cite
 
