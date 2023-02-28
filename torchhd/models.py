@@ -221,10 +221,10 @@ class IntRVFL(nn.Module):
         """
         factory_kwargs = {"device": self.weight.device, "dtype": self.weight.dtype}
         n = labels.size(0)
-        
+
         # Transform to hypervector representations
         encodings = self.encode(samples)
-        
+
         # Transform classes to one-hot encoding
         one_hot_labels = torch.zeros(n, self.out_features, **factory_kwargs)
         one_hot_labels[torch.arange(n), labels] = 1
