@@ -1,3 +1,26 @@
+#
+# MIT License
+#
+# Copyright (c) 2023 Mike Heddes, Igor Nunes, Pere Vergés, Denis Kleyko, and Danny Abraham
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 import torch
 from torch import Tensor
 import torch.nn.functional as F
@@ -7,7 +30,7 @@ from torchhd.tensors.base import VSATensor
 
 
 class MAPTensor(VSATensor):
-    """Multiply Add Permute
+    r"""Multiply Add Permute
 
     Proposed in `Multiplicative Binding, Representation Operators & Analogy <https://www.researchgate.net/publication/215992330_Multiplicative_Binding_Representation_Operators_Analogy>`_, this model works with dense bipolar hypervectors with elements from :math:`\{-1,1\}`.
     """
@@ -33,7 +56,7 @@ class MAPTensor(VSATensor):
         device=None,
         requires_grad=False,
     ) -> "MAPTensor":
-        """Creates a set of hypervectors representing empty sets.
+        r"""Creates a set of hypervectors representing empty sets.
 
         When bundled with a hypervector :math:`x`, the result is :math:`x`.
 
@@ -80,7 +103,7 @@ class MAPTensor(VSATensor):
         device=None,
         requires_grad=False,
     ) -> "MAPTensor":
-        """Creates a set of identity hypervectors.
+        r"""Creates a set of identity hypervectors.
 
         When bound with a random-hypervector :math:`x`, the result is :math:`x`.
 
@@ -128,7 +151,7 @@ class MAPTensor(VSATensor):
         device=None,
         requires_grad=False,
     ) -> "MAPTensor":
-        """Creates a set of random independent hypervectors.
+        r"""Creates a set of random independent hypervectors.
 
         The resulting hypervectors are sampled uniformly at random from the ``dimensions``-dimensional hyperspace.
 
@@ -255,7 +278,7 @@ class MAPTensor(VSATensor):
         return torch.clone(self)
 
     def negative(self) -> "MAPTensor":
-        """Negate the hypervector for the bundling inverse
+        r"""Negate the hypervector for the bundling inverse
 
         Shapes:
             - Self: :math:`(*)`
@@ -296,7 +319,7 @@ class MAPTensor(VSATensor):
         return torch.roll(self, shifts=shifts, dims=-1)
 
     def clipping(self, kappa) -> "MAPTensor":
-        """Performs the clipping function that clips the lower and upper values.
+        r"""Performs the clipping function that clips the lower and upper values.
 
         Args:
             kappa (int): specifies the range of the clipping function.

@@ -1,3 +1,26 @@
+#
+# MIT License
+#
+# Copyright (c) 2023 Mike Heddes, Igor Nunes, Pere Vergés, Denis Kleyko, and Danny Abraham
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 import math
 from typing import Type, Union, Optional
 import torch
@@ -81,7 +104,7 @@ class Centroid(nn.Module):
 
     @torch.no_grad()
     def add_online(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
-        """Only updates the prototype vectors on wrongly predicted inputs.
+        r"""Only updates the prototype vectors on wrongly predicted inputs.
 
         Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
 
@@ -129,7 +152,7 @@ class Centroid(nn.Module):
 
 
 class IntRVFL(nn.Module):
-    """Class implementing integer random vector functional link network (intRVFL) model as described in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
+    r"""Class implementing integer random vector functional link network (intRVFL) model as described in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
 
     Args:
         in_features (int): Size of each input sample.
@@ -205,7 +228,7 @@ class IntRVFL(nn.Module):
         labels: Tensor,
         alpha: Optional[float] = 1,
     ) -> None:
-        """Compute the weights (readout matrix) with :func:`~torchhd.ridge_regression`.
+        r"""Compute the weights (readout matrix) with :func:`~torchhd.ridge_regression`.
 
         It is a common way to form classifiers wihtin randomized neural networks see, e.g., `Randomness in Neural Networks: An Overview  <https://doi.org/10.1002/widm.1200>`_.
 
