@@ -16,7 +16,7 @@ import torchhd.embeddings as embeddings
 
 __all__ = [
     "Centroid",
-    "IntRVFLRidge",
+    "IntRVFL",
 ]
 
 
@@ -128,7 +128,7 @@ class Centroid(nn.Module):
         )
 
 
-class IntRVFLRidge(nn.Module):
+class IntRVFL(nn.Module):
     """Class implementing integer random vector functional link network (intRVFL) model as described in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
 
     Args:
@@ -168,7 +168,7 @@ class IntRVFLRidge(nn.Module):
         dtype=None,
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
-        super(IntRVFLRidge, self).__init__()
+        super(IntRVFL, self).__init__()
 
         self.in_features = in_features
         self.dimensions = dimensions
@@ -208,9 +208,28 @@ class IntRVFLRidge(nn.Module):
         """Compute the weights (readout matrix) with :func:`~torchhd.ridge_regression`.
 
         It is a common way to form classifiers wihtin randomized neural networks see, e.g., `Randomness in Neural Networks: An Overview  <https://doi.org/10.1002/widm.1200>`_.
+
+        Args:
+            samples (Tensor): The feature vectors.
+            labels (LongTensor): The targets vector, typically the class of each sample.
+            alpha (float, optional): Scalar for the variance of the samples. Default is 1.
+
+        Shapes:
+           - Samples: :math:`(n, f)`
+           - Labels: :math:`(n, c)`
+
         """
+        factory_kwargs = {"device": self.weight.device, "dtype": self.weight.dtype}
+        n = labels.size(0)
+        
+        # Transform to hypervector representations
         encodings = self.encode(samples)
+        
+        # Transform classes to one-hot encoding
+        one_hot_labels = torch.zeros(n, self.out_features, **factory_kwargs)
+        one_hot_labels[torch.arange(n), labels] = 1
+
         # Compute the readout matrix using the ridge regression
-        weights = functional.ridge_regression(encodings, labels, alpha=alpha)
+        weights = functional.ridge_regression(encodings, one_hot_labels, alpha=alpha)
         # Assign the obtained classifier to the output
         self.weight.copy_(weights)

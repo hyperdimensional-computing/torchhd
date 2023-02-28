@@ -1545,8 +1545,8 @@ def ridge_regression(
     It is a common way to form classifiers within randomized neural networks see, e.g., `Randomness in Neural Networks: An Overview  <https://doi.org/10.1002/widm.1200>`_.
 
     Args:
-        samples (VSATensor): The feature vectors.
-        labels (VSATensor): The target vectors, typically one-hot vectors for classification problems.
+        samples (Tensor): The feature vectors.
+        labels (Tensor): The target vectors, typically one-hot vectors for classification problems.
         alpha (float, optional): Scalar for the variance of the samples. Default is 1.
 
     Shapes:

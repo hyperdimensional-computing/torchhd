@@ -8,7 +8,7 @@ from tqdm import tqdm
 import torchmetrics
 import torchhd
 from torchhd.datasets import UCIClassificationBenchmark
-from torchhd.models import IntRVFLRidge
+from torchhd.models import IntRVFL
 
 
 # Function for performing min-max normalization of the input data samples
@@ -177,19 +177,16 @@ for dataset in benchmark.datasets():
 
     # Set up data loaders
     test_loader = data.DataLoader(dataset.test, batch_size=batch_size)
-
-    one_hot_targets = torch.zeros(num_train_samples, num_classes, device=device)
-    one_hot_targets[torch.arange(num_train_samples), dataset.train.targets] = 1
+    train_data = transform(dataset.train.data)
 
     # Run for the requested number of simulations
     for r in range(repeats):
         # Creates a model to be evaluated. The model should specify both transformation of input data as well as the algorithm for forming the classifier.
-        model = IntRVFLRidge(num_feat, dims, num_classes, kappa=kappa, device=device)
+        model = IntRVFL(num_feat, dims, num_classes, kappa=kappa, device=device)
 
         # Obtain the classifier for the model
-        model.fit_ridge_regression(
-            transform(dataset.train.data), one_hot_targets, alpha=alpha
-        )
+        model.fit_ridge_regression(train_data, dataset.train.targets, alpha=alpha)
+
         accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
         with torch.no_grad():
