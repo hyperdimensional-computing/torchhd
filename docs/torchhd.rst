@@ -81,6 +81,7 @@ VSA Models
     :template: class.rst
 
     VSATensor
+    TPTensor
     BSCTensor
     MAPTensor
     HRRTensor

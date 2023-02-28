@@ -7,6 +7,7 @@ import torchhd.datasets as datasets
 import torchhd.utils as utils
 
 from torchhd.tensors.base import VSATensor
+from torchhd.tensors.tp import TPTensor
 from torchhd.tensors.bsc import BSCTensor
 from torchhd.tensors.map import MAPTensor
 from torchhd.tensors.hrr import HRRTensor
@@ -57,6 +58,7 @@ from torchhd.version import __version__
 __all__ = [
     "__version__",
     "VSATensor",
+    "TPTensor",
     "BSCTensor",
     "MAPTensor",
     "HRRTensor",

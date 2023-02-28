@@ -5,6 +5,7 @@ from torch import LongTensor, FloatTensor, Tensor
 from collections import deque
 
 from torchhd.tensors.base import VSATensor
+from torchhd.tensors.tp import TPTensor
 from torchhd.tensors.bsc import BSCTensor
 from torchhd.tensors.map import MAPTensor
 from torchhd.tensors.hrr import HRRTensor
@@ -51,7 +52,9 @@ __all__ = [
 
 
 def get_vsa_tensor_class(vsa: VSAOptions) -> Type[VSATensor]:
-    if vsa == "BSC":
+    if vsa == "TP":
+        return TPTensor
+    elif vsa == "BSC":
         return BSCTensor
     elif vsa == "MAP":
         return MAPTensor
