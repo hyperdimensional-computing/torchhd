@@ -10,3 +10,4 @@ torchhd.models
     :template: class.rst
 
     Centroid
+    IntRVFL

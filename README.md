@@ -42,6 +42,8 @@ The API documentation is divided into several sections:
 - [`torchhd`](https://torchhd.readthedocs.io/en/stable/torchhd.html)
 - [`torchhd.embeddings`](https://torchhd.readthedocs.io/en/stable/embeddings.html)
 - [`torchhd.structures`](https://torchhd.readthedocs.io/en/stable/structures.html)
+- [`torchhd.models`](https://torchhd.readthedocs.io/en/stable/models.html)
+- [`torchhd.memory`](https://torchhd.readthedocs.io/en/stable/memory.html)
 - [`torchhd.datasets`](https://torchhd.readthedocs.io/en/stable/datasets.html)
 
 You can improve the documentation by sending pull requests to this repository.
@@ -104,7 +106,11 @@ We are always looking for people that want to contribute to the library. If you 
 
 ### Documentation
 
-To build the documentation locally, use `pip install -r docs/requirements.txt` to install the required packages. Then, with `sphinx-build -b html docs build` you can generate the html documentation in the `/build` directory. To create a clean build, remove the `/build` and `/docs/generated` directories.
+To build the documentation locally do the following:
+1. Use `pip install -r docs/requirements.txt` to install the required packages. 
+2. Use `sphinx-build -b html docs build` to generate the html documentation in the `/build` directory. 
+
+To create a clean build, remove the `/build` and `/docs/generated` directories.
 
 ### Creating a New Release
 
