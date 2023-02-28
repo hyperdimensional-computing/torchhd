@@ -1,7 +1,9 @@
 import pytest
 import torch
 
-from torchhd.datasets import UCIClassificationBenchmark
+import torchhd.datasets
+from torchhd.datasets import *
+# from torchhd.datasets import UCIClassificationBenchmark
 
 def delete_folder():
     import os, shutil
@@ -141,15 +143,15 @@ dataset_metadata = {
 }
 
 @pytest.fixture()
-def benchmark():
-    benchmark = UCIClassificationBenchmark("../data", download=True)
-    yield benchmark
+def teardown():
+    yield True
     delete_folder()
 
 class TestDataset:    
-    def test_dataset_metadata(self, benchmark):        
+    def test_dataset_metadata(self, teardown):        
         num_datasets = 0
         previous_name = ""
+        benchmark = UCIClassificationBenchmark("../data", download=True)
         for dataset in benchmark.datasets():
             if previous_name != dataset.name:
                 num_feat = dataset.train[0][0].size(-1)
@@ -162,11 +164,23 @@ class TestDataset:
                 previous_name = dataset.name
                 num_datasets += 1
         assert(len(benchmark.dataset_names) == num_datasets)
+        
+    def test_datasets_dowload(self, teardown):
+        dataset_classes = [(name, cls) for name, cls in torchhd.datasets.__dict__.items() if isinstance(cls, type)]
+        for dataset_name, dataset_class in dataset_classes:
+            try:
+                dataset = dataset_class("../data", download=True)
+                assert(dataset is not None)
+                assert(len(dataset) > 0)
+            except RuntimeError:
+                assert(False, f"Was unable to download {dataset_name}")
+            except Exception as error:
+                assert(False, f"Was unable to download {dataset_name} due to {error}")
 
 
 if __name__ == "__main__":
     print("MAIN:")
-    benchmark = UCIClassificationBenchmark("../data", download=True)
+    # benchmark = UCIClassificationBenchmark("../data", download=True)
     # print(len(benchmark.dataset_names))
     # for dataset in benchmark.datasets():
     #     # print(dataset.name)
@@ -175,5 +189,10 @@ if __name__ == "__main__":
     #     # Number of classes in the dataset.
     #     num_classes = len(dataset.train.classes)
         
-    test = TestDataset()
-    test.test_dataset_metadata()
+    # test = TestDataset()
+    # test.test_dataset_metadata()
+    
+    name_2_class = [(name, cls) for name, cls in torchhd.datasets.__dict__.items() if isinstance(cls, type)]
+    print(name_2_class)
+    instance = name_2_class[1][1]("../data", download=False)
+    print(instance.data)
