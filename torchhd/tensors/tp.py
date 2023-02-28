@@ -226,10 +226,12 @@ class TPTensor(VSATensor):
             tensor([-1., -1., -1.,  1., -1.,  1.,  1., -1., -1., -1.])
 
         """
-        outer = torch.mul(self.unsqueeze(-1), other.unsqueeze(-2)) 
+        outer = torch.mul(self.unsqueeze(-1), other.unsqueeze(-2))
         return torch.flatten(outer, start_dim=-2)
 
-    def unbind(self, *, left: Optional["TPTensor"] = None, right: Optional["TPTensor"] = None) -> "TPTensor":
+    def unbind(
+        self, *, left: Optional["TPTensor"] = None, right: Optional["TPTensor"] = None
+    ) -> "TPTensor":
         r"""Unind the hypervector either from the left or right side.
 
         Must specify either left or right but not both.
@@ -259,7 +261,7 @@ class TPTensor(VSATensor):
 
         if left is not None and right is not None:
             raise ValueError("Must specify only one of left or right, not both.")
-        
+
         batch_size = list(self.size()[:-1])
 
         if left is not None:
