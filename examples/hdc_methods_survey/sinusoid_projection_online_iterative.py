@@ -7,6 +7,8 @@ from tqdm import tqdm
 import torch.utils.data as data
 import json
 import os
+import sys
+sys.path.insert(0, '../../')
 import torchhd
 from torchhd import embeddings
 from torchhd.models import Centroid
@@ -171,4 +173,4 @@ def experiment(
             )
 
 
-experiment()
+#experiment()

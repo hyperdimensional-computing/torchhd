@@ -1,0 +1,25 @@
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 10.840%
+7.325672626495361
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 47.723%
+8.084139585494995
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 72.931%
+9.104081392288208
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 80.180%
+10.071489095687866
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 84.477%
+55.99405264854431

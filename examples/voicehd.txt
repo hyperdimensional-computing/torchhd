@@ -1,0 +1,125 @@
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 8.724%
+7.19413948059082
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 7.248%
+7.166191816329956
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 10.584%
+7.341714859008789
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 6.928%
+7.261279821395874
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 11.610%
+7.071308374404907
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 47.851%
+8.07866644859314
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 46.504%
+8.18741250038147
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 50.545%
+8.1937415599823
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 44.580%
+8.27464747428894
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 48.942%
+8.117603540420532
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 74.086%
+9.08755111694336
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 76.395%
+9.128961324691772
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 74.022%
+8.974872589111328
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 74.150%
+8.664125680923462
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 76.652%
+8.926029920578003
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 79.987%
+10.965830087661743
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 79.666%
+11.036361694335938
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 80.693%
+10.51947021484375
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 81.334%
+10.863277196884155
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 80.885%
+10.33692741394043
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 85.439%
+61.100592851638794
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 85.247%
+56.37831473350525
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 84.926%
+56.34599781036377
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 84.798%
+61.4007523059845
+Using cpu device
+Files already downloaded and verified
+Files already downloaded and verified
+Testing accuracy of 85.439%
+57.592543840408325

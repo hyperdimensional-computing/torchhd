@@ -165,4 +165,4 @@ def experiment(DIMENSIONS=10000, method="DensityEncoding", filename="exp"):
             )
 
 
-experiment()
+#experiment()

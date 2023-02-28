@@ -6,6 +6,8 @@ import torchmetrics
 from tqdm import tqdm
 import torch.utils.data as data
 import numpy as np
+import sys
+sys.path.insert(0, '../../')
 import torchhd
 from torchhd import embeddings
 from torchhd.models import Centroid
@@ -167,4 +169,4 @@ def experiment(
             )
 
 
-experiment()
+#experiment()
