@@ -1,0 +1,4 @@
+Name,Accuracy,Time,Size,Classes,Dimensions,Method
+Abalone,0.5814176201820374,2.1564059257507324,6266,3,10000,RandomProjectionOnlineIterative
+Abalone,0.5852490663528442,2.0698981285095215,6266,3,10000,RandomProjectionOnlineIterative
+Abalone,0.5890804529190063,2.9088661670684814,6266,3,10000,RandomProjectionOnlineIterative

@@ -1,0 +1,2 @@
+Name,Accuracy,Time,Size,Classes,Dimensions,Method
+Abalone,0.5986589789390564,7.403865814208984,6266,3,10000,RandomProjectionOnlineIterative
