@@ -354,7 +354,7 @@ class TestProjection:
     def test_value(self, vsa):
         if vsa == "BSC" or vsa == "FHRR":
             return
-        in_features = 100000
+        in_features = 1000000
         out_features = 100
         emb = embeddings.Projection(in_features, out_features, vsa=vsa)
         assert abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.5e-2
@@ -442,7 +442,7 @@ class TestDensity:
     def test_value(self, vsa):
         if vsa == "HRR":
             return
-        dimensions = 10000
+        dimensions = 100000
         embedding = 10
         emb = embeddings.Density(embedding, dimensions, vsa=vsa)
         return (
