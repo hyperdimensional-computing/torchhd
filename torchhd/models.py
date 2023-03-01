@@ -85,24 +85,23 @@ class Centroid(nn.Module):
         logit = self(input)
         pred = logit.argmax(1)
         is_wrong = target != pred
-        #print(logit)
-        #print(logit.argmax(1))
+        # print(logit)
+        # print(logit.argmax(1))
 
         select = torch.empty(10000, dtype=torch.bool)
         select.bernoulli_(0.1)
         result = torch.where(select, -1, +1).to()
-        #print(result.sum())
+        # print(result.sum())
         # cancel update if all predictions were correct
         if is_wrong.sum().item() == 0:
             return
 
-        #print(input)
+        # print(input)
         # only update wrongly predicted inputs
         logit = logit[is_wrong]
         input = input[is_wrong]
         target = target[is_wrong]
         pred = pred[is_wrong]
-
 
         alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
         alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1.0

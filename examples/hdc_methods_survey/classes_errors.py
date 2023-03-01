@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
-with open('results/embeddings_comparison/missclassified_samples.json') as f:
+with open("results/embeddings_comparison/missclassified_samples.json") as f:
     f = json.load(f)
     missclassifed_data = f
     total_missclassified = {}
@@ -32,7 +32,7 @@ with open('results/embeddings_comparison/missclassified_samples.json') as f:
                     normalized_misses[i][j][k] = f[i][j][k] / total_missclassified[i][j]
 
 
-with open('results/embeddings_comparison/train_samples.json') as f:
+with open("results/embeddings_comparison/train_samples.json") as f:
     f = json.load(f)
 
     data = f
@@ -60,7 +60,7 @@ with open('results/embeddings_comparison/train_samples.json') as f:
                 if total_value[i][j] == 0:
                     normalized_data[i][j][k] = 0
                 else:
-                    normalized_data[i][j][k] = f[i][j][k]/total_value[i][j]
+                    normalized_data[i][j][k] = f[i][j][k] / total_value[i][j]
 
 df_misses = pd.DataFrame.from_dict(normalized_misses)
 df_data = pd.DataFrame.from_dict(normalized_data)
@@ -77,9 +77,24 @@ for i in range(len(df_misses)):
     fig.suptitle(str(dataset_names[i]), fontsize=16)
     print(df_misses.iloc[i].apply(pd.Series).fillna(0).sort_index(axis=1))
     print(df_data.iloc[i].apply(pd.Series).fillna(0).sort_index(axis=1))
-    sns.heatmap(df_misses.iloc[i].apply(pd.Series).fillna(0).sort_index(axis=1), fmt='g', vmin=0, vmax=1, cmap=sns.color_palette("blend:#FFF,#000", as_cmap=True), ax=ax[0], annot=df_missclassified.iloc[i].apply(pd.Series).fillna(0).sort_index(axis=1))
-    sns.heatmap(df_data.iloc[i].apply(pd.Series).fillna(0).sort_index(axis=1), vmin=0, vmax=1, cmap=sns.color_palette("blend:#FFF,#000", as_cmap=True), ax=ax[1], annot=True, yticklabels=False, xticklabels=df_amount_per_class.iloc[i].apply(pd.Series).fillna(0).iloc[0])
+    sns.heatmap(
+        df_misses.iloc[i].apply(pd.Series).fillna(0).sort_index(axis=1),
+        fmt="g",
+        vmin=0,
+        vmax=1,
+        cmap=sns.color_palette("blend:#FFF,#000", as_cmap=True),
+        ax=ax[0],
+        annot=df_missclassified.iloc[i].apply(pd.Series).fillna(0).sort_index(axis=1),
+    )
+    sns.heatmap(
+        df_data.iloc[i].apply(pd.Series).fillna(0).sort_index(axis=1),
+        vmin=0,
+        vmax=1,
+        cmap=sns.color_palette("blend:#FFF,#000", as_cmap=True),
+        ax=ax[1],
+        annot=True,
+        yticklabels=False,
+        xticklabels=df_amount_per_class.iloc[i].apply(pd.Series).fillna(0).iloc[0],
+    )
 
     plt.show()
-
-

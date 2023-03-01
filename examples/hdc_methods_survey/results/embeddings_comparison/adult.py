@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data as data
 import time
+
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
 from tqdm import tqdm
@@ -15,10 +16,11 @@ from torchhd.datasets import EMGHandGestures
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
 
-DIMENSIONS=10000
-method="HashmapProjection"
-levels=100
+DIMENSIONS = 10000
+method = "HashmapProjection"
+levels = 100
 BATCH_SIZE = 1
+
 
 class Encoder(nn.Module):
     def __init__(self, size, levels):
@@ -32,19 +34,17 @@ class Encoder(nn.Module):
         sample_hv = torchhd.hash_table(self.keys.weight, self.values(x))
         return torchhd.hard_quantize(sample_hv)
 
+
 def create_min_max_normalize(min, max):
     def normalize(input):
         return torch.nan_to_num((input - min) / (max - min))
 
     return normalize
 
+
 def experiment():
-    train = torchhd.datasets.Adult(
-        "../../data", download=True, train=True
-    )
-    test = torchhd.datasets.Adult(
-        "../../data", download=True, train=False
-    )
+    train = torchhd.datasets.Adult("../../data", download=True, train=True)
+    test = torchhd.datasets.Adult("../../data", download=True, train=False)
     # Number of features in the dataset.
     # Number of classes in the dataset.
     num_classes = len(train.classes)
@@ -57,9 +57,7 @@ def experiment():
     test.transform = transform
 
     # Set up data loaders
-    train_loader = data.DataLoader(
-        train, batch_size=BATCH_SIZE, shuffle=True
-    )
+    train_loader = data.DataLoader(train, batch_size=BATCH_SIZE, shuffle=True)
     test_loader = data.DataLoader(test, batch_size=BATCH_SIZE)
     encode = Encoder(train[0][0].size(-1), levels)
     encode = encode.to(device)
@@ -114,18 +112,22 @@ def experiment():
             outputs2 = model2(samples_hv2, dot=True)
             outputs3 = model3(samples_hv3, dot=True)
             predic = 0
-            if (np.argmax(outputs).item() + np.argmax(outputs2).item() + np.argmax(outputs3).item()) >= 2:
+            if (
+                np.argmax(outputs).item()
+                + np.argmax(outputs2).item()
+                + np.argmax(outputs3).item()
+            ) >= 2:
                 predic = 1
             if predic != labels.item():
                 errors += 1
-                #print('out', np.argmax(outputs).item())
-                #print('out2', np.argmax(outputs2).item())
+                # print('out', np.argmax(outputs).item())
+                # print('out2', np.argmax(outputs2).item())
                 if labels.item() not in wrong_inferred:
                     wrong_inferred[labels.item()] = 1
                 wrong_inferred[labels.item()] += 1
             else:
                 corr += 1
-            '''
+            """
             for i in model.weight:
                 out2.append(torch.nn.functional.pairwise_distance(i, samples_hv))
             if np.argmax(out2).item() != labels.item():
@@ -138,10 +140,10 @@ def experiment():
                 if labels.item() not in wrong_inferred:
                     wrong_inferred[labels.item()] = 1
                 wrong_inferred[labels.item()] += 1
-            '''
+            """
             accuracy.update(outputs.cpu(), labels)
-    print('corr',corr/(corr+errors))
-    print('wrong inferred',wrong_inferred)
+    print("corr", corr / (corr + errors))
+    print("wrong inferred", wrong_inferred)
     print(added_classes)
     print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
 
