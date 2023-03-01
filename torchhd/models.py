@@ -51,6 +51,7 @@ class Centroid(nn.Module):
         out_features (int): Size of the output, typically the number of classes.
         device (``torch.device``, optional):  the desired device of the weights. Default: if ``None``, uses the current device for the default tensor type (see ``torch.set_default_tensor_type()``). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         dtype (``torch.dtype``, optional): the desired data type of the weights. Default: if ``None``, uses ``torch.get_default_dtype()``.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
     Shape:
         - Input: :math:`(*, d)` where :math:`*` means any number of
@@ -76,7 +77,12 @@ class Centroid(nn.Module):
     weight: Tensor
 
     def __init__(
-        self, in_features: int, out_features: int, device=None, dtype=None
+        self,
+        in_features: int,
+        out_features: int,
+        device=None,
+        dtype=None,
+        requires_grad=False,
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
         super(Centroid, self).__init__()
@@ -85,7 +91,7 @@ class Centroid(nn.Module):
         self.out_features = out_features
 
         weight = torch.empty((out_features, in_features), **factory_kwargs)
-        self.weight = Parameter(weight)
+        self.weight = Parameter(weight, requires_grad=requires_grad)
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
@@ -161,6 +167,7 @@ class IntRVFL(nn.Module):
         kappa (int, optional): Parameter of the clipping function limiting the range of values; used as the part of transforming input data.
         device (``torch.device``, optional):  the desired device of the weights. Default: if ``None``, uses the current device for the default tensor type (see ``torch.set_default_tensor_type()``). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
         dtype (``torch.dtype``, optional): the desired data type of the weights. Default: if ``None``, uses ``torch.get_default_dtype()``.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
     Shape:
         - Input: :math:`(*, d)` where :math:`*` means any number of
@@ -189,6 +196,7 @@ class IntRVFL(nn.Module):
         kappa: Optional[int] = None,
         device=None,
         dtype=None,
+        requires_grad=False,
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
         super(IntRVFL, self).__init__()
@@ -202,8 +210,12 @@ class IntRVFL(nn.Module):
             in_features, self.dimensions, **factory_kwargs
         )
 
-        weight = torch.zeros((out_features, dimensions), **factory_kwargs)
-        self.weight = Parameter(weight)
+        weight = torch.empty((out_features, dimensions), **factory_kwargs)
+        self.weight = Parameter(weight, requires_grad=requires_grad)
+        self.reset_parameters()
+
+    def reset_parameters(self) -> None:
+        init.zeros_(self.weight)
 
     def encode(self, x):
         encodings = self.encoding(x)
