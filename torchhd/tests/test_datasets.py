@@ -163,12 +163,24 @@ class TestDataset:
                 
                 previous_name = dataset.name
                 num_datasets += 1
+                
+            benchmark.report(dataset, 0.5)
         assert(len(benchmark.dataset_names) == num_datasets)
+        
+        num_datasets = 0
+        previous_name = ""
+        all_metrics = benchmark.score()
+        print(all_metrics)
+        for dataset in benchmark.datasets():
+            if previous_name != dataset.name:
+                assert(all_metrics[dataset.name][0] == 0.5)
+                num_datasets += 1
         
     def test_datasets_dowload(self, teardown):
         dataset_classes = [(name, cls) for name, cls in torchhd.datasets.__dict__.items() if isinstance(cls, type)]
         for dataset_name, dataset_class in dataset_classes:
             try:
+                dataset = dataset_class("../data", download=True)
                 dataset = dataset_class("../data", download=True)
                 assert(dataset is not None)
                 assert(len(dataset) > 0)
@@ -189,10 +201,10 @@ if __name__ == "__main__":
     #     # Number of classes in the dataset.
     #     num_classes = len(dataset.train.classes)
         
-    # test = TestDataset()
-    # test.test_dataset_metadata()
+    test = TestDataset()
+    test.test_dataset_metadata(None)
     
-    name_2_class = [(name, cls) for name, cls in torchhd.datasets.__dict__.items() if isinstance(cls, type)]
-    print(name_2_class)
-    instance = name_2_class[1][1]("../data", download=False)
-    print(instance.data)
+    # name_2_class = [(name, cls) for name, cls in torchhd.datasets.__dict__.items() if isinstance(cls, type)]
+    # print(name_2_class)
+    # instance = name_2_class[1][1]("../data", download=False)
+    # print(instance.data)
