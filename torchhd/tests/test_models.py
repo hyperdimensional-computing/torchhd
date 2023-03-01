@@ -81,6 +81,9 @@ class TestCentroid:
         model = models.Centroid(12, 3)
         model.add_online(samples, targets)
 
+        logits = model(samples)
+        assert logits.shape == (10, 3)
+
 class TestIntRVFL:
     
     @pytest.mark.parametrize("dtype", torch_dtypes)
@@ -108,6 +111,7 @@ class TestIntRVFL:
         model = models.IntRVFL(12, 1245, 3)
         model.fit_ridge_regression(samples, targets)
 
-        model(samples)
+        logits = model(samples)
+        assert logits.shape == (10, 3)
 
 
