@@ -82,6 +82,7 @@ class TestCentroid:
         logits = model(samples)
         assert logits.shape == (10, 3)
 
+
 class TestIntRVFL:
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_initialization(self, dtype):
@@ -108,5 +109,3 @@ class TestIntRVFL:
 
         logits = model(samples)
         assert logits.shape == (10, 3)
-
-
