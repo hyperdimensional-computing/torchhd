@@ -1,4 +1,27 @@
-from typing import Type, Callable
+#
+# MIT License
+#
+# Copyright (c) 2023 Mike Heddes, Igor Nunes, Pere Vergés, Denis Kleyko, and Danny Abraham
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+from typing import Type, Callable, Optional
 import math
 import torch
 from torch import LongTensor, FloatTensor, Tensor
@@ -43,6 +66,7 @@ __all__ = [
     "hash_table",
     "graph",
     "resonator",
+    "ridge_regression",
     "map_range",
     "value_to_index",
     "index_to_value",
@@ -1439,6 +1463,11 @@ def resonator(input: VSATensor, estimates: VSATensor, domains: VSATensor) -> VSA
 
     Given current estimates for each factor, it returns the next estimates for those factors.
 
+    Args:
+        input (VSATensor): The hypervector to be factorized.
+        estimates (VSATensor): The current estimates of the factors, typically starts as a multiset of the domain.
+        domains (VSATensor): The domains of each factor containing all possible factors.
+
     Shapes:
         - Input: :math:`(*, d)`
         - Estimates: :math:`(*, n, d)`
@@ -1527,6 +1556,32 @@ def resonator(input: VSATensor, estimates: VSATensor, domains: VSATensor) -> VSA
 
     # normalize the output vector with a non-linearity
     return output.sign()
+
+
+def ridge_regression(
+    samples: Tensor,
+    labels: Tensor,
+    alpha: Optional[float] = 1,
+):
+    """Compute weights (readout matrix) with ridge regression.
+
+    It is a common way to form classifiers within randomized neural networks see, e.g., `Randomness in Neural Networks: An Overview  <https://doi.org/10.1002/widm.1200>`_.
+
+    Args:
+        samples (Tensor): The feature vectors.
+        labels (Tensor): The target vectors, typically one-hot vectors for classification problems.
+        alpha (float, optional): Scalar for the variance of the samples. Default is 1.
+
+    Shapes:
+       - Samples: :math:`(n, d)`
+       - Labels: :math:`(n, c)`
+       - Output: :math:`(c, d)`
+
+    """
+
+    variance = alpha * torch.diag(torch.var(samples, -2))
+
+    return labels.mT @ samples @ torch.linalg.pinv(samples.mT @ samples + variance)
 
 
 def map_range(
