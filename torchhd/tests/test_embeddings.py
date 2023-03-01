@@ -345,10 +345,8 @@ class TestProjection:
         out_features = 10
         emb = embeddings.Projection(in_features, out_features, vsa=vsa)
         x = torch.randn(1, in_features)
-        if vsa == "MAP":
+        if vsa == "MAP" or vsa == "HRR":
             assert emb(x).dtype == torch.float
-        elif vsa == "HRR":
-            assert emb(x).dtype == torch.complex64 or emb(x).dtype == torch.complex32
         else:
             return
 
@@ -389,10 +387,8 @@ class TestSinusoid:
         out_features = 10
         emb = embeddings.Sinusoid(in_features, out_features, vsa=vsa)
         x = torch.randn(1, in_features)
-        if vsa == "MAP":
+        if vsa == "MAP" or vsa == "HRR":
             assert emb(x).dtype == torch.float
-        elif vsa == "HRR":
-            assert emb(x).dtype == torch.complex64 or emb(x).dtype == torch.complex32
         else:
             return
 
