@@ -36,10 +36,8 @@ from .utils import (
 
 
 class TestCentroid:
-    
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_initialization(self, dtype):
-
         if dtype not in MAPTensor.supported_dtypes:
             return
 
@@ -55,7 +53,6 @@ class TestCentroid:
         assert model.weight.device == device
 
     def test_add(self):
-
         samples = torch.randn(4, 12)
         targets = torch.tensor([0, 1, 2, 2])
 
@@ -67,14 +64,15 @@ class TestCentroid:
 
         assert torch.allclose(model(samples), torchhd.cos(samples, c))
         assert torch.allclose(model(samples, dot=True), torchhd.dot(samples, c))
-        
+
         model.normalize()
         print(model(samples, dot=True))
         print(torchhd.cos(samples, c))
-        assert torch.allclose(model(samples, dot=True), torchhd.dot(samples, F.normalize(c)))
+        assert torch.allclose(
+            model(samples, dot=True), torchhd.dot(samples, F.normalize(c))
+        )
 
     def test_add_online(self):
-
         samples = torch.randn(10, 12)
         targets = torch.randint(0, 3, (10,))
 
@@ -85,10 +83,8 @@ class TestCentroid:
         assert logits.shape == (10, 3)
 
 class TestIntRVFL:
-    
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_initialization(self, dtype):
-
         if dtype not in MAPTensor.supported_dtypes:
             return
 
@@ -104,7 +100,6 @@ class TestIntRVFL:
         assert model.weight.device == device
 
     def test_fit_ridge_regression(self):
-
         samples = torch.randn(10, 12)
         targets = torch.randint(0, 3, (10,))
 
