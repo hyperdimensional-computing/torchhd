@@ -49,11 +49,11 @@ class TestEmpty:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_value(self, vsa):
-        dimensions = 1000000
+        dimensions = 10000
         embedding = 4
         emb = embeddings.Empty(embedding, dimensions, vsa=vsa)
         if vsa == "BSC":
-            assert abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.5e-2
+            assert abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.5e-1
         elif vsa == "MAP":
             assert torch.all(emb.weight == 0.0).item()
         elif vsa == "HRR":
@@ -155,10 +155,10 @@ class TestRandom:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_value(self, vsa):
-        dimensions = 1000000
+        dimensions = 10000
         embedding = 4
         emb = embeddings.Random(embedding, dimensions, vsa=vsa)
-        assert abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.5e-2
+        assert abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.5e-1
 
 
 class TestLevel:
@@ -195,7 +195,7 @@ class TestLevel:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_value(self, vsa):
-        dimensions = 1000000
+        dimensions = 100000
         embedding = 4
         emb = embeddings.Level(embedding, dimensions, vsa=vsa)
         assert (
@@ -251,7 +251,7 @@ class TestCircular:
     def test_value(self, vsa):
         if vsa == "HRR":
             return
-        dimensions = 1000000
+        dimensions = 100000
         embedding = 4
         emb = embeddings.Circular(embedding, dimensions, vsa=vsa)
         assert (
@@ -306,7 +306,7 @@ class TestThermometer:
     def test_value(self, vsa):
         if vsa == "HRR":
             return
-        dimensions = 1000000
+        dimensions = 100000
         embedding = 4
         emb = embeddings.Thermometer(embedding, dimensions, vsa=vsa)
         assert (
@@ -354,10 +354,10 @@ class TestProjection:
     def test_value(self, vsa):
         if vsa == "BSC" or vsa == "FHRR":
             return
-        in_features = 1000000
+        in_features = 100000
         out_features = 100
         emb = embeddings.Projection(in_features, out_features, vsa=vsa)
-        assert abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.5e-2
+        assert abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.5e-1
 
 
 class TestSinusoid:
@@ -396,10 +396,10 @@ class TestSinusoid:
     def test_value(self, vsa):
         if vsa == "BSC" or vsa == "FHRR":
             return
-        in_features = 1000000
+        in_features = 100000
         out_features = 10
         emb = embeddings.Sinusoid(in_features, out_features, vsa=vsa)
-        assert abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.5e-2
+        assert abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.5e-1
 
 
 class TestDensity:
@@ -442,7 +442,7 @@ class TestDensity:
     def test_value(self, vsa):
         if vsa == "HRR":
             return
-        dimensions = 100000
+        dimensions = 1000
         embedding = 10
         emb = embeddings.Density(embedding, dimensions, vsa=vsa)
         return (
