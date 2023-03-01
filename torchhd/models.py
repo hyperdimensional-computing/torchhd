@@ -77,7 +77,12 @@ class Centroid(nn.Module):
     weight: Tensor
 
     def __init__(
-        self, in_features: int, out_features: int, device=None, dtype=None, requires_grad=False
+        self,
+        in_features: int,
+        out_features: int,
+        device=None,
+        dtype=None,
+        requires_grad=False,
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
         super(Centroid, self).__init__()
