@@ -64,6 +64,7 @@ class TPTensor(VSATensor):
         result = torch.zeros(
             num_vectors,
             dimensions,
+            1,
             dtype=dtype,
             device=device,
             requires_grad=requires_grad,
@@ -110,6 +111,7 @@ class TPTensor(VSATensor):
 
         result = torch.ones(
             num_vectors,
+            1,
             1,
             dtype=dtype,
             device=device,
@@ -160,7 +162,7 @@ class TPTensor(VSATensor):
             options = ", ".join([str(x) for x in cls.supported_dtypes])
             raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
-        size = (num_vectors, dimensions)
+        size = (num_vectors, dimensions, 1)
         select = torch.empty(size, dtype=torch.bool, device=device)
         select.bernoulli_(generator=generator)
 
@@ -198,7 +200,7 @@ class TPTensor(VSATensor):
 
     def multibundle(self) -> "TPTensor":
         """Bundle multiple hypervectors"""
-        return torch.sum(self, dim=-2, dtype=self.dtype)
+        return torch.sum(self, dim=-3, dtype=self.dtype)
 
     def bind(self, other: "TPTensor") -> "TPTensor":
         r"""Bind the hypervector with other using the tensor product (outer product).
@@ -226,8 +228,10 @@ class TPTensor(VSATensor):
             tensor([-1., -1., -1.,  1., -1.,  1.,  1., -1., -1., -1.])
 
         """
-        outer = torch.mul(self.unsqueeze(-1), other.unsqueeze(-2))
-        return torch.flatten(outer, start_dim=-2)
+        # outer = torch.mul(self.unsqueeze(-1), other.unsqueeze(-2))
+        # return torch.flatten(outer, start_dim=-2)
+        output = torch.matmul(self, other.mT)
+        return output
 
     def unbind(
         self, *, left: Optional["TPTensor"] = None, right: Optional["TPTensor"] = None
@@ -298,7 +302,7 @@ class TPTensor(VSATensor):
 
         """
 
-        return torch.clone(self)
+        return torch.clone(self.mT)
 
     def negative(self) -> "TPTensor":
         """Negate the hypervector for the bundling inverse
