@@ -4,6 +4,7 @@ import torch
 import torchhd.datasets
 from torchhd.datasets import *
 
+
 def delete_folder():
     import os, shutil
 
