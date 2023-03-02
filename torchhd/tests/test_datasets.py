@@ -187,12 +187,7 @@ class TestDataset:
             if isinstance(cls, type)
         ]
         for dataset_name, dataset_class in dataset_classes:
-            try:
-                dataset = dataset_class("../data", download=True)
-                dataset = dataset_class("../data", download=True)
-                assert dataset is not None
-                assert len(dataset) > 0
-            except RuntimeError:
-                assert False, f"Was unable to download {dataset_name}"
-            except Exception as error:
-                assert False, f"Was unable to download {dataset_name} due to {error}"
+            dataset = dataset_class("../data", download=True)
+            dataset = dataset_class("../data", download=True)
+            assert dataset is not None
+            assert len(dataset) > 0
