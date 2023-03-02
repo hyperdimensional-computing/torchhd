@@ -192,6 +192,6 @@ class TestDataset:
                 assert dataset is not None
                 assert len(dataset) > 0
             except RuntimeError:
-                assert (False, f"Was unable to download {dataset_name}")
+                assert False, f"Was unable to download {dataset_name}"
             except Exception as error:
-                assert (False, f"Was unable to download {dataset_name} due to {error}")
+                assert False, f"Was unable to download {dataset_name} due to {error}"
