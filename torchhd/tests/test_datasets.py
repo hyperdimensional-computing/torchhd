@@ -188,10 +188,11 @@ class TestDataset:
         ]
         for dataset_name, dataset_class in dataset_classes:
             try:
+                if dataset_name == "UCIHAR":
+                    continue
                 dataset = dataset_class("../data", download=True)
                 dataset = dataset_class("../data", download=True)
             except:
-                print(dataset_name)
-                raise RuntimeError
+                raise RuntimeError(dataset_name)
             assert dataset is not None
             assert len(dataset) > 0

@@ -180,7 +180,7 @@ class UCIHAR(data.Dataset):
         unzip_file(zip_file_path, self.root)
         os.remove(zip_file_path)
 
-        source_dir = os.path.join(self.root, "'UCI HAR Dataset'")
+        source_dir = os.path.join(self.root, "UCI HAR Dataset")
         data_files = os.listdir(source_dir)
         for filename in data_files:
             os.rename(
