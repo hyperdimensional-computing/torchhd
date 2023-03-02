@@ -4,9 +4,6 @@ import torch
 import torchhd.datasets
 from torchhd.datasets import *
 
-# from torchhd.datasets import UCIClassificationBenchmark
-
-
 def delete_folder():
     import os, shutil
 
@@ -198,23 +195,3 @@ class TestDataset:
                 assert (False, f"Was unable to download {dataset_name}")
             except Exception as error:
                 assert (False, f"Was unable to download {dataset_name} due to {error}")
-
-
-if __name__ == "__main__":
-    print("MAIN:")
-    # benchmark = UCIClassificationBenchmark("../data", download=True)
-    # print(len(benchmark.dataset_names))
-    # for dataset in benchmark.datasets():
-    #     # print(dataset.name)
-    #     # Number of features in the dataset.
-    #     num_feat = dataset.train[0][0].size(-1)
-    #     # Number of classes in the dataset.
-    #     num_classes = len(dataset.train.classes)
-
-    test = TestDataset()
-    test.test_dataset_metadata(None)
-
-    # name_2_class = [(name, cls) for name, cls in torchhd.datasets.__dict__.items() if isinstance(cls, type)]
-    # print(name_2_class)
-    # instance = name_2_class[1][1]("../data", download=False)
-    # print(instance.data)
