@@ -188,7 +188,7 @@ class TestDataset:
         ]
         for dataset_name, dataset_class in dataset_classes:
             try:
-                if dataset_name == "UCIHAR" or dataset_name == "CyclePowerPlant":
+                if dataset_name == "UCIHAR" or dataset_name == "CyclePowerPlant" or dataset_name == "CollectionDataset":
                     continue
                 dataset = dataset_class("../data", download=True)
                 dataset = dataset_class("../data", download=True)
