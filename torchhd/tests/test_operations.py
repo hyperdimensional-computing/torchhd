@@ -329,4 +329,5 @@ class TestRandomPermute:
 
         x = functional.random(4, 100, device=device)
         perm = functional.create_random_permute(100)
+        perm = perm.to(device)
         assert perm(x).device == device
