@@ -743,6 +743,7 @@ class create_random_permute(torch.nn.Module):
                 [ 1.,  1.,  1., -1., -1.,  1., -1.,  1.,  1.,  1.]])
 
     """
+
     def __init__(self, dim: int) -> None:
         super().__init__()
 
@@ -759,11 +760,11 @@ class create_random_permute(torch.nn.Module):
         if shifts > 0:
             for _ in range(abs(shifts)):
                 y = y[..., self.forward_indices]
-        
+
         elif shifts < 0:
             for _ in range(abs(shifts)):
                 y = y[..., self.backward_indices]
-        
+
         return y.clone()
 
 

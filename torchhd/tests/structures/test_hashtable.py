@@ -241,10 +241,8 @@ class TestHashtable:
         )
 
     def test_from_tensor(self):
-        keys_hv = MAPTensor([[ 1., -1., -1.],
-           [-1.,  1.,  1.]])
-        values_hv = MAPTensor([[-1.,  1., -1.],
-           [-1., -1., -1.]])
+        keys_hv = MAPTensor([[1.0, -1.0, -1.0], [-1.0, 1.0, 1.0]])
+        values_hv = MAPTensor([[-1.0, 1.0, -1.0], [-1.0, -1.0, -1.0]])
 
         H = structures.HashTable.from_tensors(keys_hv, values_hv)
-        assert torch.allclose(H.value, MAPTensor([ 0., -2.,  0.]))
+        assert torch.allclose(H.value, MAPTensor([0.0, -2.0, 0.0]))

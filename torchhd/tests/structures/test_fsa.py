@@ -84,16 +84,16 @@ class TestFSA:
         F.add_transition(tokens[0], states[1], states[2])
         assert torch.allclose(
             F.value,
-            MAPTensor([-1., -1.,  1., -1., -1.,  1.,  1.,  1., -1., -1.]),
+            MAPTensor([-1.0, -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0, -1.0]),
         )
         F.add_transition(tokens[1], states[1], states[3])
         assert torch.allclose(
-            F.value, MAPTensor([-2.,  0.,  2.,  0., -2.,  2.,  0.,  0.,  0., -2.])
+            F.value, MAPTensor([-2.0, 0.0, 2.0, 0.0, -2.0, 2.0, 0.0, 0.0, 0.0, -2.0])
         )
         F.add_transition(tokens[2], states[1], states[3])
         assert torch.allclose(
             F.value,
-            MAPTensor([-1., -1.,  1., -1., -3.,  1., -1.,  1., -1., -1.]),
+            MAPTensor([-1.0, -1.0, 1.0, -1.0, -3.0, 1.0, -1.0, 1.0, -1.0, -1.0]),
         )
 
     def test_transition(self):
