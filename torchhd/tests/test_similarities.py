@@ -179,7 +179,7 @@ class TestDotSimilarity:
 
         similarity = functional.dot_similarity(hv, hv)
 
-        assert similarity.device == device
+        assert similarity.device.type == device.type
 
 
 class TestCosSimilarity:
@@ -322,7 +322,7 @@ class TestCosSimilarity:
 
         similarity = functional.cosine_similarity(hv, hv)
 
-        assert similarity.device == device
+        assert similarity.device.type == device.type
 
 
 class TestHammingSimilarity:
@@ -456,4 +456,4 @@ class TestHammingSimilarity:
 
         similarity = functional.hamming_similarity(hv, hv)
 
-        assert similarity.device == device
+        assert similarity.device.type == device.type

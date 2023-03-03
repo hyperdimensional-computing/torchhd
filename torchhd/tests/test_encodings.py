@@ -90,7 +90,7 @@ class TestMultiset:
 
         hv = functional.random(11, 10000, device=device)
         res = functional.multiset(hv)
-        assert res.device == device
+        assert res.device.type == device.type
 
 
 class TestMultibind:
@@ -155,7 +155,7 @@ class TestMultibind:
 
         hv = functional.random(11, 10000, device=device)
         res = functional.multibind(hv)
-        assert res.device == device
+        assert res.device.type == device.type
 
 
 class TestCrossProduct:
@@ -184,7 +184,7 @@ class TestCrossProduct:
 
         hv = functional.random(11, 10000, device=device)
         res = functional.cross_product(hv, hv)
-        assert res.device == device
+        assert res.device.type == device.type
 
 
 class TestNgrams:
@@ -212,7 +212,7 @@ class TestNgrams:
 
         hv = functional.random(11, 10000, device=device)
         res = functional.ngrams(hv)
-        assert res.device == device
+        assert res.device.type == device.type
 
 
 class TestHashTable:
@@ -239,7 +239,7 @@ class TestHashTable:
 
         hv = functional.random(11, 10000, device=device)
         res = functional.hash_table(hv, hv)
-        assert res.device == device
+        assert res.device.type == device.type
 
 
 class TestBundleSequence:
@@ -267,7 +267,7 @@ class TestBundleSequence:
 
         hv = functional.random(11, 10000, device=device)
         res = functional.bundle_sequence(hv)
-        assert res.device == device
+        assert res.device.type == device.type
 
 
 class TestBindSequence:
@@ -302,7 +302,7 @@ class TestBindSequence:
 
         hv = functional.random(11, 10000, device=device)
         res = functional.bind_sequence(hv)
-        assert res.device == device
+        assert res.device.type == device.type
 
 
 class TestGraph:
@@ -337,4 +337,4 @@ class TestGraph:
 
         hv = torch.zeros(5, 2, 23, 1000, device=device).as_subclass(MAPTensor)
         res = functional.graph(hv)
-        assert res.device == device
+        assert res.device.type == device.type

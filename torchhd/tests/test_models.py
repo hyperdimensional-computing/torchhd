@@ -50,7 +50,7 @@ class TestCentroid:
         model = models.Centroid(1245, 12, dtype=dtype, device=device)
         assert torch.allclose(model.weight, torch.zeros(12, 1245, dtype=dtype))
         assert model.weight.dtype == dtype
-        assert model.weight.device == device
+        assert model.weight.device.type == device.type
 
     def test_add(self):
         samples = torch.randn(4, 12)
@@ -98,7 +98,7 @@ class TestIntRVFL:
         model = models.IntRVFL(5, 1245, 12, dtype=dtype, device=device)
         assert torch.allclose(model.weight, torch.zeros(12, 1245, dtype=dtype))
         assert model.weight.dtype == dtype
-        assert model.weight.device == device
+        assert model.weight.device.type == device.type
 
     def test_fit_ridge_regression(self):
         samples = torch.randn(10, 12)

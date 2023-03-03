@@ -135,7 +135,7 @@ class Testcircular:
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         hv = functional.circular(3, 52, device=device, dtype=dtype)
-        assert hv.device == device
+        assert hv.device.type == device.type
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
     @pytest.mark.parametrize("vsa", vsa_tensors)
@@ -148,7 +148,7 @@ class Testcircular:
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         hv = functional.circular(3, 52, vsa, device=device, dtype=dtype)
-        assert hv.device == device
+        assert hv.device.type == device.type
 
     def test_uses_default_dtype(self):
         hv = functional.circular(3, 52, "BSC")

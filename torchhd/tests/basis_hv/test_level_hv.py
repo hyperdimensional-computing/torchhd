@@ -129,7 +129,7 @@ class Testlevel:
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         hv = functional.level(3, 52, vsa, device=device, dtype=dtype)
-        assert hv.device == device
+        assert hv.device.type == device.type
 
     def test_uses_default_dtype(self):
         hv = functional.level(3, 52, "BSC")

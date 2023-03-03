@@ -62,7 +62,7 @@ class TestBind:
         assert res.dim() == 1
         assert res.size(0) == 100
         assert torch.all((hv == -1) | (hv == 1)).item(), "values are either -1 or +1"
-        assert res.device == device
+        assert res.device.type == device.type
 
 
 class TestBundle:
@@ -121,7 +121,7 @@ class TestBundle:
         assert res.dim() == 1
         assert res.size(0) == 100
         assert torch.all((hv <= 2) & (hv >= -2)).item(), "values are between -2 and +2"
-        assert res.device == device
+        assert res.device.type == device.type
 
 
 class TestPermute:
@@ -188,7 +188,7 @@ class TestPermute:
         assert res.dim() == 1
         assert res.size(0) == 100
         assert torch.all((hv == -1) | (hv == 1)).item(), "values are either -1 or +1"
-        assert res.device == device
+        assert res.device.type == device.type
 
 
 class TestCleanup:
@@ -229,7 +229,7 @@ class TestCleanup:
 
         hv = functional.random(5, 100, vsa, dtype=dtype)
         res = functional.cleanup(hv[0], hv)
-        assert res.device == device
+        assert res.device.type == device.type
 
 
 class TestRandsel:
@@ -267,7 +267,7 @@ class TestRandsel:
         assert res.dtype == a.dtype
         assert res.dim() == 1
         assert res.size(0) == 100
-        assert res.device == device
+        assert res.device.type == device.type
 
 
 class TestMultiRandsel:
@@ -306,7 +306,7 @@ class TestMultiRandsel:
         assert res.dtype == x.dtype
         assert res.dim() == 1
         assert res.size(0) == 100
-        assert res.device == device
+        assert res.device.type == device.type
 
 
 class TestRandomPermute:
@@ -330,4 +330,4 @@ class TestRandomPermute:
         x = functional.random(4, 100, device=device)
         perm = functional.create_random_permute(100)
         perm = perm.to(device)
-        assert perm(x).device == device
+        assert perm(x).device.type == device.type
