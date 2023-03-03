@@ -26,6 +26,7 @@ import torch
 import string
 
 from torchhd import structures, functional
+from torchhd import MAPTensor
 
 seed_key = 2147483644
 seed_value = 2147483622
@@ -35,7 +36,7 @@ letters = list(string.ascii_lowercase)
 class TestHashtable:
     def test_creation_dim(self):
         H = structures.HashTable(10000)
-        assert torch.equal(H.value, torch.zeros(10000))
+        assert torch.allclose(H.value, torch.zeros(10000))
 
     def test_creation_tensor(self):
         generator_key = torch.Generator()
@@ -50,7 +51,7 @@ class TestHashtable:
         hasht = functional.bundle(hash_v1, hash_v2)
 
         H = structures.HashTable(hasht)
-        assert torch.equal(H.value, hasht)
+        assert torch.allclose(H.value, hasht)
 
     def test_generator(self):
         generator = torch.Generator()
@@ -240,13 +241,10 @@ class TestHashtable:
         )
 
     def test_from_tensor(self):
-        generator_key = torch.Generator()
-        generator_key.manual_seed(seed_key)
-        keys_hv = functional.random(2, 3, generator=generator_key)
-
-        generator_value = torch.Generator()
-        generator_value.manual_seed(seed_value)
-        values_hv = functional.random(2, 3, generator=generator_value)
+        keys_hv = MAPTensor([[ 1., -1., -1.],
+           [-1.,  1.,  1.]])
+        values_hv = MAPTensor([[-1.,  1., -1.],
+           [-1., -1., -1.]])
 
         H = structures.HashTable.from_tensors(keys_hv, values_hv)
-        assert torch.equal(H.value, torch.tensor([2.0, 0.0, 0.0]))
+        assert torch.allclose(H.value, MAPTensor([ 0., -2.,  0.]))

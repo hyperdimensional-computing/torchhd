@@ -716,7 +716,10 @@ def permute(input: VSATensor, *, shifts=1) -> VSATensor:
     return input.permute(shifts)
 
 
-def create_random_permute(dim: int) -> Callable[[VSATensor, int], VSATensor]:
+class create_random_permute(torch.nn.Module):
+    forward_indices: LongTensor
+    backward_indices: LongTensor
+
     r"""Creates random permutation functions.
 
     Args:
@@ -740,22 +743,28 @@ def create_random_permute(dim: int) -> Callable[[VSATensor, int], VSATensor]:
                 [ 1.,  1.,  1., -1., -1.,  1., -1.,  1.,  1.,  1.]])
 
     """
+    def __init__(self, dim: int) -> None:
+        super().__init__()
 
-    forward = torch.randperm(dim)
-    backward = torch.empty_like(forward)
-    backward[forward] = torch.arange(dim)
+        forward = torch.randperm(dim)
+        backward = torch.empty_like(forward)
+        backward[forward] = torch.arange(dim)
 
-    def permute(input: VSATensor, shifts: int = 1) -> VSATensor:
+        self.register_buffer("forward_indices", forward)
+        self.register_buffer("backward_indices", backward)
+
+    def __call__(self, input: VSATensor, shifts: int = 1) -> VSATensor:
         y = input
-        if shifts > 0:
-            for _ in range(shifts):
-                y = y[..., forward]
-        elif shifts < 0:
-            for _ in range(shifts):
-                y = y[..., backward]
-        return y
 
-    return permute
+        if shifts > 0:
+            for _ in range(abs(shifts)):
+                y = y[..., self.forward_indices]
+        
+        elif shifts < 0:
+            for _ in range(abs(shifts)):
+                y = y[..., self.backward_indices]
+        
+        return y.clone()
 
 
 def inverse(input: VSATensor) -> VSATensor:

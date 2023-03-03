@@ -26,6 +26,7 @@ import torch
 import string
 
 from torchhd import structures, functional
+from torchhd import MAPTensor
 
 seed = 2147483644
 letters = list(string.ascii_lowercase)
@@ -34,7 +35,7 @@ letters = list(string.ascii_lowercase)
 class TestBundleSequence:
     def test_creation_dim(self):
         S = structures.BundleSequence(10000)
-        assert torch.equal(S.value, torch.zeros(10000))
+        assert torch.allclose(S.value, torch.zeros(10000))
 
     def test_creation_tensor(self):
         generator = torch.Generator()
@@ -43,7 +44,7 @@ class TestBundleSequence:
         seq = functional.bundle(hv[1], functional.permute(hv[0], shifts=1))
 
         S = structures.BundleSequence(seq)
-        assert torch.equal(S.value, seq)
+        assert torch.allclose(S.value, seq)
 
     def test_generator(self):
         generator = torch.Generator()
@@ -57,72 +58,164 @@ class TestBundleSequence:
         assert (hv1 == hv2).min().item()
 
     def test_append(self):
-        generator = torch.Generator()
-        generator.manual_seed(seed)
-        hv = functional.random(len(letters), 4, generator=generator)
-        S = structures.BundleSequence(4)
+        hv = MAPTensor([[ 1., -1.,  1.,  1.,  1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [ 1.,  1.,  1., -1.,  1.],
+           [ 1.,  1.,  1., -1., -1.],
+           [-1.,  1., -1., -1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1., -1., -1.,  1., -1.],
+           [ 1., -1., -1.,  1., -1.],
+           [ 1.,  1.,  1., -1., -1.],
+           [-1.,  1., -1.,  1., -1.],
+           [-1., -1., -1., -1., -1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [ 1.,  1., -1., -1.,  1.],
+           [ 1.,  1.,  1.,  1., -1.],
+           [ 1.,  1., -1.,  1.,  1.],
+           [-1., -1.,  1.,  1., -1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [-1., -1., -1., -1., -1.],
+           [-1.,  1., -1.,  1., -1.],
+           [-1.,  1., -1.,  1.,  1.],
+           [ 1.,  1.,  1.,  1.,  1.],
+           [-1., -1.,  1., -1.,  1.],
+           [ 1.,  1., -1.,  1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1.,  1., -1., -1.,  1.]])
+        S = structures.BundleSequence(5)
 
         S.append(hv[0])
-        assert torch.equal(S.value, torch.tensor([1.0, -1.0, 1.0, 1.0]))
+        assert torch.allclose(S.value, MAPTensor([ 1., -1.,  1.,  1.,  1.]))
 
         S.append(hv[1])
-        assert torch.equal(S.value, torch.tensor([2.0, 2.0, -2.0, 2.0]))
+        assert torch.allclose(S.value, MAPTensor([0., 0., 0., 2., 2.]))
 
         S.append(hv[2])
-        assert torch.equal(S.value, torch.tensor([3.0, 3.0, 3.0, -3.0]))
+        assert torch.allclose(S.value, MAPTensor([ 3.,  1.,  1., -1.,  3.]))
 
     def test_appendleft(self):
-        generator = torch.Generator()
-        generator.manual_seed(seed)
-        hv = functional.random(len(letters), 4, generator=generator)
-        S = structures.BundleSequence(4)
+        hv = MAPTensor([[ 1., -1.,  1.,  1.,  1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [ 1.,  1.,  1., -1.,  1.],
+           [ 1.,  1.,  1., -1., -1.],
+           [-1.,  1., -1., -1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1., -1., -1.,  1., -1.],
+           [ 1., -1., -1.,  1., -1.],
+           [ 1.,  1.,  1., -1., -1.],
+           [-1.,  1., -1.,  1., -1.],
+           [-1., -1., -1., -1., -1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [ 1.,  1., -1., -1.,  1.],
+           [ 1.,  1.,  1.,  1., -1.],
+           [ 1.,  1., -1.,  1.,  1.],
+           [-1., -1.,  1.,  1., -1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [-1., -1., -1., -1., -1.],
+           [-1.,  1., -1.,  1., -1.],
+           [-1.,  1., -1.,  1.,  1.],
+           [ 1.,  1.,  1.,  1.,  1.],
+           [-1., -1.,  1., -1.,  1.],
+           [ 1.,  1., -1.,  1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1.,  1., -1., -1.,  1.]])
+        S = structures.BundleSequence(5)
 
         S.appendleft(hv[0])
-        assert torch.equal(S.value, torch.tensor([1.0, -1.0, 1.0, 1.0]))
+        assert torch.allclose(S.value, MAPTensor([ 1., -1.,  1.,  1.,  1.]))
 
         S.appendleft(hv[1])
-        assert torch.equal(S.value, torch.tensor([2.0, 0.0, 2.0, 0.0]))
+        assert torch.allclose(S.value, MAPTensor([ 2., -2.,  0.,  2.,  2.]))
 
         S.appendleft(hv[2])
-        assert torch.equal(S.value, torch.tensor([3.0, -1.0, 3.0, 1.0]))
+        assert torch.allclose(S.value, MAPTensor([ 1., -1.,  1.,  3.,  3.]))
 
     def test_pop(self):
-        generator = torch.Generator()
-        generator.manual_seed(seed)
-        hv = functional.random(len(letters), 4, generator=generator)
-        S = structures.BundleSequence(4)
+        hv = MAPTensor([[ 1., -1.,  1.,  1.,  1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [ 1.,  1.,  1., -1.,  1.],
+           [ 1.,  1.,  1., -1., -1.],
+           [-1.,  1., -1., -1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1., -1., -1.,  1., -1.],
+           [ 1., -1., -1.,  1., -1.],
+           [ 1.,  1.,  1., -1., -1.],
+           [-1.,  1., -1.,  1., -1.],
+           [-1., -1., -1., -1., -1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [ 1.,  1., -1., -1.,  1.],
+           [ 1.,  1.,  1.,  1., -1.],
+           [ 1.,  1., -1.,  1.,  1.],
+           [-1., -1.,  1.,  1., -1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [-1., -1., -1., -1., -1.],
+           [-1.,  1., -1.,  1., -1.],
+           [-1.,  1., -1.,  1.,  1.],
+           [ 1.,  1.,  1.,  1.,  1.],
+           [-1., -1.,  1., -1.,  1.],
+           [ 1.,  1., -1.,  1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1.,  1., -1., -1.,  1.]])
+        S = structures.BundleSequence(5)
 
         S.append(hv[0])
         S.append(hv[1])
         S.append(hv[2])
 
         S.pop(hv[2])
-        assert torch.equal(S.value, torch.tensor([2.0, 2.0, -2.0, 2.0]))
+        assert torch.allclose(S.value, MAPTensor([0., 0., 0., 2., 2.]))
 
         S.pop(hv[1])
-        assert torch.equal(S.value, torch.tensor([1.0, -1.0, 1.0, 1.0]))
+        assert torch.allclose(S.value, MAPTensor([ 1., -1.,  1.,  1.,  1.]))
 
         S.pop(hv[0])
-        assert torch.equal(S.value, torch.tensor([0.0, 0.0, 0.0, 0.0]))
+        assert torch.allclose(S.value, MAPTensor([0.0, 0.0, 0.0, 0.0, 0.0]))
 
     def test_popleft(self):
-        generator = torch.Generator()
-        generator.manual_seed(seed)
-        hv = functional.random(len(letters), 4, generator=generator)
-        S = structures.BundleSequence(4)
+        hv = MAPTensor([[ 1., -1.,  1.,  1.,  1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [ 1.,  1.,  1., -1.,  1.],
+           [ 1.,  1.,  1., -1., -1.],
+           [-1.,  1., -1., -1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1., -1., -1.,  1., -1.],
+           [ 1., -1., -1.,  1., -1.],
+           [ 1.,  1.,  1., -1., -1.],
+           [-1.,  1., -1.,  1., -1.],
+           [-1., -1., -1., -1., -1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [ 1.,  1., -1., -1.,  1.],
+           [ 1.,  1.,  1.,  1., -1.],
+           [ 1.,  1., -1.,  1.,  1.],
+           [-1., -1.,  1.,  1., -1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [-1., -1., -1., -1., -1.],
+           [-1.,  1., -1.,  1., -1.],
+           [-1.,  1., -1.,  1.,  1.],
+           [ 1.,  1.,  1.,  1.,  1.],
+           [-1., -1.,  1., -1.,  1.],
+           [ 1.,  1., -1.,  1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1.,  1., -1., -1.,  1.]])
+        S = structures.BundleSequence(5)
 
         S.appendleft(hv[0])
         S.appendleft(hv[1])
         S.appendleft(hv[2])
 
         S.popleft(hv[2])
-        assert torch.equal(S.value, torch.tensor([2.0, 0.0, 2.0, 0.0]))
+        assert torch.allclose(S.value, MAPTensor([ 2., -2.,  0.,  2.,  2.]))
 
         S.popleft(hv[1])
-        assert torch.equal(S.value, torch.tensor([1.0, -1.0, 1.0, 1.0]))
+        assert torch.allclose(S.value, MAPTensor([ 1., -1.,  1.,  1.,  1.]))
 
         S.popleft(hv[0])
-        assert torch.equal(S.value, torch.tensor([0.0, 0.0, 0.0, 0.0]))
+        assert torch.allclose(S.value, MAPTensor([0.0, 0.0, 0.0, 0.0, 0.0]))
 
     def test_replace(self):
         generator = torch.Generator()

@@ -26,6 +26,7 @@ import torch
 import string
 
 from torchhd import structures, functional
+from torchhd import MAPTensor
 
 seed = 2147483644
 letters = list(string.ascii_lowercase)
@@ -34,7 +35,7 @@ letters = list(string.ascii_lowercase)
 class TestMultiset:
     def test_creation_dim(self):
         M = structures.Multiset(10000)
-        assert torch.equal(M.value, torch.zeros(10000))
+        assert torch.allclose(M.value, torch.zeros(10000))
 
     def test_creation_tensor(self):
         generator = torch.Generator()
@@ -43,7 +44,7 @@ class TestMultiset:
         multiset = functional.multiset(keys_hv)
 
         M = structures.Multiset(multiset)
-        assert torch.equal(M.value, multiset)
+        assert torch.allclose(M.value, multiset)
 
     def test_generator(self):
         generator = torch.Generator()
@@ -57,25 +58,48 @@ class TestMultiset:
         assert (hv1 == hv2).min().item()
 
     def test_add(self):
-        generator = torch.Generator()
-        generator.manual_seed(seed)
-        keys_hv = functional.random(len(letters), 4, generator=generator)
-        M = structures.Multiset(4)
+        keys_hv = MAPTensor([[ 1., -1.,  1.,  1.,  1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [ 1.,  1.,  1., -1.,  1.],
+           [ 1.,  1.,  1., -1., -1.],
+           [-1.,  1., -1., -1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1., -1., -1.,  1., -1.],
+           [ 1., -1., -1.,  1., -1.],
+           [ 1.,  1.,  1., -1., -1.],
+           [-1.,  1., -1.,  1., -1.],
+           [-1., -1., -1., -1., -1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [ 1.,  1., -1., -1.,  1.],
+           [ 1.,  1.,  1.,  1., -1.],
+           [ 1.,  1., -1.,  1.,  1.],
+           [-1., -1.,  1.,  1., -1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [-1., -1., -1., -1., -1.],
+           [-1.,  1., -1.,  1., -1.],
+           [-1.,  1., -1.,  1.,  1.],
+           [ 1.,  1.,  1.,  1.,  1.],
+           [-1., -1.,  1., -1.,  1.],
+           [ 1.,  1., -1.,  1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1.,  1., -1., -1.,  1.]])
+        M = structures.Multiset(5)
 
         M.add(keys_hv[0])
-        assert torch.equal(M.value, torch.tensor([1.0, -1.0, 1.0, 1.0]))
+        assert torch.allclose(M.value, MAPTensor([ 1., -1.,  1.,  1.,  1.]))
 
         M.add(keys_hv[1])
-        assert torch.equal(M.value, torch.tensor([2.0, 0.0, 0.0, 2.0]))
+        assert torch.allclose(M.value, MAPTensor([ 0., -2.,  2.,  2.,  2.]))
 
         M.add(keys_hv[2])
-        assert torch.equal(M.value, torch.tensor([3.0, 1.0, 1.0, 1.0]))
+        assert torch.allclose(M.value, MAPTensor([ 1., -1.,  3.,  1.,  3.]))
 
     def test_remove(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        keys_hv = functional.random(len(letters), 4, generator=generator)
-        M = structures.Multiset(4)
+        keys_hv = functional.random(len(letters), 1000, generator=generator)
+        M = structures.Multiset(1000)
 
         M.add(keys_hv[0])
         M.add(keys_hv[1])
@@ -90,8 +114,8 @@ class TestMultiset:
     def test_contains(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        keys_hv = functional.random(len(letters), 4, generator=generator)
-        M = structures.Multiset(4)
+        keys_hv = functional.random(len(letters), 1000, generator=generator)
+        M = structures.Multiset(1000)
 
         M.add(keys_hv[0])
         M.add(keys_hv[0])
@@ -141,16 +165,63 @@ class TestMultiset:
         assert M.contains(keys_hv[0]) > torch.tensor([0.8])
 
     def test_from_ngrams(self):
-        generator = torch.Generator()
-        generator.manual_seed(seed)
-        keys_hv = functional.random(len(letters), 3, generator=generator)
+        keys_hv = MAPTensor([[ 1., -1.,  1.,  1.,  1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [ 1.,  1.,  1., -1.,  1.],
+           [ 1.,  1.,  1., -1., -1.],
+           [-1.,  1., -1., -1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1., -1., -1.,  1., -1.],
+           [ 1., -1., -1.,  1., -1.],
+           [ 1.,  1.,  1., -1., -1.],
+           [-1.,  1., -1.,  1., -1.],
+           [-1., -1., -1., -1., -1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [ 1.,  1., -1., -1.,  1.],
+           [ 1.,  1.,  1.,  1., -1.],
+           [ 1.,  1., -1.,  1.,  1.],
+           [-1., -1.,  1.,  1., -1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [-1., -1., -1., -1., -1.],
+           [-1.,  1., -1.,  1., -1.],
+           [-1.,  1., -1.,  1.,  1.],
+           [ 1.,  1.,  1.,  1.,  1.],
+           [-1., -1.,  1., -1.,  1.],
+           [ 1.,  1., -1.,  1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1.,  1., -1., -1.,  1.]])
+        
         M = structures.Multiset.from_ngrams(keys_hv)
-
-        assert torch.equal(M.value, torch.tensor([0.0, 4.0, 0.0]))
+        assert torch.allclose(M.value, MAPTensor([  6.,   0., -10.,   8.,  -4.]))
 
     def test_from_tensor(self):
-        generator = torch.Generator()
-        generator.manual_seed(seed)
-        keys_hv = functional.random(len(letters), 4, generator=generator)
+        keys_hv = MAPTensor([[ 1., -1.,  1.,  1.,  1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [ 1.,  1.,  1., -1.,  1.],
+           [ 1.,  1.,  1., -1., -1.],
+           [-1.,  1., -1., -1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1., -1., -1.,  1., -1.],
+           [ 1., -1., -1.,  1., -1.],
+           [ 1.,  1.,  1., -1., -1.],
+           [-1.,  1., -1.,  1., -1.],
+           [-1., -1., -1., -1., -1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [ 1.,  1., -1., -1.,  1.],
+           [ 1.,  1.,  1.,  1., -1.],
+           [ 1.,  1., -1.,  1.,  1.],
+           [-1., -1.,  1.,  1., -1.],
+           [-1., -1.,  1.,  1.,  1.],
+           [-1., -1., -1., -1., -1.],
+           [-1.,  1., -1.,  1., -1.],
+           [-1.,  1., -1.,  1.,  1.],
+           [ 1.,  1.,  1.,  1.,  1.],
+           [-1., -1.,  1., -1.,  1.],
+           [ 1.,  1., -1.,  1.,  1.],
+           [-1., -1., -1., -1.,  1.],
+           [-1.,  1., -1., -1.,  1.]])
+        
         M = structures.Multiset.from_tensor(keys_hv)
-        assert torch.equal(M.value, torch.tensor([2.0, 10.0, 4.0, 2.0]))
+        assert torch.allclose(M.value, MAPTensor([-6.,  0., -4.,  2.,  6.]))

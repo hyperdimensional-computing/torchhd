@@ -307,3 +307,26 @@ class TestMultiRandsel:
         assert res.dim() == 1
         assert res.size(0) == 100
         assert res.device == device
+
+
+class TestRandomPermute:
+    @pytest.mark.parametrize("vsa", vsa_tensors)
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_value(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
+            return
+
+        x = functional.random(4, 100)
+
+        perm = functional.create_random_permute(100)
+
+        assert torch.equal(x, perm(perm(x, 3), -3))
+        assert torch.equal(x, perm(x, 0))
+        assert torch.allclose(x.sort().values, perm(x, 5).sort().values)
+
+    def test_device(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        x = functional.random(4, 100, device=device)
+        perm = functional.create_random_permute(100)
+        assert perm(x).device == device

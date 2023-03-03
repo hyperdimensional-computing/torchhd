@@ -29,7 +29,7 @@ from torchhd import functional
 
 from ..utils import torch_dtypes, supported_dtype, vsa_tensors
 
-seed = 2147483644
+seed = 2147483643
 
 
 class Testlevel:

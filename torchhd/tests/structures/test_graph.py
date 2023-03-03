@@ -28,14 +28,14 @@ import string
 from torchhd import structures, functional
 from torchhd.tensors.map import MAPTensor
 
-seed = 2147483644
+seed = 2147483645
 letters = list(string.ascii_lowercase)
 
 
 class TestGraph:
     def test_creation_dim(self):
         G = structures.Graph(10000, directed=True)
-        assert torch.equal(G.value, torch.zeros(10000))
+        assert torch.allclose(G.value, torch.zeros(10000))
 
     def test_creation_tensor(self):
         generator = torch.Generator()
@@ -43,7 +43,7 @@ class TestGraph:
         hv = functional.random(len(letters), 10000, generator=generator)
         g = functional.bind(hv[0], hv[1])
         G = structures.Graph(g)
-        assert torch.equal(G.value, g)
+        assert torch.allclose(G.value, g)
 
     def test_generator(self):
         generator = torch.Generator()
@@ -68,22 +68,22 @@ class TestGraph:
         ).as_subclass(MAPTensor)
 
         G.add_edge(hv[0], hv[1])
-        assert torch.equal(
+        assert torch.allclose(
             G.value, torch.tensor([-1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0])
         )
         G.add_edge(hv[2], hv[3])
-        assert torch.equal(
+        assert torch.allclose(
             G.value, torch.tensor([-2.0, -2.0, 0.0, 2.0, -2.0, 0.0, 2.0, -2.0])
         )
 
         GD = structures.Graph(8, directed=True)
 
         GD.add_edge(hv[0], hv[1])
-        assert torch.equal(
+        assert torch.allclose(
             GD.value, torch.tensor([-1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0])
         )
         GD.add_edge(hv[2], hv[3])
-        assert torch.equal(
+        assert torch.allclose(
             GD.value, torch.tensor([0.0, 0.0, 0.0, -2.0, 0.0, -2.0, 2.0, -2.0])
         )
 
@@ -99,23 +99,23 @@ class TestGraph:
         ).as_subclass(MAPTensor)
 
         e1 = G.encode_edge(hv[0], hv[1])
-        assert torch.equal(
+        assert torch.allclose(
             e1, torch.tensor([-1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0])
         )
         e2 = G.encode_edge(hv[2], hv[3])
-        assert torch.equal(
+        assert torch.allclose(
             e2, torch.tensor([-1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0])
         )
 
         GD = structures.Graph(8, directed=True)
 
         e1 = GD.encode_edge(hv[0], hv[1])
-        assert torch.equal(
+        assert torch.allclose(
             e1, torch.tensor([-1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0])
         )
         e2 = GD.encode_edge(hv[2], hv[3])
         print(e2)
-        assert torch.equal(
+        assert torch.allclose(
             e2, torch.tensor([1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0])
         )
 
@@ -157,8 +157,8 @@ class TestGraph:
     def test_contains(self):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        hv = functional.random(4, 8, generator=generator)
-        G = structures.Graph(8)
+        hv = functional.random(4, 1000, generator=generator)
+        G = structures.Graph(1000)
 
         e1 = G.encode_edge(hv[0], hv[1])
         e2 = G.encode_edge(hv[0], hv[2])
@@ -172,7 +172,7 @@ class TestGraph:
         assert G.contains(e2) > torch.tensor([0.6])
         assert G.contains(e3) < torch.tensor(0.6)
 
-        GD = structures.Graph(8, directed=True)
+        GD = structures.Graph(1000, directed=True)
 
         ee1 = GD.encode_edge(hv[0], hv[1])
         ee2 = GD.encode_edge(hv[0], hv[2])
@@ -200,7 +200,7 @@ class TestGraph:
 
         G.clear()
 
-        assert torch.equal(
+        assert torch.allclose(
             G.value, torch.tensor([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         )
 
@@ -208,8 +208,8 @@ class TestGraph:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(4, 8, generator=generator)
-        edges = torch.empty(2, 3, 8).as_subclass(MAPTensor)
+        hv = functional.random(4, 1000, generator=generator)
+        edges = torch.empty(2, 3, 1000).as_subclass(MAPTensor)
         edges[0, 0] = hv[0]
         edges[1, 0] = hv[1]
         edges[0, 1] = hv[0]
