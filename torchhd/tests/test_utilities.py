@@ -109,21 +109,21 @@ class TestValueToIndex:
 
 class TestIndexToValue:
     def test_value(self):
-        x = torch.LongTensor([0, 1, 5, 8])
+        x = torch.tensor([0, 1, 5, 8], dtype=torch.long)
         res = functional.index_to_value(x, 9, 0, 1)
         assert torch.all(res == torch.tensor([0.0, 0.125, 0.625, 1.0])).item()
 
-        x = torch.LongTensor([-3, 2, 6])
+        x = torch.tensor([-3, 2, 6], dtype=torch.long)
         res = functional.index_to_value(x, 5, 0, 2)
         assert torch.all(res == torch.tensor([-1.5, 1.0, 3.0])).item()
 
     def test_dtype(self):
-        x = torch.LongTensor([0, 1, 5, 8])
+        x = torch.tensor([0, 1, 5, 8], dtype=torch.long)
         res = functional.index_to_value(x, 9, 0, 1)
         assert res.dtype == torch.float
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        x = torch.LongTensor([0, 1, 5, 8], device=device)
+        x = torch.tensor([0, 1, 5, 8], device=device, dtype=torch.long)
         res = functional.index_to_value(x, 9, 0, 1)
         assert res.device.type == device.type

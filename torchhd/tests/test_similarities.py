@@ -169,9 +169,9 @@ class TestDotSimilarity:
         if not supported_dtype(dtype, vsa):
             return
 
-        generator = torch.Generator()
-        generator.manual_seed(seed)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        generator = torch.Generator(device)
+        generator.manual_seed(seed)
 
         hv = functional.random(
             3, 100, vsa, generator=generator, dtype=dtype, device=device
@@ -312,9 +312,9 @@ class TestCosSimilarity:
         if not supported_dtype(dtype, vsa):
             return
 
-        generator = torch.Generator()
-        generator.manual_seed(seed)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        generator = torch.Generator(device)
+        generator.manual_seed(seed)
 
         hv = functional.random(
             3, 100, vsa, generator=generator, dtype=dtype, device=device
@@ -446,9 +446,9 @@ class TestHammingSimilarity:
         if not supported_dtype(dtype, vsa):
             return
 
-        generator = torch.Generator()
-        generator.manual_seed(seed)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        generator = torch.Generator(device)
+        generator.manual_seed(seed)
 
         hv = functional.random(
             3, 100, vsa, generator=generator, dtype=dtype, device=device
