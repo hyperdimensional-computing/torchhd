@@ -225,7 +225,7 @@ class TestCleanup:
     def test_device(self, vsa, dtype):
         if not supported_dtype(dtype, vsa):
             return
-        
+
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         hv = functional.random(5, 100, vsa, dtype=dtype, device=device)
         res = functional.cleanup(hv[0], hv)
@@ -259,7 +259,7 @@ class TestRandsel:
     def test_device(self, vsa, dtype):
         if not supported_dtype(dtype, vsa):
             return
-        
+
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         a, b = functional.random(2, 100, vsa, dtype=dtype, device=device)
         res = functional.randsel(a, b)

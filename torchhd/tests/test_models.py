@@ -48,7 +48,9 @@ class TestCentroid:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         model = models.Centroid(1245, 12, dtype=dtype, device=device)
-        assert torch.allclose(model.weight, torch.zeros(12, 1245, dtype=dtype, device=device))
+        assert torch.allclose(
+            model.weight, torch.zeros(12, 1245, dtype=dtype, device=device)
+        )
         assert model.weight.dtype == dtype
         assert model.weight.device.type == device.type
 
@@ -96,7 +98,9 @@ class TestIntRVFL:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         model = models.IntRVFL(5, 1245, 12, dtype=dtype, device=device)
-        assert torch.allclose(model.weight, torch.zeros(12, 1245, dtype=dtype, device=device))
+        assert torch.allclose(
+            model.weight, torch.zeros(12, 1245, dtype=dtype, device=device)
+        )
         assert model.weight.dtype == dtype
         assert model.weight.device.type == device.type
 
