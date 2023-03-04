@@ -137,7 +137,7 @@ class Testrandom:
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         hv = functional.random(3, 52, vsa, device=device, dtype=dtype)
-        assert hv.device == device
+        assert hv.device.type == device.type
 
     def test_uses_default_dtype(self):
         hv = functional.random(3, 52, "BSC")

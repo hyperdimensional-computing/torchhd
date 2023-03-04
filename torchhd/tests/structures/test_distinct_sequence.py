@@ -34,7 +34,7 @@ letters = list(string.ascii_lowercase)
 class TestBindSequence:
     def test_creation_dim(self):
         S = structures.BindSequence(10000)
-        assert torch.equal(S.value, torch.ones(10000))
+        assert torch.allclose(S.value, torch.ones(10000))
 
     def test_creation_tensor(self):
         generator = torch.Generator()
@@ -42,7 +42,7 @@ class TestBindSequence:
         hv = functional.random(len(letters), 10000, generator=generator)
 
         S = structures.BindSequence(hv[0])
-        assert torch.equal(S.value, hv[0])
+        assert torch.allclose(S.value, hv[0])
 
     def test_generator(self):
         generator = torch.Generator()

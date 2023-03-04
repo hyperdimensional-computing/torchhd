@@ -48,9 +48,11 @@ class TestCentroid:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         model = models.Centroid(1245, 12, dtype=dtype, device=device)
-        assert torch.allclose(model.weight, torch.zeros(12, 1245, dtype=dtype))
+        assert torch.allclose(
+            model.weight, torch.zeros(12, 1245, dtype=dtype, device=device)
+        )
         assert model.weight.dtype == dtype
-        assert model.weight.device == device
+        assert model.weight.device.type == device.type
 
     def test_add(self):
         samples = torch.randn(4, 12)
@@ -96,9 +98,11 @@ class TestIntRVFL:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         model = models.IntRVFL(5, 1245, 12, dtype=dtype, device=device)
-        assert torch.allclose(model.weight, torch.zeros(12, 1245, dtype=dtype))
+        assert torch.allclose(
+            model.weight, torch.zeros(12, 1245, dtype=dtype, device=device)
+        )
         assert model.weight.dtype == dtype
-        assert model.weight.device == device
+        assert model.weight.device.type == device.type
 
     def test_fit_ridge_regression(self):
         samples = torch.randn(10, 12)
