@@ -186,6 +186,12 @@ class TestDataset:
             for name, cls in torchhd.datasets.__dict__.items()
             if isinstance(cls, type)
         ]
+        for dataset_name, dataset_class in dataset_classes:
+            if dataset_name != "UCIHAR":
+                continue
+            dataset = dataset_class("../data", download=True)
+            dataset = dataset_class("../data", download=True)
+            
         # for dataset_name, dataset_class in dataset_classes:
         #     try:
         #         if (
