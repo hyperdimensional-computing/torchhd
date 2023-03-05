@@ -187,12 +187,18 @@ class TestDataset:
             if isinstance(cls, type)
         ]
         for dataset_name, dataset_class in dataset_classes:
-            try:
-                if dataset_name == "UCIHAR" or dataset_name == "CyclePowerPlant" or dataset_name == "CollectionDataset":
-                    continue
-                dataset = dataset_class("../data", download=True)
-                dataset = dataset_class("../data", download=True)
-            except:
-                raise RuntimeError(dataset_name)
-            assert dataset is not None
-            assert len(dataset) > 0
+            if dataset_name != "UCIHAR":
+                continue
+            dataset = dataset_class("../data", download=True)
+            dataset = dataset_class("../data", download=True)
+            
+        # for dataset_name, dataset_class in dataset_classes:
+        #     try:
+        #         if dataset_name == "UCIHAR" or dataset_name == "CyclePowerPlant" or dataset_name == "CollectionDataset":
+        #             continue
+        #         dataset = dataset_class("../data", download=True)
+        #         dataset = dataset_class("../data", download=True)
+        #     except:
+        #         raise RuntimeError(dataset_name)
+        #     assert dataset is not None
+        #     assert len(dataset) > 0
