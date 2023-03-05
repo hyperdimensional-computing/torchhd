@@ -191,7 +191,7 @@ class TestDataset:
                 continue
             dataset = dataset_class("../data", download=True)
             dataset = dataset_class("../data", download=True)
-            
+
         # for dataset_name, dataset_class in dataset_classes:
         #     try:
         #         if (
