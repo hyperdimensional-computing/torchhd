@@ -172,7 +172,7 @@ class UCIHAR(data.Dataset):
         """Downloads the dataset if it doesn't exist already"""
 
         print("DEBUG: Downloading dataset")
-        #---
+        # ---
         if self._check_integrity():
             print("Files already downloaded and verified")
             return
@@ -183,7 +183,7 @@ class UCIHAR(data.Dataset):
             "https://archive.ics.uci.edu/ml/machine-learning-databases/00240/UCI%20HAR%20Dataset.zip",
             zip_file_path,
         )
-        
+
         print("DEBUG: removing zip file")
         unzip_file(zip_file_path, self.root)
         os.remove(zip_file_path)
