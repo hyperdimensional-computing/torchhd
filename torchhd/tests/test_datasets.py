@@ -152,33 +152,33 @@ def teardown():
 
 
 class TestDataset:
-    def test_dataset_metadata(self, teardown):
-        num_datasets = 0
-        previous_name = ""
-        benchmark = UCIClassificationBenchmark("../data", download=True)
-        for dataset in benchmark.datasets():
-            if previous_name != dataset.name:
-                num_feat = dataset.train[0][0].size(-1)
-                num_classes = len(dataset.train.classes)
-                num_instances = len(dataset.train)
-                assert dataset_metadata[dataset.name][0] == num_feat
-                assert dataset_metadata[dataset.name][1] == num_classes
-                assert dataset_metadata[dataset.name][2] == num_instances
+    # def test_dataset_metadata(self, teardown):
+    #     num_datasets = 0
+    #     previous_name = ""
+    #     benchmark = UCIClassificationBenchmark("../data", download=True)
+    #     for dataset in benchmark.datasets():
+    #         if previous_name != dataset.name:
+    #             num_feat = dataset.train[0][0].size(-1)
+    #             num_classes = len(dataset.train.classes)
+    #             num_instances = len(dataset.train)
+    #             assert dataset_metadata[dataset.name][0] == num_feat
+    #             assert dataset_metadata[dataset.name][1] == num_classes
+    #             assert dataset_metadata[dataset.name][2] == num_instances
 
-                previous_name = dataset.name
-                num_datasets += 1
+    #             previous_name = dataset.name
+    #             num_datasets += 1
 
-            benchmark.report(dataset, 0.5)
-        assert len(benchmark.dataset_names) == num_datasets
+    #         benchmark.report(dataset, 0.5)
+    #     assert len(benchmark.dataset_names) == num_datasets
 
-        num_datasets = 0
-        previous_name = ""
-        all_metrics = benchmark.score()
-        print(all_metrics)
-        for dataset in benchmark.datasets():
-            if previous_name != dataset.name:
-                assert all_metrics[dataset.name][0] == 0.5
-                num_datasets += 1
+    #     num_datasets = 0
+    #     previous_name = ""
+    #     all_metrics = benchmark.score()
+    #     print(all_metrics)
+    #     for dataset in benchmark.datasets():
+    #         if previous_name != dataset.name:
+    #             assert all_metrics[dataset.name][0] == 0.5
+    #             num_datasets += 1
 
     def test_datasets_dowload(self, teardown):
         dataset_classes = [

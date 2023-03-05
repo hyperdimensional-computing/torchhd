@@ -125,6 +125,7 @@ class UCIHAR(data.Dataset):
 
     def _check_integrity(self) -> bool:
         if not os.path.isdir(self.root):
+            print("DEBUG: {self.root} ir not dir")
             return False
 
         train_dir = os.path.join(self.root, "train")
@@ -133,18 +134,21 @@ class UCIHAR(data.Dataset):
         has_test_dir = os.path.isdir(test_dir)
 
         if not has_train_dir and not has_test_dir:
+            print("DEBUG: train_dir but no test_dir")
             return False
 
         has_train_x = os.path.isfile(os.path.join(train_dir, "X_train.txt"))
         has_train_y = os.path.isfile(os.path.join(train_dir, "y_train.txt"))
 
         if not has_train_x and not has_train_y:
+            print("DEBUG: has train_x but not train_y")
             return False
 
         has_test_x = os.path.isfile(os.path.join(test_dir, "X_test.txt"))
         has_test_y = os.path.isfile(os.path.join(train_dir, "y_test.txt"))
 
         if not has_test_x or not has_test_y:
+            print("DEBUG: has test_x but not test_y")
             return False
 
         return True
@@ -167,24 +171,32 @@ class UCIHAR(data.Dataset):
     def download(self):
         """Downloads the dataset if it doesn't exist already"""
 
+        print("DEBUG: Downloading dataset")
+        #---
         if self._check_integrity():
             print("Files already downloaded and verified")
             return
 
         zip_file_path = os.path.join(self.root, "data.zip")
+        print("DEBUG: zip_file_path", zip_file_path)
         download_file(
             "https://archive.ics.uci.edu/ml/machine-learning-databases/00240/UCI%20HAR%20Dataset.zip",
             zip_file_path,
         )
-
+        
+        print("DEBUG: removing zip file")
         unzip_file(zip_file_path, self.root)
         os.remove(zip_file_path)
 
+        print("DEBUG: renaming")
         source_dir = os.path.join(self.root, "UCI HAR Dataset")
         data_files = os.listdir(source_dir)
+        print("DEBUG: source_dir: ", source_dir)
+        print("DEBUG: data_files: ", data_files)
         for filename in data_files:
             os.rename(
                 os.path.join(source_dir, filename), os.path.join(self.root, filename)
             )
 
+        print("DEBUG: removing source_dir")
         os.rmdir(source_dir)
