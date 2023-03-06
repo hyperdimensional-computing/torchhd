@@ -181,7 +181,6 @@ class TestDataset:
     #             num_datasets += 1
 
     def test_datasets_dowload(self, teardown):
-        
         # dataset = UCIHAR("../data", download=True)
         # f = open("out.txt", "w")
         dataset_classes = [
@@ -190,7 +189,12 @@ class TestDataset:
             if isinstance(cls, type)
         ]
         for dataset_name, dataset_class in dataset_classes:
-            if dataset_name == "UCIHAR" or dataset_name == "CollectionDataset" or dataset_name == "DatasetFourFold" or dataset_name == "DatasetTrainTest":
+            if (
+                dataset_name == "UCIHAR"
+                or dataset_name == "CollectionDataset"
+                or dataset_name == "DatasetFourFold"
+                or dataset_name == "DatasetTrainTest"
+            ):
                 continue
             # try:
             #     dataset = dataset_class("../data", download=True)
@@ -212,6 +216,7 @@ class TestDataset:
         #         raise RuntimeError(dataset_name)
         #     assert dataset is not None
         #     assert len(dataset) > 0
+
 
 if __name__ == "__main__":
     T = TestDataset()

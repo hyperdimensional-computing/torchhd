@@ -196,7 +196,11 @@ class UCIHAR(data.Dataset):
         print("DEBUG: data_files: ", data_files)
         print("DEBUG: files in root before renaming", os.listdir(self.root))
         for filename in data_files:
-            shutil.move(os.path.join(source_dir, filename), os.path.join(self.root, filename), copy_function = shutil.copytree)
+            shutil.move(
+                os.path.join(source_dir, filename),
+                os.path.join(self.root, filename),
+                copy_function=shutil.copytree,
+            )
             # os.rename(
             #     os.path.join(source_dir, filename), os.path.join(self.root, filename)
             # )
