@@ -177,14 +177,14 @@ class BeijingAirQuality(data.Dataset):
         # Map the wind directions to a category identifier (int)
         # # Save the mapping for user referencing
         self.wind_directions = tuple(sorted(list(set(data.wind_direction))))
-        data.loc[:, "wind_direction"] = data.wind_direction.apply(
+        data.wind_direction = data.wind_direction.apply(
             lambda x: self.wind_directions.index(x)
         )
 
         # Map the stations to a category identifier (int)
         # Save the mapping for user referencing
         self.stations = tuple(sorted(list(set(data.station))))
-        data.loc[:, "station"] = data.station.apply(lambda x: self.stations.index(x))
+        data.station = data.station.apply(lambda x: self.stations.index(x))
 
         categorical = data[self.categorical_columns]
         self.categorical_data = torch.tensor(categorical.values, dtype=torch.long)

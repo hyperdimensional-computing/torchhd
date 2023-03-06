@@ -1,23 +1,11 @@
+import os
+import shutil
 import pytest
 import torch
+import torch.utils.data as data
 
 import torchhd.datasets
-from torchhd.datasets import *
-
-
-def delete_folder():
-    import os, shutil
-
-    folder = "../data"
-    for filename in os.listdir(folder):
-        file_path = os.path.join(folder, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            print("Failed to delete %s. Reason: %s" % (file_path, e))
+from torchhd.datasets import UCIClassificationBenchmark
 
 
 dataset_metadata = {
@@ -146,78 +134,58 @@ dataset_metadata = {
 
 
 @pytest.fixture()
-def teardown():
-    yield True
-    delete_folder()
+def cleandir():
+    if os.path.isdir("./data"):
+        shutil.rmtree("./data")
 
 
 class TestDataset:
-    # def test_dataset_metadata(self, teardown):
-    #     num_datasets = 0
-    #     previous_name = ""
-    #     benchmark = UCIClassificationBenchmark("../data", download=True)
-    #     for dataset in benchmark.datasets():
-    #         if previous_name != dataset.name:
-    #             num_feat = dataset.train[0][0].size(-1)
-    #             num_classes = len(dataset.train.classes)
-    #             num_instances = len(dataset.train)
-    #             assert dataset_metadata[dataset.name][0] == num_feat
-    #             assert dataset_metadata[dataset.name][1] == num_classes
-    #             assert dataset_metadata[dataset.name][2] == num_instances
+    def test_benchmark(self):
+        seen_datasets = set()
+        benchmark = UCIClassificationBenchmark("./data", download=True)
+        for dataset in benchmark.datasets():
+            num_feat = dataset.train[0][0].size(-1)
+            num_classes = len(dataset.train.classes)
+            num_instances = len(dataset.train)
+            assert dataset_metadata[dataset.name][0] == num_feat
+            assert dataset_metadata[dataset.name][1] == num_classes
+            assert dataset_metadata[dataset.name][2] == num_instances
 
-    #             previous_name = dataset.name
-    #             num_datasets += 1
+            seen_datasets.add(dataset.name)
+            benchmark.report(dataset, 0.5)
 
-    #         benchmark.report(dataset, 0.5)
-    #     assert len(benchmark.dataset_names) == num_datasets
+        assert len(benchmark.dataset_names) == len(seen_datasets)
 
-    #     num_datasets = 0
-    #     previous_name = ""
-    #     all_metrics = benchmark.score()
-    #     print(all_metrics)
-    #     for dataset in benchmark.datasets():
-    #         if previous_name != dataset.name:
-    #             assert all_metrics[dataset.name][0] == 0.5
-    #             num_datasets += 1
+        all_metrics = benchmark.score()
+        for dataset in benchmark.datasets():
+            assert all_metrics[dataset.name][0] == 0.5
 
-    def test_datasets_dowload(self, teardown):
-        # dataset = UCIHAR("../data", download=True)
-        # f = open("out.txt", "w")
-        dataset_classes = [
-            (name, cls)
-            for name, cls in torchhd.datasets.__dict__.items()
-            if isinstance(cls, type)
-        ]
+    def test_datasets_dowload(self, cleandir):
+
+        def is_dataset_class(key_value_pair):
+            ds_name, ds_class = key_value_pair
+            print(ds_name)
+
+            if not isinstance(ds_class, type):
+                return False
+            
+            return issubclass(ds_class, data.Dataset)
+
+        dataset_classes = filter(is_dataset_class, torchhd.datasets.__dict__.items())
+
         for dataset_name, dataset_class in dataset_classes:
-            if (
-                dataset_name == "UCIHAR"
-                or dataset_name == "CollectionDataset"
-                or dataset_name == "DatasetFourFold"
-                or dataset_name == "DatasetTrainTest"
-            ):
+            if dataset_name in {"CollectionDataset", "DatasetFourFold", "DatasetTrainTest"}:
                 continue
-            # try:
-            #     dataset = dataset_class("../data", download=True)
-            # except Exception as e:
-            #     f.write(f"{dataset_name}, {e}\n")
-            dataset = dataset_class("../data", download=True)
-        # f.close()
-        # for dataset_name, dataset_class in dataset_classes:
-        #     try:
-        #         if (
-        #             dataset_name == "UCIHAR"
-        #             or dataset_name == "CyclePowerPlant"
-        #             or dataset_name == "CollectionDataset"
-        #         ):
-        #             continue
-        #         dataset = dataset_class("../data", download=True)
-        #         dataset = dataset_class("../data", download=True)
-        #     except:
-        #         raise RuntimeError(dataset_name)
-        #     assert dataset is not None
-        #     assert len(dataset) > 0
+
+            with pytest.raises(RuntimeError):
+                dataset = dataset_class("./data", download=False)
+
+            dataset = dataset_class("./data", download=True)
+            assert len(dataset) > 0
+            
+            # Test if downloaded ds can be opened with download=False
+            dataset = dataset_class("./data", download=False)
+            assert len(dataset) > 0
 
 
-if __name__ == "__main__":
-    T = TestDataset()
-    T.test_datasets_dowload(None)
+
