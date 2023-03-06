@@ -956,6 +956,10 @@ class Density(nn.Module):
             out_features + 1, out_features, vsa, low=low, high=high, **factory_kwargs
         )
 
+    def reset_parameters(self) -> None:
+        self.key.reset_parameters()
+        self.density_encoding.reset_parameters()
+
     # Specify the steps needed to perform the encoding
     def forward(self, input: Tensor) -> Tensor:
         # Perform binding of key and value vectors
