@@ -334,7 +334,6 @@ class TestRandomPermute:
 
 
 class TestResonator:
-
     def test_shape(self):
         X = functional.random(5, 100)
         Y = functional.random(5, 100)
