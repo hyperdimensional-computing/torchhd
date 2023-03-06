@@ -520,7 +520,7 @@ class TestDensity:
             return
         dimensions = 1000
         embedding = 10
-        
+
         emb = embeddings.Density(embedding, dimensions, vsa=vsa)
         assert (
             abs(
