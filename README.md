@@ -124,7 +124,7 @@ To run the unit tests located in [`torchhd/tests`](https://github.com/hyperdimen
 1. Use `pip install -r dev-requirements.txt` to install the required development packages.
 2. Then run the tests using just `pytest`.
 
-Optionally, to measure the code coverage use `coverage run -m --omit=torchhd/tests/** pytest` to create the coverage report. You can then view this report with `coverage report`.
+Optionally, to measure the code coverage use `coverage run -m --omit="torchhd/tests/**" pytest` to create the coverage report. You can then view this report with `coverage report`.
 
 ### License
 
