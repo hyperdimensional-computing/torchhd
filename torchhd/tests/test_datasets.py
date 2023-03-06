@@ -139,6 +139,26 @@ def cleandir():
         shutil.rmtree("./data")
 
 
+def is_dataset_class(key_value_pair):
+    ds_name, ds_class = key_value_pair
+
+    if not isinstance(ds_class, type):
+        return False
+
+    if ds_name in {
+        "CollectionDataset",
+        "DatasetFourFold",
+        "DatasetTrainTest",
+    }:
+        return False
+
+    return issubclass(ds_class, data.Dataset)
+
+
+dataset_names = filter(is_dataset_class, torchhd.datasets.__dict__.items())
+dataset_names = [name for name, ds in dataset_names]
+
+
 class TestDataset:
     def test_benchmark(self):
         seen_datasets = set()
@@ -160,29 +180,13 @@ class TestDataset:
         for dataset in benchmark.datasets():
             assert all_metrics[dataset.name][0] == 0.5
 
-    def test_datasets_dowload(self, cleandir):
-        def is_dataset_class(key_value_pair):
-            ds_name, ds_class = key_value_pair
-            print(ds_name)
+    @pytest.mark.parametrize("dataset_name", dataset_names)
+    def test_datasets_dowload(self, cleandir, dataset_name):
+        dataset_class = getattr(torchhd.datasets, dataset_name)
 
-            if not isinstance(ds_class, type):
-                return False
+        dataset = dataset_class("./data", download=True)
+        assert len(dataset) > 0
 
-            return issubclass(ds_class, data.Dataset)
-
-        dataset_classes = filter(is_dataset_class, torchhd.datasets.__dict__.items())
-
-        for dataset_name, dataset_class in dataset_classes:
-            if dataset_name in {
-                "CollectionDataset",
-                "DatasetFourFold",
-                "DatasetTrainTest",
-            }:
-                continue
-
-            dataset = dataset_class("./data", download=True)
-            assert len(dataset) > 0
-
-            # Test if downloaded ds can be opened with download=False
-            dataset = dataset_class("./data", download=False)
-            assert len(dataset) > 0
+        # Test if downloaded ds can be opened with download=False
+        dataset = dataset_class("./data", download=False)
+        assert len(dataset) > 0
