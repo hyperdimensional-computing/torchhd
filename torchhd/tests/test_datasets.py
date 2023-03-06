@@ -161,20 +161,23 @@ class TestDataset:
             assert all_metrics[dataset.name][0] == 0.5
 
     def test_datasets_dowload(self, cleandir):
-
         def is_dataset_class(key_value_pair):
             ds_name, ds_class = key_value_pair
             print(ds_name)
 
             if not isinstance(ds_class, type):
                 return False
-            
+
             return issubclass(ds_class, data.Dataset)
 
         dataset_classes = filter(is_dataset_class, torchhd.datasets.__dict__.items())
 
         for dataset_name, dataset_class in dataset_classes:
-            if dataset_name in {"CollectionDataset", "DatasetFourFold", "DatasetTrainTest"}:
+            if dataset_name in {
+                "CollectionDataset",
+                "DatasetFourFold",
+                "DatasetTrainTest",
+            }:
                 continue
 
             with pytest.raises(RuntimeError):
@@ -182,10 +185,7 @@ class TestDataset:
 
             dataset = dataset_class("./data", download=True)
             assert len(dataset) > 0
-            
+
             # Test if downloaded ds can be opened with download=False
             dataset = dataset_class("./data", download=False)
             assert len(dataset) > 0
-
-
-
