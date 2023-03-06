@@ -8,3 +8,4 @@ flake8
 pytest
 black
 tqdm
+openpyxl
