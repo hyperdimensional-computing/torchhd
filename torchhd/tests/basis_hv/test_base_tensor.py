@@ -26,6 +26,7 @@ import torch
 
 from torchhd import VSATensor
 
+
 class TestVSATensor:
     def test_empty(self):
         with pytest.raises(NotImplementedError):
