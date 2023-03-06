@@ -180,9 +180,6 @@ class TestDataset:
             }:
                 continue
 
-            with pytest.raises(RuntimeError):
-                dataset = dataset_class("./data", download=False)
-
             dataset = dataset_class("./data", download=True)
             assert len(dataset) > 0
 

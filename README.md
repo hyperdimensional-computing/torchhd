@@ -118,9 +118,13 @@ To create a clean build, remove the `/build` and `/docs/generated` directories.
 2. Create a new GitHub release. Set the tag according to [PEP 440](https://peps.python.org/pep-0440/), e.g., v1.5.2, and provide a clear description of the changes. You can use GitHub's "auto-generate release notes" button. Look at previous releases for examples.
 3. A GitHub release triggers a GitHub action that builds the library and publishes it to PyPi and Conda in addition to the documentation website.
 
-### Measuring Code Coverage
+### Running tests
 
-To measure the code coverage use `pip install coverage` to install the required tool. Then use `coverage run -m --omit=./torchhd/tests/** pytest` to create the coverage report. You can then view this report with `coverage report`.
+To run the unit tests located in [`torchhd/tests`](https://github.com/hyperdimensional-computing/torchhd/tree/main/torchhd/tests) do the following:
+1. Use `pip install -r dev-requirements.txt` to install the required development packages.
+2. Then run the tests using just `pytest`.
+
+Optionally, to measure the code coverage use `coverage run -m --omit=torchhd/tests/** pytest` to create the coverage report. You can then view this report with `coverage report`.
 
 ### License
 
