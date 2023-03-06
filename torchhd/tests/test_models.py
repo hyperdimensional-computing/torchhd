@@ -48,9 +48,11 @@ class TestCentroid:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         model = models.Centroid(1245, 12, dtype=dtype, device=device)
-        assert torch.allclose(model.weight, torch.zeros(12, 1245, dtype=dtype))
+        assert torch.allclose(
+            model.weight, torch.zeros(12, 1245, dtype=dtype, device=device)
+        )
         assert model.weight.dtype == dtype
-        assert model.weight.device == device
+        assert model.weight.device.type == device.type
 
     def test_add(self):
         samples = torch.randn(4, 12)
@@ -96,16 +98,18 @@ class TestIntRVFL:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         model = models.IntRVFL(5, 1245, 12, dtype=dtype, device=device)
-        assert torch.allclose(model.weight, torch.zeros(12, 1245, dtype=dtype))
+        assert torch.allclose(
+            model.weight, torch.zeros(12, 1245, dtype=dtype, device=device)
+        )
         assert model.weight.dtype == dtype
-        assert model.weight.device == device
+        assert model.weight.device.type == device.type
 
     def test_fit_ridge_regression(self):
-        samples = torch.randn(10, 12)
-        targets = torch.randint(0, 3, (10,))
+        samples = torch.eye(10, 12)
+        targets = torch.arange(10)
 
-        model = models.IntRVFL(12, 1245, 3)
+        model = models.IntRVFL(12, 1245, 10)
         model.fit_ridge_regression(samples, targets)
 
         logits = model(samples)
-        assert logits.shape == (10, 3)
+        assert logits.shape == (10, 10)

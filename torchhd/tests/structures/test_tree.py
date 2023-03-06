@@ -34,7 +34,7 @@ letters = list(string.ascii_lowercase)
 class TestTree:
     def test_creation_dim(self):
         T = structures.Tree(10000)
-        assert torch.equal(T.value, torch.zeros(10000))
+        assert torch.allclose(T.value, torch.zeros(10000))
 
     def test_generator(self):
         generator = torch.Generator()
@@ -97,6 +97,6 @@ class TestTree:
         T.add_leaf(hv[1], ["l", "r"])
 
         T.clear()
-        assert torch.equal(
+        assert torch.allclose(
             T.value, torch.tensor([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         )

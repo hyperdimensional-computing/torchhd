@@ -169,9 +169,9 @@ class TestDotSimilarity:
         if not supported_dtype(dtype, vsa):
             return
 
-        generator = torch.Generator()
-        generator.manual_seed(seed)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        generator = torch.Generator(device)
+        generator.manual_seed(seed)
 
         hv = functional.random(
             3, 100, vsa, generator=generator, dtype=dtype, device=device
@@ -179,7 +179,7 @@ class TestDotSimilarity:
 
         similarity = functional.dot_similarity(hv, hv)
 
-        assert similarity.device == device
+        assert similarity.device.type == device.type
 
 
 class TestCosSimilarity:
@@ -312,9 +312,9 @@ class TestCosSimilarity:
         if not supported_dtype(dtype, vsa):
             return
 
-        generator = torch.Generator()
-        generator.manual_seed(seed)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        generator = torch.Generator(device)
+        generator.manual_seed(seed)
 
         hv = functional.random(
             3, 100, vsa, generator=generator, dtype=dtype, device=device
@@ -322,7 +322,7 @@ class TestCosSimilarity:
 
         similarity = functional.cosine_similarity(hv, hv)
 
-        assert similarity.device == device
+        assert similarity.device.type == device.type
 
 
 class TestHammingSimilarity:
@@ -446,9 +446,9 @@ class TestHammingSimilarity:
         if not supported_dtype(dtype, vsa):
             return
 
-        generator = torch.Generator()
-        generator.manual_seed(seed)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        generator = torch.Generator(device)
+        generator.manual_seed(seed)
 
         hv = functional.random(
             3, 100, vsa, generator=generator, dtype=dtype, device=device
@@ -456,4 +456,4 @@ class TestHammingSimilarity:
 
         similarity = functional.hamming_similarity(hv, hv)
 
-        assert similarity.device == device
+        assert similarity.device.type == device.type

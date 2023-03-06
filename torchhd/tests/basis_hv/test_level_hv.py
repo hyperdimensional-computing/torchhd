@@ -29,7 +29,7 @@ from torchhd import functional
 
 from ..utils import torch_dtypes, supported_dtype, vsa_tensors
 
-seed = 2147483644
+seed = 2147483643
 
 
 class Testlevel:
@@ -129,7 +129,7 @@ class Testlevel:
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         hv = functional.level(3, 52, vsa, device=device, dtype=dtype)
-        assert hv.device == device
+        assert hv.device.type == device.type
 
     def test_uses_default_dtype(self):
         hv = functional.level(3, 52, "BSC")

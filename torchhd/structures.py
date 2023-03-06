@@ -944,7 +944,7 @@ class Graph:
             return functional.bind(self.value, input.inverse())
 
     def contains(self, input: VSATensor) -> Tensor:
-        """Returns the cosine similarity of the input vector against the graph.
+        """Returns the normalized dot similarity of the input vector against the graph.
 
         Args:
             input (Tensor): Hypervector to compare against the multiset.
@@ -955,7 +955,7 @@ class Graph:
             >>> G.contains(e)
             tensor(1.)
         """
-        return functional.cosine_similarity(input, self.value)
+        return functional.dot_similarity(input, self.value) / self.value.size(-1)
 
     def clear(self) -> None:
         """Empties the graph.

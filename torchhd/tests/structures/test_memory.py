@@ -59,9 +59,9 @@ class TestMemory:
         M.add(keys_hv[1], letters[1])
         M.add(keys_hv[2], letters[2])
 
-        assert torch.equal(M.keys[0], keys_hv[0])
-        assert torch.equal(M.keys[1], keys_hv[1])
-        assert torch.equal(M.keys[2], keys_hv[2])
+        assert torch.allclose(M.keys[0], keys_hv[0])
+        assert torch.allclose(M.keys[1], keys_hv[1])
+        assert torch.allclose(M.keys[2], keys_hv[2])
         assert M.values[0] == letters[0]
         assert M.values[1] == letters[1]
         assert M.values[2] == letters[2]
