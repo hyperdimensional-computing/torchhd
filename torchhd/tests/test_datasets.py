@@ -181,17 +181,23 @@ class TestDataset:
     #             num_datasets += 1
 
     def test_datasets_dowload(self, teardown):
+        
+        # dataset = UCIHAR("../data", download=True)
+        # f = open("out.txt", "w")
         dataset_classes = [
             (name, cls)
             for name, cls in torchhd.datasets.__dict__.items()
             if isinstance(cls, type)
         ]
         for dataset_name, dataset_class in dataset_classes:
-            if dataset_name != "UCIHAR":
+            if dataset_name == "UCIHAR" or dataset_name == "CollectionDataset" or dataset_name == "DatasetFourFold" or dataset_name == "DatasetTrainTest":
                 continue
+            # try:
+            #     dataset = dataset_class("../data", download=True)
+            # except Exception as e:
+            #     f.write(f"{dataset_name}, {e}\n")
             dataset = dataset_class("../data", download=True)
-            dataset = dataset_class("../data", download=True)
-
+        # f.close()
         # for dataset_name, dataset_class in dataset_classes:
         #     try:
         #         if (
@@ -206,3 +212,7 @@ class TestDataset:
         #         raise RuntimeError(dataset_name)
         #     assert dataset is not None
         #     assert len(dataset) > 0
+
+if __name__ == "__main__":
+    T = TestDataset()
+    T.test_datasets_dowload(None)

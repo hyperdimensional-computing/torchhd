@@ -23,6 +23,7 @@
 #
 import os
 import os.path as path
+import shutil
 from typing import Callable, Optional, List
 import torch
 from torch.utils import data
@@ -195,9 +196,10 @@ class UCIHAR(data.Dataset):
         print("DEBUG: data_files: ", data_files)
         print("DEBUG: files in root before renaming", os.listdir(self.root))
         for filename in data_files:
-            os.rename(
-                os.path.join(source_dir, filename), os.path.join(self.root, filename)
-            )
+            shutil.move(os.path.join(source_dir, filename), os.path.join(self.root, filename), copy_function = shutil.copytree)
+            # os.rename(
+            #     os.path.join(source_dir, filename), os.path.join(self.root, filename)
+            # )
 
         print("DEBUG: files in root after renaming", os.listdir(self.root))
         print("DEBUG: removing source_dir")
