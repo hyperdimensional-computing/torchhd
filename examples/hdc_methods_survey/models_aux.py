@@ -97,7 +97,7 @@ class Centroid(nn.Module):
         # cancel update if all predictions were correct
         if is_wrong.sum().item() == 0:
             arr = logit.topk(2)
-            if abs(arr[0][0][0].item()-arr[0][0][1].item()) > 0.1:
+            if abs(arr[0][0][0].item() - arr[0][0][1].item()) > 0.1:
                 print(abs(arr[0][0][0].item() - arr[0][0][1].item()))
                 self.weight.index_add_(0, target, input, alpha=lr)
             return
@@ -210,12 +210,11 @@ class MemoryModel(nn.Module):
         iinput = torch.matmul(input, self.weight)
         predictions = functional.dot_similarity(iinput, self.classes.weight)
 
-
         if np.argmax(predictions).item() != target.item():
             label = torch.index_select(self.classes.weight, 0, target)
             self.weight += torch.matmul(input.T, label)
 
-        '''
+        """
         else:
             top_two_pred = predictions.topk(2)
             print('a',np.argmax(predictions).item(), target.item())
@@ -225,4 +224,4 @@ class MemoryModel(nn.Module):
                 self.weight += torch.matmul(input.T, label)
             #label = torch.index_select(self.classes.weight, 0, target)
             #self.weight += torch.matmul(input.T, label)
-        '''
+        """

@@ -15,6 +15,7 @@ from torchhd import embeddings
 from torchhd.models import Centroid
 from torchhd.datasets import UCIClassificationBenchmark
 import numpy as np
+
 torch.manual_seed(20)
 
 device = "cpu"

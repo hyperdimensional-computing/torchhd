@@ -50,7 +50,6 @@ files = [
     # density_encoding_online_iterative,
     # density_encoding_regenerative_continuous,
     # density_encoding_regenerative_reset,
-
     hashmap_encoding_online,
     hashmap_encoding_online_v2,
     random_projection_online,
@@ -59,7 +58,6 @@ files = [
     sinusoid_projection_online_v2,
     density_encoding_online,
     density_encoding_online_v2,
-
 ]
 """
 

@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import torch.utils.data as data
 import time
 from torchhd.datasets import UCIClassificationBenchmark
+
 torch.manual_seed(20)
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
@@ -37,6 +38,8 @@ def create_min_max_normalize(min, max):
         return torch.nan_to_num((input - min) / (max - min))
 
     return normalize
+
+
 def normalize(w, eps=1e-12) -> None:
     """Transforms all the class prototype vectors into unit vectors.
 
@@ -48,12 +51,11 @@ def normalize(w, eps=1e-12) -> None:
     w.div_(norms)
 
 
-
 def experiment():
     train = torchhd.datasets.Yeast("../../data", download=True, train=True, fold=1)
     test = torchhd.datasets.Yeast("../../data", download=True, train=False, fold=1)
     added = 0
-    #test = torchhd.datasets.AcuteInflammation("../../data", download=True, train=False)
+    # test = torchhd.datasets.AcuteInflammation("../../data", download=True, train=False)
     # Number of features in the dataset.
     # Number of classes in the dataset.
     num_classes = len(train.classes)
@@ -76,21 +78,19 @@ def experiment():
 
     count = 0
     with torch.no_grad():
-        for samples, labels in tqdm(train_loader, desc='Testing'):
+        for samples, labels in tqdm(train_loader, desc="Testing"):
             samples = samples.to(device)
             labels = labels.to(device)
 
             samples_hv = encode(samples)
-            #print("labels", labels)
+            # print("labels", labels)
             model.add_online(samples_hv, labels)
-            #if count == 10:
-                #break
+            # if count == 10:
+            # break
             count += 1
         model.normalize()
 
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
-
-
 
     with torch.no_grad():
         for samples, labels in tqdm(test_loader, desc="Testing"):
