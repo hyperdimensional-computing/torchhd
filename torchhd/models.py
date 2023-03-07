@@ -141,7 +141,6 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, target, lr * alpha1 * input)
         # self.weight.index_add_(0, pred, lr * alpha2 * input)
 
-
     @torch.no_grad()
     def normalize(self, eps=1e-12) -> None:
         """Transforms all the class prototype vectors into unit vectors.
@@ -237,7 +236,7 @@ class MemoryModel(nn.Module):
         label = torch.index_select(self.classes.weight, 0, target)
         input = torch.matmul(input.T, label)
         self.weight += input
-        #self.weight.index_add_(0, target, input, alpha=lr)
+        # self.weight.index_add_(0, target, input, alpha=lr)
 
     @torch.no_grad()
     def add_online(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
@@ -248,14 +247,8 @@ class MemoryModel(nn.Module):
         if np.argmax(predictions).item() != target.item():
             label = torch.index_select(self.classes.weight, 0, target)
             self.weight += torch.matmul(input.T, label)
-        return
-        '''
-        else:
-            if predictions.max(1).values.item() < 0.8:
-                self.weight.index_add_(0, target, input)
-            return
-        '''
-        '''
+
+        """
         else:
             top_two_pred = predictions.topk(2)
             if abs(top_two_pred[0][0][0].item()/top_two_pred[0][0][1].item()) > 1.1:
@@ -264,28 +257,35 @@ class MemoryModel(nn.Module):
                 self.weight += torch.matmul(input.T, label)
             #label = torch.index_select(self.classes.weight, 0, target)
             #self.weight += torch.matmul(input.T, label)
-        '''
+        """
 
     @torch.no_grad()
     def add_online2(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
         """Adds the input vectors scaled by the lr to the target prototype vectors."""
         iinput = torch.matmul(input, self.weight)
         predictions = functional.cos_similarity(iinput, self.classes.weight)
-        #print(predictions[0][target.item()])
-        #print(predictions[0][target.item()])
+        # print(predictions[0][target.item()])
+        # print(predictions[0][target.item()])
         top_two_pred = predictions.topk(2)
         print(abs(top_two_pred[0][0][0].item() - top_two_pred[0][0][1].item()))
 
         if np.argmax(predictions).item() != target.item():
-            if predictions[0][target.item()].item() < 0.7 or abs(top_two_pred[0][0][0].item() - top_two_pred[0][0][1].item()) > 0.1:
+            if (
+                predictions[0][target.item()].item() < 0.7
+                or abs(top_two_pred[0][0][0].item() - top_two_pred[0][0][1].item())
+                > 0.1
+            ):
                 label = torch.index_select(self.classes.weight, 0, target)
                 self.weight += torch.matmul(input.T, label)
         else:
             if predictions[0][target.item()].item() < 0.5:
-                if abs(top_two_pred[0][0][0].item() - top_two_pred[0][0][1].item()) > 0.1:
+                if (
+                    abs(top_two_pred[0][0][0].item() - top_two_pred[0][0][1].item())
+                    > 0.1
+                ):
                     label = torch.index_select(self.classes.weight, 0, target)
                     self.weight += torch.matmul(input.T, label)
-            '''
+            """
             if np.argmax(predictions).item() != target.item():
                 #print(predictions[0][target.item()])
                 label = torch.index_select(self.classes.weight, 0, target)
@@ -294,7 +294,7 @@ class MemoryModel(nn.Module):
                 self.weight += torch.matmul(input.T, label)
 
                 print(predictions[0][target.item()])
-                '''
+                """
 
     def add_online3(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
         iinput = torch.matmul(input, self.weight)

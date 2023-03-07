@@ -20,16 +20,21 @@ print("Using {} device".format(device))
 
 DIMENSIONS = 10000
 method = "MemoryModel"
-BATCH_SIZE = 1
+BATCH_SIZE = 1024
 
 
 class Encoder(nn.Module):
     def __init__(self, size):
         super(Encoder, self).__init__()
-        self.proj = embeddings.Projection(size, DIMENSIONS)
+        self.keys = embeddings.Random(size, DIMENSIONS)
+        self.values = embeddings.Level(size, DIMENSIONS)
+
+        # self.proj = embeddings.Projection(size, DIMENSIONS)
 
     def forward(self, x):
-        sample_hv = self.proj(x).sign()
+        sample_hv = torchhd.hash_table(self.keys.weight, self.values(x))
+
+        # sample_hv = self.proj(x).sign()
         return torchhd.hard_quantize(sample_hv)
 
 
@@ -71,7 +76,7 @@ def experiment():
     train_loader = data.DataLoader(train, batch_size=BATCH_SIZE, shuffle=True)
     test_loader = data.DataLoader(test, batch_size=BATCH_SIZE)
 
-    model = Centroid(DIMENSIONS, num_classes)
+    model = MemoryModel(DIMENSIONS, num_classes, type='hashmap')
 
     encode = Encoder(train[0][0].size(-1))
     encode = encode.to(device)
@@ -84,7 +89,7 @@ def experiment():
 
             samples_hv = encode(samples)
             # print("labels", labels)
-            model.add_online(samples_hv, labels)
+            model.add(samples_hv, labels)
             # if count == 10:
             # break
             count += 1

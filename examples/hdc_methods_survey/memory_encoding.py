@@ -83,7 +83,7 @@ def experiment(DIMENSIONS=10000, method="MemoryModel", filename="exp"):
                     labels = labels.to(device)
 
                     samples_hv = encode(samples)
-                    model.add_online(samples_hv, labels)
+                    model.add(samples_hv, labels)
 
             accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
