@@ -7,6 +7,9 @@ from tqdm import tqdm
 import torch.utils.data as data
 import json
 import os
+import sys
+
+sys.path.insert(0, "../../")
 import torchhd
 from torchhd import embeddings
 from torchhd.models import Centroid
@@ -14,14 +17,19 @@ from torchhd.datasets import UCIClassificationBenchmark
 import numpy as np
 torch.manual_seed(20)
 
-BATCH_SIZE = 1
-
 device = "cpu"
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # print("Using {} device".format(device))
 
+BATCH_SIZE = 1
 
-def experiment(DIMENSIONS=10000, method="DensityEncodingOnline", filename="exp"):
+
+def experiment(
+    DIMENSIONS=10000,
+    method="SinusoidProjectionOnlineIterative",
+    epochs=5,
+    filename="exp",
+):
     def create_min_max_normalize(min, max):
         def normalize(input):
             return torch.nan_to_num((input - min) / (max - min))
@@ -31,7 +39,7 @@ def experiment(DIMENSIONS=10000, method="DensityEncodingOnline", filename="exp")
     class Encoder(nn.Module):
         def __init__(self, size):
             super(Encoder, self).__init__()
-            self.embed = embeddings.Density(size, DIMENSIONS)
+            self.embed = embeddings.Sinusoid(size, DIMENSIONS)
             self.flatten = torch.nn.Flatten()
 
         def forward(self, x):
@@ -73,22 +81,23 @@ def experiment(DIMENSIONS=10000, method="DensityEncodingOnline", filename="exp")
 
         model = Centroid(DIMENSIONS, num_classes)
         model = model.to(device)
+        t = time.time()
 
         added_classes = {}
         wrong_inferred = {}
 
-        t = time.time()
-        with torch.no_grad():
-            for samples, labels in tqdm(train_loader, desc="Training"):
-                samples = samples.to(device)
-                labels = labels.to(device)
+        for i in range(epochs):
+            with torch.no_grad():
+                for samples, labels in tqdm(train_loader, desc="Training"):
+                    samples = samples.to(device)
+                    labels = labels.to(device)
 
-                samples_hv = encode(samples)
-                model.add_online(samples_hv, labels)
-                if labels.item() not in added_classes:
-                    added_classes[labels.item()] = 1
-                else:
-                    added_classes[labels.item()] += 1
+                    samples_hv = encode(samples)
+                    model.add_online2(samples_hv, labels)
+                    if labels.item() not in added_classes:
+                        added_classes[labels.item()] = 1
+                    else:
+                        added_classes[labels.item()] += 1
 
         accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
@@ -150,6 +159,7 @@ def experiment(DIMENSIONS=10000, method="DensityEncodingOnline", filename="exp")
                 outfile.seek(0)
                 # convert back to json.
                 json.dump(file_data, outfile, indent=4)
+
         with open(results_file, "a", newline="") as file:
             writer = csv.writer(file)
             writer.writerow(

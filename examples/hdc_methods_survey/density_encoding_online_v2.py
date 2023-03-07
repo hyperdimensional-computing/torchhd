@@ -12,9 +12,9 @@ from torchhd import embeddings
 from torchhd.models import Centroid
 from torchhd.datasets import UCIClassificationBenchmark
 import numpy as np
-torch.manual_seed(20)
 
 BATCH_SIZE = 1
+torch.manual_seed(20)
 
 device = "cpu"
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -84,7 +84,7 @@ def experiment(DIMENSIONS=10000, method="DensityEncodingOnline", filename="exp")
                 labels = labels.to(device)
 
                 samples_hv = encode(samples)
-                model.add_online(samples_hv, labels)
+                model.add_online2(samples_hv, labels)
                 if labels.item() not in added_classes:
                     added_classes[labels.item()] = 1
                 else:

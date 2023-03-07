@@ -7,21 +7,25 @@ from tqdm import tqdm
 import torch.utils.data as data
 import json
 import os
+import sys
+torch.manual_seed(20)
+
+sys.path.insert(0, "../../")
 import torchhd
 from torchhd import embeddings
 from torchhd.models import Centroid
 from torchhd.datasets import UCIClassificationBenchmark
 import numpy as np
-torch.manual_seed(20)
-
-BATCH_SIZE = 1
 
 device = "cpu"
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# print("Using {} device".format(device))
+print("Using {} device".format(device))
+BATCH_SIZE = 1
 
 
-def experiment(DIMENSIONS=10000, method="DensityEncodingOnline", filename="exp"):
+def experiment(
+    DIMENSIONS=10000, method="HashmapProjectionOnline", levels=100, filename="exp"
+):
     def create_min_max_normalize(min, max):
         def normalize(input):
             return torch.nan_to_num((input - min) / (max - min))
@@ -29,14 +33,15 @@ def experiment(DIMENSIONS=10000, method="DensityEncodingOnline", filename="exp")
         return normalize
 
     class Encoder(nn.Module):
-        def __init__(self, size):
+        def __init__(self, size, levels):
             super(Encoder, self).__init__()
-            self.embed = embeddings.Density(size, DIMENSIONS)
+            self.keys = embeddings.Random(size, DIMENSIONS)
+            self.values = embeddings.Level(levels, DIMENSIONS)
             self.flatten = torch.nn.Flatten()
 
         def forward(self, x):
             x = self.flatten(x)
-            sample_hv = self.embed(x).sign()
+            sample_hv = torchhd.hash_table(self.keys.weight, self.values(x))
             return torchhd.hard_quantize(sample_hv)
 
     benchmark = UCIClassificationBenchmark("../data", download=True)
@@ -67,8 +72,7 @@ def experiment(DIMENSIONS=10000, method="DensityEncodingOnline", filename="exp")
             dataset.train, batch_size=BATCH_SIZE, shuffle=True
         )
         test_loader = data.DataLoader(dataset.test, batch_size=BATCH_SIZE)
-
-        encode = Encoder(dataset.train[0][0].size(-1))
+        encode = Encoder(dataset.train[0][0].size(-1), levels)
         encode = encode.to(device)
 
         model = Centroid(DIMENSIONS, num_classes)
@@ -84,7 +88,7 @@ def experiment(DIMENSIONS=10000, method="DensityEncodingOnline", filename="exp")
                 labels = labels.to(device)
 
                 samples_hv = encode(samples)
-                model.add_online(samples_hv, labels)
+                model.add_online2(samples_hv, labels)
                 if labels.item() not in added_classes:
                     added_classes[labels.item()] = 1
                 else:
