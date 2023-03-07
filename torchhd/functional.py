@@ -717,9 +717,6 @@ def permute(input: VSATensor, *, shifts=1) -> VSATensor:
 
 
 class create_random_permute(torch.nn.Module):
-    forward_indices: LongTensor
-    backward_indices: LongTensor
-
     r"""Creates random permutation functions.
 
     Args:
@@ -743,6 +740,9 @@ class create_random_permute(torch.nn.Module):
                 [ 1.,  1.,  1., -1., -1.,  1., -1.,  1.,  1.,  1.]])
 
     """
+
+    forward_indices: LongTensor
+    backward_indices: LongTensor
 
     def __init__(self, dim: int) -> None:
         super().__init__()
