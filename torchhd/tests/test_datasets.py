@@ -133,7 +133,7 @@ dataset_metadata = {
 }
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session", autouse=True)
 def cleandir():
     if os.path.isdir("./data"):
         shutil.rmtree("./data")
@@ -181,7 +181,7 @@ class TestDataset:
             assert all_metrics[dataset.name][0] == 0.5
 
     @pytest.mark.parametrize("dataset_name", dataset_names)
-    def test_datasets_dowload(self, cleandir, dataset_name):
+    def test_datasets_dowload(self, dataset_name):
         dataset_class = getattr(torchhd.datasets, dataset_name)
 
         dataset = dataset_class("./data", download=True)
