@@ -26,6 +26,7 @@ BATCH_SIZE = 1
 # {0: 24720, 1: 7841}
 # Testing accuracy of 73.558%
 
+
 class Encoder(nn.Module):
     def __init__(self, size, levels):
         super(Encoder, self).__init__()
@@ -45,6 +46,7 @@ def create_min_max_normalize(min, max):
 
     return normalize
 
+
 def normalize(w, eps=1e-12) -> None:
     """Transforms all the class prototype vectors into unit vectors.
 
@@ -54,7 +56,6 @@ def normalize(w, eps=1e-12) -> None:
     norms = w.norm(dim=1, keepdim=True)
     norms.clamp_(min=eps)
     w.div_(norms)
-
 
 
 def experiment():
@@ -71,7 +72,7 @@ def experiment():
     train.transform = transform
     test.transform = transform
 
-    batch = (len(train))
+    batch = len(train)
     print(batch)
 
     # Set up data loaders
@@ -97,14 +98,13 @@ def experiment():
     count = 0
     error = 0
     with torch.no_grad():
-
         for samples, labels in tqdm(test_loader, desc="Testing"):
             samples = samples.to(device)
             labels = labels.to(device)
 
             input = proj(samples)
             input = torchhd.hard_quantize(input)
-            a = torch.matmul(input,res)
+            a = torch.matmul(input, res)
 
             print(torchhd.dot_similarity(a, m.classes.weight))
             print(m.classes)
@@ -114,7 +114,7 @@ def experiment():
             else:
                 error += 1
             break
-    print("Accuracy", count/(count+error))
+    print("Accuracy", count / (count + error))
     '''
     num_models = 1
     models = []
@@ -212,5 +212,6 @@ def experiment():
     print(added_classes)
     print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
     '''
+
 
 experiment()

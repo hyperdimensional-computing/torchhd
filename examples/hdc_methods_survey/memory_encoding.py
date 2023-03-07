@@ -41,7 +41,6 @@ def experiment(DIMENSIONS=10000, method="MemoryModel", filename="exp"):
             sample_hv = self.proj(x).sign()
             return torchhd.hard_quantize(sample_hv)
 
-
     benchmark = UCIClassificationBenchmark("../data", download=True)
     results_file = "results/results" + str(time.time()) + ".csv"
     with open(results_file, "w", newline="") as file:
@@ -52,8 +51,7 @@ def experiment(DIMENSIONS=10000, method="MemoryModel", filename="exp"):
 
     for dataset in benchmark.datasets():
         # print(dataset.name)
-        if dataset.name[:4] > 'ConnB':
-
+        if dataset.name[:4] > "ConnB":
             # Number of features in the dataset.
             num_feat = dataset.train[0][0].size(-1)
             # Number of classes in the dataset.
@@ -102,7 +100,10 @@ def experiment(DIMENSIONS=10000, method="MemoryModel", filename="exp"):
                     accuracy.update(outputs.cpu(), labels)
 
                 op = "r+"
-                if os.path.exists("results/missclassified" + filename + ".json") == False:
+                if (
+                    os.path.exists("results/missclassified" + filename + ".json")
+                    == False
+                ):
                     op = "x+"
 
                 with open("results/missclassified" + filename + ".json", op) as outfile:
