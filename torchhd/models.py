@@ -194,7 +194,7 @@ class MemoryModel(nn.Module):
     weight: Tensor
 
     def __init__(
-        self, in_features: int, out_features: int, device=None, dtype=None
+        self, in_features: int, out_features: int, type='projection', device=None, dtype=None
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
         super(MemoryModel, self).__init__()
@@ -202,7 +202,15 @@ class MemoryModel(nn.Module):
         self.in_features = in_features
         self.out_features = out_features
 
-        self.classes = torchhd.embeddings.Projection(in_features, out_features)
+        if type == 'projection':
+            self.classes = torchhd.embeddings.Projection(in_features, out_features)
+        elif type == 'sinusoid':
+            self.classes = torchhd.embeddings.Sinusoid(in_features, out_features)
+        elif type == 'density':
+            self.classes = torchhd.embeddings.Density(in_features, out_features)
+        elif type == 'hashmap':
+            self.classes = torchhd.embeddings.Random(out_features, in_features)
+
         self.weight = torch.empty((in_features, in_features), **factory_kwargs)
 
     def forward(self, input: Tensor, dot: bool = False) -> Tensor:
@@ -240,6 +248,13 @@ class MemoryModel(nn.Module):
         if np.argmax(predictions).item() != target.item():
             label = torch.index_select(self.classes.weight, 0, target)
             self.weight += torch.matmul(input.T, label)
+        return
+        '''
+        else:
+            if predictions.max(1).values.item() < 0.8:
+                self.weight.index_add_(0, target, input)
+            return
+        '''
         '''
         else:
             top_two_pred = predictions.topk(2)
