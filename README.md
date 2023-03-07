@@ -21,7 +21,7 @@ Torchhd is a Python library for *Hyperdimensional Computing* (also known as *Vec
 
 ## Installation
 
-Torchhd is hosted on [PyPi](https://pypi.org/project/torch-hd/) and [Anaconda](https://anaconda.org/torchhd/torchhd). Use one of the following commands to install:
+Torchhd is hosted on [PyPi](https://pypi.org/project/torch-hd/) and [Anaconda](https://anaconda.org/torchhd/torchhd). First, install PyTorch using their [installation instructions](https://pytorch.org/get-started/locally/). Then, use one of the following commands to install Torchhd:
 
 ```bash
 pip install torch-hd
