@@ -193,7 +193,12 @@ class MemoryModel(nn.Module):
     weight: Tensor
 
     def __init__(
-        self, in_features: int, out_features: int, type='projection', device=None, dtype=None
+        self,
+        in_features: int,
+        out_features: int,
+        type="projection",
+        device=None,
+        dtype=None,
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
         super(MemoryModel, self).__init__()
@@ -201,13 +206,13 @@ class MemoryModel(nn.Module):
         self.in_features = in_features
         self.out_features = out_features
 
-        if type == 'projection':
+        if type == "projection":
             self.classes = torchhd.embeddings.Projection(in_features, out_features)
-        elif type == 'sinusoid':
+        elif type == "sinusoid":
             self.classes = torchhd.embeddings.Sinusoid(in_features, out_features)
-        elif type == 'density':
+        elif type == "density":
             self.classes = torchhd.embeddings.Density(in_features, out_features)
-        elif type == 'hashmap':
+        elif type == "hashmap":
             self.classes = torchhd.embeddings.Random(out_features, in_features)
 
         self.weight = torch.empty((in_features, in_features), **factory_kwargs)

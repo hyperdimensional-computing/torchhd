@@ -76,7 +76,7 @@ def experiment():
     train_loader = data.DataLoader(train, batch_size=BATCH_SIZE, shuffle=True)
     test_loader = data.DataLoader(test, batch_size=BATCH_SIZE)
 
-    model = MemoryModel(DIMENSIONS, num_classes, type='hashmap')
+    model = MemoryModel(DIMENSIONS, num_classes, type="hashmap")
 
     encode = Encoder(train[0][0].size(-1))
     encode = encode.to(device)
