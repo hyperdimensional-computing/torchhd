@@ -353,7 +353,7 @@ class DatasetFourFold(CollectionDataset):
     """
 
     # Number of folds for cross validation
-    num_folds = 0
+    num_folds = 4
 
     def __init__(
         self,
