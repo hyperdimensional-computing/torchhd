@@ -206,7 +206,7 @@ class MemoryModel(nn.Module):
         self.weight = torch.empty((in_features, in_features), **factory_kwargs)
 
     def forward(self, input: Tensor, dot: bool = False) -> Tensor:
-        input = torch.matmul(input, self.weight)
+        input = torch.matmul(input, self.weight).sign()
         if dot:
             return functional.dot_similarity(input, self.classes.weight)
 
@@ -235,7 +235,7 @@ class MemoryModel(nn.Module):
     def add_online(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
         """Adds the input vectors scaled by the lr to the target prototype vectors."""
         iinput = torch.matmul(input, self.weight)
-        predictions = functional.dot_similarity(iinput, self.classes.weight)
+        predictions = functional.cos_similarity(iinput, self.classes.weight)
 
         if np.argmax(predictions).item() != target.item():
             label = torch.index_select(self.classes.weight, 0, target)
