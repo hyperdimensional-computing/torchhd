@@ -25,6 +25,7 @@ setup(
         "numpy",
         "requests",
         "tqdm",
+        "openpyxl",
     ],
     packages=find_packages(exclude=["docs", "torchhd.tests", "examples"]),
     python_requires=">=3.6, <4",

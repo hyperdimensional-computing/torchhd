@@ -23,6 +23,7 @@ requirements:
     - scipy
     - pandas
     - requests
+    - openpyxl
     - tqdm
 
 test:

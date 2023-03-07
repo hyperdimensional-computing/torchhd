@@ -331,3 +331,24 @@ class TestRandomPermute:
         perm = functional.create_random_permute(100)
         perm = perm.to(device)
         assert perm(x).device.type == device.type
+
+
+class TestResonator:
+    def test_shape(self):
+        X = functional.random(5, 100)
+        Y = functional.random(5, 100)
+        Z = functional.random(5, 100)
+        domains = torch.stack((X, Y, Z), dim=0)
+
+        x_hat = functional.multiset(X)
+        y_hat = functional.multiset(Y)
+        z_hat = functional.multiset(Z)
+        estimates = torch.stack((x_hat, y_hat, z_hat), dim=0)
+
+        # Create the combined symbol
+        s = X[0].bind(Y[1]).bind(Z[3])
+
+        # resonator step
+        new_estimates = functional.resonator(s, estimates, domains)
+        assert new_estimates.shape == estimates.shape
+        assert new_estimates.dtype == estimates.dtype
