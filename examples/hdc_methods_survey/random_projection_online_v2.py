@@ -23,7 +23,7 @@ BATCH_SIZE = 1
 torch.manual_seed(20)
 
 
-def experiment(DIMENSIONS=10000, method="RandomProjectionOnline", filename="exp"):
+def experiment(DIMENSIONS=10000, method="RandomProjectionOnlineV2", filename="exp"):
     def create_min_max_normalize(min, max):
         def normalize(input):
             return torch.nan_to_num((input - min) / (max - min))

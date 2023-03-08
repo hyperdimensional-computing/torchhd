@@ -27,7 +27,7 @@ BATCH_SIZE = 1
 
 def experiment(
     DIMENSIONS=10000,
-    method="SinusoidProjectionOnlineIterative",
+    method="SinusoidProjectionOnline",
     epochs=5,
     filename="exp",
 ):
@@ -87,18 +87,17 @@ def experiment(
         added_classes = {}
         wrong_inferred = {}
 
-        for i in range(epochs):
-            with torch.no_grad():
-                for samples, labels in tqdm(train_loader, desc="Training"):
-                    samples = samples.to(device)
-                    labels = labels.to(device)
+        with torch.no_grad():
+            for samples, labels in tqdm(train_loader, desc="Training"):
+                samples = samples.to(device)
+                labels = labels.to(device)
 
-                    samples_hv = encode(samples)
-                    model.add_online(samples_hv, labels)
-                    if labels.item() not in added_classes:
-                        added_classes[labels.item()] = 1
-                    else:
-                        added_classes[labels.item()] += 1
+                samples_hv = encode(samples)
+                model.add_online(samples_hv, labels)
+                if labels.item() not in added_classes:
+                    added_classes[labels.item()] = 1
+                else:
+                    added_classes[labels.item()] += 1
 
         accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 

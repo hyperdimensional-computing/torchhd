@@ -21,7 +21,7 @@ device = "cpu"
 # print("Using {} device".format(device))
 
 
-def experiment(DIMENSIONS=10000, method="DensityEncodingOnline", filename="exp"):
+def experiment(DIMENSIONS=10000, method="DensityEncodingOnlineV2", filename="exp"):
     def create_min_max_normalize(min, max):
         def normalize(input):
             return torch.nan_to_num((input - min) / (max - min))
