@@ -3,13 +3,14 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import csv
+
 file = "results/openlab.csv"
 data = pd.read_csv(file)
 accuracy = []
 first = True
 df = None
 
-methods = ['MemoryModel', 'MemoryModelOnline']
+methods = ["MemoryModel", "MemoryModelOnline"]
 df_new = {}
 l = 0
 for i in data["Method"].unique():
@@ -18,15 +19,15 @@ for i in data["Method"].unique():
         df.index = np.array(data[data["Method"] == i]["Name"])
         first = False
         l = len(df.index)
-        df_new['dataset'] = data[data["Method"] == i]['Name'].values
-        df_new['classes'] = data[data["Method"] == i]['Classes'].values
+        df_new["dataset"] = data[data["Method"] == i]["Name"].values
+        df_new["classes"] = data[data["Method"] == i]["Classes"].values
     else:
         print(i)
         print(len(data[data["Method"] == i]["Accuracy"]))
         df[i] = np.array(data[data["Method"] == i]["Accuracy"])
 
     if i in methods:
-        df_new[i] = data[data["Method"] == i]['Accuracy'].values
+        df_new[i] = data[data["Method"] == i]["Accuracy"].values
     accuracy.append(data[data["Method"] == i]["Accuracy"])
 
 with open("comparison.csv", "w") as outfile:
@@ -45,9 +46,9 @@ for index, (i, row) in enumerate(df.iterrows()):
     maxes = np.flatnonzero(row == np.max(row))
     for j in maxes:
         df2.iloc[index][j] = 1
-    if df.columns[np.argmax(row)] in ['MemoryModel','MemoryModelOnline']:
+    if df.columns[np.argmax(row)] in ["MemoryModel", "MemoryModelOnline"]:
         print("MEMORY")
-    if row.name == 'HayesRoth':
+    if row.name == "HayesRoth":
         print(row)
     print(row.name, np.max(row), np.argmax(row), df.columns[np.argmax(row)])
 
