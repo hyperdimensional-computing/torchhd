@@ -5,7 +5,7 @@ import torch.utils.data as data
 import time
 from torchhd.datasets import UCIClassificationBenchmark
 
-torch.manual_seed(20)
+torch.manual_seed(0)
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
 from tqdm import tqdm
@@ -24,17 +24,26 @@ BATCH_SIZE = 1024
 
 
 class Encoder(nn.Module):
-    def __init__(self, size):
+    def __init__(self, size, type):
         super(Encoder, self).__init__()
-        self.keys = embeddings.Random(size, DIMENSIONS)
-        self.values = embeddings.Level(size, DIMENSIONS)
-
+        self.type = type
+        self.keys = None
+        if self.type == 'hashmap':
+            self.keys = embeddings.Random(size, DIMENSIONS)
+            self.values = embeddings.Level(size, DIMENSIONS)
+        elif self.type == 'projection':
+            self.proj = embeddings.Projection(size, DIMENSIONS)
+        elif self.type == 'sinusoid':
+            self.proj = embeddings.Sinusoid(size, DIMENSIONS)
+        elif self.type == 'density':
+            self.proj = embeddings.Density(size, DIMENSIONS)
         # self.proj = embeddings.Projection(size, DIMENSIONS)
 
     def forward(self, x):
-        sample_hv = torchhd.hash_table(self.keys.weight, self.values(x))
-
-        # sample_hv = self.proj(x).sign()
+        if self.type == 'hashmap':
+            sample_hv = torchhd.hash_table(self.keys.weight, self.values(x))
+        else:
+            sample_hv = self.proj(x).sign()
         return torchhd.hard_quantize(sample_hv)
 
 
@@ -57,8 +66,8 @@ def normalize(w, eps=1e-12) -> None:
 
 
 def experiment():
-    train = torchhd.datasets.Yeast("../../data", download=True, train=True, fold=1)
-    test = torchhd.datasets.Yeast("../../data", download=True, train=False, fold=1)
+    train = torchhd.datasets.HeartVa("../../data", download=True, train=True, fold=0)
+    test = torchhd.datasets.HeartVa("../../data", download=True, train=False, fold=0)
     added = 0
     # test = torchhd.datasets.AcuteInflammation("../../data", download=True, train=False)
     # Number of features in the dataset.
@@ -75,39 +84,41 @@ def experiment():
     # Set up data loaders
     train_loader = data.DataLoader(train, batch_size=BATCH_SIZE, shuffle=True)
     test_loader = data.DataLoader(test, batch_size=BATCH_SIZE)
+    types = ['projection','sinusoid','hashmap','density']
 
-    model = MemoryModel(DIMENSIONS, num_classes, type='hashmap')
+    for t in types:
+        model = MemoryModel(DIMENSIONS, num_classes, type=t)
 
-    encode = Encoder(train[0][0].size(-1))
-    encode = encode.to(device)
+        encode = Encoder(train[0][0].size(-1), t)
+        encode = encode.to(device)
 
-    count = 0
-    with torch.no_grad():
-        for samples, labels in tqdm(train_loader, desc="Testing"):
-            samples = samples.to(device)
-            labels = labels.to(device)
+        count = 0
+        with torch.no_grad():
+            for samples, labels in tqdm(train_loader, desc="Testing"):
+                samples = samples.to(device)
+                labels = labels.to(device)
 
-            samples_hv = encode(samples)
-            # print("labels", labels)
-            model.add(samples_hv, labels)
-            # if count == 10:
-            # break
-            count += 1
-        model.normalize()
+                samples_hv = encode(samples)
+                # print("labels", labels)
+                model.add(samples_hv, labels)
+                # if count == 10:
+                # break
+                count += 1
+            model.normalize()
 
-    accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
+        accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
-    with torch.no_grad():
-        for samples, labels in tqdm(test_loader, desc="Testing"):
-            samples = samples.to(device)
-            labels = labels.to(device)
+        with torch.no_grad():
+            for samples, labels in tqdm(test_loader, desc="Testing"):
+                samples = samples.to(device)
+                labels = labels.to(device)
 
-            samples_hv = encode(samples)
-            outputs = model(samples_hv, dot=True)
+                samples_hv = encode(samples)
+                outputs = model(samples_hv, dot=True)
 
-            accuracy.update(outputs.cpu(), labels)
-    print("Added samples ", added)
-    print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
+                accuracy.update(outputs.cpu(), labels)
+
+        print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
 
 
 experiment()
