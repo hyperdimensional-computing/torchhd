@@ -55,6 +55,8 @@ class Centroid(nn.Module):
         self.out_features = out_features
         self.similarity_sum = 0
         self.count = 0
+        self.error_similarity_sum = 0
+        self.error_count = 0
         weight = torch.empty((out_features, in_features), **factory_kwargs)
         self.weight = Parameter(weight)
         self.reset_parameters()
@@ -136,9 +138,14 @@ class Centroid(nn.Module):
         # cancel update if all predictions were correct
         self.similarity_sum += logit.max(1).values.item()
         self.count += 1
+
+        if self.error_count == 0:
+            val = self.similarity_sum/self.count
+        else:
+            val = (self.error_similarity_sum/self.error_count)-(self.error_similarity_sum/self.error_count)*0.01
         #print(self.similarity_sum/self.count)
         if is_wrong.sum().item() == 0:
-            if logit.max(1).values.item() < 0.8:
+            if logit.max(1).values.item() < val:
                 self.weight.index_add_(0, target, input)
             return
         # print(input)
@@ -147,12 +154,30 @@ class Centroid(nn.Module):
         input = input[is_wrong]
         target = target[is_wrong]
         pred = pred[is_wrong]
+        self.error_count += 1
+        self.error_similarity_sum += logit.max(1).values.item()
+        #print('Total',self.similarity_sum / self.count)
+        #print('Err',self.error_similarity_sum/self.error_count)
 
         alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
-        alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1.0
-
         self.weight.index_add_(0, target, lr * alpha1 * input)
+
+
+        alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1.0
         self.weight.index_add_(0, pred, lr * alpha2 * input)
+
+        '''
+
+        for i in range(self.out_features):
+            if i != target.item():
+                if i in logit.topk(2).indices and abs(logit[0][pred].item()-logit[0][i].item()) > 7:
+                #print(pred.unsqueeze(1), torch.tensor([i]).unsqueeze(1))
+                    #print(logit[0][i].item(), self.similarity_sum/self.count, abs(logit[0][pred].item()-logit[0][i].item()))
+                    alpha2 = logit.gather(1, torch.tensor([i]).unsqueeze(1)) - 1.0
+                    self.weight.index_add_(0, torch.tensor(i), lr * alpha2 * input)
+'''
+
+
 
     @torch.no_grad()
     def add_online3(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
