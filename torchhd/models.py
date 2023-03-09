@@ -92,7 +92,8 @@ class Centroid(nn.Module):
         is_wrong = target != pred
         # print(logit)
         # print(logit.argmax(1))
-
+        self.similarity_sum += logit.max(1).values.item()
+        self.count += 1
         select = torch.empty(10000, dtype=torch.bool)
         select.bernoulli_(0.1)
         result = torch.where(select, -1, +1).to()
@@ -106,7 +107,8 @@ class Centroid(nn.Module):
         input = input[is_wrong]
         target = target[is_wrong]
         pred = pred[is_wrong]
-
+        self.error_count += 1
+        self.error_similarity_sum += logit.max(1).values.item()
         alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
         alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1.0
 
@@ -142,9 +144,7 @@ class Centroid(nn.Module):
         if self.error_count == 0:
             val = self.similarity_sum / self.count
         else:
-            val = (self.error_similarity_sum / self.error_count) - (
-                self.error_similarity_sum / self.error_count
-            ) * 0.01
+            val = (self.error_similarity_sum / self.error_count)
         # print(self.similarity_sum/self.count)
 
         if is_wrong.sum().item() == 0:
@@ -157,6 +157,7 @@ class Centroid(nn.Module):
         input = input[is_wrong]
         target = target[is_wrong]
         pred = pred[is_wrong]
+
         self.error_count += 1
         self.error_similarity_sum += logit.max(1).values.item()
         # print('Total',self.similarity_sum / self.count)
@@ -286,17 +287,9 @@ class MemoryModel(nn.Module):
         self.in_features = in_features
         self.out_features = out_features
 
-        if type == "projection":
-            self.classes = torchhd.embeddings.Projection(in_features, out_features)
-        elif type == "sinusoid":
-            self.classes = torchhd.embeddings.Sinusoid(in_features, out_features)
-        elif type == "density":
-            self.classes = torchhd.embeddings.Density(in_features, out_features)
-        elif type == "hashmap":
-            self.classes = torchhd.embeddings.Random(out_features, in_features)
-        """
+        self.classes = torchhd.embeddings.Projection(in_features, out_features)
         self.weight = torch.empty((in_features, in_features), **factory_kwargs)
-        """
+
 
     def forward(self, input: Tensor, dot: bool = False) -> Tensor:
         input = torch.matmul(input, self.weight).sign()

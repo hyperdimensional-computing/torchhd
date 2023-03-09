@@ -25,7 +25,7 @@ BATCH_SIZE = 1
 
 def experiment(
     DIMENSIONS=10000,
-    method="SinusoidProjectionOnlineIterative",
+    method="SinusoidProjectionOnlineIterativeV2",
     epochs=3,
     filename="exp",
 ):
@@ -92,7 +92,7 @@ def experiment(
                     labels = labels.to(device)
 
                     samples_hv = encode(samples)
-                    model.add_online(samples_hv, labels)
+                    model.add_online2(samples_hv, labels)
                     if labels.item() not in added_classes:
                         added_classes[labels.item()] = 1
                     else:
