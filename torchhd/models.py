@@ -144,7 +144,7 @@ class Centroid(nn.Module):
         if self.error_count == 0:
             val = self.similarity_sum / self.count
         else:
-            val = (self.error_similarity_sum / self.error_count)
+            val = self.error_similarity_sum / self.error_count
         # print(self.similarity_sum/self.count)
 
         if is_wrong.sum().item() == 0:
@@ -289,7 +289,6 @@ class MemoryModel(nn.Module):
 
         self.classes = torchhd.embeddings.Projection(in_features, out_features)
         self.weight = torch.empty((in_features, in_features), **factory_kwargs)
-
 
     def forward(self, input: Tensor, dot: bool = False) -> Tensor:
         input = torch.matmul(input, self.weight).sign()

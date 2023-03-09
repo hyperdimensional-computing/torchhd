@@ -113,10 +113,7 @@ def experiment(DIMENSIONS=10000, method="MemoryModel", filename="exp"):
                 accuracy.update(outputs.cpu(), labels)
 
             op = "r+"
-            if (
-                os.path.exists("results/missclassified" + filename + ".json")
-                == False
-            ):
+            if os.path.exists("results/missclassified" + filename + ".json") == False:
                 op = "x+"
 
             with open("results/missclassified" + filename + ".json", op) as outfile:
