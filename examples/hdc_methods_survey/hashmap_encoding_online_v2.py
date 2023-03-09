@@ -25,7 +25,7 @@ BATCH_SIZE = 1
 
 
 def experiment(
-    DIMENSIONS=10000, method="HashmapProjectionOnline", levels=100, filename="exp"
+    DIMENSIONS=10000, method="HashmapProjectionOnlineV2", levels=100, filename="exp"
 ):
     def create_min_max_normalize(min, max):
         def normalize(input):
