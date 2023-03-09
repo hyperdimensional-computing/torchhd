@@ -136,7 +136,7 @@ class Centroid(nn.Module):
         # cancel update if all predictions were correct
         self.similarity_sum += logit.max(1).values.item()
         self.count += 1
-        #print(self.similarity_sum/self.count)
+        # print(self.similarity_sum/self.count)
         if is_wrong.sum().item() == 0:
             if logit.max(1).values.item() < 0.8:
                 self.weight.index_add_(0, target, input)
@@ -180,7 +180,7 @@ class Centroid(nn.Module):
         if is_wrong.sum().item() == 0:
             if logit.max(1).values.item() < 0.8:
                 alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
-                #print(alpha1)
+                # print(alpha1)
                 self.weight.index_add_(0, target, lr * alpha1 * input)
             return
         # print(input)
@@ -269,9 +269,9 @@ class MemoryModel(nn.Module):
             self.classes = torchhd.embeddings.Density(in_features, out_features)
         elif type == "hashmap":
             self.classes = torchhd.embeddings.Random(out_features, in_features)
-        '''
+        """
         self.weight = torch.empty((in_features, in_features), **factory_kwargs)
-        '''
+        """
 
     def forward(self, input: Tensor, dot: bool = False) -> Tensor:
         input = torch.matmul(input, self.weight).sign()
