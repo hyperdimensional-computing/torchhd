@@ -86,8 +86,8 @@ def experiment():
     train_loader = data.DataLoader(train, batch_size=BATCH_SIZE, shuffle=True)
     test_loader = data.DataLoader(test, batch_size=BATCH_SIZE)
 
-    #types = ['projection','sinusoid','hashmap','density']
-    types = ['density']
+    # types = ['projection','sinusoid','hashmap','density']
+    types = ["density"]
 
     for t in types:
         model = Centroid(DIMENSIONS, num_classes)
