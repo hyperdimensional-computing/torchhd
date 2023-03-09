@@ -20,7 +20,7 @@ print("Using {} device".format(device))
 
 DIMENSIONS = 10000
 method = "MemoryModel"
-BATCH_SIZE = 1024
+BATCH_SIZE = 1
 
 
 class Encoder(nn.Module):
@@ -66,8 +66,9 @@ def normalize(w, eps=1e-12) -> None:
 
 
 def experiment():
-    train = torchhd.datasets.HeartVa("../../data", download=True, train=True, fold=0)
-    test = torchhd.datasets.HeartVa("../../data", download=True, train=False, fold=0)
+    train = torchhd.datasets.Car("../../data", download=True, train=True, fold=0)
+    test = torchhd.datasets.Car("../../data", download=True, train=False, fold=0)
+
     added = 0
     # test = torchhd.datasets.AcuteInflammation("../../data", download=True, train=False)
     # Number of features in the dataset.
@@ -84,10 +85,10 @@ def experiment():
     # Set up data loaders
     train_loader = data.DataLoader(train, batch_size=BATCH_SIZE, shuffle=True)
     test_loader = data.DataLoader(test, batch_size=BATCH_SIZE)
-    types = ['projection','sinusoid','hashmap','density']
-
+    #types = ['projection','sinusoid','hashmap','density']
+    types = ['density']
     for t in types:
-        model = MemoryModel(DIMENSIONS, num_classes, type=t)
+        model = Centroid(DIMENSIONS, num_classes)
 
         encode = Encoder(train[0][0].size(-1), t)
         encode = encode.to(device)
@@ -100,7 +101,7 @@ def experiment():
 
                 samples_hv = encode(samples)
                 # print("labels", labels)
-                model.add(samples_hv, labels)
+                model.add_online2(samples_hv, labels)
                 # if count == 10:
                 # break
                 count += 1
