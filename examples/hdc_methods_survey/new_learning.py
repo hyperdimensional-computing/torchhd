@@ -28,19 +28,19 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
         self.type = type
         self.keys = None
-        if self.type == 'hashmap':
+        if self.type == "hashmap":
             self.keys = embeddings.Random(size, DIMENSIONS)
             self.values = embeddings.Level(size, DIMENSIONS)
-        elif self.type == 'projection':
+        elif self.type == "projection":
             self.proj = embeddings.Projection(size, DIMENSIONS)
-        elif self.type == 'sinusoid':
+        elif self.type == "sinusoid":
             self.proj = embeddings.Sinusoid(size, DIMENSIONS)
-        elif self.type == 'density':
+        elif self.type == "density":
             self.proj = embeddings.Density(size, DIMENSIONS)
         # self.proj = embeddings.Projection(size, DIMENSIONS)
 
     def forward(self, x):
-        if self.type == 'hashmap':
+        if self.type == "hashmap":
             sample_hv = torchhd.hash_table(self.keys.weight, self.values(x))
         else:
             sample_hv = self.proj(x).sign()
@@ -85,8 +85,10 @@ def experiment():
     # Set up data loaders
     train_loader = data.DataLoader(train, batch_size=BATCH_SIZE, shuffle=True)
     test_loader = data.DataLoader(test, batch_size=BATCH_SIZE)
+
     #types = ['projection','sinusoid','hashmap','density']
     types = ['density']
+
     for t in types:
         model = Centroid(DIMENSIONS, num_classes)
 
