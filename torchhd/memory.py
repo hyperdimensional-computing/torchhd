@@ -34,7 +34,6 @@ from torchhd.tensors.base import VSATensor
 
 __all__ = [
     "SparseDistributed",
-    "Hopfield",
     "hopfield",
     "modern_hopfield",
     "attention",
@@ -118,7 +117,7 @@ class SparseDistributed(nn.Module):
 
         Shapes:
             - Query: :math:`(*, d)`
-            - Result: :math:`(*, d)
+            - Result: :math:`(*, d)`
 
         """
         out_shape = query.shape
@@ -167,14 +166,16 @@ class SparseDistributed(nn.Module):
 
 
 def hopfield(query: Tensor, memory: Tensor, kappa: int = None) -> Tensor:
-    r"""Read value from Hopfield network at key most similar to the query.
+    r"""`Classical Hopfield network <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC346238/>`_
 
     Args:
         query (Tensor): The query vector for the memory lookup.
+        memory (Tensor): The items of memory for the memory lookup.
 
     Shapes:
         - Query: :math:`(*, d)`
-        - Result: :math:`(*, d)
+        - Memory: :math:`(n, d)`
+        - Result: :math:`(*, d)`
 
     Examples::
         >>> items = torchhd.random(6, 512)
@@ -201,91 +202,6 @@ def hopfield(query: Tensor, memory: Tensor, kappa: int = None) -> Tensor:
     return query @ product
 
 
-class Hopfield(nn.Module):
-    r"""`Classical Hopfield network <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC346238/>`_
-
-    Args:
-        vector_dim (int): The dimensionality of the vectors in the memory.
-        kappa (int, optional): The maximum count for each memory cell, values are clipped between [-kappa, kappa]. Default: no clipping.
-        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
-        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
-        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
-
-    Shapes:
-        - Memory: :math:`(d, d)`
-
-    Examples::
-        >>> items = torchhd.random(6, 512)
-        >>> hopfield = torchhd.memory.Hopfield(512)
-        >>> hopfield.write(items)
-        >>> read = hopfield.read(items).sign()
-        >>> torchhd.cosine_similarity(read, items)
-        tensor([[ 1.0000,  0.0156, -0.0039, -0.0742,  0.0000, -0.0195],
-                [ 0.0156,  1.0000, -0.0352, -0.0586,  0.0000, -0.0039],
-                [-0.0039, -0.0352,  1.0000,  0.0156,  0.0820, -0.0234],
-                [-0.0742, -0.0586,  0.0156,  1.0000, -0.0039,  0.0000],
-                [ 0.0000,  0.0000,  0.0820, -0.0039,  1.0000,  0.0195],
-                [-0.0195, -0.0039, -0.0234,  0.0000,  0.0195,  1.0000]])
-    """
-
-    vector_dim: int
-    memory: Tensor
-    kappa: Optional[int]
-
-    def __init__(
-        self,
-        vector_dim: int,
-        kappa: Optional[int] = None,
-        dtype=None,
-        device=None,
-        requires_grad=False,
-    ) -> None:
-        super().__init__()
-
-        self.vector_dim = vector_dim
-        self.kappa = kappa
-
-        memory = torch.zeros(
-            self.vector_dim, self.vector_dim, device=device, dtype=dtype
-        )
-        self.memory = nn.Parameter(memory, requires_grad)
-
-    def read(self, query: Tensor) -> Tensor:
-        r"""Read value from Hopfield network at key most similar to the query.
-
-        Args:
-            query (Tensor): The query vector for the memory lookup.
-
-        Shapes:
-            - Query: :math:`(*, d)`
-            - Result: :math:`(*, d)
-
-        """
-        return F.linear(query, self.memory)
-
-    @torch.no_grad()
-    def write(self, items: Tensor) -> Tensor:
-        r"""Write items to Hopfield Memory.
-
-        Args:
-            items (Tensor): The item vectors to write to memory.
-
-        Shapes:
-            - Items: :math:`(*, d)`
-
-        """
-
-        if items.dim() == 1:
-            items = items.unsqueeze(0)
-
-        # Add the outer product to memory
-        self.memory.add_(items.mT @ items)
-        torch.diagonal(self.memory).zero_()
-
-        if self.kappa is not None:
-            self.memory.clamp_(-self.kappa, self.kappa)
-
-
 def modern_hopfield(query: Tensor, memory: Tensor) -> Tensor:
     r"""`Modern Hopfield network <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC346238/>`_
 
@@ -298,7 +214,7 @@ def modern_hopfield(query: Tensor, memory: Tensor) -> Tensor:
     Shapes:
         - Query: :math:`(*, d)`
         - Memory: :math:`(n, d)`
-        - Result: :math:`(*, d)
+        - Result: :math:`(*, d)`
 
 
     Examples::
