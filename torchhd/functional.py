@@ -1221,7 +1221,7 @@ def ngrams(input: VSATensor, n: int = 3) -> VSATensor:
         \bigoplus_{i=0}^{m - n} \bigotimes_{j = 0}^{n - 1} \Pi^{n - j - 1}(V_{i + j})
 
     .. note::
-        For :math:`n=1` use :func:`~torchhd.functional.multiset` instead and for :math:`n=m` use :func:`~torchhd.functional.bind_sequence` instead.
+        For :math:`n=1` use :func:`~torchhd.multiset` instead and for :math:`n=m` use :func:`~torchhd.bind_sequence` instead.
 
     Args:
         input (VSATensor): The value hypervectors.

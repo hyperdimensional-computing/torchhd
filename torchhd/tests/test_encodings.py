@@ -140,7 +140,7 @@ class TestMultibind:
     def test_dtype(self, dtype):
         hv = torch.zeros(23, 1000, dtype=dtype).as_subclass(MAPTensor)
 
-        if dtype in {torch.float16, torch.bfloat16}:
+        if dtype in {torch.float16}:
             # torch.product is not implemented on CPU for these dtypes
             with pytest.raises(RuntimeError):
                 functional.multibind(hv)
@@ -287,7 +287,7 @@ class TestBindSequence:
     def test_dtype(self, dtype):
         hv = torch.zeros(23, 1000, dtype=dtype).as_subclass(MAPTensor)
 
-        if dtype in {torch.float16, torch.bfloat16}:
+        if dtype in {torch.float16}:
             # torch.product is not implemented on CPU for these dtypes
             with pytest.raises(RuntimeError):
                 functional.multibind(hv)
