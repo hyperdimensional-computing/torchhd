@@ -82,7 +82,7 @@ class Memory:
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random(len(letters), 10000)
+            >>> letters_hv = torchhd.random(len(letters), 10000)
             >>> memory.add(letters_hv[0], letters[0])
 
         """
@@ -213,7 +213,7 @@ class Multiset:
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random(len(letters), 10000)
+            >>> letters_hv = torchhd.random(len(letters), 10000)
             >>> M.add(letters_hv[0])
 
         """
@@ -274,7 +274,7 @@ class Multiset:
     def from_ngrams(cls, input: VSATensor, n=3):
         r"""Creates a multiset from the ngrams of a set of hypervectors.
 
-        See: :func:`~torchhd.functional.ngrams`.
+        See: :func:`~torchhd.ngrams`.
 
         Args:
             input (VSATensor): Set of hypervectors to convert in a multiset.
@@ -293,7 +293,7 @@ class Multiset:
     def from_tensor(cls, input: VSATensor):
         """Creates a multiset from a set of hypervectors.
 
-        See: :func:`~torchhd.functional.multiset`.
+        See: :func:`~torchhd.multiset`.
 
         Args:
             input (VSATensor): Set of hypervectors to convert in a multiset.
@@ -362,7 +362,7 @@ class HashTable:
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random(len(letters), 10000)
+            >>> letters_hv = torchhd.random(len(letters), 10000)
             >>> values = functional.random(2, 10000)
             >>> H.add(letters_hv[0], values[0])
 
@@ -457,15 +457,15 @@ class HashTable:
     def from_tensors(cls, keys: VSATensor, values: VSATensor):
         """Creates a hash table from a set of keys and values hypervectors.
 
-        See: :func:`~torchhd.functional.hash_table`.
+        See: :func:`~torchhd.hash_table`.
 
         Args:
             keys (VSATensor): Set of key hypervectors to add in the hash table.
             values (VSATensor): Set of value hypervectors to add in the hash table.
 
         Examples::
-            >>> letters_hv = functional.random(len(letters), 10000)
-            >>> values = functional.random(len(letters), 10000)
+            >>> letters_hv = torchhd.random(len(letters), 10000)
+            >>> values = torchhd.random(len(letters), 10000)
             >>> H = structures.HashTable.from_tensors(letters_hv, values)
 
         """
@@ -493,7 +493,7 @@ class BundleSequence:
         >>> S = structures.BundleSequence(10000)
 
         >>> letters = list(string.ascii_lowercase)
-        >>> letters_hv = functional.random(len(letters), 10000)
+        >>> letters_hv = torchhd.random(len(letters), 10000)
         >>> S = structures.BundleSequence(letters_hv[0], size=1)
 
     """
@@ -528,7 +528,7 @@ class BundleSequence:
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random(len(letters), 10000)
+            >>> letters_hv = torchhd.random(len(letters), 10000)
             >>> S.append(letters_hv[0])
 
         """
@@ -656,13 +656,13 @@ class BundleSequence:
     def from_tensor(cls, input: VSATensor):
         """Creates a sequence from hypervectors.
 
-        See: :func:`~torchhd.functional.bundle_sequence`.
+        See: :func:`~torchhd.bundle_sequence`.
 
         Args:
             input (VSATensor): Tensor containing hypervectors that form the sequence.
 
         Examples::
-            >>> letters_hv = functional.random(len(letters), 10000)
+            >>> letters_hv = torchhd.random(len(letters), 10000)
             >>> S = structures.BundleSequence.from_tensor(letters_hv)
 
         """
@@ -720,7 +720,7 @@ class BindSequence:
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random(len(letters), 10000)
+            >>> letters_hv = torchhd.random(len(letters), 10000)
             >>> DS.append(letters_hv[0])
 
         """
@@ -819,13 +819,13 @@ class BindSequence:
     def from_tensor(cls, input: VSATensor):
         """Creates a sequence from tensor.
 
-        See: :func:`~torchhd.functional.bind_sequence`.
+        See: :func:`~torchhd.bind_sequence`.
 
         Args:
             input (VSATensor): Tensor containing hypervectors that form the sequence.
 
         Examples::
-            >>> letters_hv = functional.random(len(letters), 10000)
+            >>> letters_hv = torchhd.random(len(letters), 10000)
             >>> DS = structures.BindSequence.from_tensor(letters_hv)
 
         """
@@ -891,7 +891,7 @@ class Graph:
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random(len(letters), 10000)
+            >>> letters_hv = torchhd.random(len(letters), 10000)
             >>> G.add_edge(letters_hv[0], letters_hv[1])
 
         """
@@ -910,7 +910,7 @@ class Graph:
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random(len(letters), 10000)
+            >>> letters_hv = torchhd.random(len(letters), 10000)
             >>> G.encode_edge(letters_hv[0], letters_hv[1])
             tensor([-1.,  1., -1.,  ...,  1., -1., -1.])
 
@@ -970,7 +970,7 @@ class Graph:
     def from_edges(cls, input: VSATensor, directed=False):
         """Creates a graph from a VSATensor
 
-        See: :func:`~torchhd.functional.graph`.
+        See: :func:`~torchhd.graph`.
 
         Args:
             input (VSATensor): tensor containing pairs of node hypervectors that share an edge.
@@ -1022,7 +1022,7 @@ class Tree:
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random(len(letters), 10000)
+            >>> letters_hv = torchhd.random(len(letters), 10000)
             >>> T.add_leaf(letters_hv[0], ['l','l'])
 
         """
@@ -1142,7 +1142,7 @@ class FiniteStateAutomata:
         Examples::
 
             >>> letters = list(string.ascii_lowercase)
-            >>> letters_hv = functional.random(len(letters), 10000)
+            >>> letters_hv = torchhd.random(len(letters), 10000)
             >>> T.add_transition(letters_hv[0], letters_hv[1], letters_hv[2])
 
         """
