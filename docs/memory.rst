@@ -10,7 +10,7 @@ torchhd.memory
     :template: class.rst
 
     SparseDistributed
-
+    Hopfield
 
 .. autosummary:: 
     :toctree: generated/
