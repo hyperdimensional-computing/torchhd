@@ -39,7 +39,7 @@ class Encoder(nn.Module):
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         signal = self.signals(input)
         samples = torchhd.bind(signal, self.channels.weight.unsqueeze(0))
-        samples = torchhd.bind(signal, self.timestamps.weight.unsqueeze(1))
+        samples = torchhd.bind(samples, self.timestamps.weight.unsqueeze(1))
 
         samples = torchhd.multiset(samples)
         sample_hv = torchhd.ngrams(samples, n=N_GRAM_SIZE)
