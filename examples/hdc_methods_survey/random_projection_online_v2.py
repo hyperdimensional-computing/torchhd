@@ -81,7 +81,6 @@ def experiment(DIMENSIONS=10000, method="RandomProjectionOnlineV2", filename="ex
         wrong_inferred = {}
         iterations = 10
 
-
         with torch.no_grad():
             for i in range(iterations):
                 for samples, labels in tqdm(train_loader, desc="Training"):
