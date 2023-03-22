@@ -81,17 +81,19 @@ def experiment(DIMENSIONS=10000, method="RandomProjectionOnline", filename="exp"
         added_classes = {}
         wrong_inferred = {}
 
+        iterations = 10
         with torch.no_grad():
-            for samples, labels in tqdm(train_loader, desc="Training"):
-                samples = samples.to(device)
-                labels = labels.to(device)
+            for i in range(iterations):
+                for samples, labels in tqdm(train_loader, desc="Training"):
+                    samples = samples.to(device)
+                    labels = labels.to(device)
 
-                samples_hv = encode(samples)
-                model.add_online(samples_hv, labels)
-                if labels.item() not in added_classes:
-                    added_classes[labels.item()] = 1
-                else:
-                    added_classes[labels.item()] += 1
+                    samples_hv = encode(samples)
+                    model.add_online(samples_hv, labels)
+                    if labels.item() not in added_classes:
+                        added_classes[labels.item()] = 1
+                    else:
+                        added_classes[labels.item()] += 1
 
         accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
