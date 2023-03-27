@@ -45,6 +45,13 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
+# maps functions with a class name that is indistinguishable when case is
+# ignore to another filename
+autosummary_filename_map = {
+    "torchhd.memory.Hopfield": "hopfield-class",
+    "torchhd.memory.hopfield": "hopfield-function",
+}
+
 
 # -- Options for HTML output -------------------------------------------------
 

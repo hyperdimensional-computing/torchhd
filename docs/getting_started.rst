@@ -55,7 +55,7 @@ Similar behavior can be achieved using the classes in the :ref:`embeddings` modu
 
 	weight = torch.tensor([149.0])
 	# explicit mapping of the fruit weight to an index
-	w_i = torchhd.functional.value_to_index(weight, 0, 200, 10)
+	w_i = torchhd.value_to_index(weight, 0, 200, 10)
 	weights[w_i]  # select representation of 149
 
 whereas the :ref:`embeddings<embeddings>` have this common behavior built-in:
