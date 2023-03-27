@@ -771,7 +771,7 @@ class create_random_permute(torch.nn.Module):
 def inverse(input: VSATensor) -> VSATensor:
     r"""Inverse for the binding operation.
 
-    See :func:`~torchhd.functional.bind`.
+    See :func:`~torchhd.bind`.
 
     Args:
         input (VSATensor): input hypervector
@@ -796,7 +796,7 @@ def inverse(input: VSATensor) -> VSATensor:
 def negative(input: VSATensor) -> VSATensor:
     r"""Inverse for the bundling operation.
 
-    See :func:`~torchhd.functional.bundle`.
+    See :func:`~torchhd.bundle`.
 
     Args:
         input (VSATensor): input hypervector
