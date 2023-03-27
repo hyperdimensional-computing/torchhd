@@ -26,7 +26,6 @@ from typing import Optional
 import torch
 from torch import Tensor
 import torch.nn as nn
-import torch.nn.functional as F
 from scipy.stats import binom
 
 import torchhd.functional as functional
@@ -121,17 +120,21 @@ class SparseDistributed(nn.Module):
             - Result: :math:`(*, d)`
 
         """
-        out_shape = query.shape
+        # first dims from query, last dim from value
+        out_shape = (*query.shape[:-1], self.value_dim)
 
         if query.dim() == 1:
             query = query.unsqueeze(0)
 
-        similarity = F.linear(query, self.keys)
+        # make sure to have at least two dimension for index_add_
+        intermediate_shape = (*query.shape[:-1], self.value_dim)
+
+        similarity = query @ self.keys.T
         is_active = similarity >= self.threshold
 
         # sparse matrix-vector multiplication
         r_indices, v_indices = is_active.nonzero().T
-        read = torch.zeros_like(query)
+        read = query.new_zeros(intermediate_shape)
         read.index_add_(0, r_indices, self.values[v_indices])
         return read.view(out_shape)
 
@@ -155,7 +158,7 @@ class SparseDistributed(nn.Module):
         if values.dim() == 1:
             values = values.unsqueeze(0)
 
-        similarity = F.linear(keys, self.keys)
+        similarity = keys @ self.keys.T
         is_active = similarity >= self.threshold
 
         # sparse outer product and addition
@@ -191,11 +194,8 @@ def hopfield(query: Tensor, memory: Tensor, kappa: int = None) -> Tensor:
 
 
     """
-    product = memory.mT @ memory
+    product = memory.T @ memory
     torch.diagonal(product).zero_()
-
-    if memory.dim() == 2:
-        product.divide_(memory.size(0))
 
     if kappa is not None:
         product.clamp_(-kappa, kappa)
@@ -263,7 +263,7 @@ class Hopfield(nn.Module):
             - Result: :math:`(*, d)`
 
         """
-        return F.linear(query, self.memory)
+        return query @ self.memory.T
 
     @torch.no_grad()
     def write(self, items: Tensor) -> Tensor:
@@ -281,7 +281,7 @@ class Hopfield(nn.Module):
             items = items.unsqueeze(0)
 
         # Add the outer product to memory
-        self.memory.add_(items.mT @ items)
+        self.memory.add_(items.T @ items)
         torch.diagonal(self.memory).zero_()
 
         if self.kappa is not None:
@@ -327,10 +327,10 @@ def modern_hopfield(query: Tensor, memory: Tensor) -> Tensor:
     neg_query = query.repeat(*repeat)
     torch.diagonal(neg_query, dim1=-2, dim2=-1).fill_(-1)
 
-    pos_energy = pos_query @ memory.mT
+    pos_energy = pos_query @ memory.T
     pos_energy = torch.logsumexp(pos_energy, dim=-1)
 
-    neg_energy = neg_query @ memory.mT
+    neg_energy = neg_query @ memory.T
     neg_energy = torch.logsumexp(neg_energy, dim=-1)
 
     return pos_energy - neg_energy
@@ -370,6 +370,6 @@ def attention(
         d = query.size(-1)
         beta = 1 / math.sqrt(d)
 
-    similarity = query @ keys.mT
-    scores = F.softmax(beta * similarity, dim=-1)
+    similarity = query @ keys.T
+    scores = torch.softmax(beta * similarity, dim=-1)
     return scores @ values
