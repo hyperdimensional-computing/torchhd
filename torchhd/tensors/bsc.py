@@ -438,7 +438,7 @@ class BSCTensor(VSATensor):
         others_as_bipolar = torch.where(others.bool(), min_one, plus_one)
 
         if others.dim() >= 2:
-            others_as_bipolar = others_as_bipolar.mT
+            others_as_bipolar = others_as_bipolar.transpose(-2, -1)
         return torch.matmul(self_as_bipolar, others_as_bipolar)
 
     def cosine_similarity(self, others: "BSCTensor") -> Tensor:
