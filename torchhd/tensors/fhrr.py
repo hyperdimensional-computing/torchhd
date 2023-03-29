@@ -378,7 +378,7 @@ class FHRRTensor(VSATensor):
     def dot_similarity(self, others: "FHRRTensor") -> Tensor:
         """Inner product with other hypervectors"""
         if others.dim() >= 2:
-            others = others.mT
+            others = others.transpose(-2, -1)
         return torch.real(torch.matmul(self, torch.conj(others)))
 
     def cosine_similarity(self, others: "FHRRTensor", *, eps=1e-08) -> Tensor:

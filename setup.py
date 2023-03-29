@@ -13,7 +13,7 @@ with open("torchhd/version.py") as f:
 setup(
     name="torch-hd",  # use torch-hd on PyPi to install torchhd, torchhd is too similar according to PyPi
     version=version["__version__"],
-    description="Torchhd is a Python library for Hyperdimensional Computing",
+    description="Torchhd is a Python library for Hyperdimensional Computing and Vector Symbolic Architectures",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/hyperdimensional-computing/torchhd",

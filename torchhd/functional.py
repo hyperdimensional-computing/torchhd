@@ -1562,7 +1562,7 @@ def resonator(input: VSATensor, estimates: VSATensor, domains: VSATensor) -> VSA
     new_estimates = bind(input.unsqueeze(-2), inv_others)
 
     similarity = dot_similarity(new_estimates.unsqueeze(-2), domains)
-    output = dot_similarity(similarity, domains.mT).squeeze(-2)
+    output = dot_similarity(similarity, domains.transpose(-2, -1)).squeeze(-2)
 
     # normalize the output vector with a non-linearity
     return output.sign()
@@ -1591,7 +1591,11 @@ def ridge_regression(
 
     variance = alpha * torch.diag(torch.var(samples, -2))
 
-    return labels.mT @ samples @ torch.linalg.pinv(samples.mT @ samples + variance)
+    return (
+        labels.transpose(-2, -1)
+        @ samples
+        @ torch.linalg.pinv(samples.transpose(-2, -1) @ samples + variance)
+    )
 
 
 def map_range(
