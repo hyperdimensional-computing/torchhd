@@ -12,10 +12,11 @@ from torchhd import embeddings
 from torchhd.models import Centroid
 from torchhd.datasets import EMGHandGestures
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+device = torch.device("cpu")
 print("Using {} device".format(device))
 
-DIMENSIONS = 10000  # number of hypervector dimensions
+DIMENSIONS = 10240  # number of hypervector dimensions
 NUM_LEVELS = 21
 BATCH_SIZE = 1  # for GPUs with enough memory we can process multiple images at ones
 WINDOW = 256
@@ -64,8 +65,8 @@ class Encoder(nn.Module):
         samples = torchhd.bind(signal, self.timestamps.weight.unsqueeze(1))
 
         samples = torchhd.multiset(samples)
-        # sample_hv = torchhd.ngrams(samples, n=N_GRAM_SIZE)
-        sample_hv = ngram(samples, N_GRAM_SIZE, self.permute_hv)
+        sample_hv = torchhd.ngrams(samples, n=N_GRAM_SIZE)
+        #sample_hv = ngram(samples, N_GRAM_SIZE, self.permute_hv)
 
         return torchhd.hard_quantize(sample_hv)
 
@@ -114,5 +115,5 @@ def experiment(subjects=[0]):
 
 
 # Make a model for each subject
-for i in range(5):
+for i in range(1):
     experiment([i])

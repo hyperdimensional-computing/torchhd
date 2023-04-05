@@ -14,7 +14,7 @@ from torchhd.datasets import UCIClassificationBenchmark
 import numpy as np
 
 BATCH_SIZE = 1
-torch.manual_seed(20)
+torch.manual_seed(21)
 
 device = "cpu"
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -71,14 +71,14 @@ def experiment(DIMENSIONS=10000, method="DensityEncodingOnlineV2", filename="exp
         encode = Encoder(dataset.train[0][0].size(-1))
         encode = encode.to(device)
 
-        model = Centroid(DIMENSIONS, num_classes)
+        model = Centroid(DIMENSIONS, num_classes, int(len(train_loader)*0.05))
         model = model.to(device)
 
         added_classes = {}
         wrong_inferred = {}
 
         t = time.time()
-        iterations = 10
+        iterations = 1
 
         with torch.no_grad():
             for i in range(iterations):
@@ -168,4 +168,4 @@ def experiment(DIMENSIONS=10000, method="DensityEncodingOnlineV2", filename="exp
             )
 
 
-# experiment()
+experiment()

@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
-from torchvision.datasets import MNIST
+from torchhd.datasets import UCIHAR
+import torch.utils.data as data
 
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
@@ -17,33 +18,35 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
 
 DIMENSIONS = 10000
-IMG_SIZE = 28
-NUM_LEVELS = 1000
+NUM_LEVELS = 100
 BATCH_SIZE = 1  # for GPUs with enough memory we can process multiple images at ones
 
-transform = torchvision.transforms.ToTensor()
+ds = UCIHAR(
+        "../data", download=True
+)
 
-train_ds = MNIST("../data", train=True, transform=transform, download=True)
-train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
+train_size = int(len(ds) * 0.8)
+test_size = len(ds) - train_size
+train_ds, test_ds = data.random_split(ds, [train_size, test_size])
 
-test_ds = MNIST("../data", train=False, transform=transform, download=True)
-test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
+train_ld = data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
+test_ld = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
-'''
-class Encoder(nn.Module):
+
+
+'''class Encoder(nn.Module):
     def __init__(self, out_features, size, levels):
         super(Encoder, self).__init__()
         self.flatten = torch.nn.Flatten()
-        self.position = embeddings.Random(size * size, out_features)
+        self.position = embeddings.Random(size, out_features)
         self.value = embeddings.Level(levels, out_features)
 
     def forward(self, x):
-        x = self.flatten(x)
+        #x = self.flatten(x)
         sample_hv = torchhd.bind(self.position.weight, self.value(x))
         sample_hv = torchhd.multiset(sample_hv)
-        #samples_hv = torchhd.ngrams(self.value(x), 3)
-        return torchhd.hard_quantize(sample_hv)
-'''
+        #sample_hv = torchhd.ngrams(sample_hv, 4)
+        return torchhd.hard_quantize(sample_hv)'''
 
 class Encoder(nn.Module):
     def __init__(self, num_classes, size):
@@ -56,10 +59,10 @@ class Encoder(nn.Module):
         sample_hv = self.embed(x).sign()
         return torchhd.hard_quantize(sample_hv)
 
-encode = Encoder(DIMENSIONS, IMG_SIZE*IMG_SIZE)
+encode = Encoder(DIMENSIONS, ds[0][0].size(-1))
 encode = encode.to(device)
 
-num_classes = len(train_ds.classes)
+num_classes =len(ds.classes)
 model = Centroid(DIMENSIONS, num_classes)
 model = model.to(device)
 
@@ -69,7 +72,7 @@ with torch.no_grad():
         labels = labels.to(device)
 
         samples_hv = encode(samples)
-        model.add_online2(samples_hv, labels)
+        model.add(samples_hv, labels)
 
 accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 

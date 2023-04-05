@@ -1,5 +1,29 @@
+#
+# MIT License
+#
+# Copyright (c) 2023 Mike Heddes, Igor Nunes, Pere Vergés, Denis Kleyko, and Danny Abraham
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 import os
 import os.path as path
+import shutil
 from typing import Callable, Optional, List
 import torch
 from torch.utils import data
@@ -12,12 +36,10 @@ from .utils import download_file, unzip_file
 class UCIHAR(data.Dataset):
     """`UCI Human Activity Recognition <https://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones>`_ dataset.
     As found in the paper `"Human Activity Recognition Using Smartphones" <https://ieeexplore.ieee.org/document/8567275>`_.
-
     .. list-table::
        :widths: 10 10 10 10
        :align: center
        :header-rows: 1
-
        * - Instances
          - Attributes
          - Task
@@ -26,7 +48,6 @@ class UCIHAR(data.Dataset):
          - 561
          - Classification
          - N/A
-
     Args:
         root (string): Root directory of dataset where the training and testing samples are located.
         train (bool, optional): If True, creates dataset from UCIHAR-training data,
@@ -38,8 +59,6 @@ class UCIHAR(data.Dataset):
             and returns a transformed version.
         target_transform (callable, optional): A function/transform that takes in the
             target and transforms it.
-
-
     """
 
     classes: List[str] = [
@@ -85,7 +104,6 @@ class UCIHAR(data.Dataset):
         """
         Args:
             index (int): Index
-
         Returns:
             Tuple[torch.FloatTensor, torch.LongTensor]: (sample, target) where target is the index of the target class
         """
@@ -109,19 +127,19 @@ class UCIHAR(data.Dataset):
         test_dir = os.path.join(self.root, "test")
         has_test_dir = os.path.isdir(test_dir)
 
-        if not has_train_dir and not has_test_dir:
+        if (not has_train_dir) or (not has_test_dir):
             return False
 
         has_train_x = os.path.isfile(os.path.join(train_dir, "X_train.txt"))
         has_train_y = os.path.isfile(os.path.join(train_dir, "y_train.txt"))
 
-        if not has_train_x and not has_train_y:
+        if (not has_train_x) or (not has_train_y):
             return False
 
         has_test_x = os.path.isfile(os.path.join(test_dir, "X_test.txt"))
-        has_test_y = os.path.isfile(os.path.join(train_dir, "y_test.txt"))
+        has_test_y = os.path.isfile(os.path.join(test_dir, "y_test.txt"))
 
-        if not has_test_x or not has_test_y:
+        if (not has_test_x) or (not has_test_y):
             return False
 
         return True
@@ -131,15 +149,11 @@ class UCIHAR(data.Dataset):
         data_file = "X_train.txt" if self.train else "X_test.txt"
         target_file = "y_train.txt" if self.train else "y_test.txt"
 
-        data = pd.read_csv(
-            os.path.join(data_dir, data_file), delim_whitespace=True, header=None
-        )
-        targets = np.loadtxt(
-            path.join(data_dir, target_file), delimiter="\n", dtype="int64"
-        ).tolist()
+        data = np.loadtxt(os.path.join(data_dir, data_file), dtype="float32")
+        targets = np.loadtxt(path.join(data_dir, target_file), dtype="int64")
 
-        self.data = torch.tensor(data.values, dtype=torch.float)
-        self.targets = torch.tensor(targets, dtype=torch.long) - 1
+        self.data = torch.from_numpy(data)
+        self.targets = torch.from_numpy(targets) - 1
 
     def download(self):
         """Downloads the dataset if it doesn't exist already"""
@@ -160,8 +174,8 @@ class UCIHAR(data.Dataset):
         source_dir = os.path.join(self.root, "UCI HAR Dataset")
         data_files = os.listdir(source_dir)
         for filename in data_files:
-            os.rename(
-                os.path.join(source_dir, filename), os.path.join(self.root, filename)
-            )
+            src = os.path.join(source_dir, filename)
+            dest = os.path.join(self.root, filename)
+            os.rename(src, dest)
 
         os.rmdir(source_dir)

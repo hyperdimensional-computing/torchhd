@@ -66,62 +66,85 @@ def normalize(w, eps=1e-12) -> None:
 
 
 def experiment():
-    train = torchhd.datasets.Car("../../data", download=True, train=True, fold=0)
-    test = torchhd.datasets.Car("../../data", download=True, train=False, fold=0)
+    train = torchhd.datasets.OocytesMerlucciusNucleus4d("../../data", download=True, train=True, fold=0)
+    test = torchhd.datasets.OocytesMerlucciusNucleus4d("../../data", download=True, train=False, fold=0)
 
-    added = 0
-    # test = torchhd.datasets.AcuteInflammation("../../data", download=True, train=False)
-    # Number of features in the dataset.
-    # Number of classes in the dataset.
+    train_size = int(0.8 * len(train))
+    test_size = len(train) - train_size
+    train_dataset, validation_dataset = torch.utils.data.random_split(train, [train_size, test_size])
+
     num_classes = len(train.classes)
 
-    # Get values for min-max normalization and add the transformation
     min_val = torch.min(train.data, 0).values.to(device)
     max_val = torch.max(train.data, 0).values.to(device)
     transform = create_min_max_normalize(min_val, max_val)
     train.transform = transform
     test.transform = transform
-
-    # Set up data loaders
-    train_loader = data.DataLoader(train, batch_size=BATCH_SIZE, shuffle=True)
+    train_data = data.DataLoader(train, batch_size=BATCH_SIZE, shuffle=True)
+    train_loader = data.DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=False)
+    validation_loader = data.DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=False)
     test_loader = data.DataLoader(test, batch_size=BATCH_SIZE)
-
-    # types = ['projection','sinusoid','hashmap','density']
     types = ["density"]
+
 
     for t in types:
         model = Centroid(DIMENSIONS, num_classes)
-
         encode = Encoder(train[0][0].size(-1), t)
         encode = encode.to(device)
-
         count = 0
-        with torch.no_grad():
-            for samples, labels in tqdm(train_loader, desc="Testing"):
-                samples = samples.to(device)
-                labels = labels.to(device)
-
-                samples_hv = encode(samples)
-                # print("labels", labels)
-                model.add_online2(samples_hv, labels)
-                # if count == 10:
-                # break
-                count += 1
-            model.normalize()
-
-        accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
+        epochs = 10
 
         with torch.no_grad():
-            for samples, labels in tqdm(test_loader, desc="Testing"):
-                samples = samples.to(device)
-                labels = labels.to(device)
+            for i in range(epochs):
+                validate_accuracy = 0
+                train_accuracy = 0
+                test_accuracy = 0
+                model.mse = 0
+                for samples, labels in train_loader:
+                    samples = samples.to(device)
+                    labels = labels.to(device)
 
-                samples_hv = encode(samples)
-                outputs = model(samples_hv, dot=True)
+                    samples_hv = encode(samples)
+                    pred = model.add_online(samples_hv, labels)
+                    if pred.item() == labels[0].item():
+                        train_accuracy += 1
+                model.normalize()
 
-                accuracy.update(outputs.cpu(), labels)
+                matri = torchhd.cos_similarity(model.weight, model.weight)
+                print(torch.sum(torch.triu(abs(matri), diagonal=1)))
+                print(torch.det(matri))
+                # hinge loss
+                for samples, labels in validation_loader:
+                    samples = samples.to(device)
+                    labels = labels.to(device)
+                    samples_hv = encode(samples)
+                    outputs = model(samples_hv, dot=True)
+                    if torch.argmax(outputs).item() == labels[0].item():
+                        validate_accuracy += 1
+                print('VALIDATE ACC ', validate_accuracy/len(validation_dataset))
 
-        print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
+                print('TRAIN ACC ', train_accuracy/len(train_data))
 
+                #print(model.error_similarity_sum / model.error_count)
+                #print(model.similarity_sum / model.count)
+                #print('VALIDATE ACC ', validate_accuracy/total_val)
+                model.error_similarity_sum = 0
+                model.error_count = 0
+                model.similarity_sum = 0
+                model.count = 0
+
+                for samples, labels in test_loader:
+                    samples = samples.to(device)
+                    labels = labels.to(device)
+
+                    samples_hv = encode(samples)
+                    outputs = model(samples_hv, dot=True)
+
+                    if outputs.argmax(1).item() == labels[0].item():
+                        test_accuracy += 1
+
+                print(f"TEST ACC {(test_accuracy/len(test)):.3f}%")
+                print(f"MSE {(model.mse/len(train_dataset)):.3f}%")
+                print()
 
 experiment()

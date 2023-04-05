@@ -1146,7 +1146,6 @@ def ngrams(input: VSA_Model, n: int = 3) -> VSA_Model:
 
         \bigoplus_{i=0}^{m - n} \bigotimes_{j = 0}^{n - 1} \Pi^{n - j - 1}(V_{i + j})
 
-    .. note::
         For :math:`n=1` use :func:`~torchhd.functional.multiset` instead and for :math:`n=m` use :func:`~torchhd.functional.bind_sequence` instead.
 
     Args:
@@ -1170,12 +1169,14 @@ def ngrams(input: VSA_Model, n: int = 3) -> VSA_Model:
         tensor([-1., -1.,  1., -3., -1., -3.])
 
     """
-    input = as_vsa_model(input)
+    shit_size = 16
 
-    n_gram = permute(input[..., : -(n - 1), :], shifts=n - 1)
+    input = as_vsa_model(input)
+    #print(-n-1)
+    n_gram = permute(input[..., : -(n - 1), :], shifts=(n - 1)*shit_size)
     for i in range(1, n):
         stop = None if i == (n - 1) else -(n - i - 1)
-        sample = permute(input[..., i:stop, :], shifts=n - i - 1)
+        sample = permute(input[..., i:stop, :], shifts=(n - i - 1)*shit_size)
         n_gram = bind(n_gram, sample)
 
     return multiset(n_gram)

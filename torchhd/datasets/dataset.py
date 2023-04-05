@@ -163,7 +163,6 @@ class UCIClassificationBenchmark:
 
     def datasets(self) -> Generator[DatasetEntry, None, None]:
         """Returns an iterator over all datasets in the benchmark."""
-
         # For all datasets in the collection
         for dataset_name in self.dataset_names:
             # Fetch the current dataset
@@ -261,7 +260,6 @@ class CollectionDataset(data.Dataset):
 
         self.transform = transform
         self.target_transform = target_transform
-
         if download:
             self.download()
 
@@ -374,7 +372,6 @@ class DatasetFourFold(CollectionDataset):
             raise ValueError(
                 "This dataset does not have a separate file for test data. Please check that fold is specified correctly."
             )
-
         self.train = train
         self.fold = fold
         self.hyper_search = hyper_search

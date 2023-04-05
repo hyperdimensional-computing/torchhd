@@ -1,4 +1,3 @@
-Name,Accuracy,Time,Size,Classes,Dimensions,Method
 Abalone,0.6321839094161987,11.905324459075928,6266,3,10000,SinusoidProjectionOnlineV2
 AcuteInflammation,1.0,0.2683217525482178,180,2,10000,SinusoidProjectionOnlineV2
 AcuteNephritis,1.0,0.32337260246276855,180,2,10000,SinusoidProjectionOnlineV2
