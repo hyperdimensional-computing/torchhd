@@ -29,7 +29,7 @@ train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=
 test_ds = MNIST("../data", train=False, transform=transform, download=True)
 test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
-'''
+"""
 class Encoder(nn.Module):
     def __init__(self, out_features, size, levels):
         super(Encoder, self).__init__()
@@ -43,7 +43,8 @@ class Encoder(nn.Module):
         sample_hv = torchhd.multiset(sample_hv)
         #samples_hv = torchhd.ngrams(self.value(x), 3)
         return torchhd.hard_quantize(sample_hv)
-'''
+"""
+
 
 class Encoder(nn.Module):
     def __init__(self, num_classes, size):
@@ -56,7 +57,8 @@ class Encoder(nn.Module):
         sample_hv = self.embed(x).sign()
         return torchhd.hard_quantize(sample_hv)
 
-encode = Encoder(DIMENSIONS, IMG_SIZE*IMG_SIZE)
+
+encode = Encoder(DIMENSIONS, IMG_SIZE * IMG_SIZE)
 encode = encode.to(device)
 
 num_classes = len(train_ds.classes)

@@ -66,7 +66,7 @@ class Encoder(nn.Module):
 
         samples = torchhd.multiset(samples)
         sample_hv = torchhd.ngrams(samples, n=N_GRAM_SIZE)
-        #sample_hv = ngram(samples, N_GRAM_SIZE, self.permute_hv)
+        # sample_hv = ngram(samples, N_GRAM_SIZE, self.permute_hv)
 
         return torchhd.hard_quantize(sample_hv)
 
