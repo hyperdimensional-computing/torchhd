@@ -21,9 +21,7 @@ DIMENSIONS = 10000
 NUM_LEVELS = 100
 BATCH_SIZE = 1  # for GPUs with enough memory we can process multiple images at ones
 
-ds = PAMAP(
-        "../data", download=True
-)
+ds = PAMAP("../data", download=True)
 
 train_size = int(len(ds) * 0.7)
 test_size = len(ds) - train_size
@@ -33,8 +31,7 @@ train_ld = data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
 test_ld = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
 
-
-'''class Encoder(nn.Module):
+"""class Encoder(nn.Module):
     def __init__(self, out_features, size, levels):
         super(Encoder, self).__init__()
         self.flatten = torch.nn.Flatten()
@@ -46,8 +43,7 @@ test_ld = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
         sample_hv = torchhd.bind(self.position.weight, self.value(x))
         sample_hv = torchhd.multiset(sample_hv)
         #sample_hv = torchhd.ngrams(sample_hv, 5)
-        return torchhd.hard_quantize(sample_hv)'''
-
+        return torchhd.hard_quantize(sample_hv)"""
 
 
 class Encoder(nn.Module):
@@ -65,7 +61,7 @@ class Encoder(nn.Module):
 encode = Encoder(DIMENSIONS, ds[0][0].size(-1))
 encode = encode.to(device)
 
-num_classes =len(ds.classes)
+num_classes = len(ds.classes)
 model = Centroid(DIMENSIONS, num_classes)
 model = model.to(device)
 
@@ -75,7 +71,7 @@ with torch.no_grad():
         labels = labels.to(device)
 
         samples_hv = encode(samples)
-        model.add_online2(samples_hv, labels-1)
+        model.add_online2(samples_hv, labels - 1)
 
 accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
@@ -87,6 +83,6 @@ with torch.no_grad():
 
         samples_hv = encode(samples)
         outputs = model(samples_hv, dot=True)
-        accuracy.update(outputs.cpu(), labels-1)
+        accuracy.update(outputs.cpu(), labels - 1)
 
 print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")

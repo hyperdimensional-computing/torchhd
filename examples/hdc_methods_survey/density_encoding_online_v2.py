@@ -71,7 +71,7 @@ def experiment(DIMENSIONS=10000, method="DensityEncodingOnlineV2", filename="exp
         encode = Encoder(dataset.train[0][0].size(-1))
         encode = encode.to(device)
 
-        model = Centroid(DIMENSIONS, num_classes, int(len(train_loader)*0.05))
+        model = Centroid(DIMENSIONS, num_classes, int(len(train_loader) * 0.05))
         model = model.to(device)
 
         added_classes = {}

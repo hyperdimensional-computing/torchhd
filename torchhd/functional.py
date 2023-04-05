@@ -1172,11 +1172,11 @@ def ngrams(input: VSA_Model, n: int = 3) -> VSA_Model:
     shit_size = 16
 
     input = as_vsa_model(input)
-    #print(-n-1)
-    n_gram = permute(input[..., : -(n - 1), :], shifts=(n - 1)*shit_size)
+    # print(-n-1)
+    n_gram = permute(input[..., : -(n - 1), :], shifts=(n - 1) * shit_size)
     for i in range(1, n):
         stop = None if i == (n - 1) else -(n - i - 1)
-        sample = permute(input[..., i:stop, :], shifts=(n - i - 1)*shit_size)
+        sample = permute(input[..., i:stop, :], shifts=(n - i - 1) * shit_size)
         n_gram = bind(n_gram, sample)
 
     return multiset(n_gram)

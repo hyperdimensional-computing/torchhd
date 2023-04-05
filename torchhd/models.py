@@ -47,7 +47,12 @@ class Centroid(nn.Module):
     weight: Tensor
 
     def __init__(
-        self, in_features: int, out_features: int, init_samples = 0, device=None, dtype=None
+        self,
+        in_features: int,
+        out_features: int,
+        init_samples=0,
+        device=None,
+        dtype=None,
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
         super(Centroid, self).__init__()
@@ -63,26 +68,37 @@ class Centroid(nn.Module):
         self.weight = Parameter(weight)
         self.weight_base = Parameter(weight_base)
         self.reset_parameters()
-        self.train_accuracy = torchmetrics.Accuracy("multiclass", num_classes=out_features)
-        self.train_accuracy_base = torchmetrics.Accuracy("multiclass", num_classes=out_features)
+        self.train_accuracy = torchmetrics.Accuracy(
+            "multiclass", num_classes=out_features
+        )
+        self.train_accuracy_base = torchmetrics.Accuracy(
+            "multiclass", num_classes=out_features
+        )
         self.added_samples = 0
         self.init_samples = init_samples
-
 
     def reset_parameters(self) -> None:
         init.zeros_(self.weight)
 
-    def forward(self, input: Tensor, dot: bool = False, combined = False, test = False) -> Tensor:
+    def forward(
+        self, input: Tensor, dot: bool = False, combined=False, test=False
+    ) -> Tensor:
         if dot:
             return functional.dot_similarity(input, self.weight)
 
         return functional.cos_similarity(input, self.weight)
 
-    def forward2(self, input: Tensor, dot: bool = False, combined = False, test = False) -> Tensor:
+    def forward2(
+        self, input: Tensor, dot: bool = False, combined=False, test=False
+    ) -> Tensor:
         if dot:
-            return functional.dot_similarity(input, self.weight), functional.dot_similarity(input, self.weight_base)
-        return functional.cos_similarity(input, self.weight), functional.cos_similarity(input, self.weight_base)
-        #return functional.cos_similarity(input, self.weight)
+            return functional.dot_similarity(
+                input, self.weight
+            ), functional.dot_similarity(input, self.weight_base)
+        return functional.cos_similarity(input, self.weight), functional.cos_similarity(
+            input, self.weight_base
+        )
+        # return functional.cos_similarity(input, self.weight)
 
     @torch.no_grad()
     def add(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
@@ -91,15 +107,19 @@ class Centroid(nn.Module):
         logit = self(input)
         return logit
 
-
     def mutate_hv(self, input, target, w=1, lr=1):
-        idx = torch.nonzero(torch.tensor(torchhd.hard_quantize(self.weight[target]) != input),  as_tuple=True)[1]
+        idx = torch.nonzero(
+            torch.tensor(torchhd.hard_quantize(self.weight[target]) != input),
+            as_tuple=True,
+        )[1]
         a = torch.zeros((1, self.in_features))
         a[0][idx] = input[0][idx]
-        self.weight.index_add_(0, target, a*w)
+        self.weight.index_add_(0, target, a * w)
 
     @torch.no_grad()
-    def add_data_augmentation(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
+    def add_data_augmentation(
+        self, input: Tensor, target: Tensor, lr: float = 1.0
+    ) -> None:
         """Adds the input vectors scaled by the lr to the target prototype vectors."""
         for i in range(1):
             self.mutate_hv(input, target)
@@ -144,7 +164,9 @@ class Centroid(nn.Module):
         return l
 
     @torch.no_grad()
-    def add_online2(self, input: Tensor, target: Tensor, rep: int = 0, lr: float = 1.0) -> None:
+    def add_online2(
+        self, input: Tensor, target: Tensor, rep: int = 0, lr: float = 1.0
+    ) -> None:
         """Only updates the prototype vectors on wrongly predicted inputs.
 
         Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
@@ -155,64 +177,6 @@ class Centroid(nn.Module):
         and :math:`\delta` is the cosine similarity of the input with the target class prototype.
         """
         # Adapted from: https://gitlab.com/biaslab/onlinehd/-/blob/master/onlinehd/onlinehd.py
-
-        logit = self(input)
-        pred = logit.argmax(1)
-        is_wrong = target != pred
-        l = logit
-
-        select = torch.empty(10000, dtype=torch.bool)
-        select.bernoulli_(0.1)
-
-        self.similarity_sum += logit.max(1).values.item()
-        self.count += 1
-        if self.error_count == 0:
-            val = self.similarity_sum / self.count
-        else:
-            val = self.error_similarity_sum / self.error_count
-        if is_wrong.sum().item() == 0:
-            #print(val, logit.max(1).values.item(), 0.05  > abs(logit.max(1).values.item()-logit[0][1-logit.argmax(1).item()]).item())
-
-            if logit.max(1).values.item() < val:
-                self.weight.index_add_(0, target, input)
-            #else:
-            #    print(logit, val)
-            return l
-
-        self.error_count += 1
-        self.error_similarity_sum += logit.max(1).values.item()
-
-        logit = logit[is_wrong]
-        input = input[is_wrong]
-        target = target[is_wrong]
-        pred = pred[is_wrong]
-
-        alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
-        self.weight.index_add_(0, target, lr * alpha1 * input)
-        alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1.0
-        self.weight.index_add_(0, pred, lr * alpha2 * input)
-        #print("alpha 1", alpha1, logit.gather(1, target.unsqueeze(1)), "alpha 2", alpha2)
-
-        return l
-
-    @torch.no_grad()
-    def add_online2_init(self, input: Tensor, target: Tensor, rep: int = 0, lr: float = 1.0) -> None:
-        """Only updates the prototype vectors on wrongly predicted inputs.
-
-        Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
-
-        Adds the input to the mispredicted class prototype scaled by :math:`\epsilon - 1`
-        and adds the input to the target prototype scaled by :math:`1 - \delta`,
-        where :math:`\epsilon` is the cosine similarity of the input with the mispredicted class prototype
-        and :math:`\delta` is the cosine similarity of the input with the target class prototype.
-        """
-        # Adapted from: https://gitlab.com/biaslab/onlinehd/-/blob/master/onlinehd/onlinehd.py
-        if self.added_samples < self.init_samples:
-            self.added_samples += 1
-            self.weight.index_add_(0, target, input, alpha=lr)
-            logit = self(input)
-            return logit
-
 
         logit = self(input)
         pred = logit.argmax(1)
@@ -254,7 +218,68 @@ class Centroid(nn.Module):
         return l
 
     @torch.no_grad()
-    def add_online_combined(self, input: Tensor, target: Tensor, rep: int = 0, lr: float = 1.0) -> None:
+    def add_online2_init(
+        self, input: Tensor, target: Tensor, rep: int = 0, lr: float = 1.0
+    ) -> None:
+        """Only updates the prototype vectors on wrongly predicted inputs.
+
+        Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
+
+        Adds the input to the mispredicted class prototype scaled by :math:`\epsilon - 1`
+        and adds the input to the target prototype scaled by :math:`1 - \delta`,
+        where :math:`\epsilon` is the cosine similarity of the input with the mispredicted class prototype
+        and :math:`\delta` is the cosine similarity of the input with the target class prototype.
+        """
+        # Adapted from: https://gitlab.com/biaslab/onlinehd/-/blob/master/onlinehd/onlinehd.py
+        if self.added_samples < self.init_samples:
+            self.added_samples += 1
+            self.weight.index_add_(0, target, input, alpha=lr)
+            logit = self(input)
+            return logit
+
+        logit = self(input)
+        pred = logit.argmax(1)
+        is_wrong = target != pred
+        l = logit
+
+        select = torch.empty(10000, dtype=torch.bool)
+        select.bernoulli_(0.1)
+
+        self.similarity_sum += logit.max(1).values.item()
+        self.count += 1
+        if self.error_count == 0:
+            val = self.similarity_sum / self.count
+        else:
+            val = self.error_similarity_sum / self.error_count
+        if is_wrong.sum().item() == 0:
+            # print(val, logit.max(1).values.item(), 0.05  > abs(logit.max(1).values.item()-logit[0][1-logit.argmax(1).item()]).item())
+
+            if logit.max(1).values.item() < val:
+                self.weight.index_add_(0, target, input)
+            # else:
+            #    print(logit, val)
+            return l
+
+        self.error_count += 1
+        self.error_similarity_sum += logit.max(1).values.item()
+
+        logit = logit[is_wrong]
+        input = input[is_wrong]
+        target = target[is_wrong]
+        pred = pred[is_wrong]
+
+        alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
+        self.weight.index_add_(0, target, lr * alpha1 * input)
+        alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1.0
+        self.weight.index_add_(0, pred, lr * alpha2 * input)
+        # print("alpha 1", alpha1, logit.gather(1, target.unsqueeze(1)), "alpha 2", alpha2)
+
+        return l
+
+    @torch.no_grad()
+    def add_online_combined(
+        self, input: Tensor, target: Tensor, rep: int = 0, lr: float = 1.0
+    ) -> None:
         """Only updates the prototype vectors on wrongly predicted inputs.
 
         Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
@@ -285,20 +310,20 @@ class Centroid(nn.Module):
             val = self.error_similarity_sum / self.error_count
 
         if is_wrong.sum().item() == 0:
-            #print(val, logit.max(1).values.item(), 0.05  > abs(logit.max(1).values.item()-logit[0][1-logit.argmax(1).item()]).item())
+            # print(val, logit.max(1).values.item(), 0.05  > abs(logit.max(1).values.item()-logit[0][1-logit.argmax(1).item()]).item())
 
             if logit.max(1).values.item() < val:
-                #or 0.05 > abs(logit.max(1).values.item()-logit[0][1-logit.argmax(1).item()]).item():
+                # or 0.05 > abs(logit.max(1).values.item()-logit[0][1-logit.argmax(1).item()]).item():
                 self.weight.index_add_(0, target, input)
-            #else:
+            # else:
             #    print(logit, val)
             return l, l_base
 
         self.error_count += 1
         self.error_similarity_sum += logit.max(1).values.item()
 
-        #logit = logit[is_wrong]
-        #logit_base = logit_base[is_wrong_base]
+        # logit = logit[is_wrong]
+        # logit_base = logit_base[is_wrong_base]
         input = input[is_wrong]
         target = target[is_wrong]
         pred = pred[is_wrong]
@@ -313,13 +338,14 @@ class Centroid(nn.Module):
 
         alpha2_base = logit_base.gather(1, pred_base.unsqueeze(1)) - 1.0
         self.weight_base.index_add_(0, pred_base, lr * alpha2_base * input)
-        #print("alpha 1", alpha1, logit.gather(1, target.unsqueeze(1)), "alpha 2", alpha2)
+        # print("alpha 1", alpha1, logit.gather(1, target.unsqueeze(1)), "alpha 2", alpha2)
 
         return l, l_base
 
-
     @torch.no_grad()
-    def add_online_noise(self, input: Tensor, target: Tensor, rep: int = 0, lr: float = 1.0) -> None:
+    def add_online_noise(
+        self, input: Tensor, target: Tensor, rep: int = 0, lr: float = 1.0
+    ) -> None:
         """Only updates the prototype vectors on wrongly predicted inputs.
 
         Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
@@ -346,7 +372,7 @@ class Centroid(nn.Module):
 
         if is_wrong.sum().item() == 0:
             if logit.max(1).values.item() < val:
-                self.mutate_hv(input,target)
+                self.mutate_hv(input, target)
             return l
 
         self.error_count += 1
@@ -362,7 +388,6 @@ class Centroid(nn.Module):
         alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1.0
         self.weight.index_add_(0, pred, lr * alpha2 * input)
         return l
-
 
     @torch.no_grad()
     def add_online3(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
@@ -395,12 +420,12 @@ class Centroid(nn.Module):
         if self.error_count == 0:
             val = self.similarity_sum / self.count
         else:
-            val = (self.error_similarity_sum / self.error_count)
+            val = self.error_similarity_sum / self.error_count
         # print(self.similarity_sum/self.count)
         alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
         if is_wrong.sum().item() == 0:
             if logit.max(1).values.item() < val:
-                #self.weight.index_add_(0, target, input)
+                # self.weight.index_add_(0, target, input)
                 self.weight.index_add_(0, target, lr * alpha1 * input)
 
             return pred
@@ -416,14 +441,14 @@ class Centroid(nn.Module):
         # print('Total',self.similarity_sum / self.count)
         # print('Err',self.error_similarity_sum/self.error_count)
 
-
-
         alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1.0
         self.weight.index_add_(0, pred, lr * alpha2 * input)
         return pred
 
     @torch.no_grad()
-    def add_online4(self, input: Tensor, target: Tensor, rep = 0, lr: float = 1.0) -> None:
+    def add_online4(
+        self, input: Tensor, target: Tensor, rep=0, lr: float = 1.0
+    ) -> None:
         """Only updates the prototype vectors on wrongly predicted inputs.
 
         Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
@@ -466,25 +491,27 @@ class Centroid(nn.Module):
             self.conf_pred_class_count[pred.item()] = 0
 
         if is_wrong.sum().item() == 0:
-            if self.conf_pred_class_count[pred.item()] == 0 or \
-                    logit.max(1).values.item() < (
-                    self.conf_pred_class[pred.item()] / self.conf_pred_class_count[pred.item()]):
-                self.weight.index_add_(0, target, input*(rep+1))
+            if self.conf_pred_class_count[pred.item()] == 0 or logit.max(
+                1
+            ).values.item() < (
+                self.conf_pred_class[pred.item()]
+                / self.conf_pred_class_count[pred.item()]
+            ):
+                self.weight.index_add_(0, target, input * (rep + 1))
                 self.conf_pred_class[pred.item()] += logit.max(1).values.item()
                 self.conf_pred_class_count[pred.item()] += 1
-                #if rep < 5:
+                # if rep < 5:
                 #    self.add_online4(ii, tt, rep=rep+1)
 
             return pred
         # print(input)
         # only update wrongly predicted inputs
 
-
         if pred.item() not in self.miss_predict:
             self.miss_predict[pred.item()] = 0
         self.miss_predict[pred.item()] += 1
 
-        #print("pred", logit.max(1).values.item())
+        # print("pred", logit.max(1).values.item())
 
         logit = logit[is_wrong]
         input = input[is_wrong]
@@ -495,19 +522,19 @@ class Centroid(nn.Module):
         self.error_similarity_sum += logit.max(1).values.item()
 
         alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
-        self.weight.index_add_(0, target, lr*(rep+1) * alpha1 * input)
+        self.weight.index_add_(0, target, lr * (rep + 1) * alpha1 * input)
 
-        #if pred.item() != t.item() and not torch.all(self.weight[pred.item()] == 0):
+        # if pred.item() != t.item() and not torch.all(self.weight[pred.item()] == 0):
         alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1.0
         self.weight.index_add_(0, pred, lr * alpha2 * input)
-        '''
+        """
         for i in range(self.out_features):
             if i != t.item() and not torch.all(self.weight[i] == 0):
                 alpha = logit.gather(1, torch.tensor([[i]])) - 1.0
                 self.weight.index_add_(0, torch.tensor(i), lr * alpha * input)
 
-        '''
-        #if rep < 5:
+        """
+        # if rep < 5:
         #    self.add_online4(ii, tt, rep=rep+1)
 
         return p

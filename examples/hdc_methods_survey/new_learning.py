@@ -66,12 +66,18 @@ def normalize(w, eps=1e-12) -> None:
 
 
 def experiment():
-    train = torchhd.datasets.OocytesMerlucciusNucleus4d("../../data", download=True, train=True, fold=0)
-    test = torchhd.datasets.OocytesMerlucciusNucleus4d("../../data", download=True, train=False, fold=0)
+    train = torchhd.datasets.OocytesMerlucciusNucleus4d(
+        "../../data", download=True, train=True, fold=0
+    )
+    test = torchhd.datasets.OocytesMerlucciusNucleus4d(
+        "../../data", download=True, train=False, fold=0
+    )
 
     train_size = int(0.8 * len(train))
     test_size = len(train) - train_size
-    train_dataset, validation_dataset = torch.utils.data.random_split(train, [train_size, test_size])
+    train_dataset, validation_dataset = torch.utils.data.random_split(
+        train, [train_size, test_size]
+    )
 
     num_classes = len(train.classes)
 
@@ -82,10 +88,11 @@ def experiment():
     test.transform = transform
     train_data = data.DataLoader(train, batch_size=BATCH_SIZE, shuffle=True)
     train_loader = data.DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=False)
-    validation_loader = data.DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=False)
+    validation_loader = data.DataLoader(
+        validation_dataset, batch_size=BATCH_SIZE, shuffle=False
+    )
     test_loader = data.DataLoader(test, batch_size=BATCH_SIZE)
     types = ["density"]
-
 
     for t in types:
         model = Centroid(DIMENSIONS, num_classes)
@@ -121,13 +128,13 @@ def experiment():
                     outputs = model(samples_hv, dot=True)
                     if torch.argmax(outputs).item() == labels[0].item():
                         validate_accuracy += 1
-                print('VALIDATE ACC ', validate_accuracy/len(validation_dataset))
+                print("VALIDATE ACC ", validate_accuracy / len(validation_dataset))
 
-                print('TRAIN ACC ', train_accuracy/len(train_data))
+                print("TRAIN ACC ", train_accuracy / len(train_data))
 
-                #print(model.error_similarity_sum / model.error_count)
-                #print(model.similarity_sum / model.count)
-                #print('VALIDATE ACC ', validate_accuracy/total_val)
+                # print(model.error_similarity_sum / model.error_count)
+                # print(model.similarity_sum / model.count)
+                # print('VALIDATE ACC ', validate_accuracy/total_val)
                 model.error_similarity_sum = 0
                 model.error_count = 0
                 model.similarity_sum = 0
@@ -146,5 +153,6 @@ def experiment():
                 print(f"TEST ACC {(test_accuracy/len(test)):.3f}%")
                 print(f"MSE {(model.mse/len(train_dataset)):.3f}%")
                 print()
+
 
 experiment()
