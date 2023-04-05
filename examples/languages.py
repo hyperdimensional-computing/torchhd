@@ -20,12 +20,14 @@ ASCII_Z = ord("z")
 ASCII_SPACE = ord(" ")
 NUM_TOKENS = ASCII_Z - ASCII_A + 3
 
+
 def char2int(char: str) -> int:
     """Map a character to its integer identifier"""
     ascii_index = ord(char)
     if ascii_index == ASCII_SPACE:
         return ASCII_Z - ASCII_A + 1
     return ascii_index - ASCII_A
+
 
 def transform(x: str) -> torch.Tensor:
     char_ids = x[:MAX_INPUT_SIZE]
@@ -44,6 +46,7 @@ test_ds = Languages("../data", train=False, transform=transform, download=True)
 test_ld = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
 t = time.time()
+
 
 class Model(nn.Module):
     def __init__(self, num_classes, size):
@@ -81,7 +84,6 @@ correct_pred = 0
 
 with torch.no_grad():
     for samples, labels in tqdm(test_ld, desc="Testing"):
-
         samples = samples.to(device)
         labels = labels.to(device)
 
@@ -89,4 +91,12 @@ with torch.no_grad():
         predictions = torch.argmax(outputs, dim=-1)
         if predictions == labels:
             correct_pred += 1
-print('language recognition,' + str(DIMENSIONS) + ',' + str(time.time() - t) + ',' + str((correct_pred / 21000)), end='')
+print(
+    "language recognition,"
+    + str(DIMENSIONS)
+    + ","
+    + str(time.time() - t)
+    + ","
+    + str((correct_pred / 21000)),
+    end="",
+)

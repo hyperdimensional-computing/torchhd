@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data as data
 import time
+
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 from tqdm import tqdm
 
@@ -10,6 +11,7 @@ import sys
 from torchhd import functional
 from torchhd import embeddings
 from torchhd.datasets import EMGHandGestures
+
 device = torch.device("cpu")
 
 DIMENSIONS = int(sys.argv[2])
@@ -20,9 +22,12 @@ N_GRAM_SIZE = 4
 DOWNSAMPLE = 5
 SUBSAMPLES = torch.arange(0, WINDOW, int(WINDOW / DOWNSAMPLE))
 
-subjects=[int(sys.argv[1])]
+subjects = [int(sys.argv[1])]
+
+
 def transform(x):
     return x[SUBSAMPLES]
+
 
 class Model(nn.Module):
     def __init__(self, num_classes, timestamps, channels):
@@ -39,7 +44,7 @@ class Model(nn.Module):
         x = self.flatten(x)
         signal = self.signals(x)
         samples = functional.bind(signal, self.channels.weight.unsqueeze(0))
-        #samples = functional.bind(samples, self.timestamps.weight.unsqueeze(1))
+        # samples = functional.bind(samples, self.timestamps.weight.unsqueeze(1))
 
         samples = functional.multiset(samples)
         sample_hv = functional.ngrams(samples, n=N_GRAM_SIZE)
@@ -51,10 +56,7 @@ class Model(nn.Module):
         return logit
 
 
-
-ds = EMGHandGestures(
-    "../data", download=True, subjects=subjects, transform=transform
-)
+ds = EMGHandGestures("../data", download=True, subjects=subjects, transform=transform)
 
 train_size = int(len(ds) * 0.7)
 test_size = len(ds) - train_size
@@ -87,15 +89,24 @@ with torch.no_grad():
         if predictions == labels[0]:
             suma += 1
 
-n = ''
+n = ""
 if subjects == [0]:
-    n = 'emgp'
+    n = "emgp"
 if subjects == [1]:
-    n = 'emgpp'
+    n = "emgpp"
 if subjects == [2]:
-    n = 'emgppp'
+    n = "emgppp"
 if subjects == [3]:
-    n = 'emgpppp'
+    n = "emgpppp"
 if subjects == [4]:
-    n = 'emgppppp'
-print(n+','+str(DIMENSIONS) +',' + str(time.time()-t)+','+str((suma/len(test_ld))), end = '')
+    n = "emgppppp"
+print(
+    n
+    + ","
+    + str(DIMENSIONS)
+    + ","
+    + str(time.time() - t)
+    + ","
+    + str((suma / len(test_ld))),
+    end="",
+)
