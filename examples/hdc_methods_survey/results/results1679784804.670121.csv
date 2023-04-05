@@ -1,0 +1,4 @@
+Name,Accuracy,Time,Size,Classes,Dimensions,Method
+Abalone,0.5641762614250183,3.7396459579467773,6266,3,10000,DensityEncodingOnlineV2
+AcuteInflammation,1.0,0.11164188385009766,180,2,10000,DensityEncodingOnlineV2
+AcuteNephritis,1.0,0.0985260009765625,180,2,10000,DensityEncodingOnlineV2

@@ -1,0 +1,13 @@
+Name,Accuracy,Time,Size,Classes,Dimensions,Method,Type
+Abalone,0.5363984704017639,6.342012882232666,6266,3,10000,MemoryModel,<class 'type'>
+Abalone,0.532567024230957,5.487914085388184,6266,3,10000,MemoryModel,<class 'type'>
+Abalone,0.5316091775894165,4.47878098487854,6266,3,10000,MemoryModel,<class 'type'>
+Abalone,0.5287356376647949,4.602730989456177,6266,3,10000,MemoryModel,<class 'type'>
+AcuteInflammation,1.0,0.30913615226745605,180,2,10000,MemoryModel,<class 'type'>
+AcuteInflammation,1.0,0.2981839179992676,180,2,10000,MemoryModel,<class 'type'>
+AcuteInflammation,1.0,0.2919728755950928,180,2,10000,MemoryModel,<class 'type'>
+AcuteInflammation,1.0,0.29291796684265137,180,2,10000,MemoryModel,<class 'type'>
+AcuteNephritis,0.8333333134651184,0.29346394538879395,180,2,10000,MemoryModel,<class 'type'>
+AcuteNephritis,0.7666666507720947,0.2999308109283447,180,2,10000,MemoryModel,<class 'type'>
+AcuteNephritis,1.0,0.32665205001831055,180,2,10000,MemoryModel,<class 'type'>
+AcuteNephritis,1.0,0.3615422248840332,180,2,10000,MemoryModel,<class 'type'>

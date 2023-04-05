@@ -1,0 +1,2 @@
+Name,Accuracy,Time,Size,Classes,Dimensions,Method,Type
+Abalone,0.5392720103263855,5.017757892608643,6266,3,10000,MemoryModel,<class 'type'>

@@ -1,0 +1,4 @@
+Name,Accuracy,Time,Size,Classes,Dimensions,Method
+Abalone,0.5593869686126709,5.24047589302063,6266,3,10000,MemoryModel
+AcuteInflammation,1.0,0.3000171184539795,180,2,10000,MemoryModel
+AcuteNephritis,1.0,0.28801679611206055,180,2,10000,MemoryModel
