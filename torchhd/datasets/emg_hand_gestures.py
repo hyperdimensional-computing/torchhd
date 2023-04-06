@@ -49,6 +49,7 @@ class EMGHandGestures(data.Dataset):
         subjects (list[int], optional): The subject numbers from 0 til 4 to include. Defaults to [0, 1, 2, 3, 4].
         window (int, optional): The number of measurements to include in each sample. Defaults to 256.
     """
+
     name = "EMGHandGestures"
     classes: List[str] = [
         "Closed hand",

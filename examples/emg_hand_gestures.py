@@ -40,7 +40,6 @@ class Encoder(nn.Module):
         return torchhd.hard_quantize(sample_hv)
 
 
-
 def experiment(subjects=[0]):
     print("List of subjects " + str(subjects))
     ds = EMGHandGestures(
@@ -54,7 +53,7 @@ def experiment(subjects=[0]):
     train_ld = data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
     test_ld = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
-    encode = Encoder(ds[0][0].size(-1)* ds[0][0].size(-2))
+    encode = Encoder(ds[0][0].size(-1) * ds[0][0].size(-2))
     encode = encode.to(device)
 
     num_classes = len(ds.classes)

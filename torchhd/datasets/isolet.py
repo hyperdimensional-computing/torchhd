@@ -63,6 +63,7 @@ class ISOLET(data.Dataset):
             target and transforms it.
 
     """
+
     name = "isolet"
     classes: List[str] = [
         "A",

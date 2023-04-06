@@ -56,8 +56,6 @@ class HDCArena:
 
         return ascii_index - ASCII_A
 
-
-
     """Class for iterating over all datasets used in `Do we Need Hundreds of Classifiers to Solve Real World Classification Problems? <https://jmlr.org/papers/v15/delgado14a.html>`_ from the `UCI Machine Learning Repository <https://archive.ics.uci.edu/ml/index.php>`_.
 
     Args:
@@ -100,21 +98,29 @@ class HDCArena:
         # For all datasets in the collection
         for dataset_name in self.dataset_names:
             # Fetch the current dataset
-            if dataset_name == 'MNIST':
+            if dataset_name == "MNIST":
                 import torchvision
                 from torchvision.datasets import MNIST
 
                 transform = torchvision.transforms.ToTensor()
-                train_ds = MNIST("../data", train=True, transform=transform, download=True)
-                test_ds = MNIST("../data", train=False, transform=transform, download=True)
+                train_ds = MNIST(
+                    "../data", train=True, transform=transform, download=True
+                )
+                test_ds = MNIST(
+                    "../data", train=False, transform=transform, download=True
+                )
                 yield self.DatasetEntry(dataset_name, train_ds, test_ds)
-            elif dataset_name == 'CIFAR10':
+            elif dataset_name == "CIFAR10":
                 import torchvision
                 from torchvision.datasets import CIFAR10
 
                 transform = torchvision.transforms.ToTensor()
-                train_ds = CIFAR10("../data", train=True, transform=transform, download=True)
-                test_ds = CIFAR10("../data", train=False, transform=transform, download=True)
+                train_ds = CIFAR10(
+                    "../data", train=True, transform=transform, download=True
+                )
+                test_ds = CIFAR10(
+                    "../data", train=False, transform=transform, download=True
+                )
                 yield self.DatasetEntry(dataset_name, train_ds, test_ds)
             else:
                 dataset = getattr(torchhd.datasets, dataset_name)
@@ -134,7 +140,7 @@ class HDCArena:
                 # Case of avaiable test set
                 else:
                     # Set test and train datasets
-                    if dataset_name == 'EuropeanLanguages':
+                    if dataset_name == "EuropeanLanguages":
                         from torchhd.datasets import EuropeanLanguages as Languages
 
                         def transform(x: str) -> torch.Tensor:
@@ -158,27 +164,43 @@ class HDCArena:
                             char_ids = [char2int(char) + 1 for char in char_ids.lower()]
 
                             if len(char_ids) < MAX_INPUT_SIZE:
-                                char_ids += [PADDING_IDX] * (MAX_INPUT_SIZE - len(char_ids))
+                                char_ids += [PADDING_IDX] * (
+                                    MAX_INPUT_SIZE - len(char_ids)
+                                )
                             return torch.tensor(char_ids, dtype=torch.long)
 
-                        train_ds = Languages("../data", train=True, transform=transform, download=True)
-                        test_ds = Languages("../data", train=False, transform=transform, download=True)
+                        train_ds = Languages(
+                            "../data", train=True, transform=transform, download=True
+                        )
+                        test_ds = Languages(
+                            "../data", train=False, transform=transform, download=True
+                        )
                         yield self.DatasetEntry(dataset_name, train_ds, test_ds)
 
-                    elif dataset_name == 'PAMAP':
+                    elif dataset_name == "PAMAP":
                         for i in range(8):
-                            train_ds = dataset(self.root, subjects=[i],  download=self.download)
-                            test_ds = dataset(self.root, subjects=[i], download=self.download)
+                            train_ds = dataset(
+                                self.root, subjects=[i], download=self.download
+                            )
+                            test_ds = dataset(
+                                self.root, subjects=[i], download=self.download
+                            )
                             yield self.DatasetEntry(dataset_name, train_ds, test_ds)
 
-                    elif dataset_name == 'EMGHandGestures':
+                    elif dataset_name == "EMGHandGestures":
                         for i in range(5):
-                            train_ds = dataset(self.root, subjects=[i],  download=self.download)
-                            test_ds = dataset(self.root, subjects=[i], download=self.download)
+                            train_ds = dataset(
+                                self.root, subjects=[i], download=self.download
+                            )
+                            test_ds = dataset(
+                                self.root, subjects=[i], download=self.download
+                            )
                             yield self.DatasetEntry(dataset_name, train_ds, test_ds)
 
                     else:
-                        train_ds = dataset(self.root, train=True, download=self.download)
+                        train_ds = dataset(
+                            self.root, train=True, download=self.download
+                        )
                         test_ds = dataset(self.root, train=False, download=False)
                         yield self.DatasetEntry(dataset_name, train_ds, test_ds)
 
@@ -220,6 +242,7 @@ class HDCArena:
                 results[key] = self.statistics[key]
 
         return results
+
 
 class UCIClassificationBenchmark:
     """Class for iterating over all datasets used in `Do we Need Hundreds of Classifiers to Solve Real World Classification Problems? <https://jmlr.org/papers/v15/delgado14a.html>`_ from the `UCI Machine Learning Repository <https://archive.ics.uci.edu/ml/index.php>`_.

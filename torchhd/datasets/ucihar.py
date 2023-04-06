@@ -65,6 +65,7 @@ class UCIHAR(data.Dataset):
 
 
     """
+
     name = "ucihar"
     classes: List[str] = [
         "WALKING",

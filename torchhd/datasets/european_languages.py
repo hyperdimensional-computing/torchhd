@@ -51,7 +51,7 @@ class EuropeanLanguages(data.Dataset):
             target and transforms it.
     """
 
-    name = 'european_languages'
+    name = "european_languages"
     classes: List[str] = [
         "Bulgarian",
         "Czech",

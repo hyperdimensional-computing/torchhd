@@ -63,6 +63,7 @@ class PAMAP(data.Dataset):
 
 
     """
+
     name = "PAMAP"
     classes: List[str] = [
         "lying",
@@ -271,7 +272,7 @@ class PAMAP(data.Dataset):
             clean_features = torch.cat((clean_features, features))
 
         self.data = clean_features
-        self.targets = clean_labels-1
+        self.targets = clean_labels - 1
 
     def download(self):
         """Download the data if it doesn't exist already."""
