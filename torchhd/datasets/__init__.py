@@ -33,6 +33,7 @@ from torchhd.datasets.dataset import CollectionDataset
 from torchhd.datasets.dataset import DatasetFourFold
 from torchhd.datasets.dataset import DatasetTrainTest
 from torchhd.datasets.dataset import UCIClassificationBenchmark
+from torchhd.datasets.dataset import HDCArena
 from torchhd.datasets.abalone import Abalone
 from torchhd.datasets.adult import Adult
 from torchhd.datasets.acute_inflammation import AcuteInflammation
@@ -156,6 +157,7 @@ from torchhd.datasets.yeast import Yeast
 from torchhd.datasets.zoo import Zoo
 
 __all__ = [
+    "HDCArena",
     "BeijingAirQuality",
     "ISOLET",
     "EuropeanLanguages",

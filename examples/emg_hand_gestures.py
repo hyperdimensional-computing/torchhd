@@ -29,21 +29,16 @@ def transform(x):
 
 
 class Encoder(nn.Module):
-    def __init__(self, out_features, timestamps, channels):
+    def __init__(self, size):
         super(Encoder, self).__init__()
+        self.embed = embeddings.Density(size, DIMENSIONS)
+        self.flatten = torch.nn.Flatten()
 
-        self.channels = embeddings.Random(channels, out_features)
-        self.timestamps = embeddings.Random(timestamps, out_features)
-        self.signals = embeddings.Level(NUM_LEVELS, out_features, high=20)
-
-    def forward(self, input: torch.Tensor) -> torch.Tensor:
-        signal = self.signals(input)
-        samples = torchhd.bind(signal, self.channels.weight.unsqueeze(0))
-        samples = torchhd.bind(samples, self.timestamps.weight.unsqueeze(1))
-
-        samples = torchhd.multiset(samples)
-        sample_hv = torchhd.ngrams(samples, n=N_GRAM_SIZE)
+    def forward(self, x):
+        x = self.flatten(x)
+        sample_hv = self.embed(x).sign()
         return torchhd.hard_quantize(sample_hv)
+
 
 
 def experiment(subjects=[0]):
@@ -59,7 +54,7 @@ def experiment(subjects=[0]):
     train_ld = data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
     test_ld = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
-    encode = Encoder(DIMENSIONS, ds[0][0].size(-2), ds[0][0].size(-1))
+    encode = Encoder(ds[0][0].size(-1)* ds[0][0].size(-2))
     encode = encode.to(device)
 
     num_classes = len(ds.classes)

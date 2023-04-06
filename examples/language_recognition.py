@@ -61,6 +61,8 @@ class Encoder(nn.Module):
         self.symbol = embeddings.Random(size, out_features, padding_idx=PADDING_IDX)
 
     def forward(self, x):
+        print(self.symbol.weight)
+
         symbols = self.symbol(x)
         sample_hv = torchhd.ngrams(symbols, n=3)
         return torchhd.hard_quantize(sample_hv)

@@ -33,6 +33,194 @@ import torchhd
 from .utils import download_file_from_google_drive
 
 
+class HDCArena:
+    MAX_INPUT_SIZE = 128
+    PADDING_IDX = 0
+
+    ASCII_A = ord("a")
+    ASCII_Z = ord("z")
+    ASCII_SPACE = ord(" ")
+    NUM_TOKENS = ASCII_Z - ASCII_A + 3
+
+    def char2int(char: str) -> int:
+        """Map a character to its integer identifier"""
+        ascii_index = ord(char)
+
+        from examples.language_recognition import ASCII_SPACE
+        from examples.language_recognition import ASCII_A
+        from examples.language_recognition import ASCII_Z
+
+        if ascii_index == ASCII_SPACE:
+            # Remap the space character to come after "z"
+            return ASCII_Z - ASCII_A + 1
+
+        return ascii_index - ASCII_A
+
+
+
+    """Class for iterating over all datasets used in `Do we Need Hundreds of Classifiers to Solve Real World Classification Problems? <https://jmlr.org/papers/v15/delgado14a.html>`_ from the `UCI Machine Learning Repository <https://archive.ics.uci.edu/ml/index.php>`_.
+
+    Args:
+        root (string): Root directory containing the files of the dataset.
+        download (bool, optional): If True, downloads the dataset from the internet and
+            puts it in root directory. If dataset is already downloaded, it is not
+            downloaded again.
+    """
+
+    # All datasets included in the collection
+    dataset_names = [
+        "CIFAR10",
+        "MNIST",
+        "EuropeanLanguages",
+        "EMGHandGestures",
+        "PAMAP",
+        "ISOLET",
+        "UCIHAR",
+    ]
+
+    # Specify namedtuple format
+    class DatasetEntry(NamedTuple):
+        name: str
+        train: data.Dataset
+        test: data.Dataset
+
+    def __init__(
+        self,
+        root: str,
+        download: bool,
+    ):
+        super(HDCArena, self).__init__()
+        self.root = root
+        self.download = download
+        self.statistics = {key: [] for key in self.dataset_names}
+
+    def datasets(self) -> Generator[DatasetEntry, None, None]:
+        """Returns an iterator over all datasets in the benchmark."""
+
+        # For all datasets in the collection
+        for dataset_name in self.dataset_names:
+            # Fetch the current dataset
+            if dataset_name == 'MNIST':
+                import torchvision
+                from torchvision.datasets import MNIST
+
+                transform = torchvision.transforms.ToTensor()
+                train_ds = MNIST("../data", train=True, transform=transform, download=True)
+                test_ds = MNIST("../data", train=False, transform=transform, download=True)
+                yield self.DatasetEntry(dataset_name, train_ds, test_ds)
+            elif dataset_name == 'CIFAR10':
+                import torchvision
+                from torchvision.datasets import CIFAR10
+
+                transform = torchvision.transforms.ToTensor()
+                train_ds = CIFAR10("../data", train=True, transform=transform, download=True)
+                test_ds = CIFAR10("../data", train=False, transform=transform, download=True)
+                yield self.DatasetEntry(dataset_name, train_ds, test_ds)
+            else:
+                dataset = getattr(torchhd.datasets, dataset_name)
+
+                # If no separate test dataset available - do 4-fold cross-validation
+                if hasattr(dataset, "num_folds"):
+                    for fold_id in range(dataset.num_folds):
+                        # Set test and train datasets for the current fold
+                        train_ds = dataset(
+                            self.root, train=True, download=self.download, fold=fold_id
+                        )
+                        test_ds = dataset(
+                            self.root, train=False, download=False, fold=fold_id
+                        )
+                        yield self.DatasetEntry(dataset_name, train_ds, test_ds)
+
+                # Case of avaiable test set
+                else:
+                    # Set test and train datasets
+                    if dataset_name == 'EuropeanLanguages':
+                        from torchhd.datasets import EuropeanLanguages as Languages
+
+                        def transform(x: str) -> torch.Tensor:
+                            PADDING_IDX = 0
+                            MAX_INPUT_SIZE = 128
+                            ASCII_A = ord("a")
+                            ASCII_Z = ord("z")
+                            ASCII_SPACE = ord(" ")
+
+                            def char2int(char: str) -> int:
+                                """Map a character to its integer identifier"""
+                                ascii_index = ord(char)
+
+                                if ascii_index == ASCII_SPACE:
+                                    # Remap the space character to come after "z"
+                                    return ASCII_Z - ASCII_A + 1
+
+                                return ascii_index - ASCII_A
+
+                            char_ids = x[:MAX_INPUT_SIZE]
+                            char_ids = [char2int(char) + 1 for char in char_ids.lower()]
+
+                            if len(char_ids) < MAX_INPUT_SIZE:
+                                char_ids += [PADDING_IDX] * (MAX_INPUT_SIZE - len(char_ids))
+                            return torch.tensor(char_ids, dtype=torch.long)
+
+                        train_ds = Languages("../data", train=True, transform=transform, download=True)
+                        test_ds = Languages("../data", train=False, transform=transform, download=True)
+                        yield self.DatasetEntry(dataset_name, train_ds, test_ds)
+
+                    elif dataset_name == 'PAMAP':
+                        for i in range(8):
+                            train_ds = dataset(self.root, subjects=[i],  download=self.download)
+                            test_ds = dataset(self.root, subjects=[i], download=self.download)
+                            yield self.DatasetEntry(dataset_name, train_ds, test_ds)
+
+                    elif dataset_name == 'EMGHandGestures':
+                        for i in range(5):
+                            train_ds = dataset(self.root, subjects=[i],  download=self.download)
+                            test_ds = dataset(self.root, subjects=[i], download=self.download)
+                            yield self.DatasetEntry(dataset_name, train_ds, test_ds)
+
+                    else:
+                        train_ds = dataset(self.root, train=True, download=self.download)
+                        test_ds = dataset(self.root, train=False, download=False)
+                        yield self.DatasetEntry(dataset_name, train_ds, test_ds)
+
+    def report(self, dataset: DatasetEntry, metric: float) -> None:
+        """Report the metric, e.g., accuracy, of the current dataset."""
+        # Update statistics for the current run if the dataset uses cross-validation
+        if hasattr(dataset.train, "num_folds"):
+            num_folds = dataset.train.num_folds
+            fold_idx = dataset.train.fold
+
+            if len(self.statistics[dataset.name]) == 0:
+                # Create a new nested list for each fold
+                self.statistics[dataset.name] = [[] for _ in range(num_folds)]
+
+            self.statistics[dataset.name][fold_idx].append(metric)
+
+        # Update statistics for the current run if the dataset has train/test split
+        else:
+            self.statistics[dataset.name].append(metric)
+
+    def score(self) -> Dict[str, List[float]]:
+        """Get the score on each dataset, averaged over cross-fold validation."""
+        results = {}
+        for key in self.statistics:
+            # If applicable average over folds
+            if len(self.statistics[key]) > 0 and isinstance(
+                self.statistics[key][0], list
+            ):
+                group_by_repetition = list(zip(*self.statistics[key]))
+                # If division by zero occurs keep empty
+                try:
+                    results[key] = [
+                        sum(metrics) / len(metrics) for metrics in group_by_repetition
+                    ]
+                except:
+                    results[key] = []
+
+            else:
+                results[key] = self.statistics[key]
+
+        return results
+
 class UCIClassificationBenchmark:
     """Class for iterating over all datasets used in `Do we Need Hundreds of Classifiers to Solve Real World Classification Problems? <https://jmlr.org/papers/v15/delgado14a.html>`_ from the `UCI Machine Learning Repository <https://archive.ics.uci.edu/ml/index.php>`_.
 

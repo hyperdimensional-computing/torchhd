@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
-from torchvision.datasets import MNIST
+from torchvision.datasets import CIFAR10
 
 # Note: this example requires the torchmetrics library: https://torchmetrics.readthedocs.io
 import torchmetrics
@@ -23,10 +23,10 @@ BATCH_SIZE = 1  # for GPUs with enough memory we can process multiple images at 
 
 transform = torchvision.transforms.ToTensor()
 
-train_ds = MNIST("../data", train=True, transform=transform, download=True)
+train_ds = CIFAR10("../data", train=True, transform=transform, download=True)
 train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
 
-test_ds = MNIST("../data", train=False, transform=transform, download=True)
+test_ds = CIFAR10("../data", train=False, transform=transform, download=True)
 test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
 
@@ -34,7 +34,7 @@ class Encoder(nn.Module):
     def __init__(self, out_features, size, levels):
         super(Encoder, self).__init__()
         self.flatten = torch.nn.Flatten()
-        self.position = embeddings.Random(size * size, out_features)
+        self.position = embeddings.Random(3072, out_features)
         self.value = embeddings.Level(levels, out_features)
 
     def forward(self, x):
