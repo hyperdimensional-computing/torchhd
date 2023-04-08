@@ -630,6 +630,120 @@ class Thermometer(nn.Embedding):
         return super().forward(index).as_subclass(vsa_tensor)
 
 
+class Flocet(nn.Embedding):
+    """Embedding wrapper around :func:`~torchhd.thermometer`.
+
+    Class inherits from `Embedding <https://pytorch.org/docs/stable/generated/torch.nn.Embedding.html>`_ and supports the same keyword arguments.
+
+    Args:
+        num_embeddings (int): the number of hypervectors to generate.
+        embedding_dim (int): the dimensionality of the hypervectors.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
+        low (float, optional): The lower bound of the real number range that the levels represent. Default: ``0.0``
+        high (float, optional): The upper bound of the real number range that the levels represent. Default: ``1.0``
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` uses default of VSATensor.
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
+
+    Values outside the interval between low and high are clipped to the closed bound.
+
+    Examples::
+
+        >>> emb = embeddings.Thermometer(4, 6)
+        >>> x = torch.rand(4)
+        >>> x
+        tensor([0.5295, 0.0618, 0.0675, 0.1750])
+        >>> emb(x)
+        MAPTensor([[ 1.,  1.,  1.,  1., -1., -1.],
+                   [-1., -1., -1., -1., -1., -1.],
+                   [-1., -1., -1., -1., -1., -1.],
+                   [ 1.,  1., -1., -1., -1., -1.]])
+
+        >>> emb = embeddings.Thermometer(4, 6, "FHRR")
+        >>> x = torch.rand(4)
+        >>> x
+        tensor([0.2668, 0.7668, 0.8083, 0.6247])
+        >>> emb(x)
+        FHRRTensor([[ 1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
+                    [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j],
+                    [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j],
+                    [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j]])
+
+    """
+
+    __constants__ = [
+        "num_embeddings",
+        "embedding_dim",
+        "vsa",
+        "low",
+        "high",
+        "padding_idx",
+        "max_norm",
+        "norm_type",
+        "scale_grad_by_freq",
+        "sparse",
+    ]
+
+    low: float
+    high: float
+    vsa: VSAOptions
+
+    def __init__(
+        self,
+        num_embeddings: int,
+        embedding_dim: int,
+        vsa: VSAOptions = "MAP",
+        low: float = 0.0,
+        high: float = 1.0,
+        requires_grad: bool = False,
+        max_norm: Optional[float] = None,
+        norm_type: float = 2.0,
+        scale_grad_by_freq: bool = False,
+        sparse: bool = False,
+        device=None,
+        dtype=None,
+    ) -> None:
+        factory_kwargs = {"device": device, "dtype": dtype}
+        # Have to call Module init explicitly in order not to use the Embedding init
+        nn.Module.__init__(self)
+
+        self.num_embeddings = num_embeddings
+        self.embedding_dim = embedding_dim
+        self.vsa = vsa
+        self.low = low
+        self.high = high
+
+        self.padding_idx = None
+        self.max_norm = max_norm
+        self.norm_type = norm_type
+        self.scale_grad_by_freq = scale_grad_by_freq
+        self.sparse = sparse
+
+        embeddings = functional.flocet(
+            num_embeddings, embedding_dim, self.vsa, **factory_kwargs
+        )
+        # Have to provide requires grad at the creation of the parameters to
+        # prevent errors when instantiating a non-float embedding
+        self.weight = Parameter(embeddings, requires_grad=requires_grad)
+
+    def reset_parameters(self) -> None:
+        factory_kwargs = {"device": self.weight.device, "dtype": self.weight.dtype}
+
+        with torch.no_grad():
+            embeddings = functional.flocet(
+                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs
+            )
+            self.weight.copy_(embeddings)
+
+    def forward(self, input: Tensor) -> Tensor:
+        index = functional.value_to_index(
+            input, self.low, self.high, self.num_embeddings
+        )
+        index = index.clamp(min=0, max=self.num_embeddings - 1)
+        vsa_tensor = functional.get_vsa_tensor_class(self.vsa)
+        return super().forward(index).as_subclass(vsa_tensor)
+
+
 class Circular(nn.Embedding):
     """Embedding wrapper around :func:`~torchhd.circular`.
 
@@ -948,7 +1062,6 @@ class Density(nn.Module):
             "requires_grad": requires_grad,
         }
         super(Density, self).__init__()
-
         # A set of random vectors used as unique IDs for features of the dataset.
         self.key = Random(in_features, out_features, vsa, **factory_kwargs)
         # Thermometer encoding used for transforming input data.
@@ -964,5 +1077,71 @@ class Density(nn.Module):
     def forward(self, input: Tensor) -> Tensor:
         # Perform binding of key and value vectors
         output = functional.bind(self.key.weight, self.density_encoding(input))
+        # Perform the superposition operation on the bound key-value pairs
+        return functional.multibundle(output)
+
+
+class DensityFlocet(nn.Module):
+    """Performs the transformation of input data into hypervectors according to the intRVFL model.
+
+    See details in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
+
+    Args:
+        in_features (int): the dimensionality of the input feature vector.
+        out_features (int): the dimensionality of the hypervectors.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
+        low (float, optional): The lower bound of the real number range that the levels of the thermometer encoding represent. Default: ``0.0``
+        high (float, optional): The upper bound of the real number range that the levels of the thermometer encoding represent. Default: ``1.0``
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` uses default of ``VSATensor``.
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
+
+
+    Examples::
+
+        >>> embed = embeddings.Density(6, 5)
+        >>> x = torch.randn(3, 6)
+        >>> x
+        tensor([[ 0.5430,  1.0740,  0.7250, -0.3410, -0.1318,  1.3188],
+                [ 0.4373,  1.2400, -0.2264,  1.2448, -0.2040, -0.7831],
+                [ 1.7460, -0.7359, -1.3271,  0.4338, -0.2401,  1.6553]])
+        >>> embed(x)
+        MAPTensor([[ 2.,  2., -2., -2.,  0.],
+                   [ 4.,  0.,  6.,  4.,  0.],
+                   [ 4., -4., -2., -4., -4.]])
+    """
+
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        vsa: VSAOptions = "MAP",
+        low: float = 0.0,
+        high: float = 1.0,
+        device=None,
+        dtype=None,
+        requires_grad: bool = False,
+    ):
+        factory_kwargs = {
+            "device": device,
+            "dtype": dtype,
+            "requires_grad": requires_grad,
+        }
+        super(DensityFlocet, self).__init__()
+        # A set of random vectors used as unique IDs for features of the dataset.
+        self.key = Random(in_features, out_features, vsa=vsa, **factory_kwargs)
+
+        self.flocet_encoding = Flocet(
+            math.floor(out_features/2) + 1, out_features, vsa, low=low, high=high, **factory_kwargs
+        )
+
+    def reset_parameters(self) -> None:
+        self.key.reset_parameters()
+        self.flocet_encoding.reset_parameters()
+
+    # Specify the steps needed to perform the encoding
+    def forward(self, input: Tensor) -> Tensor:
+        # Perform binding of key and value vectors
+        output = functional.bind(self.key.weight, self.flocet_encoding(input))
         # Perform the superposition operation on the bound key-value pairs
         return functional.multibundle(output)

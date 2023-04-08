@@ -15,8 +15,8 @@ from torchhd.datasets import EuropeanLanguages as Languages
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using {} device".format(device))
 
-DIMENSIONS = 10000
-BATCH_SIZE = 1  # for GPUs with enough memory we can process multiple images at ones
+DIMENSIONS = 200
+BATCH_SIZE = 1024  # for GPUs with enough memory we can process multiple images at ones
 # cap maximum sample size to 128 characters (including spaces)
 MAX_INPUT_SIZE = 128
 PADDING_IDX = 0
@@ -61,9 +61,7 @@ class Encoder(nn.Module):
         self.symbol = embeddings.Random(size, out_features, padding_idx=PADDING_IDX)
 
     def forward(self, x):
-        print(self.symbol.weight)
-
-        symbols = self.symbol(x)
+        symbols = self.symbol(x.long())
         sample_hv = torchhd.ngrams(symbols, n=3)
         return torchhd.hard_quantize(sample_hv)
 

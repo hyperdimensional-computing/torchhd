@@ -32,8 +32,8 @@ class Encoder(nn.Module):
         self.method = method
         if self.method == "bundle":
             self.symbol = embeddings.Random(size, dimensions)
-        if self.method == "hashmap":
-            levels = 1
+        if self.method == 'hashmap':
+            levels = 100
             self.keys = embeddings.Random(size, dimensions)
             self.values = embeddings.Level(levels, dimensions)
         if self.method == "ngram":
@@ -42,11 +42,12 @@ class Encoder(nn.Module):
             self.symbol = embeddings.Random(size, dimensions)
         if self.method == "random":
             self.embed = embeddings.Projection(size, dimensions)
-        if self.method == "sinusoid":
-            self.embed = embeddings.Projection(size, dimensions)
-        if self.method == "density":
+        if self.method == 'sinusoid':
+            self.embed = embeddings.Sinusoid(size, dimensions)
+        if self.method == 'density':
             self.embed = embeddings.Density(size, dimensions)
-
+        if self.method == 'flocet':
+            self.embed = embeddings.DensityFlocet(size, dimensions)
         self.flatten = torch.nn.Flatten()
 
     def forward(self, x):
@@ -64,6 +65,8 @@ class Encoder(nn.Module):
         if self.method == "sinusoid":
             sample_hv = self.embed(x).sign()
         if self.method == "density":
+            sample_hv = self.embed(x).sign()
+        if self.method == 'flocet':
             sample_hv = self.embed(x).sign()
         return torchhd.hard_quantize(sample_hv)
 
@@ -178,14 +181,16 @@ def exec_arena(method="density", dimensions=1, repeats=1, batch_size=1):
             train_loader = data.DataLoader(dataset.train, batch_size=batch_size)
             test_loader = data.DataLoader(dataset.test, batch_size=batch_size)
 
-        encode = Encoder(num_feat, dimensions, method)
-        encode = encode.to(device)
 
-        model = Centroid(dimensions, num_classes)
-        model = model.to(device)
 
         # Run for the requested number of simulations
         for r in range(repeats):
+            encode = Encoder(num_feat, dimensions, method)
+            encode = encode.to(device)
+
+            model = Centroid(dimensions, num_classes)
+            model = model.to(device)
+
             t = time.time()
             with torch.no_grad():
                 for samples, labels in tqdm(train_loader, desc="Training"):
@@ -228,11 +233,12 @@ def exec_arena(method="density", dimensions=1, repeats=1, batch_size=1):
 
 BATCH_SIZE = 128
 # Specifies how many random initializations of the model to evaluate for each dataset in the collection.
-REPEATS = 5
+REPEATS = 1
 # DIMENSIONS = [64, 128, 256, 512, 1024, 2048, 4096, 8192, 10000]
 DIMENSIONS = [10000]
-METHODS = ["bundle", "hashmap", "ngram", "sequence", "random", "sinusoid", "density"]
-# METHODS = ['bundle','sequence']
+
+METHODS = ['bundle','hashmap','ngram','sequence','random','sinusoid','density']
+METHODS = ['hashmap','sinusoid','flocet']
 print(benchmark.datasets())
 
 for i in DIMENSIONS:

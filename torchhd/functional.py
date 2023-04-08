@@ -42,6 +42,7 @@ __all__ = [
     "random",
     "level",
     "thermometer",
+    "flocet",
     "circular",
     "bind",
     "bundle",
@@ -467,6 +468,90 @@ def thermometer(
     hv.requires_grad = requires_grad
     return hv.as_subclass(vsa_tensor)
 
+
+def flocet(
+    num_vectors: int,
+    dimensions: int,
+    vsa: VSAOptions = "MAP",
+    *,
+    requires_grad=False,
+    **kwargs,
+) -> VSATensor:
+    """Creates a thermometer code for given dimensionality.
+
+    Implements similarity-preserving hypervectors as described in `Sparse Binary Distributed Encoding of Scalars <https://doi.org/10.1615/J%20Automat%20Inf%20Scien.v37.i6.20>`_.
+
+    Args:
+        num_vectors (int): the number of hypervectors to generate.
+        dimensions (int): the dimensionality of the hypervectors.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"MAP"``.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
+
+    Examples::
+
+        >>> torchhd.flocet(7, 6, "BSC")
+        tensor([[False, False, False, False, False, False],
+                [ True, False, False, False, False, False],
+                [ True,  True, False, False, False, False],
+                [ True,  True,  True, False, False, False],
+                [ True,  True,  True,  True, False, False],
+                [ True,  True,  True,  True,  True, False],
+                [ True,  True,  True,  True,  True,  True]])
+
+        >>> torchhd.flocet(4, 6, "MAP")
+        tensor([[-1., -1., -1., -1., -1., -1.],
+                [ 1.,  1., -1., -1., -1., -1.],
+                [ 1.,  1.,  1.,  1., -1., -1.],
+                [ 1.,  1.,  1.,  1.,  1.,  1.]])
+
+        >>> torchhd.flocet(6, 6, "FHRR")
+        tensor([[-1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
+                [ 1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
+                [ 1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
+                [ 1.+0.j,  1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j, -1.+0.j],
+                [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j, -1.+0.j, -1.+0.j],
+                [ 1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j,  1.+0.j, -1.+-0.j]])
+
+    """
+    vsa_tensor = get_vsa_tensor_class(vsa)
+
+    # generate a random vector as a placeholder to get dtype and device
+    rand_hv = vsa_tensor.random(
+        1,
+        dimensions,
+        **kwargs,
+    )
+
+    if vsa_tensor == BSCTensor:
+        # Use binary vectors
+        hv = torch.zeros(
+            num_vectors,
+            dimensions,
+            dtype=rand_hv.dtype,
+            device=rand_hv.device,
+        )
+    elif (vsa_tensor == MAPTensor) | (vsa_tensor == FHRRTensor):
+        # Use bipolar vectors
+        hv = torch.full(
+            (
+                num_vectors,
+                dimensions,
+            ),
+            -1,
+            dtype=rand_hv.dtype,
+            device=rand_hv.device,
+        )
+    else:
+        raise ValueError(f"{vsa_tensor} HD/VSA model is not defined.")
+
+    # Create hypervectors using the obtained step
+    for i in range(0, num_vectors):
+        hv[i, i : i + int(dimensions/2)] = 1
+
+    hv.requires_grad = requires_grad
+    return hv.as_subclass(vsa_tensor)
 
 def circular(
     num_vectors: int,

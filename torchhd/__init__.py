@@ -42,6 +42,7 @@ from torchhd.functional import (
     random,
     level,
     thermometer,
+    flocet,
     circular,
     bind,
     bundle,
