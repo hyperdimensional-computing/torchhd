@@ -548,10 +548,11 @@ def flocet(
 
     # Create hypervectors using the obtained step
     for i in range(0, num_vectors):
-        hv[i, i : i + int(dimensions/2)] = 1
+        hv[i, i : i + int(dimensions / 2)] = 1
 
     hv.requires_grad = requires_grad
     return hv.as_subclass(vsa_tensor)
+
 
 def circular(
     num_vectors: int,

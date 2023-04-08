@@ -32,7 +32,7 @@ class Encoder(nn.Module):
         self.method = method
         if self.method == "bundle":
             self.symbol = embeddings.Random(size, dimensions)
-        if self.method == 'hashmap':
+        if self.method == "hashmap":
             levels = 100
             self.keys = embeddings.Random(size, dimensions)
             self.values = embeddings.Level(levels, dimensions)
@@ -42,11 +42,11 @@ class Encoder(nn.Module):
             self.symbol = embeddings.Random(size, dimensions)
         if self.method == "random":
             self.embed = embeddings.Projection(size, dimensions)
-        if self.method == 'sinusoid':
+        if self.method == "sinusoid":
             self.embed = embeddings.Sinusoid(size, dimensions)
-        if self.method == 'density':
+        if self.method == "density":
             self.embed = embeddings.Density(size, dimensions)
-        if self.method == 'flocet':
+        if self.method == "flocet":
             self.embed = embeddings.DensityFlocet(size, dimensions)
         self.flatten = torch.nn.Flatten()
 
@@ -66,7 +66,7 @@ class Encoder(nn.Module):
             sample_hv = self.embed(x).sign()
         if self.method == "density":
             sample_hv = self.embed(x).sign()
-        if self.method == 'flocet':
+        if self.method == "flocet":
             sample_hv = self.embed(x).sign()
         return torchhd.hard_quantize(sample_hv)
 
@@ -181,8 +181,6 @@ def exec_arena(method="density", dimensions=1, repeats=1, batch_size=1):
             train_loader = data.DataLoader(dataset.train, batch_size=batch_size)
             test_loader = data.DataLoader(dataset.test, batch_size=batch_size)
 
-
-
         # Run for the requested number of simulations
         for r in range(repeats):
             encode = Encoder(num_feat, dimensions, method)
@@ -237,8 +235,8 @@ REPEATS = 1
 # DIMENSIONS = [64, 128, 256, 512, 1024, 2048, 4096, 8192, 10000]
 DIMENSIONS = [10000]
 
-METHODS = ['bundle','hashmap','ngram','sequence','random','sinusoid','density']
-METHODS = ['hashmap','sinusoid','flocet']
+METHODS = ["bundle", "hashmap", "ngram", "sequence", "random", "sinusoid", "density"]
+METHODS = ["hashmap", "sinusoid", "flocet"]
 print(benchmark.datasets())
 
 for i in DIMENSIONS:

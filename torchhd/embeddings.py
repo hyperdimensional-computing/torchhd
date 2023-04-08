@@ -1132,7 +1132,12 @@ class DensityFlocet(nn.Module):
         self.key = Random(in_features, out_features, vsa=vsa, **factory_kwargs)
 
         self.flocet_encoding = Flocet(
-            math.floor(out_features/2) + 1, out_features, vsa, low=low, high=high, **factory_kwargs
+            math.floor(out_features / 2) + 1,
+            out_features,
+            vsa,
+            low=low,
+            high=high,
+            **factory_kwargs,
         )
 
     def reset_parameters(self) -> None:
