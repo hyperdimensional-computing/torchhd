@@ -231,12 +231,11 @@ def exec_arena(method="density", dimensions=1, repeats=1, batch_size=1):
 
 BATCH_SIZE = 128
 # Specifies how many random initializations of the model to evaluate for each dataset in the collection.
-REPEATS = 2
+REPEATS = 5
 # DIMENSIONS = [64, 128, 256, 512, 1024, 2048, 4096, 8192, 10000]
-DIMENSIONS = [200]
+DIMENSIONS = [10000]
 
 METHODS = ["bundle", "sequence", "ngram","hashmap",  "flocet", "density","random", "sinusoid",]
-METHODS = ["random"]
 print(benchmark.datasets())
 
 for i in DIMENSIONS:
