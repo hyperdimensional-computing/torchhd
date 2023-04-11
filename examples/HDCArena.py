@@ -256,11 +256,11 @@ REPEATS = 1
 DIMENSIONS = [500]
 
 ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
-ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid"]
-ENCODINGS = ["hashmap"]
-METHODS = ["add_adjust"]
-METHODS = ["add_adapt","add_online","add_adjust"]
-RETRAIN = True
+#ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid"]
+#ENCODINGS = ["hashmap"]
+METHODS = ["add"]
+#METHODS = ["add_adapt","add_online","add_adjust"]
+RETRAIN = False
 
 DIMENSIONS = [10000]
 
