@@ -81,119 +81,109 @@ with open(results_file, "w", newline="") as file:
     writer.writerow(["Name", "Accuracy", "Time", "Dimensions", "Method", "Encoding"])
 
 
-def exec_arena(
-    method="add",
-    encoding="density",
-    retrain=False,
-    dimensions=10,
-    repeats=1,
-    batch_size=1,
-):
+def exec_arena(method="add", encoding='density', retrain=False, dimensions=10, repeats=1, batch_size=1):
     for dataset in benchmark.datasets():
-        print(dataset.name)
-        if dataset.name == "EuropeanLanguages":
-            from torchhd.datasets import EuropeanLanguages as Languages
+        for r in range(repeats):
+            print(dataset.name)
+            if dataset.name == "EuropeanLanguages":
+                from torchhd.datasets import EuropeanLanguages as Languages
 
-            MAX_INPUT_SIZE = 128
-            PADDING_IDX = 0
+                MAX_INPUT_SIZE = 128
+                PADDING_IDX = 0
 
-            ASCII_A = ord("a")
-            ASCII_Z = ord("z")
-            ASCII_SPACE = ord(" ")
+                ASCII_A = ord("a")
+                ASCII_Z = ord("z")
+                ASCII_SPACE = ord(" ")
 
-            def char2int(char: str) -> int:
-                """Map a character to its integer identifier"""
-                ascii_index = ord(char)
+                def char2int(char: str) -> int:
+                    """Map a character to its integer identifier"""
+                    ascii_index = ord(char)
 
-                if ascii_index == ASCII_SPACE:
-                    # Remap the space character to come after "z"
-                    return ASCII_Z - ASCII_A + 1
+                    if ascii_index == ASCII_SPACE:
+                        # Remap the space character to come after "z"
+                        return ASCII_Z - ASCII_A + 1
 
-                return ascii_index - ASCII_A
+                    return ascii_index - ASCII_A
 
-            def transform(x: str) -> torch.Tensor:
-                char_ids = x[:MAX_INPUT_SIZE]
-                char_ids = [char2int(char) + 1 for char in char_ids.lower()]
+                def transform(x: str) -> torch.Tensor:
+                    char_ids = x[:MAX_INPUT_SIZE]
+                    char_ids = [char2int(char) + 1 for char in char_ids.lower()]
 
-                if len(char_ids) < MAX_INPUT_SIZE:
-                    char_ids += [PADDING_IDX] * (MAX_INPUT_SIZE - len(char_ids))
+                    if len(char_ids) < MAX_INPUT_SIZE:
+                        char_ids += [PADDING_IDX] * (MAX_INPUT_SIZE - len(char_ids))
 
-                return torch.tensor(char_ids, dtype=torch.long)
+                    return torch.tensor(char_ids, dtype=torch.long)
 
-            num_feat = MAX_INPUT_SIZE
+                num_feat = MAX_INPUT_SIZE
 
-            train_ds = Languages(
-                "../data", train=True, transform=transform, download=True
-            )
-            train_loader = data.DataLoader(
-                train_ds, batch_size=BATCH_SIZE, shuffle=True
-            )
+                train_ds = Languages(
+                    "../data", train=True, transform=transform, download=True
+                )
+                train_loader = data.DataLoader(
+                    train_ds, batch_size=BATCH_SIZE, shuffle=True
+                )
 
-            test_ds = Languages(
-                "../data", train=False, transform=transform, download=True
-            )
-            test_loader = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
-            num_classes = len(train_ds.classes)
+                test_ds = Languages(
+                    "../data", train=False, transform=transform, download=True
+                )
+                test_loader = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
+                num_classes = len(train_ds.classes)
 
-        elif dataset.name in ["PAMAP", "EMGHandGestures"]:
-            if dataset.name == "EMGHandGestures":
-                num_feat = dataset.train[0][0].size(-1) * dataset.train[0][0].size(-2)
-            else:
-                num_feat = dataset.train[0][0].size(-1)
+            elif dataset.name in ["PAMAP", "EMGHandGestures"]:
+                if dataset.name == "EMGHandGestures":
+                    num_feat = dataset.train[0][0].size(-1) * dataset.train[0][0].size(-2)
+                else:
+                    num_feat = dataset.train[0][0].size(-1)
 
-            # Number of classes in the dataset.
-            num_classes = len(dataset.train.classes)
-            # Number of training samples in the dataset.
-            num_train_samples = len(dataset.train)
+                # Number of classes in the dataset.
+                num_classes = len(dataset.train.classes)
+                # Number of training samples in the dataset.
+                num_train_samples = len(dataset.train)
 
-            # Get values for min-max normalization and add the transformation
-            min_val = torch.min(dataset.train.data, 0).values.to(device)
-            max_val = torch.max(dataset.train.data, 0).values.to(device)
-            transform = create_min_max_normalize(min_val, max_val)
-            dataset.train.transform = transform
-
-            train_size = int(len(dataset.train) * 0.7)
-            test_size = len(dataset.train) - train_size
-            train_ds, test_ds = data.random_split(
-                dataset.train, [train_size, test_size]
-            )
-
-            train_loader = data.DataLoader(
-                train_ds, batch_size=batch_size, shuffle=True
-            )
-            test_loader = data.DataLoader(test_ds, batch_size=batch_size)
-        else:
-            # Number of features in the dataset.
-            if dataset.name not in ["MNIST", "CIFAR10"]:
-                num_feat = dataset.train[0][0].size(-1)
-            else:
-                if dataset.name == "MNIST":
-                    num_feat = dataset.train[0][0].size(-1) * dataset.train[0][0].size(
-                        -1
-                    )
-                elif dataset.name == "CIFAR10":
-                    num_feat = 3072
-            # Number of classes in the dataset.
-            num_classes = len(dataset.train.classes)
-            # Number of training samples in the dataset.
-            num_train_samples = len(dataset.train)
-            # Get values for min-max normalization and add the transformation
-
-            if dataset.name not in ["MNIST", "CIFAR10"]:
+                # Get values for min-max normalization and add the transformation
                 min_val = torch.min(dataset.train.data, 0).values.to(device)
                 max_val = torch.max(dataset.train.data, 0).values.to(device)
                 transform = create_min_max_normalize(min_val, max_val)
                 dataset.train.transform = transform
-                dataset.test.transform = transform
 
-            # Set up data loaders
-            train_loader = data.DataLoader(
-                dataset.train, batch_size=batch_size, shuffle=True
-            )
-            test_loader = data.DataLoader(dataset.test, batch_size=batch_size)
+                train_size = int(len(dataset.train) * 0.7)
+                test_size = len(dataset.train) - train_size
+                train_ds, test_ds = data.random_split(
+                    dataset.train, [train_size, test_size]
+                )
 
-        # Run for the requested number of simulations
-        for r in range(repeats):
+                train_loader = data.DataLoader(train_ds, batch_size=batch_size, shuffle=True)
+                test_loader = data.DataLoader(test_ds, batch_size=batch_size)
+            else:
+                # Number of features in the dataset.
+                if dataset.name not in ["MNIST", "CIFAR10"]:
+                    num_feat = dataset.train[0][0].size(-1)
+                else:
+                    if dataset.name == "MNIST":
+                        num_feat = dataset.train[0][0].size(-1) * dataset.train[0][0].size(
+                            -1
+                        )
+                    elif dataset.name == "CIFAR10":
+                        num_feat = 3072
+                # Number of classes in the dataset.
+                num_classes = len(dataset.train.classes)
+                # Number of training samples in the dataset.
+                num_train_samples = len(dataset.train)
+                # Get values for min-max normalization and add the transformation
+
+                if dataset.name not in ["MNIST", "CIFAR10"]:
+                    min_val = torch.min(dataset.train.data, 0).values.to(device)
+                    max_val = torch.max(dataset.train.data, 0).values.to(device)
+                    transform = create_min_max_normalize(min_val, max_val)
+                    dataset.train.transform = transform
+                    dataset.test.transform = transform
+
+                # Set up data loaders
+                train_loader = data.DataLoader(dataset.train, batch_size=batch_size, shuffle=True)
+                test_loader = data.DataLoader(dataset.test, batch_size=batch_size)
+
+            # Run for the requested number of simulations
+
             encode = Encoder(num_feat, dimensions, encoding)
             encode = encode.to(device)
 
@@ -219,13 +209,13 @@ def exec_arena(
                     labels = labels.to(device)
 
                     samples_hv = encode(samples)
-                    if method == "add":
+                    if method == 'add':
                         model.add(samples_hv, labels)
-                    elif method == "add_online":
+                    elif method == 'add_online':
                         model.add_online(samples_hv, labels)
-                    elif method == "add_adapt":
+                    elif method == 'add_adapt':
                         model.add_adapt(samples_hv, labels)
-                    elif method == "add_adjust":
+                    elif method == 'add_adjust':
                         model.add_adapt(samples_hv, labels)
 
             with torch.no_grad():
@@ -247,8 +237,8 @@ def exec_arena(
                         accuracy.compute().item(),
                         time.time() - t,
                         dimensions,
-                        "retrain" + method if retrain else method,
-                        encoding,
+                        'retrain'+method if retrain else method,
+                        encoding
                     ]
                 )
             # print(f"{dataset.name} accuracy: {(accuracy.compute().item() * 100):.2f}%")
@@ -265,20 +255,11 @@ REPEATS = 1
 # DIMENSIONS = [64, 128, 256, 512, 1024, 2048, 4096, 8192, 10000]
 DIMENSIONS = [500]
 
-ENCODINGS = [
-    "bundle",
-    "sequence",
-    "ngram",
-    "hashmap",
-    "flocet",
-    "density",
-    "random",
-    "sinusoid",
-]
+ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = ["hashmap"]
 METHODS = ["add_adjust"]
-METHODS = ["add_adapt", "add_online", "add_adjust"]
+METHODS = ["add_adapt","add_online","add_adjust"]
 RETRAIN = True
 
 DIMENSIONS = [10000]
@@ -298,11 +279,4 @@ print(benchmark.datasets())
 for i in DIMENSIONS:
     for j in ENCODINGS:
         for k in METHODS:
-            exec_arena(
-                encoding=j,
-                method=k,
-                dimensions=i,
-                repeats=REPEATS,
-                batch_size=BATCH_SIZE,
-                retrain=RETRAIN,
-            )
+            exec_arena(encoding=j, method=k, dimensions=i, repeats=REPEATS, batch_size=BATCH_SIZE, retrain=RETRAIN)
