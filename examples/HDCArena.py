@@ -27,46 +27,46 @@ print("Using {} device".format(device))
 
 
 class Encoder(nn.Module):
-    def __init__(self, size, dimensions, method):
+    def __init__(self, size, dimensions, encoding):
         super(Encoder, self).__init__()
-        self.method = method
-        if self.method == "bundle":
+        self.encoding = encoding
+        if self.encoding == "bundle":
             self.symbol = embeddings.Random(size, dimensions)
-        if self.method == "hashmap":
+        if self.encoding == "hashmap":
             levels = 100
             self.keys = embeddings.Random(size, dimensions)
             self.values = embeddings.Level(levels, dimensions)
-        if self.method == "ngram":
+        if self.encoding == "ngram":
             self.symbol = embeddings.Random(size, dimensions)
-        if self.method == "sequence":
+        if self.encoding == "sequence":
             self.symbol = embeddings.Random(size, dimensions)
-        if self.method == "random":
+        if self.encoding == "random":
             self.embed = embeddings.Projection(size, dimensions)
-        if self.method == "sinusoid":
+        if self.encoding == "sinusoid":
             self.embed = embeddings.Sinusoid(size, dimensions)
-        if self.method == "density":
+        if self.encoding == "density":
             self.embed = embeddings.Density(size, dimensions)
-        if self.method == "flocet":
+        if self.encoding == "flocet":
             self.embed = embeddings.DensityFlocet(size, dimensions)
         self.flatten = torch.nn.Flatten()
 
     def forward(self, x):
         x = self.flatten(x).float()
-        if self.method == "bundle":
+        if self.encoding == "bundle":
             sample_hv = torchhd.multiset(self.symbol(x.long()))
-        if self.method == "hashmap":
+        if self.encoding == "hashmap":
             sample_hv = torchhd.hash_table(self.keys.weight, self.values(x))
-        if self.method == "ngram":
+        if self.encoding == "ngram":
             sample_hv = torchhd.ngrams(self.symbol(x.long()), n=3)
-        if self.method == "sequence":
+        if self.encoding == "sequence":
             sample_hv = torchhd.ngrams(self.symbol(x.long()), n=1)
-        if self.method == "random":
+        if self.encoding == "random":
             sample_hv = self.embed(x).sign()
-        if self.method == "sinusoid":
+        if self.encoding == "sinusoid":
             sample_hv = self.embed(x).sign()
-        if self.method == "density":
+        if self.encoding == "density":
             sample_hv = self.embed(x).sign()
-        if self.method == "flocet":
+        if self.encoding == "flocet":
             sample_hv = self.embed(x).sign()
         return torchhd.hard_quantize(sample_hv)
 
@@ -78,10 +78,10 @@ results_file = "results/results" + str(time.time()) + ".csv"
 
 with open(results_file, "w", newline="") as file:
     writer = csv.writer(file)
-    writer.writerow(["Name", "Accuracy", "Time", "Dimensions", "Method"])
+    writer.writerow(["Name", "Accuracy", "Time", "Dimensions", "Method", "Encoding"])
 
 
-def exec_arena(method="density", dimensions=1, repeats=1, batch_size=1):
+def exec_arena(method="add", encoding='density', retrain=False, dimensions=10, repeats=1, batch_size=1):
     for dataset in benchmark.datasets():
         print(dataset.name)
         if dataset.name == "EuropeanLanguages":
@@ -151,7 +151,7 @@ def exec_arena(method="density", dimensions=1, repeats=1, batch_size=1):
                 dataset.train, [train_size, test_size]
             )
 
-            train_loader = data.DataLoader(train_ds, batch_size=batch_size)
+            train_loader = data.DataLoader(train_ds, batch_size=batch_size, shuffle=True)
             test_loader = data.DataLoader(test_ds, batch_size=batch_size)
         else:
             # Number of features in the dataset.
@@ -178,26 +178,44 @@ def exec_arena(method="density", dimensions=1, repeats=1, batch_size=1):
                 dataset.test.transform = transform
 
             # Set up data loaders
-            train_loader = data.DataLoader(dataset.train, batch_size=batch_size)
+            train_loader = data.DataLoader(dataset.train, batch_size=batch_size, shuffle=True)
             test_loader = data.DataLoader(dataset.test, batch_size=batch_size)
 
         # Run for the requested number of simulations
         for r in range(repeats):
-            encode = Encoder(num_feat, dimensions, method)
+            encode = Encoder(num_feat, dimensions, encoding)
             encode = encode.to(device)
 
             model = Centroid(dimensions, num_classes)
             model = model.to(device)
 
             t = time.time()
+
+            accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
+
+            if retrain:
+                with torch.no_grad():
+                    for samples, labels in tqdm(train_loader, desc="Training"):
+                        samples = samples.to(device)
+                        labels = labels.to(device)
+
+                        samples_hv = encode(samples)
+                        model.add(samples_hv, labels)
+
             with torch.no_grad():
                 for samples, labels in tqdm(train_loader, desc="Training"):
                     samples = samples.to(device)
                     labels = labels.to(device)
 
                     samples_hv = encode(samples)
-                    model.add(samples_hv, labels)
-            accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
+                    if method == 'add':
+                        model.add(samples_hv, labels)
+                    elif method == 'add_online':
+                        model.add_online(samples_hv, labels)
+                    elif method == 'add_adapt':
+                        model.add_adapt(samples_hv, labels)
+                    elif method == 'add_adjust':
+                        model.add_adapt(samples_hv, labels)
 
             with torch.no_grad():
                 model.normalize()
@@ -218,7 +236,8 @@ def exec_arena(method="density", dimensions=1, repeats=1, batch_size=1):
                         accuracy.compute().item(),
                         time.time() - t,
                         dimensions,
-                        method,
+                        'retrain'+method if retrain else method,
+                        encoding
                     ]
                 )
             # print(f"{dataset.name} accuracy: {(accuracy.compute().item() * 100):.2f}%")
@@ -229,15 +248,21 @@ def exec_arena(method="density", dimensions=1, repeats=1, batch_size=1):
     # print(benchmark_accuracy)
 
 
-BATCH_SIZE = 128
+BATCH_SIZE = 10
 # Specifies how many random initializations of the model to evaluate for each dataset in the collection.
-REPEATS = 5
+REPEATS = 1
 # DIMENSIONS = [64, 128, 256, 512, 1024, 2048, 4096, 8192, 10000]
-DIMENSIONS = [10000]
+DIMENSIONS = [500]
 
-METHODS = ["bundle", "sequence", "ngram","hashmap",  "flocet", "density","random", "sinusoid",]
+ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
+ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid"]
+ENCODINGS = ["hashmap"]
+METHODS = ["add_adjust"]
+METHODS = ["add_adapt","add_online","add_adjust"]
+RETRAIN = True
 print(benchmark.datasets())
 
 for i in DIMENSIONS:
-    for j in METHODS:
-        exec_arena(method=j, dimensions=i, repeats=REPEATS, batch_size=BATCH_SIZE)
+    for j in ENCODINGS:
+        for k in METHODS:
+            exec_arena(encoding=j, method=k, dimensions=i, repeats=REPEATS, batch_size=BATCH_SIZE, retrain=RETRAIN)
