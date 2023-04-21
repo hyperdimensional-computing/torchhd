@@ -334,11 +334,11 @@ DIMENSIONS = [10000]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid"]
-#ENCODINGS = ["sinusoid"]
-#METHODS = ["add"]
+# ENCODINGS = ["sinusoid"]
+# METHODS = ["add"]
 METHODS = ["add_adjust_4"]
-#METHODS = ["neural"]
-RETRAIN = [True,False]
+# METHODS = ["neural"]
+RETRAIN = [True, False]
 
 ITERATIONS = 21
 
