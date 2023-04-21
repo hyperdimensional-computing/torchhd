@@ -299,7 +299,6 @@ class Centroid(nn.Module):
         alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
         self.weight.index_add_(0, pred, lr * alpha2 * input)
 
-
     @torch.no_grad()
     def add_adjust_5(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
         """Adds the input vectors scaled by the lr to the target prototype vectors."""
