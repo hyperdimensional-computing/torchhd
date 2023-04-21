@@ -336,7 +336,7 @@ DIMENSIONS = [10000]
 ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid"]
 # ENCODINGS = ["sinusoid"]
 # METHODS = ["add"]
-METHODS = ["add_adjust_4"]
+METHODS = ["add_adjust_5", "add_adjust_6"]
 # METHODS = ["neural"]
 RETRAIN = [True, False]
 

@@ -299,6 +299,57 @@ class Centroid(nn.Module):
         alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
         self.weight.index_add_(0, pred, lr * alpha2 * input)
 
+
+    @torch.no_grad()
+    def add_adjust_5(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
+        """Adds the input vectors scaled by the lr to the target prototype vectors."""
+        logit = self(input)
+        pred = logit.argmax(1)
+        is_wrong = target != pred
+
+        self.similarity_sum += logit.max(1).values.item()
+        self.count += 1
+        if self.error_count == 0:
+            val = self.similarity_sum / self.count
+        else:
+            val = self.error_similarity_sum / self.error_count
+        if is_wrong.sum().item() == 0:
+            if logit.max(1).values.item() < val:
+                self.weight.index_add_(0, target, input)
+            return
+
+        self.error_count += 1
+        self.error_similarity_sum += logit.max(1).values.item()
+
+        input = input[is_wrong]
+        target = target[is_wrong]
+        pred = pred[is_wrong]
+
+        self.weight.index_add_(0, target, input)
+        self.weight.index_add_(0, target, input)
+        self.weight.index_add_(0, target, input)
+        self.weight.index_add_(0, pred, -input)
+
+    @torch.no_grad()
+    def add_adjust_6(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
+        """Adds the input vectors scaled by the lr to the target prototype vectors."""
+        logit = self(input)
+        pred = logit.argmax(1)
+        is_wrong = target != pred
+
+        # cancel update if all predictions were correct
+        if is_wrong.sum().item() == 0:
+            return
+
+        input = input[is_wrong]
+        target = target[is_wrong]
+        pred = pred[is_wrong]
+
+        self.weight.index_add_(0, target, input)
+        self.weight.index_add_(0, target, input)
+        self.weight.index_add_(0, target, input)
+        self.weight.index_add_(0, pred, -input)
+
     @torch.no_grad()
     def normalize(self, eps=1e-12) -> None:
         """Transforms all the class prototype vectors into unit vectors.
