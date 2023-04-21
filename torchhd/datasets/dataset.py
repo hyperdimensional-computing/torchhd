@@ -67,13 +67,13 @@ class HDCArena:
 
     # All datasets included in the collection
     dataset_names = [
-        "CIFAR10",
-        "MNIST",
-        # "EuropeanLanguages",
-        "EMGHandGestures",
-        # "PAMAP",
-        "ISOLET",
-        "UCIHAR",
+        #"CIFAR10",
+        #"MNIST",
+        "EuropeanLanguages",
+        #"EMGHandGestures",
+        "PAMAP",
+        #"ISOLET",
+        #"UCIHAR",
     ]
 
     # Specify namedtuple format
