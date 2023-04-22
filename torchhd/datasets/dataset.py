@@ -69,10 +69,10 @@ class HDCArena:
     dataset_names = [
         #"CIFAR10",
         #"MNIST",
-        "EuropeanLanguages",
+        #"EuropeanLanguages",
         #"EMGHandGestures",
-        "PAMAP",
-        #"ISOLET",
+        #"PAMAP",
+        "ISOLET",
         #"UCIHAR",
     ]
 
