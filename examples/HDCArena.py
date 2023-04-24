@@ -333,16 +333,25 @@ REPEATS = 3
 DIMENSIONS = [10000]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
-ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid","bundle", "sequence", "ngram"]
+ENCODINGS = [
+    "hashmap",
+    "flocet",
+    "density",
+    "random",
+    "sinusoid",
+    "bundle",
+    "sequence",
+    "ngram",
+]
 # ENCODINGS = ["sinusoid"]
 # METHODS = ["add"]
 METHODS = [
     "add",
-#   "add_adapt",
-#    "add_online",
- #   "add_adjust",
- #   "add_adjust_2",
- #   "add_adjust_3",
+    #   "add_adapt",
+    #    "add_online",
+    #   "add_adjust",
+    #   "add_adjust_2",
+    #   "add_adjust_3",
 ]
 # METHODS = ["neural"]
 RETRAIN = [False]
