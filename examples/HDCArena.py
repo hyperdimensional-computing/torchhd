@@ -82,12 +82,12 @@ class Encoder(nn.Module):
 
 
 # Get an instance of the UCI benchmark
-benchmark = UCIClassificationBenchmark(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/examples/data", download=True
+benchmark = HDCArena(
+    "../data", download=True
 )
 # Perform evaluation
 results_file = (
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/examples/results/results"
+    "results/results"
     + str(time.time())
     + ".csv"
 )
@@ -231,7 +231,7 @@ def exec_arena(
             encode = Encoder(num_feat, dimensions, encoding)
             encode = encode.to(device)
 
-            model = Centroid(dimensions, num_classes, num_train_samples * 0.1)
+            model = Centroid(dimensions, num_classes)
             model = model.to(device)
 
             t = time.time()
@@ -352,10 +352,10 @@ ENCODINGS = [
 # ENCODINGS = ["sinusoid"]
 # METHODS = ["add"]
 METHODS = [
-    # "add",
-    # "add_adapt",
-    # "add_online",
-    "add_adjust_8",
+    "add",
+    "add_adapt",
+    "add_online",
+    "add_adjust",
 ]
 # METHODS = ["neural"]
 RETRAIN = [False]

@@ -243,7 +243,7 @@ def exec_arena(
             lr = 3
             iter_completed = 0
             for iter in range(iterations):
-                accuracy_train = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
+                accuracy_train = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(device)
                 iter_completed += 1
                 for samples, labels in tqdm(train_loader, desc="Training", disable=False):
                     samples = samples.to(device)
@@ -283,7 +283,7 @@ def exec_arena(
 
                 if iter == 0:
                     with torch.no_grad():
-                        accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
+                        accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(device)
 
                         for samples, labels in tqdm(test_loader, desc="Testing"):
                             samples = samples.to(device)
@@ -296,7 +296,7 @@ def exec_arena(
 
             with torch.no_grad():
                 model.normalize()
-                accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
+                accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(device)
 
                 for samples, labels in tqdm(test_loader, desc="Testing"):
                     samples = samples.to(device)
