@@ -503,6 +503,69 @@ class UCIClassificationBenchmark:
         "Zoo",
     ]
 
+    dataset_names_ = [
+        "Arrhythmia",
+        "AudiologyStd",
+        "Balloons",
+        "BreastCancer",
+        "CreditApproval",
+        "Dermatology",
+        "Echocardiogram",
+        "Ecoli",
+        "EnergyY2",
+        "HeartHungarian",
+        "HeartVa",
+        "HillValley",
+        "HorseColic",
+        "LedDisplay",
+        "Lenses",
+        "LungCancer",
+        "Lymphography",
+        "Mammographic",
+        #"Miniboone",
+        "MolecBiolPromoter",
+        "Monks1",
+        "Monks2",
+        "PittsburgBridgesMaterial",
+        "PittsburgBridgesRelL",
+        "PittsburgBridgesTOrD",
+        "PittsburgBridgesType",
+        "PlantMargin",
+        "PlantShape",
+        "PlantTexture",
+        "PrimaryTumor",
+        "Soybean",
+        "StatlogHeart",
+        "Teaching",
+        "Titanic",
+        "Twonorm",
+        "VertebralColumn3Clases",
+        "WineQualityRed",
+        "WineQualityWhite",
+    ]
+
+    dataset_names_ = [
+        "Arrhythmia",
+        "AudiologyStd",
+        "Balloons",
+        "BreastCancer",
+        "CreditApproval",
+        "Dermatology",
+        "Echocardiogram",
+        "Ecoli",
+        "EnergyY2",
+        "HeartHungarian",
+        "HeartVa",
+        "HillValley",
+        "HorseColic",
+        "LedDisplay",
+        "Lenses",
+        "LungCancer",
+        "Lymphography"
+    ]
+
+
+
     # Specify namedtuple format
     class DatasetEntry(NamedTuple):
         name: str
