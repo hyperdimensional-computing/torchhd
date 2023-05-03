@@ -622,7 +622,7 @@ def circular(
 def fractional_power_encoding(
     values: Tensor,
     dimensions: int,
-    kernel_shape = "sinc",
+    kernel_shape="sinc",
     bandwidth: float = 1.0,
     vsa: VSAOptions = "FHRR",
     *,
@@ -636,7 +636,7 @@ def fractional_power_encoding(
     Args:
         values (Tensor): values for which FPE hypervectors should be generated.
         dimensions (int): the dimensionality of the hypervectors.
-        kernel_shape (str, optional): hyperparameter defining the shape of the kernel by specifying a particular probability distribution that is used to sample the base hypervector(s).  Default: ``"sinc"``.  
+        kernel_shape (str, optional): hyperparameter defining the shape of the kernel by specifying a particular probability distribution that is used to sample the base hypervector(s).  Default: ``"sinc"``.
         bandwidth (float, optional): positive hyperparameter defining the width of the similarity kernel. Lower values lead to broader kernels while larger values lead to more narrow kernels. Default: ``1.0``.
         vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"FHRR"``.
         dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
@@ -651,7 +651,7 @@ def fractional_power_encoding(
             [ 0.4172-0.9088j,  0.8927+0.4506j,  0.7973-0.6036j, -0.4730+0.8810j,
               0.5044-0.8635j,  0.5912-0.8065j],
             [ 0.1394+0.9902j,  0.7641+0.6451j,  0.5636-0.8260j, -0.9989+0.0463j,
-              0.0076-1.0000j, -0.1627+0.9867j]]), 
+              0.0076-1.0000j, -0.1627+0.9867j]]),
          FHRRTensor([[-0.8418+0.5398j,  0.9728+0.2316j,  0.9480-0.3184j,  0.5133+0.8582j,
               0.8673-0.4978j, -0.8920+0.4521j]]))
 
@@ -662,26 +662,33 @@ def fractional_power_encoding(
         1,
         dimensions,
         **kwargs,
-    ) 
+    )
 
     # Check HD/VSA model type
     if vsa_tensor == FHRRTensor:
-        # Generate the base vector that determines the shape of the FPE kernel 
+        # Generate the base vector that determines the shape of the FPE kernel
         if kernel_shape == "sinc":
-            #Draw angles from a uniform  distribution for base hypervector(s)  
-            angle = torch.empty(base_hv.size(), dtype=torch.float64, device=base_hv.device)
-            angle.uniform_(-math.pi, math.pi)            
+            # Draw angles from a uniform  distribution for base hypervector(s)
+            angle = torch.empty(
+                base_hv.size(), dtype=torch.float64, device=base_hv.device
+            )
+            angle.uniform_(-math.pi, math.pi)
         else:
             raise ValueError(f"{kernel_shape} kernel is not supported at the moment.")
-    
-        # Set the values of the base hypervector(s)
-        base_hv[:,:] = torch.complex(angle.cos(), angle.sin())        
 
-        # Perform FPE of the desired values using the base hypervector(s)   
-        hv = torch.pow(base_hv.repeat(values.size(0), 1),torch.transpose(bandwidth*values.repeat(dimensions,1),0,1))
+        # Set the values of the base hypervector(s)
+        base_hv[:, :] = torch.complex(angle.cos(), angle.sin())
+
+        # Perform FPE of the desired values using the base hypervector(s)
+        hv = torch.pow(
+            base_hv.repeat(values.size(0), 1),
+            torch.transpose(bandwidth * values.repeat(dimensions, 1), 0, 1),
+        )
 
     else:
-        raise ValueError(f"{vsa_tensor} Fractioncal Power Encoding for this HD/VSA model is not implemented or defined.")
+        raise ValueError(
+            f"{vsa_tensor} Fractioncal Power Encoding for this HD/VSA model is not implemented or defined."
+        )
 
     hv.requires_grad = requires_grad
     return hv, base_hv
