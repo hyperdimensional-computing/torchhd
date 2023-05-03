@@ -20,6 +20,7 @@ Basis-hypervector sets
     level
     thermometer
     circular
+    fractional_power_encoding
     
 
 Operations
