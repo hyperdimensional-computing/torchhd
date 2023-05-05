@@ -20,7 +20,7 @@ def train_multicentroidHD(
             labels = labels.to(device)
 
             samples_hv = encode(samples)
-            pred = model.add_multi(samples_hv, labels)
+            pred = model.add_multi(samples_hv, labels, device)
             accuracy.update(pred, labels)
         model.reduce_subclasses(
             train_loader,

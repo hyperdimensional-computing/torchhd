@@ -445,16 +445,16 @@ class Centroid(nn.Module):
             torch.randn(encode.embed.weight.size(0)).unsqueeze(1).to(device)
         )
 
-    def multi_similarity(self, input):
+    def multi_similarity(self, input, device):
         return torch.cat(
-            [functional.cosine_similarity(input, i)[0] for i in self.multi_weight],
+            [functional.cosine_similarity(input, i.to(device))[0] for i in self.multi_weight],
             dim=0,
         )
 
     @torch.no_grad()
-    def add_multi(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
+    def add_multi(self, input: Tensor, target: Tensor, device, lr: float = 1.0) -> None:
         """Adds the input vectors scaled by the lr to the target prototype vectors."""
-        logit = self.multi_similarity(input)
+        logit = self.multi_similarity(input, device)
 
         pred = torch.argmax(logit, dim=0)
         row = 0
