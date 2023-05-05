@@ -472,7 +472,9 @@ class Centroid(nn.Module):
         if row == target:
             if self.multi_weight[row].shape[0] == col:
                 col -= 1
-            self.multi_weight[row][col] = self.multi_weight[row][col].to(device) + input.to(device)[0].to(device)
+            self.multi_weight[row][col] = self.multi_weight[row][col].to(
+                device
+            ) + input.to(device)[0].to(device)
         else:
             self.multi_weight[target] = torch.cat(
                 [self.multi_weight[target].to(device), input.to(device)], dim=0
