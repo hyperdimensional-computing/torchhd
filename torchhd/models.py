@@ -447,7 +447,10 @@ class Centroid(nn.Module):
 
     def multi_similarity(self, input, device):
         return torch.cat(
-            [functional.cosine_similarity(input, i.to(device))[0] for i in self.multi_weight],
+            [
+                functional.cosine_similarity(input, i.to(device))[0]
+                for i in self.multi_weight
+            ],
             dim=0,
         )
 
