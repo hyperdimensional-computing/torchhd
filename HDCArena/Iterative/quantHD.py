@@ -44,7 +44,7 @@ def train_quantHD(
                     model.add_quantize(samples_hv, labels, lr=lr, model=model_quantize)
                 else:
                     if idx == validation_set:
-                        model.binarize_model(model_quantize)
+                        model.binarize_model(model_quantize, device)
                     outputs = model.quantized_similarity(
                         samples_hv, model_quantize
                     ).float()

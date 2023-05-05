@@ -336,8 +336,8 @@ class Centroid(nn.Module):
         variation = max_vals - min_vals
         _, dropped_indices = variation.topk(r, largest=False)
 
-        self.weight.data[:, dropped_indices] = torch.randn(self.weight.size(0))
-        encode.embed.weight[:, dropped_indices] = torch.randn(self.weight.size(0))
+        self.weight.data[:, dropped_indices] = torch.randn(self.weight.size(0)).unsqueeze(1)
+        encode.embed.weight[:, dropped_indices] = torch.randn(encode.embed.weight.size(0)).unsqueeze(1)
 
     @torch.no_grad()
     def add_dist(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
@@ -408,7 +408,7 @@ class Centroid(nn.Module):
                 (self.m_disthd, alpha * n1 + beta * n2 - theta * n3), dim=0
             )
 
-    def regenerate_dist(self, r, eps=1e-12):
+    def regenerate_dist(self, r, encode, eps=1e-12):
         norms = self.m_disthd.norm(dim=1, keepdim=True)
         norms.clamp_(min=eps)
         self.m_disthd.div_(norms)
@@ -430,7 +430,9 @@ class Centroid(nn.Module):
                 torch.sum(top_n_ == intersect.unsqueeze(1), dim=0) > 0,
             )
         ]
-        self.weight[:, dimensions_regenerated] = torch.randn(self.weight.size(0))
+
+        self.weight.data[:, dimensions_regenerated] = torch.randn(self.weight.size(0)).unsqueeze(1)
+        encode.embed.weight[:, dimensions_regenerated] = torch.randn(encode.embed.weight.size(0)).unsqueeze(1)
 
     def multi_similarity(self, input):
         return torch.cat(

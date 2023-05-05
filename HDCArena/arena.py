@@ -263,7 +263,7 @@ def exec_arena(
                 lr = 1
                 iterations = 30
                 epsilon = 0.01
-                model_quantize = "ternary"
+                model_quantize = "binary"
                 iterations_executed = quantHDiterative.train_quantHD(
                     train_loader,
                     device,
@@ -402,7 +402,7 @@ def exec_arena(
 
 BATCH_SIZE = 1
 REPEATS = 1
-DIMENSIONS = [10000]
+DIMENSIONS = [32]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
@@ -419,9 +419,9 @@ ENCODINGS = [
 # "dist_iterative",
 # "multicentroid"]
 METHODS = [
-    "quant_iterative",
-    "sparse_iterative",
-    "neural_iterative",
+    #"quant_iterative",
+    #"sparse_iterative",
+    #"neural_iterative",
     "dist_iterative",
     "multicentroid",
 ]

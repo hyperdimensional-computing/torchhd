@@ -28,7 +28,7 @@ def train_distHD(
                 samples_hv = encode(samples)
                 model.add_dist(samples_hv, labels, lr=lr)
                 model.eval_dist(samples_hv, labels, alpha=alpha, beta=beta, theta=theta)
-            model.regenerate_dist(int(r * dimensions))
+            model.regenerate_dist(int(r * dimensions), encode)
     return iterations
 
 
