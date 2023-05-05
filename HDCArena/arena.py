@@ -402,7 +402,7 @@ def exec_arena(
 
 BATCH_SIZE = 1
 REPEATS = 1
-DIMENSIONS = [32]
+DIMENSIONS = [8]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
