@@ -31,7 +31,7 @@ from torch.nn.parameter import Parameter
 import torch.nn.init as init
 import torch.utils.data as data
 from tqdm import tqdm
-
+import torchmetrics
 import torchhd
 import torchhd.functional as functional
 import torchhd.datasets as datasets
@@ -85,7 +85,9 @@ class Centroid(nn.Module):
         factory_kwargs = {"device": device, "dtype": dtype}
         super(Centroid, self).__init__()
 
-        self.in_features = in_features
+
+        self.in_features = in_features # dimensions
+
         self.out_features = out_features
         self.similarity_sum = 0
         self.count = 0
@@ -95,45 +97,36 @@ class Centroid(nn.Module):
         weight = torch.empty((out_features, in_features), **factory_kwargs)
         self.weight = Parameter(weight, requires_grad=requires_grad)
 
+        # QuantHD
+        weight_quant = torch.empty((out_features, in_features), **factory_kwargs)
+        self.weight_quant = Parameter(weight_quant, requires_grad=requires_grad)
+
+        # SparseHD
+        weight_sparse = torch.empty((out_features, in_features), **factory_kwargs)
+        self.weight_sparse = Parameter(weight_sparse, requires_grad=requires_grad)
+
+        # DistHD
+        self.n_disthd = torch.empty((0, in_features))
+        self.m_disthd = torch.empty((0, in_features))
+
+        # MultiCentroidHD
+        multi_weight = [torch.empty(1,in_features) for i in range(out_features)]
+        self.multi_weight = [Parameter(tensor) for tensor in multi_weight]
+
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
         init.zeros_(self.weight)
+        init.zeros_(self.weight_quant)
+        init.zeros_(self.weight_sparse)
+        for i in self.multi_weight:
+            init.zeros_(i)
 
     def forward(self, input: Tensor, dot: bool = False) -> Tensor:
         if dot:
             return functional.dot_similarity(input, self.weight)
 
         return functional.cosine_similarity(input, self.weight)
-
-    '''
-    @torch.no_grad()
-    def add_high_dimensions(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
-        """Adds the input vectors scaled by the lr to the target prototype vectors."""
-        logit = self(input)
-        pred = logit.argmax(1)
-        is_wrong = target != pred
-        self.count += 1
-
-        r = 1
-        if self.correct >= 1:
-            r = 1/(self.correct/self.count)
-        self.weight.index_add_(0, target, input, alpha=r)
-
-        if is_wrong:
-            mask_indices = torch.eq(torch.sign(input), torch.sign(self.weight[pred]))
-            mask = torch.zeros_like(input, dtype=torch.bool)
-            mask[mask_indices] = True
-            alpha = (1-logit[0][target])
-            self.weight[pred] -= (alpha*input*r)
-        else:
-            self.correct += 1
-            mask_indices = torch.eq(torch.sign(input), torch.sign(self.weight[target]))
-            mask = torch.zeros_like(input, dtype=torch.bool)
-            mask[mask_indices] = True
-            alpha = (1-logit.max(1).values)
-            self.weight[target] += mask * (alpha*input*r)
-    '''
 
     @torch.no_grad()
     def add(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
@@ -230,38 +223,86 @@ class Centroid(nn.Module):
         alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
         self.weight.index_add_(0, pred, lr * alpha2 * input)
 
-    @torch.no_grad()
-    def add_adjust_2(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
-        """Adds the input vectors scaled by the lr to the target prototype vectors."""
-        logit = self(input)
+    def quantized_similarity(self, input, model):
+        if model == 'binary':
+            return functional.hamming_similarity(input, self.weight_quant).float()
+        elif model == 'ternary':
+            return functional.dot_similarity(input, self.weight_quant)
+
+    def add_quantize(self, input: Tensor, target: Tensor, lr: float = 1.0, model = 'binary') -> None:
+        logit = self.quantized_similarity(input, model)
         pred = logit.argmax(1)
         is_wrong = target != pred
 
-        self.similarity_sum += logit.max(1).values.item()
-        self.count += 1
-        if self.error_count == 0:
-            val = self.similarity_sum / self.count
-        else:
-            val = self.error_similarity_sum / self.error_count
+        # cancel update if all predictions were correct
         if is_wrong.sum().item() == 0:
-            if logit.max(1).values.item() < val:
-                self.weight.index_add_(0, target, input)
             return
-
-        self.error_count += 1
-        self.error_similarity_sum += logit.max(1).values.item()
 
         input = input[is_wrong]
         target = target[is_wrong]
         pred = pred[is_wrong]
 
-        self.weight.index_add_(0, target, input)
-        self.weight.index_add_(0, target, input)
-        self.weight.index_add_(0, pred, -input)
+        self.weight.index_add_(0, target, lr * input)
+        self.weight.index_add_(0, pred, lr * -input)
 
-    @torch.no_grad()
-    def add_adjust_3(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
-        """Adds the input vectors scaled by the lr to the target prototype vectors."""
+    def binarize_model(self, model):
+        if model == 'binary':
+            self.weight_quant.data = torch.sign(self.weight.data)
+        elif model == 'ternary':
+            self.weight_quant.data = torch.where(self.weight.data > 0, torch.tensor(1.0),
+                                                 torch.where(self.weight.data < 0, torch.tensor(-1.0),
+                                                             torch.tensor(0.0)))
+
+    def add_sparse(self, input: Tensor, target: Tensor, lr: float = 1.0, iter = 0) -> None:
+        if iter == 0:
+            logit = self(input)
+        else:
+            logit = self.sparse_similarity(input)
+        pred = logit.argmax(1)
+        is_wrong = target != pred
+
+        # cancel update if all predictions were correct
+        if is_wrong.sum().item() == 0:
+            return
+
+        input = input[is_wrong]
+        target = target[is_wrong]
+        pred = pred[is_wrong]
+
+        if iter == 0:
+            self.weight.index_add_(0, target, lr * input)
+            self.weight.index_add_(0, pred, lr * -input)
+        else:
+            self.weight_sparse.index_add_(0, target, lr * input)
+            self.weight_sparse.index_add_(0, pred, lr * -input)
+
+    def sparse_similarity(self, input):
+        return functional.cosine_similarity(input, self.weight_sparse)
+
+    def sparsify_model(self, model, s, iter):
+        if model == 'dimension':
+            if iter == 0:
+                max_vals, _ = torch.max(self.weight.data, dim=0)
+                min_vals, _ = torch.min(self.weight.data, dim=0)
+            else:
+                max_vals, _ = torch.max(self.weight_sparse.data, dim=0)
+                min_vals, _ = torch.min(self.weight_sparse.data, dim=0)
+            variation = max_vals - min_vals
+            _, dropped_indices = variation.topk(s, largest=False)
+
+            if iter == 0:
+                self.weight_sparse.data = self.weight.data.clone()
+            self.weight_sparse.data[:, dropped_indices] = 0
+        if model == 'class':
+            if iter == 0:
+                _, dropped_indices = torch.topk(self.weight.abs(), k=s, dim=1, largest=False, sorted=True)
+            else:
+                _, dropped_indices = torch.topk(self.weight_sparse.abs(), k=s, dim=1, largest=False, sorted=True)
+            if iter == 0:
+                self.weight_sparse.data = self.weight.data.clone()
+            self.weight_sparse.data[:, dropped_indices] = 0
+
+    def add_neural(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
         logit = self(input)
         pred = logit.argmax(1)
         is_wrong = target != pred
@@ -274,25 +315,205 @@ class Centroid(nn.Module):
         target = target[is_wrong]
         pred = pred[is_wrong]
 
-        self.weight.index_add_(0, target, input)
-        self.weight.index_add_(0, target, input)
-        self.weight.index_add_(0, pred, -input)
+        self.weight.index_add_(0, target, lr * input)
+        self.weight.index_add_(0, pred, lr * -input)
+
+    def neural_regenerate(self, r, encode):
+        max_vals, _ = torch.max(self.weight.data, dim=0)
+        min_vals, _ = torch.min(self.weight.data, dim=0)
+
+        variation = max_vals - min_vals
+        _, dropped_indices = variation.topk(r, largest=False)
+        
+        self.weight.data[:, dropped_indices] = torch.randn(self.weight.size(0))
+        encode.embed.weight[:, dropped_indices] = torch.randn(self.weight.size(0))
 
     @torch.no_grad()
-    def add_adjust_9(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
-        """Adds the input vectors scaled by the lr to the target prototype vectors."""
+    def add_dist(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
+        r"""Only updates the prototype vectors on wrongly predicted inputs.
 
-        self.count += 1
+        Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
 
+        Adds the input to the mispredicted class prototype scaled by :math:`\epsilon - 1`
+        and adds the input to the target prototype scaled by :math:`1 - \delta`,
+        where :math:`\epsilon` is the cosine similarity of the input with the mispredicted class prototype
+        and :math:`\delta` is the cosine similarity of the input with the target class prototype.
+        """
+        # Adapted from: https://gitlab.com/biaslab/onlinehd/-/blob/master/onlinehd/onlinehd.py
         logit = self(input)
         pred = logit.argmax(1)
         is_wrong = target != pred
 
+        # cancel update if all predictions were correct
         if is_wrong.sum().item() == 0:
-            self.weight.index_add_(0, target, input, alpha=lr)
+            return
+
+        # only update wrongly predicted inputs
+        logit = logit[is_wrong]
+        input = input[is_wrong]
+        target = target[is_wrong]
+        pred = pred[is_wrong]
+
+        alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
+        alpha2 = 1.0 - logit.gather(1, pred.unsqueeze(1))
+
+        self.weight.index_add_(0, target, lr * alpha1 * input)
+        self.weight.index_add_(0, pred, lr * alpha2 * -input)
+
+    @torch.no_grad()
+    def eval_dist(self, input: Tensor, target: Tensor, lr: float = 1.0, alpha = 1.0, beta = 1.0, theta = 1.0) -> None:
+        r"""Only updates the prototype vectors on wrongly predicted inputs.
+
+        Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
+
+        Adds the input to the mispredicted class prototype scaled by :math:`\epsilon - 1`
+        and adds the input to the target prototype scaled by :math:`1 - \delta`,
+        where :math:`\epsilon` is the cosine similarity of the input with the mispredicted class prototype
+        and :math:`\delta` is the cosine similarity of the input with the target class prototype.
+        """
+        # Adapted from: https://gitlab.com/biaslab/onlinehd/-/blob/master/onlinehd/onlinehd.py
+        logit = self(input)
+        _, top_2 = torch.topk(logit, k=2)
+        pred1 = top_2[0][0]
+        pred2 = top_2[0][1]
+
+        if pred2 == target:
+            m1 = torch.abs(input - self.weight[pred1])
+            m2 = torch.abs(input - self.weight[pred2])
+            self.m_disthd = torch.cat((self.m_disthd, alpha*m1 - beta*m2), dim=0)
+        if pred1 != target and pred2 != target:
+            n1 = torch.abs(input - self.weight[pred2])
+            n2 = torch.abs(input - self.weight[pred1])
+            n3 = torch.abs(input - self.weight[target])
+            self.n_disthd = torch.cat((self.m_disthd, alpha*n1 + beta*n2 - theta*n3), dim=0)
+
+    def regenerate_dist(self, r, eps=1e-12):
+        norms = self.m_disthd.norm(dim=1, keepdim=True)
+        norms.clamp_(min=eps)
+        self.m_disthd.div_(norms)
+
+        norms = self.n_disthd.norm(dim=1, keepdim=True)
+        norms.clamp_(min=eps)
+        self.n_disthd.div_(norms)
+
+        m_ = torch.sum(self.m_disthd, dim=0)
+        n_ = torch.sum(self.n_disthd, dim=0)
+
+        _, top_m_ = m_.topk(r, largest=True)
+        _, top_n_ = n_.topk(r, largest=True)
+        intersect = torch.unique(torch.cat((top_m_, top_n_), 0))
+
+        dimensions_regenerated = intersect[torch.logical_and(torch.sum(top_m_ == intersect.unsqueeze(1), dim=0) > 0,
+                                             torch.sum(top_n_ == intersect.unsqueeze(1), dim=0) > 0)]
+        self.weight[:, dimensions_regenerated] = torch.randn(self.weight.size(0))
+
+    def multi_similarity(self, input):
+        return torch.cat([functional.cosine_similarity(input, i)[0] for i in self.multi_weight], dim=0)
+
+    @torch.no_grad()
+    def add_multi(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
+        """Adds the input vectors scaled by the lr to the target prototype vectors."""
+        logit = self.multi_similarity(input)
+
+        pred = torch.argmax(logit, dim=0)
+        row = 0
+        col = 0
+        for i in self.multi_weight:
+            if i.shape[0] >= pred:
+                col = i.shape[0] - pred
+                break
+            else:
+                row += 1
+                pred -= i.shape[0]
+        if row == target:
+            
+            if self.multi_weight[row].shape[0] == col:
+                col -= 1
+            self.multi_weight[row][col] += input[0]
         else:
-            self.weight.index_add_(0, target, input, alpha=lr * 4)
-            self.weight.index_add_(0, pred, -input, alpha=lr)
+            self.multi_weight[target] = torch.cat([self.multi_weight[target], input], dim=0)
+        return torch.tensor([row])
+
+    def drop_classes(self, drop):
+        concatenated = torch.cat([i for i in self.multi_weight], dim=0)
+        abs_sum = torch.abs(concatenated).sum(dim=1)
+        sorted_indices = torch.argsort(abs_sum)[:drop]
+        sorted_indices, _ = torch.sort(sorted_indices, descending=False)
+        pos = 0
+        for r in range(len(self.multi_weight)):
+            prev_pos = pos
+            pos += self.multi_weight[r].shape[0]
+
+            remove_ind = sorted_indices[sorted_indices < pos]
+            remove_ind = remove_ind - prev_pos
+
+            indices_to_keep = [i for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind]
+            tensors_to_keep = torch.index_select(self.multi_weight[r], dim=0, index=torch.tensor(indices_to_keep))
+            
+            self.multi_weight[r] = tensors_to_keep
+            sorted_indices = sorted_indices[sorted_indices >= pos]
+
+    def cluster_classes(self, drop):
+        concatenated = torch.cat([i for i in self.multi_weight], dim=0)
+        abs_sum = torch.abs(concatenated).sum(dim=1)
+        sorted_indices = torch.argsort(abs_sum)[:drop]
+        sorted_indices, _ = torch.sort(sorted_indices, descending=False)
+        pos = 0
+        for r in range(len(self.multi_weight)):
+            prev_pos = pos
+            pos += self.multi_weight[r].shape[0]
+
+            remove_ind = sorted_indices[sorted_indices < pos]
+            remove_ind = remove_ind - prev_pos
+
+            to_cluster = torch.index_select(self.multi_weight[r], dim=0, index=remove_ind)
+            cluster = torchhd.multiset(to_cluster)
+
+            indices_to_keep = [i for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind]
+            tensors_to_keep = torch.index_select(self.multi_weight[r], dim=0, index=torch.tensor(indices_to_keep))
+
+            self.multi_weight[r] = tensors_to_keep
+            most_similar = torch.argmax(torchhd.cosine_similarity(cluster, self.multi_weight[r]), dim=0)
+            self.multi_weight[r] += most_similar
+            sorted_indices = sorted_indices[sorted_indices >= pos]
+
+
+    def get_subclasses(self):
+        sub_classes = 0
+        for i in self.multi_weight:
+            sub_classes += i.shape[0]
+        return sub_classes
+
+    def reduce_subclasses(self, train_loader, device, encode, model, accuracy_full, reduce_subclasses = 'drop', threshold = 0.03) -> None:
+        for i in range(10):
+            accuracy = torchmetrics.Accuracy("multiclass", num_classes=self.in_features).to(device)
+
+            drop_classes = int(self.get_subclasses()*0.1)
+            if reduce_subclasses == 'drop':
+                self.drop_classes(drop_classes)
+            elif reduce_subclasses == 'cluster':
+                self.cluster_classes(drop_classes)
+            
+            with torch.no_grad():
+                for samples, labels in tqdm(train_loader, desc="Training"):
+                    samples = samples.to(device)
+                    labels = labels.to(device)
+                    samples_hv = encode(samples)
+                    outputs = model.multi_similarity(samples_hv)
+
+                    pred = torch.argmax(outputs, dim=0)
+                    row = 0
+                    for i in model.multi_weight:
+                        if i.shape[0] >= pred:
+                            break
+                        else:
+                            row += 1
+                            pred -= i.shape[0]
+                    accuracy.update(torch.tensor([row]), labels)
+            new_acc = accuracy.compute().item()
+            if accuracy_full - new_acc > threshold:
+                print(self.get_subclasses(), accuracy_full, new_acc)
+                return
 
 
     @torch.no_grad()
@@ -311,11 +532,6 @@ class Centroid(nn.Module):
             self.in_features, self.out_features is not None
         )
 
-    def neural_regeneration(self, k=100):
-        variance = torch.var(self.weight, dim=0, keepdim=True)
-        _, indices = torch.topk(variance, k, largest=False)
-        self.weight[:, indices] = torch.zeros(indices.shape)
-        return indices
 
 
 class IntRVFL(nn.Module):
