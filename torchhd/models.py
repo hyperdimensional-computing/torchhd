@@ -479,8 +479,8 @@ class Centroid(nn.Module):
             )
         return torch.tensor([row])
 
-    def drop_classes(self, drop):
-        concatenated = torch.cat([i for i in self.multi_weight], dim=0)
+    def drop_classes(self, drop, device):
+        concatenated = torch.cat([i.to(device) for i in self.multi_weight], dim=0)
         abs_sum = torch.abs(concatenated).sum(dim=1)
         sorted_indices = torch.argsort(abs_sum)[:drop]
         sorted_indices, _ = torch.sort(sorted_indices, descending=False)
@@ -493,20 +493,20 @@ class Centroid(nn.Module):
             remove_ind = remove_ind - prev_pos
 
             indices_to_keep = [
-                i for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind
+                i.to(device) for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind
             ]
             tensors_to_keep = torch.index_select(
-                self.multi_weight[r], dim=0, index=torch.tensor(indices_to_keep)
+                self.multi_weight[r].to(device), dim=0, index=torch.tensor(indices_to_keep).to(device)
             )
 
-            self.multi_weight[r] = tensors_to_keep
+            self.multi_weight[r] = tensors_to_keep.to(device)
             sorted_indices = sorted_indices[sorted_indices >= pos]
 
-    def cluster_classes(self, drop):
-        concatenated = torch.cat([i for i in self.multi_weight], dim=0)
-        abs_sum = torch.abs(concatenated).sum(dim=1)
+    def cluster_classes(self, drop, device):
+        concatenated = torch.cat([i.to(device) for i in self.multi_weight], dim=0)
+        abs_sum = torch.abs(concatenated).sum(dim=1).to(device)
         sorted_indices = torch.argsort(abs_sum)[:drop]
-        sorted_indices, _ = torch.sort(sorted_indices, descending=False)
+        sorted_indices, _ = torch.sort(sorted_indices, descending=False).to(device)
         pos = 0
         for r in range(len(self.multi_weight)):
             prev_pos = pos
@@ -517,21 +517,21 @@ class Centroid(nn.Module):
 
             to_cluster = torch.index_select(
                 self.multi_weight[r], dim=0, index=remove_ind
-            )
-            cluster = torchhd.multiset(to_cluster)
+            ).to(device)
+            cluster = torchhd.multiset(to_cluster).to(device)
 
             indices_to_keep = [
-                i for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind
+                i.to(device) for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind
             ]
             tensors_to_keep = torch.index_select(
-                self.multi_weight[r], dim=0, index=torch.tensor(indices_to_keep)
+                self.multi_weight[r].to(device), dim=0, index=torch.tensor(indices_to_keep).to(device)
             )
 
-            self.multi_weight[r] = tensors_to_keep
+            self.multi_weight[r] = tensors_to_keep.to(device)
             most_similar = torch.argmax(
                 torchhd.cosine_similarity(cluster, self.multi_weight[r]), dim=0
             )
-            self.multi_weight[r] += most_similar
+            self.multi_weight[r] += most_similar.to(device)
             sorted_indices = sorted_indices[sorted_indices >= pos]
 
     def get_subclasses(self):
@@ -559,7 +559,7 @@ class Centroid(nn.Module):
 
             drop_classes = int(self.get_subclasses() * 0.1)
             if reduce_subclasses == "drop":
-                self.drop_classes(drop_classes)
+                self.drop_classes(drop_classes, device)
             elif reduce_subclasses == "cluster":
                 self.cluster_classes(drop_classes)
 
