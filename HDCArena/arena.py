@@ -422,7 +422,7 @@ METHODS = [
     # "quant_iterative",
     # "sparse_iterative",
     # "neural_iterative",
-    "dist_iterative",
+    #"dist_iterative",
     "multicentroid",
 ]
 

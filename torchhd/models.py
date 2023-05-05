@@ -543,13 +543,15 @@ class Centroid(nn.Module):
         device,
         encode,
         model,
+        classes,
         accuracy_full,
         reduce_subclasses="drop",
         threshold=0.03,
     ) -> None:
+        print(classes)
         for i in range(10):
             accuracy = torchmetrics.Accuracy(
-                "multiclass", num_classes=self.in_features
+                "multiclass", num_classes=classes
             ).to(device)
 
             drop_classes = int(self.get_subclasses() * 0.1)
@@ -576,7 +578,6 @@ class Centroid(nn.Module):
                     accuracy.update(torch.tensor([row]), labels)
             new_acc = accuracy.compute().item()
             if accuracy_full - new_acc > threshold:
-                print(self.get_subclasses(), accuracy_full, new_acc)
                 return
 
 

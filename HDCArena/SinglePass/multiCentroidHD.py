@@ -27,6 +27,7 @@ def train_multicentroidHD(
             device,
             encode,
             model,
+            num_classes,
             accuracy.compute().item(),
             reduce_subclasses=reduce_subclasses,
             threshold=threshold,
