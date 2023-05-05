@@ -260,8 +260,7 @@ def exec_arena(
                 )
             elif method == "quant_iterative":
                 # Suggested lr in the paper
-                lr = 1
-                iterations = 30
+                lr = 1.5
                 epsilon = 0.01
                 model_quantize = "binary"
                 iterations_executed = quantHDiterative.train_quantHD(
@@ -275,12 +274,13 @@ def exec_arena(
                     lr,
                     epsilon,
                 )
+
             elif method == "sparse_iterative":
                 # Suggested lr in the paper
                 lr = 1
-                iterations = 30
                 epsilon = 0.01
                 model_sparse = "class"
+                sparsity = 0.5
                 iterations_executed = sparseHDiterative.train_sparseHD(
                     train_loader,
                     device,
@@ -291,12 +291,12 @@ def exec_arena(
                     num_classes,
                     lr,
                     epsilon,
+                    s=sparsity,
                     dimensions=dimensions,
                 )
             elif method == "neural_iterative":
                 # Suggested lr in the paper
                 lr = 1
-                iterations = 30
                 model_neural = "reset"
                 iterations_executed = neuralHDiterative.train_neuralHD(
                     train_loader,
@@ -402,7 +402,7 @@ def exec_arena(
 
 BATCH_SIZE = 1
 REPEATS = 1
-DIMENSIONS = [10000]
+DIMENSIONS = [20]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
@@ -419,11 +419,11 @@ ENCODINGS = [
 # "dist_iterative",
 # "multicentroid"]
 METHODS = [
-    # "quant_iterative",
-    # "sparse_iterative",
-    # "neural_iterative",
-    # "dist_iterative",
-    "multicentroid",
+    "quant_iterative",
+    "sparse_iterative",
+    "neural_iterative",
+    "dist_iterative",
+    # "multicentroid",
 ]
 
 ITERATIONS = 30

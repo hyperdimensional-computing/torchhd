@@ -48,7 +48,7 @@ def train_quantHD(
                     outputs = model.quantized_similarity(
                         samples_hv, model_quantize
                     ).float()
-                    accuracy_validation.update(outputs.cpu(), labels)
+                    accuracy_validation.update(outputs.to(device), labels.to(device))
 
             if len(q) == 2:
                 if all(abs(q[i] - q[i - 1]) < epsilon for i in range(1, len(q))):
