@@ -419,9 +419,9 @@ ENCODINGS = [
 # "dist_iterative",
 # "multicentroid"]
 METHODS = [
-    #"quant_iterative",
-    #"sparse_iterative",
-    #"neural_iterative",
+    # "quant_iterative",
+    # "sparse_iterative",
+    # "neural_iterative",
     "dist_iterative",
     "multicentroid",
 ]
