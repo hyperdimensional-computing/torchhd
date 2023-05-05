@@ -401,16 +401,16 @@ class Centroid(nn.Module):
         pred2 = top_2[0][1]
 
         if pred2 == target:
-            m1 = torch.abs(input - self.weight[pred1])
-            m2 = torch.abs(input - self.weight[pred2])
+            m1 = torch.abs(input - self.weight[pred1]).to(device)
+            m2 = torch.abs(input - self.weight[pred2]).to(device)
             self.m_disthd = torch.cat((self.m_disthd, alpha * m1 - beta * m2), dim=0)
         if pred1 != target and pred2 != target:
-            n1 = torch.abs(input - self.weight[pred2])
-            n2 = torch.abs(input - self.weight[pred1])
-            n3 = torch.abs(input - self.weight[target])
+            n1 = torch.abs(input - self.weight[pred2]).to(device)
+            n2 = torch.abs(input - self.weight[pred1]).to(device)
+            n3 = torch.abs(input - self.weight[target]).to(device)
             self.n_disthd = torch.cat(
                 (self.m_disthd, alpha * n1 + beta * n2 - theta * n3), dim=0
-            )
+            ).to(device)
 
     def regenerate_dist(self, r, encode, eps=1e-12):
         norms = self.m_disthd.norm(dim=1, keepdim=True)
