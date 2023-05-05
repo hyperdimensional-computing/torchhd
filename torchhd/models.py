@@ -475,7 +475,7 @@ class Centroid(nn.Module):
             self.multi_weight[row][col] += input[0]
         else:
             self.multi_weight[target] = torch.cat(
-                [self.multi_weight[target], input], dim=0
+                [self.multi_weight[target].to(device), input.to(device)], dim=0
             )
         return torch.tensor([row])
 
