@@ -380,6 +380,7 @@ class Centroid(nn.Module):
         self,
         input: Tensor,
         target: Tensor,
+        device,
         lr: float = 1.0,
         alpha=1.0,
         beta=1.0,
