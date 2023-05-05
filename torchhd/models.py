@@ -246,7 +246,7 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, target, lr * input)
         self.weight.index_add_(0, pred, lr * -input)
 
-    def binarize_model(self, model):
+    def binarize_model(self, model, device):
         if model == "binary":
             self.weight_quant.data = torch.sign(self.weight.data)
         elif model == "ternary":
@@ -255,7 +255,7 @@ class Centroid(nn.Module):
                 torch.tensor(1.0),
                 torch.where(
                     self.weight.data < 0, torch.tensor(-1.0), torch.tensor(0.0)
-                ),
+                ).to(device),
             )
 
     def add_sparse(

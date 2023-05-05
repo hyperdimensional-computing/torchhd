@@ -26,7 +26,7 @@ def train_quantHD(
 
             samples_hv = encode(samples)
             model.add(samples_hv, labels)
-    model.binarize_model(model_quantize)
+    model.binarize_model(model_quantize, device)
 
     with torch.no_grad():
         q = deque(maxlen=2)
