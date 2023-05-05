@@ -404,7 +404,9 @@ class Centroid(nn.Module):
         if pred2 == target:
             m1 = torch.abs(input - self.weight[pred1]).to(device)
             m2 = torch.abs(input - self.weight[pred2]).to(device)
-            self.m_disthd = torch.cat((self.m_disthd.to(device), (alpha * m1 - beta * m2).to(device)), dim=0)
+            self.m_disthd = torch.cat(
+                (self.m_disthd.to(device), (alpha * m1 - beta * m2).to(device)), dim=0
+            )
         if pred1 != target and pred2 != target:
             n1 = torch.abs(input - self.weight[pred2]).to(device)
             n2 = torch.abs(input - self.weight[pred1]).to(device)
