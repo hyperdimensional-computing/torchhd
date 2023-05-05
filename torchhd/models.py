@@ -472,12 +472,12 @@ class Centroid(nn.Module):
         if row == target:
             if self.multi_weight[row].shape[0] == col:
                 col -= 1
-            self.multi_weight[row][col] += input[0].to(device)
+            self.multi_weight[row][col] += input.to(device)[0]
         else:
             self.multi_weight[target] = torch.cat(
                 [self.multi_weight[target].to(device), input.to(device)], dim=0
             ).to(device)
-        return torch.tensor([row])
+        return torch.tensor([row]).to(device)
 
     def drop_classes(self, drop, device):
         concatenated = torch.cat([i.to(device) for i in self.multi_weight], dim=0)
