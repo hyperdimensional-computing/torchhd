@@ -415,7 +415,7 @@ class Centroid(nn.Module):
                 (self.m_disthd, alpha * n1 + beta * n2 - theta * n3), dim=0
             ).to(device)
 
-    def regenerate_dist(self, r, encode, eps=1e-12):
+    def regenerate_dist(self, r, encode, device, eps=1e-12):
         norms = self.m_disthd.norm(dim=1, keepdim=True)
         norms.clamp_(min=eps)
         self.m_disthd.div_(norms)
@@ -440,10 +440,10 @@ class Centroid(nn.Module):
 
         self.weight.data[:, dimensions_regenerated] = torch.randn(
             self.weight.size(0)
-        ).unsqueeze(1)
+        ).unsqueeze(1).to(device)
         encode.embed.weight[:, dimensions_regenerated] = torch.randn(
             encode.embed.weight.size(0)
-        ).unsqueeze(1)
+        ).unsqueeze(1).to(device)
 
     def multi_similarity(self, input):
         return torch.cat(
