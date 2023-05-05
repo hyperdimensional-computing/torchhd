@@ -45,8 +45,8 @@ def train_sparseHD(
                     outputs = model.sparse_similarity(samples_hv)
                     if iter == 0:
                         outputs_full = model.forward(samples_hv)
-                        accuracy_validation.update(outputs_full.cpu(), labels)
-                    accuracy_validation_sparse.update(outputs.cpu(), labels)
+                        accuracy_validation.update(outputs_full.to(device), labels)
+                    accuracy_validation_sparse.update(outputs.to(device), labels)
             if iter == 0:
                 accuracy = accuracy_validation.compute().item()
 
@@ -62,4 +62,4 @@ def test_sparseHD(test_loader, device, encode, model, accuracy):
 
             samples_hv = encode(samples)
             outputs = model.sparse_similarity(samples_hv)
-            accuracy.update(outputs.cpu(), labels)
+            accuracy.update(outputs.to(device), labels)
