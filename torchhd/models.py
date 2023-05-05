@@ -438,12 +438,12 @@ class Centroid(nn.Module):
             )
         ]
 
-        self.weight.data[:, dimensions_regenerated] = torch.randn(
-            self.weight.size(0)
-        ).unsqueeze(1).to(device)
-        encode.embed.weight[:, dimensions_regenerated] = torch.randn(
-            encode.embed.weight.size(0)
-        ).unsqueeze(1).to(device)
+        self.weight.data[:, dimensions_regenerated] = (
+            torch.randn(self.weight.size(0)).unsqueeze(1).to(device)
+        )
+        encode.embed.weight[:, dimensions_regenerated] = (
+            torch.randn(encode.embed.weight.size(0)).unsqueeze(1).to(device)
+        )
 
     def multi_similarity(self, input):
         return torch.cat(
