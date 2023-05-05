@@ -550,9 +550,9 @@ class Centroid(nn.Module):
     ) -> None:
         print(classes)
         for i in range(10):
-            accuracy = torchmetrics.Accuracy(
-                "multiclass", num_classes=classes
-            ).to(device)
+            accuracy = torchmetrics.Accuracy("multiclass", num_classes=classes).to(
+                device
+            )
 
             drop_classes = int(self.get_subclasses() * 0.1)
             if reduce_subclasses == "drop":
