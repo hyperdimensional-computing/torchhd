@@ -1,6 +1,7 @@
 import torch
 from tqdm import tqdm
 
+
 def train_adaptHD(train_loader, device, encode, model):
     with torch.no_grad():
         for samples, labels in tqdm(train_loader, desc="Training"):

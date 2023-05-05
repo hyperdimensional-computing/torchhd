@@ -4,15 +4,34 @@ import torchmetrics
 from collections import deque
 import math
 
-def train_sparseHD(train_loader, device, encode, model, model_sparse, iterations, num_classes, lr=0.05, epsilon=0.05, s=0.05, dimensions=10000):
+
+def train_sparseHD(
+    train_loader,
+    device,
+    encode,
+    model,
+    model_sparse,
+    iterations,
+    num_classes,
+    lr=0.05,
+    epsilon=0.05,
+    s=0.05,
+    dimensions=10000,
+):
     train_len = len(train_loader)
-    validation_set = train_len - math.ceil(len(train_loader)*0.05)
+    validation_set = train_len - math.ceil(len(train_loader) * 0.05)
 
     with torch.no_grad():
-        accuracy_validation = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(device)
+        accuracy_validation = torchmetrics.Accuracy(
+            "multiclass", num_classes=num_classes
+        ).to(device)
         for iter in range(iterations):
-            accuracy_validation_sparse = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(device)
-            for idx, (samples, labels) in enumerate(tqdm(train_loader, desc="Training")):
+            accuracy_validation_sparse = torchmetrics.Accuracy(
+                "multiclass", num_classes=num_classes
+            ).to(device)
+            for idx, (samples, labels) in enumerate(
+                tqdm(train_loader, desc="Training")
+            ):
                 samples = samples.to(device)
                 labels = labels.to(device)
                 samples_hv = encode(samples)
@@ -21,7 +40,7 @@ def train_sparseHD(train_loader, device, encode, model, model_sparse, iterations
                     model.add_sparse(samples_hv, labels, lr=lr, iter=iter)
                 else:
                     if idx == validation_set:
-                        model.sparsify_model(model_sparse, int(s*dimensions), iter)
+                        model.sparsify_model(model_sparse, int(s * dimensions), iter)
 
                     outputs = model.sparse_similarity(samples_hv)
                     if iter == 0:

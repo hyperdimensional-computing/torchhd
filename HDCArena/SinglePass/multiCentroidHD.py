@@ -2,7 +2,16 @@ import torch
 from tqdm import tqdm
 import torchmetrics
 
-def train_multicentroidHD(train_loader, device, encode, model, num_classes, reduce_subclasses = 'drop', threshold = 0.03):
+
+def train_multicentroidHD(
+    train_loader,
+    device,
+    encode,
+    model,
+    num_classes,
+    reduce_subclasses="drop",
+    threshold=0.03,
+):
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(device)
 
     with torch.no_grad():
@@ -13,7 +22,16 @@ def train_multicentroidHD(train_loader, device, encode, model, num_classes, redu
             samples_hv = encode(samples)
             pred = model.add_multi(samples_hv, labels)
             accuracy.update(pred, labels)
-        model.reduce_subclasses(train_loader, device, encode, model, accuracy.compute().item(), reduce_subclasses = reduce_subclasses, threshold = threshold)
+        model.reduce_subclasses(
+            train_loader,
+            device,
+            encode,
+            model,
+            accuracy.compute().item(),
+            reduce_subclasses=reduce_subclasses,
+            threshold=threshold,
+        )
+
 
 def test_multicentroidHD(test_loader, device, encode, model, accuracy):
     with torch.no_grad():

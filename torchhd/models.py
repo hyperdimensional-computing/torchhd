@@ -85,8 +85,7 @@ class Centroid(nn.Module):
         factory_kwargs = {"device": device, "dtype": dtype}
         super(Centroid, self).__init__()
 
-
-        self.in_features = in_features # dimensions
+        self.in_features = in_features  # dimensions
 
         self.out_features = out_features
         self.similarity_sum = 0
@@ -110,7 +109,7 @@ class Centroid(nn.Module):
         self.m_disthd = torch.empty((0, in_features))
 
         # MultiCentroidHD
-        multi_weight = [torch.empty(1,in_features) for i in range(out_features)]
+        multi_weight = [torch.empty(1, in_features) for i in range(out_features)]
         self.multi_weight = [Parameter(tensor) for tensor in multi_weight]
 
         self.reset_parameters()
@@ -224,12 +223,14 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, pred, lr * alpha2 * input)
 
     def quantized_similarity(self, input, model):
-        if model == 'binary':
+        if model == "binary":
             return functional.hamming_similarity(input, self.weight_quant).float()
-        elif model == 'ternary':
+        elif model == "ternary":
             return functional.dot_similarity(input, self.weight_quant)
 
-    def add_quantize(self, input: Tensor, target: Tensor, lr: float = 1.0, model = 'binary') -> None:
+    def add_quantize(
+        self, input: Tensor, target: Tensor, lr: float = 1.0, model="binary"
+    ) -> None:
         logit = self.quantized_similarity(input, model)
         pred = logit.argmax(1)
         is_wrong = target != pred
@@ -246,14 +247,20 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, pred, lr * -input)
 
     def binarize_model(self, model):
-        if model == 'binary':
+        if model == "binary":
             self.weight_quant.data = torch.sign(self.weight.data)
-        elif model == 'ternary':
-            self.weight_quant.data = torch.where(self.weight.data > 0, torch.tensor(1.0),
-                                                 torch.where(self.weight.data < 0, torch.tensor(-1.0),
-                                                             torch.tensor(0.0)))
+        elif model == "ternary":
+            self.weight_quant.data = torch.where(
+                self.weight.data > 0,
+                torch.tensor(1.0),
+                torch.where(
+                    self.weight.data < 0, torch.tensor(-1.0), torch.tensor(0.0)
+                ),
+            )
 
-    def add_sparse(self, input: Tensor, target: Tensor, lr: float = 1.0, iter = 0) -> None:
+    def add_sparse(
+        self, input: Tensor, target: Tensor, lr: float = 1.0, iter=0
+    ) -> None:
         if iter == 0:
             logit = self(input)
         else:
@@ -280,7 +287,7 @@ class Centroid(nn.Module):
         return functional.cosine_similarity(input, self.weight_sparse)
 
     def sparsify_model(self, model, s, iter):
-        if model == 'dimension':
+        if model == "dimension":
             if iter == 0:
                 max_vals, _ = torch.max(self.weight.data, dim=0)
                 min_vals, _ = torch.min(self.weight.data, dim=0)
@@ -293,11 +300,15 @@ class Centroid(nn.Module):
             if iter == 0:
                 self.weight_sparse.data = self.weight.data.clone()
             self.weight_sparse.data[:, dropped_indices] = 0
-        if model == 'class':
+        if model == "class":
             if iter == 0:
-                _, dropped_indices = torch.topk(self.weight.abs(), k=s, dim=1, largest=False, sorted=True)
+                _, dropped_indices = torch.topk(
+                    self.weight.abs(), k=s, dim=1, largest=False, sorted=True
+                )
             else:
-                _, dropped_indices = torch.topk(self.weight_sparse.abs(), k=s, dim=1, largest=False, sorted=True)
+                _, dropped_indices = torch.topk(
+                    self.weight_sparse.abs(), k=s, dim=1, largest=False, sorted=True
+                )
             if iter == 0:
                 self.weight_sparse.data = self.weight.data.clone()
             self.weight_sparse.data[:, dropped_indices] = 0
@@ -324,7 +335,7 @@ class Centroid(nn.Module):
 
         variation = max_vals - min_vals
         _, dropped_indices = variation.topk(r, largest=False)
-        
+
         self.weight.data[:, dropped_indices] = torch.randn(self.weight.size(0))
         encode.embed.weight[:, dropped_indices] = torch.randn(self.weight.size(0))
 
@@ -361,7 +372,15 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, pred, lr * alpha2 * -input)
 
     @torch.no_grad()
-    def eval_dist(self, input: Tensor, target: Tensor, lr: float = 1.0, alpha = 1.0, beta = 1.0, theta = 1.0) -> None:
+    def eval_dist(
+        self,
+        input: Tensor,
+        target: Tensor,
+        lr: float = 1.0,
+        alpha=1.0,
+        beta=1.0,
+        theta=1.0,
+    ) -> None:
         r"""Only updates the prototype vectors on wrongly predicted inputs.
 
         Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
@@ -380,12 +399,14 @@ class Centroid(nn.Module):
         if pred2 == target:
             m1 = torch.abs(input - self.weight[pred1])
             m2 = torch.abs(input - self.weight[pred2])
-            self.m_disthd = torch.cat((self.m_disthd, alpha*m1 - beta*m2), dim=0)
+            self.m_disthd = torch.cat((self.m_disthd, alpha * m1 - beta * m2), dim=0)
         if pred1 != target and pred2 != target:
             n1 = torch.abs(input - self.weight[pred2])
             n2 = torch.abs(input - self.weight[pred1])
             n3 = torch.abs(input - self.weight[target])
-            self.n_disthd = torch.cat((self.m_disthd, alpha*n1 + beta*n2 - theta*n3), dim=0)
+            self.n_disthd = torch.cat(
+                (self.m_disthd, alpha * n1 + beta * n2 - theta * n3), dim=0
+            )
 
     def regenerate_dist(self, r, eps=1e-12):
         norms = self.m_disthd.norm(dim=1, keepdim=True)
@@ -403,12 +424,19 @@ class Centroid(nn.Module):
         _, top_n_ = n_.topk(r, largest=True)
         intersect = torch.unique(torch.cat((top_m_, top_n_), 0))
 
-        dimensions_regenerated = intersect[torch.logical_and(torch.sum(top_m_ == intersect.unsqueeze(1), dim=0) > 0,
-                                             torch.sum(top_n_ == intersect.unsqueeze(1), dim=0) > 0)]
+        dimensions_regenerated = intersect[
+            torch.logical_and(
+                torch.sum(top_m_ == intersect.unsqueeze(1), dim=0) > 0,
+                torch.sum(top_n_ == intersect.unsqueeze(1), dim=0) > 0,
+            )
+        ]
         self.weight[:, dimensions_regenerated] = torch.randn(self.weight.size(0))
 
     def multi_similarity(self, input):
-        return torch.cat([functional.cosine_similarity(input, i)[0] for i in self.multi_weight], dim=0)
+        return torch.cat(
+            [functional.cosine_similarity(input, i)[0] for i in self.multi_weight],
+            dim=0,
+        )
 
     @torch.no_grad()
     def add_multi(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
@@ -426,12 +454,13 @@ class Centroid(nn.Module):
                 row += 1
                 pred -= i.shape[0]
         if row == target:
-            
             if self.multi_weight[row].shape[0] == col:
                 col -= 1
             self.multi_weight[row][col] += input[0]
         else:
-            self.multi_weight[target] = torch.cat([self.multi_weight[target], input], dim=0)
+            self.multi_weight[target] = torch.cat(
+                [self.multi_weight[target], input], dim=0
+            )
         return torch.tensor([row])
 
     def drop_classes(self, drop):
@@ -447,9 +476,13 @@ class Centroid(nn.Module):
             remove_ind = sorted_indices[sorted_indices < pos]
             remove_ind = remove_ind - prev_pos
 
-            indices_to_keep = [i for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind]
-            tensors_to_keep = torch.index_select(self.multi_weight[r], dim=0, index=torch.tensor(indices_to_keep))
-            
+            indices_to_keep = [
+                i for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind
+            ]
+            tensors_to_keep = torch.index_select(
+                self.multi_weight[r], dim=0, index=torch.tensor(indices_to_keep)
+            )
+
             self.multi_weight[r] = tensors_to_keep
             sorted_indices = sorted_indices[sorted_indices >= pos]
 
@@ -466,17 +499,24 @@ class Centroid(nn.Module):
             remove_ind = sorted_indices[sorted_indices < pos]
             remove_ind = remove_ind - prev_pos
 
-            to_cluster = torch.index_select(self.multi_weight[r], dim=0, index=remove_ind)
+            to_cluster = torch.index_select(
+                self.multi_weight[r], dim=0, index=remove_ind
+            )
             cluster = torchhd.multiset(to_cluster)
 
-            indices_to_keep = [i for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind]
-            tensors_to_keep = torch.index_select(self.multi_weight[r], dim=0, index=torch.tensor(indices_to_keep))
+            indices_to_keep = [
+                i for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind
+            ]
+            tensors_to_keep = torch.index_select(
+                self.multi_weight[r], dim=0, index=torch.tensor(indices_to_keep)
+            )
 
             self.multi_weight[r] = tensors_to_keep
-            most_similar = torch.argmax(torchhd.cosine_similarity(cluster, self.multi_weight[r]), dim=0)
+            most_similar = torch.argmax(
+                torchhd.cosine_similarity(cluster, self.multi_weight[r]), dim=0
+            )
             self.multi_weight[r] += most_similar
             sorted_indices = sorted_indices[sorted_indices >= pos]
-
 
     def get_subclasses(self):
         sub_classes = 0
@@ -484,16 +524,27 @@ class Centroid(nn.Module):
             sub_classes += i.shape[0]
         return sub_classes
 
-    def reduce_subclasses(self, train_loader, device, encode, model, accuracy_full, reduce_subclasses = 'drop', threshold = 0.03) -> None:
+    def reduce_subclasses(
+        self,
+        train_loader,
+        device,
+        encode,
+        model,
+        accuracy_full,
+        reduce_subclasses="drop",
+        threshold=0.03,
+    ) -> None:
         for i in range(10):
-            accuracy = torchmetrics.Accuracy("multiclass", num_classes=self.in_features).to(device)
+            accuracy = torchmetrics.Accuracy(
+                "multiclass", num_classes=self.in_features
+            ).to(device)
 
-            drop_classes = int(self.get_subclasses()*0.1)
-            if reduce_subclasses == 'drop':
+            drop_classes = int(self.get_subclasses() * 0.1)
+            if reduce_subclasses == "drop":
                 self.drop_classes(drop_classes)
-            elif reduce_subclasses == 'cluster':
+            elif reduce_subclasses == "cluster":
                 self.cluster_classes(drop_classes)
-            
+
             with torch.no_grad():
                 for samples, labels in tqdm(train_loader, desc="Training"):
                     samples = samples.to(device)
@@ -531,7 +582,6 @@ class Centroid(nn.Module):
         return "in_features={}, out_features={}".format(
             self.in_features, self.out_features is not None
         )
-
 
 
 class IntRVFL(nn.Module):

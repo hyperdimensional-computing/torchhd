@@ -3,6 +3,7 @@ from tqdm import tqdm
 import torchmetrics
 from collections import deque
 
+
 def train_adaptHD(train_loader, device, encode, model, iterations, num_classes, lr):
     with torch.no_grad():
         for samples, labels in tqdm(train_loader, desc="Training"):
@@ -15,7 +16,9 @@ def train_adaptHD(train_loader, device, encode, model, iterations, num_classes, 
     with torch.no_grad():
         q = deque(maxlen=3)
         for iter in range(iterations):
-            accuracy_train = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(device)
+            accuracy_train = torchmetrics.Accuracy(
+                "multiclass", num_classes=num_classes
+            ).to(device)
 
             for samples, labels in tqdm(train_loader, desc="Training"):
                 samples = samples.to(device)
@@ -34,6 +37,7 @@ def train_adaptHD(train_loader, device, encode, model, iterations, num_classes, 
             else:
                 q.append(accuracy_train.compute().item())
     return iterations
+
 
 def test_adaptHD(test_loader, device, encode, model, accuracy):
     with torch.no_grad():
