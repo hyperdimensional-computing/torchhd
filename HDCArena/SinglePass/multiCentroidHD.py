@@ -40,7 +40,7 @@ def test_multicentroidHD(test_loader, device, encode, model, accuracy):
             samples = samples.to(device)
 
             samples_hv = encode(samples)
-            outputs = model.multi_similarity(samples_hv)
+            outputs = model.multi_similarity(samples_hv, device)
 
             pred = torch.argmax(outputs, dim=0)
             row = 0

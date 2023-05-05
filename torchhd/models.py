@@ -493,7 +493,7 @@ class Centroid(nn.Module):
             remove_ind = remove_ind - prev_pos
 
             indices_to_keep = [
-                i.to(device) for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind
+                i for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind
             ]
             tensors_to_keep = torch.index_select(
                 self.multi_weight[r].to(device), dim=0, index=torch.tensor(indices_to_keep).to(device)
@@ -521,7 +521,7 @@ class Centroid(nn.Module):
             cluster = torchhd.multiset(to_cluster).to(device)
 
             indices_to_keep = [
-                i.to(device) for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind
+                i for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind
             ]
             tensors_to_keep = torch.index_select(
                 self.multi_weight[r].to(device), dim=0, index=torch.tensor(indices_to_keep).to(device)
@@ -551,7 +551,6 @@ class Centroid(nn.Module):
         reduce_subclasses="drop",
         threshold=0.03,
     ) -> None:
-        print(classes)
         for i in range(10):
             accuracy = torchmetrics.Accuracy("multiclass", num_classes=classes).to(
                 device
@@ -568,7 +567,7 @@ class Centroid(nn.Module):
                     samples = samples.to(device)
                     labels = labels.to(device)
                     samples_hv = encode(samples)
-                    outputs = model.multi_similarity(samples_hv)
+                    outputs = model.multi_similarity(samples_hv, device)
 
                     pred = torch.argmax(outputs, dim=0)
                     row = 0

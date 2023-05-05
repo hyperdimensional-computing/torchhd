@@ -402,7 +402,7 @@ def exec_arena(
 
 BATCH_SIZE = 1
 REPEATS = 1
-DIMENSIONS = [8]
+DIMENSIONS = [4]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
@@ -427,7 +427,7 @@ METHODS = [
 ]
 
 ITERATIONS = 30
-arena = True
+arena = False
 
 if arena:
     benchmark = HDCArena("../data", download=True)
