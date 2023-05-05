@@ -476,7 +476,7 @@ class Centroid(nn.Module):
         else:
             self.multi_weight[target] = torch.cat(
                 [self.multi_weight[target].to(device), input.to(device)], dim=0
-            )
+            ).to(device)
         return torch.tensor([row])
 
     def drop_classes(self, drop, device):
