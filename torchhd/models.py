@@ -339,6 +339,7 @@ class Centroid(nn.Module):
         self.weight.data[:, dropped_indices] = torch.randn(
             self.weight.size(0)
         ).unsqueeze(1).to(device)
+
         encode.embed.weight[:, dropped_indices] = torch.randn(
             encode.embed.weight.size(0)
         ).unsqueeze(1).to(device)
@@ -686,6 +687,9 @@ class IntRVFL(nn.Module):
 
         # Get similarity values for each class
         return functional.dot_similarity(encodings, self.weight)
+
+    def dot_similarity(self, x):
+        return functional.dot_similarity(x, self.weight)
 
     # Train the model
     @torch.no_grad()
