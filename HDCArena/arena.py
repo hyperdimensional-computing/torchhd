@@ -558,11 +558,11 @@ ENCODINGS = [
 # "multicentroid"]
 METHODS = [
     # "quant_iterative",
-     #"sparse_iterative",
+    # "sparse_iterative",
     "neural_iterative",
     "dist_iterative",
     "multicentroid",
-    'rvfl'
+    "rvfl",
 ]
 
 ITERATIONS = 30

@@ -450,7 +450,6 @@ class Centroid(nn.Module):
         )
         self.reset_n_m()
 
-
     def multi_similarity(self, input, device):
         return torch.cat(
             [
