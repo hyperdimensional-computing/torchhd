@@ -19,7 +19,7 @@ def train_onlineHD(train_loader, device, encode, model, iterations, num_classes,
                 samples_hv = encode(samples)
                 model.add_online(samples_hv, labels, lr=lr)
                 outputs = model.forward(samples_hv, dot=False)
-                accuracy_train.update(outputs.cpu(), labels)
+                accuracy_train.update(outputs.to(device), labels.to(device))
             lr = (1 - accuracy_train.compute().item()) * 10
 
             if len(q) == 3:
