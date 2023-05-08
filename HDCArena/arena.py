@@ -579,7 +579,8 @@ ENCODINGS = [
 # "dist_iterative",
 # "multicentroid"]
 METHODS = [
-    #"adapt",
+    "add",
+    "adapt",
     "online",
     "adapt_iterative",
     "online_iterative",
