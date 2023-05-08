@@ -418,7 +418,11 @@ class Centroid(nn.Module):
             n2 = torch.abs(input - self.weight[pred1]).to(device)
             n3 = torch.abs(input - self.weight[target]).to(device)
             self.n_disthd = torch.cat(
-                (self.m_disthd.to(device), (alpha * n1 + beta * n2 - theta * n3).to(device)), dim=0
+                (
+                    self.m_disthd.to(device),
+                    (alpha * n1 + beta * n2 - theta * n3).to(device),
+                ),
+                dim=0,
             ).to(device)
 
     @torch.no_grad()
