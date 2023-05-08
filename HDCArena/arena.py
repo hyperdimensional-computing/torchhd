@@ -588,8 +588,7 @@ METHODS = [
     "sparse_iterative",
     "neural_iterative",
     "dist_iterative",
-    "multicentroid"
-    "rvfl",
+    "multicentroid" "rvfl",
 ]
 
 ITERATIONS = 30
