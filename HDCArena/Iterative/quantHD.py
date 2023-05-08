@@ -66,4 +66,4 @@ def test_quantHD(test_loader, device, encode, model, accuracy, model_quantize):
 
             samples_hv = encode(samples)
             outputs = model.quantized_similarity(samples_hv, model_quantize)
-            accuracy.update(outputs.to(device), labels)
+            accuracy.update(outputs.to(device), labels.to(device))

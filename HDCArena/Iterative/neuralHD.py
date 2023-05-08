@@ -41,4 +41,4 @@ def test_neuralHD(test_loader, device, encode, model, accuracy):
 
             samples_hv = encode(samples)
             outputs = model(samples_hv, dot=True)
-            accuracy.update(outputs.to(device), labels)
+            accuracy.update(outputs.to(device), labels.to(device))

@@ -50,4 +50,4 @@ def test_multicentroidHD(test_loader, device, encode, model, accuracy):
                 else:
                     row += 1
                     pred -= i.shape[0]
-            accuracy.update(torch.tensor([row]), labels)
+            accuracy.update(torch.tensor([row]).to(device), labels.to(device))
