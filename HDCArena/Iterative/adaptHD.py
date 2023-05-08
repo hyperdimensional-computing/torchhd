@@ -40,6 +40,8 @@ def train_adaptHD(train_loader, device, encode, model, iterations, num_classes, 
 
 
 def test_adaptHD(test_loader, device, encode, model, accuracy):
+    model.normalize()
+
     with torch.no_grad():
         for samples, labels in tqdm(test_loader, desc="Testing"):
             samples = samples.to(device)

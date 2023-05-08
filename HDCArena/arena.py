@@ -579,8 +579,7 @@ ENCODINGS = [
 # "dist_iterative",
 # "multicentroid"]
 METHODS = [
-    "add",
-    "adapt",
+    #"adapt",
     "online",
     "adapt_iterative",
     "online_iterative",
@@ -588,7 +587,8 @@ METHODS = [
     "sparse_iterative",
     "neural_iterative",
     "dist_iterative",
-    "multicentroid" "rvfl",
+    "multicentroid",
+    "rvfl",
 ]
 
 ITERATIONS = 30

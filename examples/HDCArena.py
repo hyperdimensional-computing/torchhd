@@ -82,7 +82,7 @@ class Encoder(nn.Module):
 
 
 # Get an instance of the UCI benchmark
-benchmark = HDCArena("../data", download=True)
+benchmark = UCIClassificationBenchmark("../data", download=True)
 # Perform evaluation
 results_file = "results/results" + str(time.time()) + ".csv"
 
@@ -339,17 +339,14 @@ DIMENSIONS = [10000]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
-    # "hashmap",
-    "flocet",
+    "hashmap",
+    #"flocet",
     # "sinusoid",
 ]
 # ENCODINGS = ["sinusoid"]
 # METHODS = ["add"]
 METHODS = [
-    "add",
-    "add_adapt",
     "add_online",
-    "add_adjust",
 ]
 # METHODS = ["neural"]
 RETRAIN = [False]

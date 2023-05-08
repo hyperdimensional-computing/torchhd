@@ -182,10 +182,10 @@ class Centroid(nn.Module):
         pred = pred[is_wrong]
 
         alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
-        alpha2 = 1.0 - logit.gather(1, pred.unsqueeze(1))
+        alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1.0
 
         self.weight.index_add_(0, target, lr * alpha1 * input)
-        self.weight.index_add_(0, pred, lr * alpha2 * -input)
+        self.weight.index_add_(0, pred, lr * alpha2 * input)
 
     @torch.no_grad()
     def add_adjust(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
