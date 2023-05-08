@@ -1796,9 +1796,7 @@ def index_to_value(
     """
     return map_range(input.float(), 0, index_length - 1, out_min, out_max)
 
-def generic(id, level, ngram):
-    result = torch.zeros((1, id.shape[1]))
-    for index, i in enumerate(id[-ngram]):
-        result = torchhd.bundle(result, torchhd.bind(i, torchhd.ngrams(level[0][index:index+ngram],ngram)))
-    return result
+def generic(id, level, ngram, device):
+    levels = torch.stack([torchhd.ngrams(level[0][i:i + ngram], ngram) for i in range(id.shape[0] - ngram)]).to(device)
+    return torchhd.multiset(torchhd.bind(id[:-ngram], levels)).unsqueeze(0)
 
