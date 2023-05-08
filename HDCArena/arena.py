@@ -225,9 +225,13 @@ class Encoder(nn.Module):
         if self.encoding == "flocet":
             sample_hv = self.embed(x).sign()
         if self.encoding == "generic":
-            sample_hv = torchhd.functional.generic(self.keys.weight.to(device), self.embed(x).to(device), 3, device).to(device)
+            sample_hv = torchhd.functional.generic(
+                self.keys.weight.to(device), self.embed(x).to(device), 3, device
+            ).to(device)
         if self.encoding == "hashmapGen":
-            sample_hv = torchhd.hash_table(self.keys(x).sign(), self.embed(x).to(device))
+            sample_hv = torchhd.hash_table(
+                self.keys(x).sign(), self.embed(x).to(device)
+            )
         return torchhd.hard_quantize(sample_hv)
 
     def neural_regeneration(self, idx):
