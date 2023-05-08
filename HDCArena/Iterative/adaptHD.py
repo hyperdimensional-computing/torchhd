@@ -46,4 +46,4 @@ def test_adaptHD(test_loader, device, encode, model, accuracy):
 
             samples_hv = encode(samples)
             outputs = model(samples_hv, dot=True)
-            accuracy.update(outputs.cpu(), labels)
+            accuracy.update(outputs.to(device), labels)
