@@ -36,4 +36,4 @@ def test_highHD(test_loader, device, encode, model, accuracy):
 
             samples_hv = encode(samples)
             outputs = model(samples_hv, dot=False)
-            accuracy.update(outputs.to(device), labels)
+            accuracy.update(outputs.to(device), labels.to(device))
