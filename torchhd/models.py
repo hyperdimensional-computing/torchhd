@@ -289,7 +289,7 @@ class Centroid(nn.Module):
             self.weight_sparse.index_add_(0, pred, lr * -input)
 
     def sparse_similarity(self, input):
-        return functional.cosine_similarity(input, self.weight_sparse)
+        return functional.dot_similarity(input, self.weight_sparse)
 
     def sparsify_model(self, model, s, iter):
         if model == "dimension":
@@ -458,7 +458,7 @@ class Centroid(nn.Module):
     def multi_similarity(self, input, device):
         return torch.cat(
             [
-                functional.cosine_similarity(input, i.to(device))[0]
+                functional.dot_similarity(input, i.to(device))[0]
                 for i in self.multi_weight
             ],
             dim=0,

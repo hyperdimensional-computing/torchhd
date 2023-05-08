@@ -562,7 +562,7 @@ def exec_arena(
 
 BATCH_SIZE = 1
 REPEATS = 1
-DIMENSIONS = [100]
+DIMENSIONS = [10000]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
@@ -579,17 +579,21 @@ ENCODINGS = [
 # "dist_iterative",
 # "multicentroid"]
 METHODS = [
-    # "add_high"
-    # "quant_iterative",
-    # "sparse_iterative",
-    # "neural_iterative",
+    "add",
+    "adapt",
+    "online",
+    "adapt_iterative",
+    "online_iterative",
+    "quant_iterative",
+    "sparse_iterative",
+    "neural_iterative",
     "dist_iterative",
-    "multicentroid",
+    "multicentroid"
     "rvfl",
 ]
 
 ITERATIONS = 30
-arena = True
+arena = False
 
 if arena:
     benchmark = HDCArena("../data", download=True)

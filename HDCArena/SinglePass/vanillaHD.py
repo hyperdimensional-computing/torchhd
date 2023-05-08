@@ -18,5 +18,5 @@ def test_vanillaHD(test_loader, device, encode, model, accuracy):
             samples = samples.to(device)
 
             samples_hv = encode(samples)
-            outputs = model(samples_hv, dot=False)
+            outputs = model(samples_hv, dot=True)
             accuracy.update(outputs.cpu(), labels)
