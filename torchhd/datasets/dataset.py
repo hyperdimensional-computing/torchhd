@@ -503,9 +503,6 @@ class UCIClassificationBenchmark:
         "Zoo",
     ]
 
-    dataset_names = [
-        "Abalone",
-    ]
 
     dataset_names_ = [
         "Arrhythmia",
