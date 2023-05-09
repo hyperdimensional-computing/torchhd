@@ -590,7 +590,7 @@ METHODS = [
     "neural_iterative",
     "dist_iterative",
     "multicentroid",
-    "rvfl"
+    "rvfl",
 ]
 
 ITERATIONS = 30
