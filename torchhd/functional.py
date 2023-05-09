@@ -1801,7 +1801,7 @@ def generic(id, level, ngram, device):
     levels = torch.stack(
         [
             torchhd.ngrams(level[0][i : i + ngram], ngram)
-            for i in range(1,id.shape[0] - ngram + 1)
+            for i in range(1, id.shape[0] - ngram + 1)
         ]
     ).to(device)
     return torchhd.multiset(torchhd.bind(id[:-ngram], levels)).unsqueeze(0)
