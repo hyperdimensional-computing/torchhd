@@ -363,11 +363,12 @@ def exec_arena(
                 if dataset.name not in ["MNIST", "CIFAR10"]:
                     min_val = torch.min(dataset.train.data, 0).values.to(device)
                     max_val = torch.max(dataset.train.data, 0).values.to(device)
-                    transform = create_min_max_normalize(min_val, max_val)
-                    dataset.train.transform = transform
-                    train_ds = dataset.train
-                    dataset.test.transform = transform
-                    test_ds = dataset.test
+                    transform_train = create_min_max_normalize(min_val, max_val)
+                    dataset.train.transform = transform_train
+                    min_val = torch.min(dataset.test.data, 0).values.to(device)
+                    max_val = torch.max(dataset.test.data, 0).values.to(device)
+                    transform_test = create_min_max_normalize(min_val, max_val)
+                    dataset.test.transform = transform_test
 
                 # Set up data loaders
                 train_loader = data.DataLoader(
@@ -566,7 +567,7 @@ DIMENSIONS = [10000]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
-    "hashmap",
+    "bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"
 ]
 # METHODS = ["add",
 # "adapt",
@@ -581,16 +582,16 @@ ENCODINGS = [
 #  "rvfl"]
 METHODS = [
     "add",
-    "adapt",
-    "online",
-    "adapt_iterative",
-    "online_iterative",
-    "quant_iterative",
-    "sparse_iterative",
-    "neural_iterative",
-    "dist_iterative",
-    "multicentroid",
-    "rvfl",
+    #"adapt",
+    #"online",
+    #"adapt_iterative",
+    #"online_iterative",
+    #"quant_iterative",
+    #"sparse_iterative",
+    #"neural_iterative",
+    #"dist_iterative",
+    #"multicentroid",
+    #"rvfl",
 ]
 
 ITERATIONS = 30
