@@ -567,7 +567,14 @@ DIMENSIONS = [10000]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
-    "bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"
+    "bundle",
+    "sequence",
+    "ngram",
+    "hashmap",
+    "flocet",
+    "density",
+    "random",
+    "sinusoid",
 ]
 # METHODS = ["add",
 # "adapt",
@@ -582,16 +589,16 @@ ENCODINGS = [
 #  "rvfl"]
 METHODS = [
     "add",
-    #"adapt",
-    #"online",
-    #"adapt_iterative",
-    #"online_iterative",
-    #"quant_iterative",
-    #"sparse_iterative",
-    #"neural_iterative",
-    #"dist_iterative",
-    #"multicentroid",
-    #"rvfl",
+    # "adapt",
+    # "online",
+    # "adapt_iterative",
+    # "online_iterative",
+    # "quant_iterative",
+    # "sparse_iterative",
+    # "neural_iterative",
+    # "dist_iterative",
+    # "multicentroid",
+    # "rvfl",
 ]
 
 ITERATIONS = 30
