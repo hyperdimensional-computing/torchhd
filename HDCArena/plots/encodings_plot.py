@@ -24,7 +24,7 @@ df_pivot.loc["mean"] = df_pivot.mean(axis=0)
 df_pivot = df_pivot[methods_order].round(3)
 
 print()
-print('Train time')
+print("Train time")
 print(df_pivot)
 print()
 print()
@@ -35,7 +35,7 @@ df_pivot.loc["mean"] = df_pivot.mean(axis=0)
 df_pivot = df_pivot[methods_order].round(3)
 
 print()
-print('Test time')
+print("Test time")
 print(df_pivot)
 print()
 print()
@@ -48,18 +48,20 @@ df_pivot = df_pivot[methods_order].round(3)
 
 column_names = df_pivot.columns.tolist()
 column_dict = {column_name: 0 for column_name in column_names}
+
+
 def count_max(row):
     max_val = row.max()
     maxx = list(row[row == max_val].index)
     for i in maxx:
         column_dict[i] += 1
+
+
 max_counts = df_pivot.apply(count_max, axis=1)
 
 
-
-
 print()
-print('Accuracy')
+print("Accuracy")
 print(df_pivot)
 
 df_pivot = df_pivot.apply(
@@ -68,4 +70,4 @@ df_pivot = df_pivot.apply(
 latex_table = df_pivot.to_latex(index=True)
 
 print(latex_table)
-print(pd.DataFrame(column_dict, index=['Best']))
+print(pd.DataFrame(column_dict, index=["Best"]))
