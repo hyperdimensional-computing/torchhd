@@ -16,8 +16,6 @@ def test_vanillaHD(test_loader, device, encode, model, accuracy):
     with torch.no_grad():
         for samples, labels in tqdm(test_loader, desc="Testing"):
             samples = samples.to(device)
-            sample_hv = encode.embed(samples.long())
-
             samples_hv = encode(samples)
             outputs = model(samples_hv, dot=True)
             accuracy.update(outputs.to(device), labels.to(device))
