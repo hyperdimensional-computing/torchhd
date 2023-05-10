@@ -35,6 +35,7 @@ def train_neuralHD(
 
 
 def test_neuralHD(test_loader, device, encode, model, accuracy):
+    model.normalize()
     with torch.no_grad():
         for samples, labels in tqdm(test_loader, desc="Testing"):
             samples = samples.to(device)
