@@ -1799,10 +1799,10 @@ def index_to_value(
 
 def generic(id, level, ngram, device):
     levels = [
-            torchhd.ngrams(level[0][i : i + ngram], ngram)
-            for i in range(1,id.shape[0] - ngram + 1)
-        ]
+        torchhd.ngrams(level[0][i : i + ngram], ngram)
+        for i in range(1, id.shape[0] - ngram + 1)
+    ]
     if len(levels) > 0:
         levels = torch.stack(levels).to(device)
         return torchhd.multiset(torchhd.bind(id[:-ngram], levels)).unsqueeze(0)
-    return torchhd.multiset(torchhd.bind(id,level))
+    return torchhd.multiset(torchhd.bind(id, level))
