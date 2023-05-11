@@ -558,7 +558,7 @@ def exec_arena(
                         iterations_executed,
                     ]
                 )
-            # print(accuracy.compute().item())
+            print(accuracy.compute().item())
 
 
 BATCH_SIZE = 1
@@ -567,14 +567,7 @@ DIMENSIONS = [10000]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
-    "bundle",
-    "sequence",
-    "ngram",
-    "hashmap",
-    "flocet",
-    "density",
-    "random",
-    "sinusoid",
+    "bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"
 ]
 # METHODS = ["add",
 # "adapt",
@@ -602,7 +595,7 @@ METHODS = [
 ]
 
 ITERATIONS = 30
-arena = False
+arena = True
 
 if arena:
     benchmark = HDCArena("../data", download=True)
