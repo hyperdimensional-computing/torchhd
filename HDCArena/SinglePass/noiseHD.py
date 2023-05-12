@@ -13,10 +13,10 @@ def train_noiseHD(train_loader, device, encode, model):
             samples_hv = encode(samples)
             model.add_adjust(samples_hv, labels)
 
-    non_significant = torch.where(model.noise < torch.mean(model.noise))[1]
+    non_significant = torch.where(model.noise < torch.mean(model.noise))[1].to(device)
     model.weight.data[:, non_significant] = torch.zeros(
         (model.weight.shape[0], len(non_significant))
-    )
+    ).to(device)
     # l = 1
 
     # for i in range(model.weight.size(1)):
