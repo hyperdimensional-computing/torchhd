@@ -620,7 +620,7 @@ ENCODINGS = [
 #  "rvfl"]
 METHODS = [
     "noise",
-    #"noise"
+    # "noise"
     # "adapt",
     # "online",
     # "adapt_iterative",

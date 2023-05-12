@@ -17,8 +17,8 @@ methods_order = [
     "dist_iterative",
     "multicentroid",
     "comp",
-    #"noise",
-    "adjust"
+    # "noise",
+    "adjust",
 ]
 
 df_mean = df.groupby([var, "Name"])["TrainTime"].mean().to_frame()
