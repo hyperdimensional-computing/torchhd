@@ -147,7 +147,9 @@ class Centroid(nn.Module):
         is_wrong = target != pred
 
         if is_wrong.sum().item() != 0:
-            self.noise += torch.where(input == self.weight[target], torch.tensor(1), torch.tensor(0))
+            self.noise += torch.where(
+                input == self.weight[target], torch.tensor(1), torch.tensor(0)
+            )
 
         self.weight.index_add_(0, target, input, alpha=lr)
 
