@@ -619,8 +619,8 @@ ENCODINGS = [
 # "multicentroid",
 #  "rvfl"]
 METHODS = [
-    "adjust",
-    "noise"
+    "noise",
+    #"noise"
     # "adapt",
     # "online",
     # "adapt_iterative",
@@ -634,7 +634,7 @@ METHODS = [
 ]
 
 ITERATIONS = 30
-arena = False
+arena = True
 
 if arena:
     benchmark = HDCArena("../data", download=True)

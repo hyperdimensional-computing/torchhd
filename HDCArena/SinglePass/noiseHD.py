@@ -11,7 +11,7 @@ def train_noiseHD(train_loader, device, encode, model):
             labels = labels.to(device)
 
             samples_hv = encode(samples)
-            model.add_adjust(samples_hv, labels)
+            model.add_noise(samples_hv, labels)
 
     non_significant = torch.where(model.noise < torch.mean(model.noise))[1].to(device)
     model.weight.data[:, non_significant] = torch.zeros(

@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Read in the CSV file
-df = pd.read_csv("../results/final_results/encodings_comparison_uci")
+df = pd.read_csv("../results/final_results/encodings_comparison_arena")
 var = "Method"
 
 methods_order = [
@@ -17,6 +17,8 @@ methods_order = [
     "dist_iterative",
     "multicentroid",
     "comp",
+    #"noise",
+    "adjust"
 ]
 
 df_mean = df.groupby([var, "Name"])["TrainTime"].mean().to_frame()
