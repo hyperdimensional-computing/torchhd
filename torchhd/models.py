@@ -628,20 +628,33 @@ class Centroid(nn.Module):
         )
 
     def comp_compress(self, chunks, device):
-        comp_weight = torch.empty((self.out_features, int(self.in_features/chunks)))
+        comp_weight = torch.empty((self.out_features, int(self.in_features / chunks)))
         self.comp_weight = Parameter(comp_weight)
 
-        w_re = torch.reshape(self.weight, (self.out_features, chunks, int(self.in_features/chunks))).to(device)
-        self.position_vectors = torchhd.embeddings.Random(chunks, int(self.in_features/chunks)).to(device)
+        w_re = torch.reshape(
+            self.weight, (self.out_features, chunks, int(self.in_features / chunks))
+        ).to(device)
+        self.position_vectors = torchhd.embeddings.Random(
+            chunks, int(self.in_features / chunks)
+        ).to(device)
 
         for i in range(self.out_features):
-            self.comp_weight.data[i] = torch.sum(w_re[i]*self.position_vectors.weight, dim=0).to(device)
+            self.comp_weight.data[i] = torch.sum(
+                w_re[i] * self.position_vectors.weight, dim=0
+            ).to(device)
 
     def compress_hv(self, enc, chunks, device):
-        return torch.sum(torch.reshape(enc, (chunks, int(self.in_features/chunks)))*self.position_vectors.weight, dim=0).to(device)
+        return torch.sum(
+            torch.reshape(enc, (chunks, int(self.in_features / chunks)))
+            * self.position_vectors.weight,
+            dim=0,
+        ).to(device)
 
     def forward_comp(self, enc, device):
-        return functional.dot_similarity(enc.to(device), self.comp_weight.to(device)).to(device)
+        return functional.dot_similarity(
+            enc.to(device), self.comp_weight.to(device)
+        ).to(device)
+
 
 
 class IntRVFL(nn.Module):

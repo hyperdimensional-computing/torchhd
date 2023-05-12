@@ -16,7 +16,7 @@ methods_order = [
     "neural_iterative",
     "dist_iterative",
     "multicentroid",
-    "comp"
+    "comp",
 ]
 
 df_mean = df.groupby([var, "Name"])["TrainTime"].mean().to_frame()
