@@ -375,6 +375,8 @@ def exec_arena(
                     dataset.train, batch_size=batch_size, shuffle=True
                 )
                 test_loader = data.DataLoader(dataset.test, batch_size=batch_size)
+                train_ds = dataset.train
+                test_ds = dataset.test
 
             encode = Encoder(num_feat, dimensions, encoding, dataset.name)
             encode = encode.to(device)
@@ -585,6 +587,7 @@ ENCODINGS = [
 # METHODS = ["add",
 # "adapt",
 # "online",
+# "comp",
 # "adapt_iterative",
 # "online_iterative",
 # "quant_iterative",
@@ -594,7 +597,7 @@ ENCODINGS = [
 # "multicentroid",
 #  "rvfl"]
 METHODS = [
-    "comp",
+    "rvfl",
     # "adapt",
     # "online",
     # "adapt_iterative",
