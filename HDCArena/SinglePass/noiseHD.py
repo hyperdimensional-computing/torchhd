@@ -1,5 +1,6 @@
 import torch
 from tqdm import tqdm
+from collections import Counter
 
 torch.set_printoptions(threshold=torch.inf)
 
@@ -11,12 +12,17 @@ def train_noiseHD(train_loader, device, encode, model):
             labels = labels.to(device)
 
             samples_hv = encode(samples)
-            model.add_noise(samples_hv, labels)
+            model.add_noise(samples_hv, labels, device=device)
 
-    non_significant = torch.where(model.noise < torch.mean(model.noise))[1].to(device)
+    counts = torch.bincount(torch.tensor(model.noise.squeeze(0).int()))
+    nonzero_indices = torch.nonzero(counts)
+    first_nonzero_index = nonzero_indices[0][0]
+    non_significant = torch.where(model.noise <= first_nonzero_index)[1].to(device)
+
     model.weight.data[:, non_significant] = torch.zeros(
         (model.weight.shape[0], len(non_significant))
     ).to(device)
+
     # l = 1
 
     # for i in range(model.weight.size(1)):

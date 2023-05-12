@@ -634,7 +634,7 @@ METHODS = [
 ]
 
 ITERATIONS = 30
-arena = True
+arena = False
 
 if arena:
     benchmark = HDCArena("../data", download=True)
