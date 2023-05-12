@@ -391,11 +391,20 @@ def exec_arena(
                 train_ds = dataset.train
                 test_ds = dataset.test
 
-            encode = Encoder(num_feat, dimensions, encoding, dataset.name)
-            encode = encode.to(device)
+            if method == "rvfl":
+                if not arena:
+                    d, alpha, kappa = INT_RVFL_HYPER[dataset.train.name]
+                    encode = Encoder(num_feat, d, encoding, dataset.name)
+                    encode = encode.to(device)
 
-            model = Centroid(dimensions, num_classes)
-            model = model.to(device)
+                    model = Centroid(d, num_classes)
+                    model = model.to(device)
+            else:
+                encode = Encoder(num_feat, dimensions, encoding, dataset.name)
+                encode = encode.to(device)
+
+                model = Centroid(dimensions, num_classes)
+                model = model.to(device)
 
             # TRAIN #
             t = time.time()
@@ -612,7 +621,7 @@ ENCODINGS = [
 # "multicentroid",
 #  "rvfl"]
 METHODS = [
-    "add_high",
+    "rvfl",
     # "adapt",
     # "online",
     # "adapt_iterative",
