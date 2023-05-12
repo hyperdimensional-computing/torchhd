@@ -12,7 +12,7 @@ import time
 import csv
 import torch.nn.functional as F
 import pandas as pd
-from SinglePass import vanillaHD, highHD, adaptHD, onlineHD, multiCentroidHD, intRVFL
+from SinglePass import vanillaHD, highHD, adaptHD, onlineHD, multiCentroidHD, intRVFL, compHD
 from Iterative import adaptHD as adaptHDiterative
 from Iterative import onlineHD as onlineHDiterative
 from Iterative import quantHD as quantHDiterative
@@ -396,6 +396,9 @@ def exec_arena(
             elif method == "online":
                 onlineHD.train_onlineHD(train_loader, device, encode, model)
                 iterations_executed = 1
+            elif method == "comp":
+                compHD.train_compHD(train_loader, device, encode, model, 10)
+                iterations_executed = 1
             elif method == "adapt_iterative":
                 iterations_executed = adaptHDiterative.train_adaptHD(
                     train_loader, device, encode, model, iterations, num_classes, lr
@@ -511,6 +514,8 @@ def exec_arena(
                 adaptHD.test_adaptHD(test_loader, device, encode, model, accuracy)
             elif method == "online":
                 onlineHD.test_onlineHD(test_loader, device, encode, model, accuracy)
+            elif method == "comp":
+                compHD.test_compHD(test_loader, device, encode, model, accuracy, 10)
             elif method == "adapt_iterative":
                 adaptHDiterative.test_adaptHD(
                     test_loader, device, encode, model, accuracy
@@ -567,7 +572,7 @@ DIMENSIONS = [10000]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
-    "bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"
+     "hashmap"
 ]
 # METHODS = ["add",
 # "adapt",
@@ -581,7 +586,7 @@ ENCODINGS = [
 # "multicentroid",
 #  "rvfl"]
 METHODS = [
-    "add",
+    "comp",
     # "adapt",
     # "online",
     # "adapt_iterative",
@@ -595,7 +600,7 @@ METHODS = [
 ]
 
 ITERATIONS = 30
-arena = True
+arena = False
 
 if arena:
     benchmark = HDCArena("../data", download=True)

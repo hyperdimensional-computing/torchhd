@@ -108,6 +108,10 @@ class Centroid(nn.Module):
         self.n_disthd = torch.empty((0, in_features))
         self.m_disthd = torch.empty((0, in_features))
 
+        # CompHD
+        self.comp_weight = None
+        self.position_vectors = None
+
         # MultiCentroidHD
         multi_weight = [torch.empty(1, in_features) for i in range(out_features)]
         self.multi_weight = [Parameter(tensor) for tensor in multi_weight]
@@ -623,6 +627,21 @@ class Centroid(nn.Module):
             self.in_features, self.out_features is not None
         )
 
+    def comp_compress(self, chunks):
+        comp_weight = torch.empty((self.out_features, int(self.in_features/chunks)))
+        self.comp_weight = Parameter(comp_weight)
+
+        w_re = torch.reshape(self.weight, (self.out_features, chunks, int(self.in_features/chunks)))
+        self.position_vectors = torchhd.embeddings.Random(chunks, int(self.in_features/chunks))
+
+        for i in range(self.out_features):
+            self.comp_weight.data[i] = torch.sum(w_re[i]*self.position_vectors.weight, dim=0)
+
+    def compress_hv(self, enc, chunks):
+        return torch.sum(torch.reshape(enc, (chunks, int(self.in_features/chunks)))*self.position_vectors.weight, dim=0)
+
+    def forward_comp(self, enc):
+        return functional.dot_similarity(enc, self.comp_weight)
 
 class IntRVFL(nn.Module):
     r"""Class implementing integer random vector functional link network (intRVFL) model as described in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
