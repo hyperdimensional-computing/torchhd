@@ -20,6 +20,8 @@ from SinglePass import (
     multiCentroidHD,
     intRVFL,
     compHD,
+    noiseHD,
+    adjustHD,
 )
 from Iterative import adaptHD as adaptHDiterative
 from Iterative import onlineHD as onlineHDiterative
@@ -208,17 +210,7 @@ class Encoder(nn.Module):
             levels = 100
             self.keys = embeddings.Random(size, dimensions)
             self.embed = embeddings.Level(levels, dimensions)
-        if self.encoding == "generic_e":
-            levels = 100
-            self.keys = embeddings.Random(size, dimensions)
-            self.embed = embeddings.Level(levels, dimensions)
-            self.sinus = embeddings.Sinusoid(levels, dimensions)
         self.flatten = torch.nn.Flatten()
-
-    def double_forward(self, x):
-        sample_hv = torchhd.hash_table(self.keys(x).sign(), self.embed(x).to(device))
-        sample_sinus = self.sinus(x).sign()
-        return sample_hv, sample_sinus
 
     def forward(self, x):
         x = self.flatten(x).float()
@@ -409,8 +401,14 @@ def exec_arena(
             if method == "add":
                 vanillaHD.train_vanillaHD(train_loader, device, encode, model)
                 iterations_executed = 1
-            elif method == "add_high":
+            elif method == "high":
                 highHD.train_highHD(train_loader, device, encode, model)
+                iterations_executed = 1
+            elif method == "noise":
+                noiseHD.train_noiseHD(train_loader, device, encode, model)
+                iterations_executed = 1
+            elif method == "adjust":
+                adjustHD.train_adjustHD(train_loader, device, encode, model)
                 iterations_executed = 1
             elif method == "adapt":
                 adaptHD.train_adaptHD(train_loader, device, encode, model)
@@ -529,8 +527,12 @@ def exec_arena(
             t = time.time()
             if method == "add":
                 vanillaHD.test_vanillaHD(test_loader, device, encode, model, accuracy)
-            elif method == "add_high":
+            elif method == "high":
                 highHD.test_highHD(test_loader, device, encode, model, accuracy)
+            elif method == "noise":
+                noiseHD.test_noiseHD(test_loader, device, encode, model, accuracy)
+            elif method == "adjust":
+                adjustHD.test_adjustHD(test_loader, device, encode, model, accuracy)
             elif method == "adapt":
                 adaptHD.test_adaptHD(test_loader, device, encode, model, accuracy)
             elif method == "online":
@@ -617,7 +619,8 @@ ENCODINGS = [
 # "multicentroid",
 #  "rvfl"]
 METHODS = [
-    "rvfl",
+    "adjust",
+    "noise"
     # "adapt",
     # "online",
     # "adapt_iterative",

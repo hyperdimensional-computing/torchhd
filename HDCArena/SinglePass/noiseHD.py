@@ -4,21 +4,18 @@ from tqdm import tqdm
 torch.set_printoptions(threshold=torch.inf)
 
 
-def train_highHD(train_loader, device, encode, model):
+def train_noiseHD(train_loader, device, encode, model):
     with torch.no_grad():
         for samples, labels in tqdm(train_loader, desc="Training"):
             samples = samples.to(device)
             labels = labels.to(device)
 
             samples_hv = encode(samples)
-            model.add(samples_hv, labels)
+            model.add_adjust(samples_hv, labels)
 
-    unique_counts = torch.tensor(
-        [len(torch.unique(model.weight[:, i])) for i in range(model.weight.shape[1])]
-    )
-    repeated_dim = torch.nonzero(unique_counts <= 1).T.long()
-    model.weight[:, repeated_dim] = torch.zeros(
-        (model.weight.shape[0], 1, len(repeated_dim))
+    non_significant = torch.where(model.noise < torch.mean(model.noise))[1]
+    model.weight.data[:, non_significant] = torch.zeros(
+        (model.weight.shape[0], len(non_significant))
     )
     # l = 1
 
@@ -27,7 +24,7 @@ def train_highHD(train_loader, device, encode, model):
     #    model.weight[:,i][topk_indices] = 0
 
 
-def test_highHD(test_loader, device, encode, model, accuracy):
+def test_noiseHD(test_loader, device, encode, model, accuracy):
     model.normalize()
     with torch.no_grad():
         for samples, labels in tqdm(test_loader, desc="Testing"):

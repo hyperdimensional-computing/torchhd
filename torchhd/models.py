@@ -116,6 +116,9 @@ class Centroid(nn.Module):
         multi_weight = [torch.empty(1, in_features) for i in range(out_features)]
         self.multi_weight = [Parameter(tensor) for tensor in multi_weight]
 
+        # noiseHD
+        self.noise = torch.zeros((1, in_features))
+
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
@@ -134,6 +137,18 @@ class Centroid(nn.Module):
     @torch.no_grad()
     def add(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
         """Adds the input vectors scaled by the lr to the target prototype vectors."""
+        self.weight.index_add_(0, target, input, alpha=lr)
+
+    @torch.no_grad()
+    def add_noise(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
+        """Adds the input vectors scaled by the lr to the target prototype vectors."""
+        logit = self(input)
+        pred = logit.argmax(1)
+        is_wrong = target != pred
+
+        if is_wrong.sum().item() != 0:
+            self.noise += torch.where(input == self.weight[target], torch.tensor(1), torch.tensor(0))
+
         self.weight.index_add_(0, target, input, alpha=lr)
 
     @torch.no_grad()
