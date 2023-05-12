@@ -216,9 +216,7 @@ class Encoder(nn.Module):
         self.flatten = torch.nn.Flatten()
 
     def double_forward(self, x):
-        sample_hv = torchhd.hash_table(
-            self.keys(x).sign(), self.embed(x).to(device)
-        )
+        sample_hv = torchhd.hash_table(self.keys(x).sign(), self.embed(x).to(device))
         sample_sinus = self.sinus(x).sign()
         return sample_hv, sample_sinus
 
@@ -518,9 +516,7 @@ def exec_arena(
                     alpha = 1
                     kappa = 3
                 iterations_executed = 1
-                model = IntRVFL(
-                    num_feat, d, num_classes, kappa=kappa, device=device
-                )
+                model = IntRVFL(num_feat, d, num_classes, kappa=kappa, device=device)
                 intRVFL.train_rvfl(train_ds, encode, model, device, num_classes, alpha)
 
             train_time = time.time() - t
