@@ -24,6 +24,7 @@ from SinglePass import (
     adjustHD,
 )
 from Iterative import adaptHD as adaptHDiterative
+from Iterative import adjustHD as adjustHDiterative
 from Iterative import onlineHD as onlineHDiterative
 from Iterative import quantHD as quantHDiterative
 from Iterative import sparseHD as sparseHDiterative
@@ -427,6 +428,10 @@ def exec_arena(
                 iterations_executed = onlineHDiterative.train_onlineHD(
                     train_loader, device, encode, model, iterations, num_classes, lr
                 )
+            elif method == "adjust_iterative":
+                iterations_executed = adjustHDiterative.train_adjustHD(
+                    train_loader, device, encode, model, iterations, num_classes, lr
+                )
             elif method == "quant_iterative":
                 # Suggested lr in the paper
                 lr = 1.5
@@ -547,6 +552,10 @@ def exec_arena(
                 onlineHDiterative.test_onlineHD(
                     test_loader, device, encode, model, accuracy
                 )
+            elif method == "adjust_iterative":
+                adjustHDiterative.test_adjustHD(
+                    test_loader, device, encode, model, accuracy
+                )
             elif method == "quant_iterative":
                 quantHDiterative.test_quantHD(
                     test_loader, device, encode, model, accuracy, model_quantize
@@ -619,7 +628,7 @@ ENCODINGS = [
 # "multicentroid",
 #  "rvfl"]
 METHODS = [
-    "noise",
+    "adjust_iterative",
     # "noise"
     # "adapt",
     # "online",
