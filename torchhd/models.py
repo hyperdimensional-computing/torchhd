@@ -140,7 +140,9 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, target, input, alpha=lr)
 
     @torch.no_grad()
-    def add_noise(self, input: Tensor, target: Tensor, lr: float = 1.0, device=None) -> None:
+    def add_noise(
+        self, input: Tensor, target: Tensor, lr: float = 1.0, device=None
+    ) -> None:
         """Adds the input vectors scaled by the lr to the target prototype vectors."""
         logit = self(input)
         pred = logit.argmax(1)

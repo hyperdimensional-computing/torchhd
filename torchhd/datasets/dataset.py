@@ -516,7 +516,6 @@ class UCIClassificationBenchmark:
 
     dataset_names_ = [
         "Arrhythmia",
-
     ]
 
     # Specify namedtuple format
