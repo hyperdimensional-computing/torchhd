@@ -516,22 +516,7 @@ class UCIClassificationBenchmark:
 
     dataset_names_ = [
         "Arrhythmia",
-        "AudiologyStd",
-        "Balloons",
-        "BreastCancer",
-        "CreditApproval",
-        "Dermatology",
-        "Echocardiogram",
-        "Ecoli",
-        "EnergyY2",
-        "HeartHungarian",
-        "HeartVa",
-        "HillValley",
-        "HorseColic",
-        "LedDisplay",
-        "Lenses",
-        "LungCancer",
-        "Lymphography",
+
     ]
 
     # Specify namedtuple format

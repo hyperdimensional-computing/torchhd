@@ -18,7 +18,7 @@ def train_noiseHD(train_loader, device, encode, model):
     nonzero_indices = torch.nonzero(counts)
     first_nonzero_index = nonzero_indices[0][0]
     non_significant = torch.where(model.noise <= first_nonzero_index)[1].to(device)
-
+    #print(len(non_significant))
     model.weight.data[:, non_significant] = torch.zeros(
         (model.weight.shape[0], len(non_significant))
     ).to(device)
