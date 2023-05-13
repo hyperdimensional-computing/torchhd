@@ -14,18 +14,16 @@ def train_noiseHD(train_loader, device, encode, model):
             samples_hv = encode(samples)
             model.add_noise(samples_hv, labels, device=device)
 
-
     counts = torch.bincount(torch.tensor(model.noise.squeeze(0).int()))
     nonzero_indices = torch.nonzero(counts)
     first_nonzero_index = nonzero_indices[0][0]
     non_significant = torch.where(model.noise <= first_nonzero_index)[1].to(device)
-    #print(len(non_significant))
+    # print(len(non_significant))
     model.weight.data[:, non_significant] = torch.zeros(
         (model.weight.shape[0], len(non_significant))
     ).to(device)
 
-
-    '''
+    """
         for i in range(model.out_features):
         counts = torch.bincount(torch.tensor(model.noise[i].squeeze(0).int()))
         nonzero_indices = torch.nonzero(counts)
@@ -40,7 +38,7 @@ def train_noiseHD(train_loader, device, encode, model):
             len(non_significant)
         ).to(device)
         #print(model.weight.data[i])
-    '''
+    """
 
     # l = 1
 
@@ -51,7 +49,7 @@ def train_noiseHD(train_loader, device, encode, model):
 
 def test_noiseHD(test_loader, device, encode, model, accuracy):
     model.normalize()
-    #print(model)
+    # print(model)
     with torch.no_grad():
         for samples, labels in tqdm(test_loader, desc="Testing"):
             samples = samples.to(device)
