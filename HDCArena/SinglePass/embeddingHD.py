@@ -2,12 +2,15 @@ import torch
 from tqdm import tqdm
 import torchmetrics
 
+
 def validate(val_loader, encodings, device, model):
     acc = []
     for _i in range(len(encodings)):
-        acc.append(torchmetrics.Accuracy(
-            "multiclass", num_classes=model.out_features
-        ).to(device))
+        acc.append(
+            torchmetrics.Accuracy("multiclass", num_classes=model.out_features).to(
+                device
+            )
+        )
 
     for samples, labels in tqdm(val_loader, desc="Validation"):
         samples = samples.to(device)
@@ -23,8 +26,9 @@ def validate(val_loader, encodings, device, model):
     model.weight = model.ww[encode_idx]
     return encode_idx
 
+
 def train_embeddingHD(train_loader, val_loader, device, encodings, model):
-    warmup = int(len(train_loader)*0.2)
+    warmup = int(len(train_loader) * 0.2)
     with torch.no_grad():
         for idx, (samples, labels) in enumerate(tqdm(train_loader, desc="Training")):
             samples = samples.to(device)
@@ -48,6 +52,7 @@ def train_embeddingHD(train_loader, val_loader, device, encodings, model):
             model.add(samples_hv, labels)
 
         return encodings[encode_idx], encode_idx
+
 
 def test_embeddingHD(test_loader, device, encode, model, accuracy):
     model.normalize()

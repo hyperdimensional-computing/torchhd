@@ -22,7 +22,7 @@ from SinglePass import (
     compHD,
     noiseHD,
     adjustHD,
-    embeddingHD
+    embeddingHD,
 )
 from Iterative import adaptHD as adaptHDiterative
 from Iterative import adjustHD as adjustHDiterative
@@ -374,10 +374,12 @@ def exec_arena(
                     max_val = torch.max(dataset.test.data, 0).values.to(device)
                     transform_test = create_min_max_normalize(min_val, max_val)
                     dataset.test.transform = transform_test
-                    t = int(len(dataset.train)*0.7)
+                    t = int(len(dataset.train) * 0.7)
                     v = len(dataset.train) - t
 
-                    train_set, val_set = torch.utils.data.random_split(dataset.train, [t, v])
+                    train_set, val_set = torch.utils.data.random_split(
+                        dataset.train, [t, v]
+                    )
 
                 # Set up data loaders
                 train_loader = data.DataLoader(
@@ -428,7 +430,9 @@ def exec_arena(
                     encode = Encoder(num_feat, dimensions, i, dataset.name)
                     encode = encode.to(device)
                     encodings.append(encode)
-                encode, idx = embeddingHD.train_embeddingHD(train_loader, val_loader, device, encodings, model)
+                encode, idx = embeddingHD.train_embeddingHD(
+                    train_loader, val_loader, device, encodings, model
+                )
                 encoding = e[idx]
 
             elif method == "high":
@@ -562,7 +566,9 @@ def exec_arena(
             if method == "add":
                 vanillaHD.test_vanillaHD(test_loader, device, encode, model, accuracy)
             if method == "embedding":
-                embeddingHD.test_embeddingHD(test_loader, device, encode, model, accuracy)
+                embeddingHD.test_embeddingHD(
+                    test_loader, device, encode, model, accuracy
+                )
             elif method == "high":
                 highHD.test_highHD(test_loader, device, encode, model, accuracy)
             elif method == "noise":
