@@ -33,19 +33,20 @@ def train_embeddingHD(train_loader, val_loader, device, encodings, model):
             if idx < warmup:
                 for index, i in enumerate(encodings):
                     samples_hv = i(samples)
-                    model.add_index(samples_hv, labels, index)
+                    model.add_index(samples_hv, labels, index, device=device)
             else:
                 if idx == warmup:
                     encode_idx = validate(val_loader, encodings, device, model)
-                samples_hv = encodings[encode_idx](samples)
+                samples_hv = encodings[encode_idx](samples).to(device)
                 model.add(samples_hv, labels)
 
         for samples, labels in tqdm(val_loader, desc="Validation"):
             samples = samples.to(device)
             labels = labels.to(device)
 
-            samples_hv = encodings[encode_idx](samples)
+            samples_hv = encodings[encode_idx](samples).to(device)
             model.add(samples_hv, labels)
+
         return encodings[encode_idx], encode_idx
 
 def test_embeddingHD(test_loader, device, encode, model, accuracy):
