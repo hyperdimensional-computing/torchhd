@@ -668,6 +668,7 @@ ENCODINGS = [
 #  "rvfl"]
 METHODS = [
     "adjust",
+    "adjust_iterative"
     # "noise"
     # "adapt",
     # "online",
