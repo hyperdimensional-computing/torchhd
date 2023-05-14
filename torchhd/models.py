@@ -94,9 +94,22 @@ class Centroid(nn.Module):
         self.error_similarity_sum = 0
         self.error_count = 0
 
+        self.similarity_sum_ad = 0
+        self.count_ad = 0
+        self.error_similarity_sum_ad = 0
+        self.error_count_ad = 0
+
+        self.similarity_sum_ad2 = 0
+        self.count_ad2 = 0
+        self.error_similarity_sum_ad2 = 0
+        self.error_count_ad2 = 0
+
         weight = torch.empty((out_features, in_features), **factory_kwargs)
         self.weight = Parameter(weight, requires_grad=requires_grad)
-
+        weight_ad = torch.empty((out_features, in_features), **factory_kwargs)
+        self.weight_ad = Parameter(weight_ad, requires_grad=requires_grad)
+        weight_ad2 = torch.empty((out_features, in_features), **factory_kwargs)
+        self.weight_ad2 = Parameter(weight_ad2, requires_grad=requires_grad)
         # QuantHD
         weight_quant = torch.empty((out_features, in_features), **factory_kwargs)
         self.weight_quant = Parameter(weight_quant, requires_grad=requires_grad)
@@ -149,6 +162,7 @@ class Centroid(nn.Module):
 
     def reset_parameters(self) -> None:
         init.zeros_(self.weight)
+        init.zeros_(self.weight_ad)
         init.zeros_(self.weight_quant)
         init.zeros_(self.weight_sparse)
         for i in self.multi_weight:
@@ -362,6 +376,102 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, target, lr * alpha1 * input)
         alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
         self.weight.index_add_(0, pred, lr * alpha2 * input)
+
+    def merge_adjust(self, eps=1e-12):
+        norms = self.weight.norm(dim=1, keepdim=True)
+        norms.clamp_(min=eps)
+        self.weight.div_(norms)
+
+        norms = self.weight_ad2.norm(dim=1, keepdim=True)
+        norms.clamp_(min=eps)
+        self.weight_ad2.div_(norms)
+
+        norms = self.weight_ad.norm(dim=1, keepdim=True)
+        norms.clamp_(min=eps)
+        self.weight_ad.div_(norms)
+
+        self.weight.data += self.weight_ad.data + self.weight_ad2.data
+
+
+    @torch.no_grad()
+    def add_adjust_ad2(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
+        r"""Only updates the prototype vectors on wrongly predicted inputs.
+
+        Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
+
+        Adds the input to the mispredicted class prototype scaled by :math:`\epsilon - 1`
+        and adds the input to the target prototype scaled by :math:`1 - \delta`,
+        where :math:`\epsilon` is the cosine similarity of the input with the mispredicted class prototype
+        and :math:`\delta` is the cosine similarity of the input with the target class prototype.
+        """
+        # Adapted from: https://gitlab.com/biaslab/onlinehd/-/blob/master/onlinehd/onlinehd.py
+        logit = self(input)
+        pred = logit.argmax(1)
+        is_wrong = target != pred
+
+        self.similarity_sum_ad2 += logit.max(1).values.item()
+        self.count_ad2 += 1
+        if self.error_count_ad2 == 0:
+            val = self.similarity_sum_ad2 / self.count_ad2
+        else:
+            val = self.error_similarity_sum_ad2 / self.error_count_ad2
+        if is_wrong.sum().item() == 0:
+            if logit.max(1).values.item() < val:
+                self.weight_ad2.index_add_(0, target, input)
+            return
+
+        self.error_count_ad2 += 1
+        self.error_similarity_sum_ad2 += logit.max(1).values.item()
+
+        logit = logit[is_wrong]
+        input = input[is_wrong]
+        target = target[is_wrong]
+        pred = pred[is_wrong]
+
+        alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
+        self.weight_ad2.index_add_(0, target, lr * alpha1 * input)
+        alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
+        self.weight_ad2.index_add_(0, pred, lr * alpha2 * input)
+
+    @torch.no_grad()
+    def add_adjust_ad(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
+        r"""Only updates the prototype vectors on wrongly predicted inputs.
+
+        Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
+
+        Adds the input to the mispredicted class prototype scaled by :math:`\epsilon - 1`
+        and adds the input to the target prototype scaled by :math:`1 - \delta`,
+        where :math:`\epsilon` is the cosine similarity of the input with the mispredicted class prototype
+        and :math:`\delta` is the cosine similarity of the input with the target class prototype.
+        """
+        # Adapted from: https://gitlab.com/biaslab/onlinehd/-/blob/master/onlinehd/onlinehd.py
+        logit = self(input)
+        pred = logit.argmax(1)
+        is_wrong = target != pred
+
+        self.similarity_sum_ad += logit.max(1).values.item()
+        self.count_ad += 1
+        if self.error_count_ad == 0:
+            val = self.similarity_sum_ad / self.count_ad
+        else:
+            val = self.error_similarity_sum_ad / self.error_count_ad
+        if is_wrong.sum().item() == 0:
+            if logit.max(1).values.item() < val:
+                self.weight_ad.index_add_(0, target, input)
+            return
+
+        self.error_count_ad += 1
+        self.error_similarity_sum_ad += logit.max(1).values.item()
+
+        logit = logit[is_wrong]
+        input = input[is_wrong]
+        target = target[is_wrong]
+        pred = pred[is_wrong]
+
+        alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
+        self.weight_ad.index_add_(0, target, lr * alpha1 * input)
+        alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
+        self.weight_ad.index_add_(0, pred, lr * alpha2 * input)
 
     def quantized_similarity(self, input, model):
         if model == "binary":
