@@ -22,8 +22,8 @@ def validate(val_loader, encodings, device, model):
     for index, i in enumerate(encodings):
         acc[index] = acc[index].compute().item()
 
-    conf = model.confidence/model.count_w
-    encode_idx = torch.argmax(torch.tensor(acc)*conf)
+    conf = model.confidence / model.count_w
+    encode_idx = torch.argmax(torch.tensor(acc) * conf)
     model.weight.data = model.ww[encode_idx]
     return encode_idx
 

@@ -127,16 +127,18 @@ class Centroid(nn.Module):
         for i in range(encodings):
             w = torch.empty((out_features, in_features), **factory_kwargs)
             self.ww.append(Parameter(w, requires_grad=requires_grad))
-            self.similarity_sum_w.append(torch.tensor(0.))
-            self.count_w.append(torch.tensor(0.))
-            self.error_similarity_sum_w.append(torch.tensor(0.))
-            self.error_count_w.append(torch.tensor(0.))
-            self.confidence.append(torch.tensor(0.))
+            self.similarity_sum_w.append(torch.tensor(0.0))
+            self.count_w.append(torch.tensor(0.0))
+            self.error_similarity_sum_w.append(torch.tensor(0.0))
+            self.error_count_w.append(torch.tensor(0.0))
+            self.confidence.append(torch.tensor(0.0))
 
         self.ww = torch.stack(self.ww).to(device)
         self.similarity_sum_w = torch.stack(self.similarity_sum_w).to(device)
         self.count_w = torch.stack(self.count_w).to(device)
-        self.error_similarity_sum_w = torch.stack(self.error_similarity_sum_w).to(device)
+        self.error_similarity_sum_w = torch.stack(self.error_similarity_sum_w).to(
+            device
+        )
         self.error_count_w = torch.stack(self.error_count_w).to(device)
         self.confidence = torch.stack(self.confidence).to(device)
 
@@ -174,13 +176,17 @@ class Centroid(nn.Module):
         logit = self.forward_index(input, index)
         conf = torch.topk(logit, 2)
 
-        #print(target, conf.indices[0][0])
+        # print(target, conf.indices[0][0])
         if target != conf.values[0][0]:
             self.count_w[index] += 1
 
-            self.confidence[index] += conf.values[0][0].item()-conf.values[0][1].item()
-        self.ww[index].index_add_(0, target.to(device), input.to(device), alpha=lr).to(device)
-        '''
+            self.confidence[index] += (
+                conf.values[0][0].item() - conf.values[0][1].item()
+            )
+        self.ww[index].index_add_(0, target.to(device), input.to(device), alpha=lr).to(
+            device
+        )
+        """
         logit = self.forward_index(input, index)
         pred = logit.argmax(1)
         is_wrong = target != pred
@@ -208,7 +214,7 @@ class Centroid(nn.Module):
         self.ww[index].index_add_(0, target, lr * alpha1 * input)
         alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
         self.ww[index].index_add_(0, pred, lr * alpha2 * input)
-        '''
+        """
 
 
     def forward_index(self, input: Tensor, index):

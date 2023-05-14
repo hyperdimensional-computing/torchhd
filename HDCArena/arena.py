@@ -418,7 +418,7 @@ def exec_arena(
                 )
                 # ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid", "generic"]
 
-                e = ["flocet","generic","sinusoid", "hashmap","sequence"]
+                e = ["flocet", "generic", "sinusoid", "hashmap", "sequence"]
 
                 model = Centroid(dimensions, num_classes, encodings=len(e))
                 model = model.to(device)
@@ -426,7 +426,7 @@ def exec_arena(
                 encodings = []
                 iterations_executed = 1
 
-                for i in ["flocet","generic","sinusoid", "hashmap","sequence"]:
+                for i in ["flocet", "generic", "sinusoid", "hashmap", "sequence"]:
                     encode = Encoder(num_feat, dimensions, i, dataset.name)
                     encode = encode.to(device)
                     encodings.append(encode)
@@ -570,7 +570,7 @@ def exec_arena(
                     test_loader, device, encode, model, accuracy
                 )
                 print(encoding)
-                encoding = 'embed'
+                encoding = "embed"
             elif method == "high":
                 highHD.test_highHD(test_loader, device, encode, model, accuracy)
             elif method == "noise":
