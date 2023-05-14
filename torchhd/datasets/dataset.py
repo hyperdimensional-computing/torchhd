@@ -502,14 +502,14 @@ class UCIClassificationBenchmark:
         "Yeast",
         "Zoo",
     ]
-    dataset_names = [
+    dataset_names_ = [
         "Arrhythmia",
         "AudiologyStd",
         "BalanceScale",
         "Balloons",
     ]
 
-    dataset_names = [
+    dataset_names_ = [
         "Arrhythmia",
     ]
 
