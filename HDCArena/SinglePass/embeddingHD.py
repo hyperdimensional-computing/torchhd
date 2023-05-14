@@ -29,7 +29,9 @@ def validate(val_loader, encodings, device, model):
     return encode_idx
 
 
-def train_embeddingHD(train_loader, val_loader, test_loader, device, encodings, e, model):
+def train_embeddingHD(
+    train_loader, val_loader, test_loader, device, encodings, e, model
+):
     warmup = int(len(train_loader) * 0.3)
     with torch.no_grad():
         for idx, (samples, labels) in enumerate(tqdm(train_loader, desc="Training")):

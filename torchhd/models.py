@@ -260,8 +260,8 @@ class Centroid(nn.Module):
         target = target[is_wrong]
         pred = pred[is_wrong]
 
-        self.weight.index_add_(0, target, input*lr)
-        self.weight.index_add_(0, pred, -input*lr)
+        self.weight.index_add_(0, target, input * lr)
+        self.weight.index_add_(0, pred, -input * lr)
 
     @torch.no_grad()
     def add_adj(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
@@ -281,12 +281,12 @@ class Centroid(nn.Module):
         target = target[is_wrong]
         pred = pred[is_wrong]
 
-        self.weight.index_add_(0, target, 2*input)
-        #print(torch.sign(self.weight[pred]))
-        #print(self.weight[pred])
-        #print(torch.sign(input))
-        #print(input)
-        #print(torch.eq(torch.sign(self.weight[pred]), input))
+        self.weight.index_add_(0, target, 2 * input)
+        # print(torch.sign(self.weight[pred]))
+        # print(self.weight[pred])
+        # print(torch.sign(input))
+        # print(input)
+        # print(torch.eq(torch.sign(self.weight[pred]), input))
         mask = torch.ne(torch.sign(self.weight[pred]), input)
         input[mask] = torch.zeros(len(mask))
         self.weight.index_add_(0, pred, -input)
