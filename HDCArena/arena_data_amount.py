@@ -260,7 +260,7 @@ with open(results_file, "w", newline="") as file:
             "Method",
             "Encoding",
             "Iterations",
-            "AmountData"
+            "AmountData",
         ]
     )
 
@@ -407,7 +407,17 @@ def exec_arena(
             # TRAIN #
             t = time.time()
             if method == "add":
-                vanillaHD.train_vanillaHD(train_loader, device, encode, model, test_loader, dataset.name, results_file, method, encoding)
+                vanillaHD.train_vanillaHD(
+                    train_loader,
+                    device,
+                    encode,
+                    model,
+                    test_loader,
+                    dataset.name,
+                    results_file,
+                    method,
+                    encoding,
+                )
                 iterations_executed = 1
             elif method == "embedding":
                 train_loader = data.DataLoader(
@@ -442,13 +452,43 @@ def exec_arena(
                 noiseHD.train_noiseHD(train_loader, device, encode, model)
                 iterations_executed = 1
             elif method == "adjust":
-                adjustHD.train_adjustHD(train_loader, device, encode, model, test_loader, dataset.name, results_file, method, encoding)
+                adjustHD.train_adjustHD(
+                    train_loader,
+                    device,
+                    encode,
+                    model,
+                    test_loader,
+                    dataset.name,
+                    results_file,
+                    method,
+                    encoding,
+                )
                 iterations_executed = 1
             elif method == "adapt":
-                adaptHD.train_adaptHD(train_loader, device, encode, model, test_loader, dataset.name, results_file, method, encoding)
+                adaptHD.train_adaptHD(
+                    train_loader,
+                    device,
+                    encode,
+                    model,
+                    test_loader,
+                    dataset.name,
+                    results_file,
+                    method,
+                    encoding,
+                )
                 iterations_executed = 1
             elif method == "online":
-                onlineHD.train_onlineHD(train_loader, device, encode, model, test_loader, dataset.name, results_file, method, encoding)
+                onlineHD.train_onlineHD(
+                    train_loader,
+                    device,
+                    encode,
+                    model,
+                    test_loader,
+                    dataset.name,
+                    results_file,
+                    method,
+                    encoding,
+                )
                 iterations_executed = 1
             elif method == "comp":
                 compHD.train_compHD(train_loader, device, encode, model, 10)
@@ -565,7 +605,7 @@ def exec_arena(
             t = time.time()
             if method == "add":
                 continue
-                #vanillaHD.test_vanillaHD(test_loader, device, encode, model, accuracy)
+                # vanillaHD.test_vanillaHD(test_loader, device, encode, model, accuracy)
             if method == "embedding":
                 embeddingHD.test_embeddingHD(
                     test_loader, device, encode, model, accuracy
@@ -578,13 +618,13 @@ def exec_arena(
                 noiseHD.test_noiseHD(test_loader, device, encode, model, accuracy)
             elif method == "adjust":
                 continue
-                #adjustHD.test_adjustHD(test_loader, device, encode, model, accuracy)
+                # adjustHD.test_adjustHD(test_loader, device, encode, model, accuracy)
             elif method == "adapt":
                 continue
-                #adaptHD.test_adaptHD(test_loader, device, encode, model, accuracy)
+                # adaptHD.test_adaptHD(test_loader, device, encode, model, accuracy)
             elif method == "online":
                 continue
-                #onlineHD.test_onlineHD(test_loader, device, encode, model, accuracy)
+                # onlineHD.test_onlineHD(test_loader, device, encode, model, accuracy)
             elif method == "comp":
                 compHD.test_compHD(test_loader, device, encode, model, accuracy, 10)
             elif method == "adapt_iterative":
@@ -623,8 +663,7 @@ def exec_arena(
                 intRVFL.test_rvfl(test_loader, device, encode, model, accuracy)
             test_time = time.time() - t
 
-            #benchmark.report(dataset, accuracy.compute().item())
-
+            # benchmark.report(dataset, accuracy.compute().item())
 
 
 BATCH_SIZE = 1

@@ -3,14 +3,25 @@ from tqdm import tqdm
 import torchmetrics
 import csv
 
-def train_adaptHD(train_loader, device, encode, model, test_loader, name, results_file, method, encoding):
+
+def train_adaptHD(
+    train_loader,
+    device,
+    encode,
+    model,
+    test_loader,
+    name,
+    results_file,
+    method,
+    encoding,
+):
     with torch.no_grad():
         l = int(len(train_loader) / 10)
         c = 0
         per = 0
-        accuracy = torchmetrics.Accuracy("multiclass", num_classes=model.out_features).to(
-            device
-        )
+        accuracy = torchmetrics.Accuracy(
+            "multiclass", num_classes=model.out_features
+        ).to(device)
         for iter, (samples, labels) in enumerate(tqdm(train_loader, desc="Training")):
             c += 1
 
@@ -35,7 +46,7 @@ def train_adaptHD(train_loader, device, encode, model, test_loader, name, result
                                 method,
                                 encoding,
                                 1,
-                                per/10
+                                per / 10,
                             ]
                         )
                 accuracy.reset()
@@ -52,12 +63,13 @@ def train_adaptHD(train_loader, device, encode, model, test_loader, name, result
                 method,
                 encoding,
                 1,
-                per / 10
+                per / 10,
             ]
         )
 
+
 def test_adaptHD(test_loader, device, encode, model, accuracy):
-    #model.normalize()
+    # model.normalize()
     with torch.no_grad():
         for samples, labels in tqdm(test_loader, desc="Testing"):
             samples = samples.to(device)
