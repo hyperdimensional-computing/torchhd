@@ -509,7 +509,7 @@ class UCIClassificationBenchmark:
         "Balloons",
     ]
 
-    dataset_names = [
+    dataset_names_ = [
         "Arrhythmia",
     ]
 
