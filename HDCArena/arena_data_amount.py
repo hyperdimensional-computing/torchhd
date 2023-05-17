@@ -687,8 +687,7 @@ ENCODINGS = ["flocet"]
 METHODS = [
     "add",
     "adapt",
-    # "noise"
-    "adapt",
+    "online",
     "adjust"
     # "online",
     # "adapt_iterative",
