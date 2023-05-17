@@ -509,9 +509,8 @@ class UCIClassificationBenchmark:
         "Balloons",
     ]
 
-    dataset_names_ = [
-        "Arrhythmia",
-    ]
+    dataset_names = [
+        "Trains"    ]
 
     # Specify namedtuple format
     class DatasetEntry(NamedTuple):

@@ -30,7 +30,7 @@ def train_onlineHD(
 
             samples_hv = encode(samples)
             model.add_online(samples_hv, labels)
-            if c % l == 0:
+            if l != 0 and c % l == 0:
                 test_onlineHD(test_loader, device, encode, model, accuracy)
                 per += 1
                 if per != 10:

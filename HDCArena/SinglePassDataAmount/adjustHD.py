@@ -29,7 +29,7 @@ def train_adjustHD(
             labels = labels.to(device)
             samples_hv = encode(samples)
             model.add_adjust(samples_hv, labels)
-            if c % l == 0:
+            if l != 0 and c % l == 0:
                 test_adjustHD(test_loader, device, encode, model, accuracy)
                 per += 1
                 if per != 10:

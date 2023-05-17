@@ -1,8 +1,8 @@
-import pandas as pd
+﻿import pandas as pd
 import matplotlib.pyplot as plt
 
 # Read in the CSV file
-df = pd.read_csv("../results/final_results/embeddings_adjust")
+df = pd.read_csv("../results/final_results/compare_embeddings_singlepass_arena")
 var = "Method"
 
 embeddings_order = ["add", "adapt", "online", "adjust"]
