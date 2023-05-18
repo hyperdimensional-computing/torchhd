@@ -19,6 +19,7 @@ methods_order = [
     "comp",
     "adjust",
     "adjust_iterative",
+    "stable",
 ]
 
 df_mean = df.groupby([var, "Name"])["TrainTime"].mean().to_frame()

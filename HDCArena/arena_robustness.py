@@ -13,18 +13,17 @@ import csv
 import torch.nn.functional as F
 import pandas as pd
 from SinglePass import (
-    vanillaHD,
     highHD,
-    adaptHD,
-    onlineHD,
     multiCentroidHD,
     intRVFL,
     compHD,
     noiseHD,
-    adjustHD,
     embeddingHD,
     adaptiveStable
 )
+
+from robustness import adaptHD, adjustHD, onlineHD, vanillaHD
+
 from Iterative import adaptHD as adaptHDiterative
 from Iterative import adjustHD as adjustHDiterative
 from Iterative import onlineHD as onlineHDiterative
@@ -262,6 +261,7 @@ with open(results_file, "w", newline="") as file:
             "Method",
             "Encoding",
             "Iterations",
+            "Failure"
         ]
     )
 
@@ -404,6 +404,8 @@ def exec_arena(
 
                 model = Centroid(dimensions, num_classes)
                 model = model.to(device)
+
+            failure = [1,2,5,10,15,20,30,40,50,60,70,80,90,100]
 
             # TRAIN #
             t = time.time()
@@ -568,7 +570,7 @@ def exec_arena(
             )
             t = time.time()
             if method == "add":
-                vanillaHD.test_vanillaHD(test_loader, device, encode, model, accuracy)
+                vanillaHD.test_vanillaHD(test_loader, device, encode, model, accuracy, dataset.name, results_file, dimensions, method, encoding, failure)
             if method == "stable":
                 adaptiveStable.test_vanillaHD(test_loader, device, encode, model, accuracy)
                 iterations_executed = 1
@@ -626,41 +628,17 @@ def exec_arena(
                 intRVFL.test_rvfl(test_loader, device, encode, model, accuracy)
             test_time = time.time() - t
 
-            benchmark.report(dataset, accuracy.compute().item())
-            with open(results_file, "a", newline="") as file:
-                writer = csv.writer(file)
-                writer.writerow(
-                    [
-                        dataset.name,
-                        accuracy.compute().item(),
-                        train_time,
-                        test_time,
-                        dimensions,
-                        method,
-                        encoding,
-                        iterations_executed,
-                    ]
-                )
-            print(accuracy.compute().item())
+            #benchmark.report(dataset, accuracy.compute().item())
+
+            #print(accuracy.compute().item())
 
 
 BATCH_SIZE = 1
 REPEATS = 1
-DIMENSIONS = [1000]
+DIMENSIONS = [10000]
 
-# ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
-ENCODINGS = [
-    "hashmap",
-    "bundle",
-    "sequence",
-    "ngram",
-    "hashmap",
-    "flocet",
-    "density",
-    "random",
-    "sinusoid",
-]
-
+# ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid","generic"]
+ENCODINGS = ["flocet"]
 # METHODS = ["add",
 # "adapt",
 # "online",
@@ -675,7 +653,6 @@ ENCODINGS = [
 #  "rvfl"]
 METHODS = [
     "add",
-    "stable",
     #"adjust"
     # "noise"
     # "adapt",

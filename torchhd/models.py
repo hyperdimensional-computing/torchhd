@@ -203,7 +203,8 @@ class Centroid(nn.Module):
 
         # cancel update if all predictions were correct
         if is_wrong.sum().item() == 0:
-            self.weight.index_add_(0, target, lr * input)
+            alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
+            self.weight.index_add_(0, target, lr * input * alpha1)
             return
 
         # only update wrongly predicted inputs
@@ -212,8 +213,11 @@ class Centroid(nn.Module):
         target = target[is_wrong]
         pred = pred[is_wrong]
 
-        self.weight.index_add_(0, target, lr * input)
-        self.weight_err.index_add_(0, pred, lr * input)
+        alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
+        alpha2 = 1.0 - logit.gather(1, pred.unsqueeze(1))
+
+        self.weight.index_add_(0, target, lr * alpha1 * input)
+        self.weight_err.index_add_(0, pred, lr * alpha2 * input)
 
     @torch.no_grad()
     def add_index(
