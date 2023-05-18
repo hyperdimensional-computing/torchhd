@@ -104,6 +104,9 @@ class Centroid(nn.Module):
         self.error_similarity_sum_ad2 = 0
         self.error_count_ad2 = 0
 
+        weight_err = torch.empty((out_features, in_features), **factory_kwargs)
+        self.weight_err = Parameter(weight_err, requires_grad=requires_grad)
+
         weight = torch.empty((out_features, in_features), **factory_kwargs)
         self.weight = Parameter(weight, requires_grad=requires_grad)
         weight_ad = torch.empty((out_features, in_features), **factory_kwargs)
@@ -165,6 +168,7 @@ class Centroid(nn.Module):
         init.zeros_(self.weight_ad)
         init.zeros_(self.weight_quant)
         init.zeros_(self.weight_sparse)
+        init.zeros_(self.weight_err)
         for i in self.multi_weight:
             init.zeros_(i)
         for i in self.ww:
@@ -179,8 +183,37 @@ class Centroid(nn.Module):
     @torch.no_grad()
     def add(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
         """Adds the input vectors scaled by the lr to the target prototype vectors."""
-
         self.weight.index_add_(0, target, input, alpha=lr)
+
+    @torch.no_grad()
+    def add_stable(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
+        r"""Only updates the prototype vectors on wrongly predicted inputs.
+
+        Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
+
+        Adds the input to the mispredicted class prototype scaled by :math:`\epsilon - 1`
+        and adds the input to the target prototype scaled by :math:`1 - \delta`,
+        where :math:`\epsilon` is the cosine similarity of the input with the mispredicted class prototype
+        and :math:`\delta` is the cosine similarity of the input with the target class prototype.
+        """
+        # Adapted from: https://gitlab.com/biaslab/onlinehd/-/blob/master/onlinehd/onlinehd.py
+        logit = self(input)
+        pred = logit.argmax(1)
+        is_wrong = target != pred
+
+        # cancel update if all predictions were correct
+        if is_wrong.sum().item() == 0:
+            self.weight.index_add_(0, target, lr * input)
+            return
+
+        # only update wrongly predicted inputs
+        logit = logit[is_wrong]
+        input = input[is_wrong]
+        target = target[is_wrong]
+        pred = pred[is_wrong]
+
+        self.weight.index_add_(0, target, lr * input)
+        self.weight_err.index_add_(0, pred, lr * input)
 
     @torch.no_grad()
     def add_index(

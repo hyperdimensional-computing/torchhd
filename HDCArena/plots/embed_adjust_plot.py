@@ -2,10 +2,11 @@
 import matplotlib.pyplot as plt
 
 # Read in the CSV file
-df = pd.read_csv("../results/final_results/compare_embeddings_singlepass_arena")
-var = "Method"
-
+df = pd.read_csv("../results/final_results/compare_embeddings_singlepass")
+var = "Encoding"
+df = df[df["Method"] == 'adjust']
 embeddings_order = ["add", "adapt", "online", "adjust"]
+embeddings_order = ["hashmap", "sinusoid", "flocet"]
 mean_accuracy_by_dimension_and_method = df.groupby(
     ["Dimensions", "Method", "Encoding"]
 )["Accuracy"].mean()
@@ -147,7 +148,9 @@ latex_table = test_time_by_dimension_and_method.to_latex(index=True)
 print(latex_table)
 
 
-df = df[df["Dimensions"] == 10000]
+#df = df[df["Dimensions"] == 10000]
+#df = df[df["Encoding"] == 'adjust']
+print(df)
 df_mean = df.groupby([var, "Name"])["Accuracy"].mean().to_frame()
 df_pivot = df_mean.reset_index().pivot(index="Name", columns=var, values="Accuracy")
 df_pivot.loc["Mean"] = df_pivot.mean(axis=0)
