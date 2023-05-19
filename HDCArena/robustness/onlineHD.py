@@ -34,7 +34,7 @@ def test_onlineHD(test_loader, device, encode, model, accuracy, name, results_fi
 
                 num_dim = int((f/100)*dimensions)
                 f_mask = torch.randperm(dimensions - 0)[:num_dim]
-                samples_hv[0][f_mask] = torch.zeros(num_dim).to(device)
+                samples_hv[0][f_mask] = samples_hv[0][f_mask] * -torch.ones(num_dim).to(device)
                 #print(samples_hv, num_dim)
                 outputs = model(samples_hv, dot=True)
 
