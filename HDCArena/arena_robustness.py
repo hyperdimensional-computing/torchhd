@@ -599,11 +599,11 @@ def exec_arena(
             elif method == "noise":
                 noiseHD.test_noiseHD(test_loader, device, encode, model, accuracy)
             elif method == "adjust":
-                adjustHD.test_adjustHD(test_loader, device, encode, model, accuracy)
+                adjustHD.test_adjustHD(test_loader, device, encode, model, accuracy, dataset.name, results_file, dimensions, method, encoding, failure)
             elif method == "adapt":
-                adaptHD.test_adaptHD(test_loader, device, encode, model, accuracy)
+                adaptHD.test_adaptHD(test_loader, device, encode, model, accuracy, dataset.name, results_file, dimensions, method, encoding, failure)
             elif method == "online":
-                onlineHD.test_onlineHD(test_loader, device, encode, model, accuracy)
+                onlineHD.test_onlineHD(test_loader, device, encode, model, accuracy, dataset.name, results_file, dimensions, method, encoding, failure)
             elif method == "comp":
                 compHD.test_compHD(test_loader, device, encode, model, accuracy, 10)
             elif method == "adapt_iterative":
@@ -667,10 +667,9 @@ ENCODINGS = ["flocet"]
 #  "rvfl"]
 METHODS = [
     "add",
-    # "adjust"
-    # "noise"
-    # "adapt",
-    # "online",
+    "adapt",
+    "online",
+    "adjust"
     # "adapt_iterative",
     # "online_iterative",
     # "quant_iterative",
