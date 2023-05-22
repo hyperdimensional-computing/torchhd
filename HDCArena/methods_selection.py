@@ -1,7 +1,7 @@
 import time
 import csv
 import sys
-sys.path.append('/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena')
+sys.path.append('methods')
 from methods import vanillaHD
 from methods import adaptHD
 from methods import onlineHD
