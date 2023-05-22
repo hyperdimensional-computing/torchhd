@@ -636,7 +636,7 @@ class Centroid(nn.Module):
             self.multi_weight[row][col] = self.multi_weight[row][col].to(
                 device
             ) + input.to(device)[0].to(device)
-        else:
+        elif len(self.multi_weight[target]) < 10:
             self.multi_weight[target] = torch.cat(
                 [self.multi_weight[target].to(device), input.to(device)], dim=0
             ).to(device)
