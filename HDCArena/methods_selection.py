@@ -1,7 +1,8 @@
 import time
 import csv
 import sys
-sys.path.append('methods')
+
+sys.path.append("methods")
 from methods import vanillaHD
 from methods import adaptHD
 from methods import onlineHD
