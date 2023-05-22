@@ -506,8 +506,6 @@ class UCIClassificationBenchmark:
         "BalanceScale",
     ]
 
-
-
     # Specify namedtuple format
     class DatasetEntry(NamedTuple):
         name: str
