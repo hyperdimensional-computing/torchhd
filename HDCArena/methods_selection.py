@@ -53,6 +53,7 @@ with open(results_file, "w", newline="") as file:
 
 
 def select_model(
+        train_ds,
     train_loader,
     test_loader,
     num_classes,
@@ -115,6 +116,7 @@ def select_model(
         )
     elif method == "adjust":
         adjustHD.train_adjustHD(
+            train_ds,
             train_loader,
             test_loader,
             num_classes,
@@ -705,6 +707,25 @@ configs = [
         "s": None,
     },
 ]
+
+configs = [    {
+        "method": "adjust",
+        "multi_reduce_subclass": None,
+        "threshold": None,
+        "lr": 1,
+        "epsilon": None,
+        "model_quantize": None,
+        "model_sparse": None,
+        "sparsity": None,
+        "lazy_regeneration": None,
+        "model_neural": None,
+        "r": None,
+        "alpha": None,
+        "beta": None,
+        "theta": None,
+        "chunks": None,
+        "s": None,
+    },]
 
 # METHODS = ["add","adapt","online","adjust","comp","adapt_iterative","online_iterative","adjust_iterative",
 # "quant_iterative","sparse_iterative","neural_iterative","dist_iterative","multicentroid","rvfl"]

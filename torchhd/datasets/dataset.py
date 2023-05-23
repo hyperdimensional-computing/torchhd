@@ -503,10 +503,7 @@ class UCIClassificationBenchmark:
         "Zoo",
     ]
     dataset_names_ = [
-        "Arrhythmia",
-        "AudiologyStd",
         "BalanceScale",
-        "Balloons",
     ]
 
 

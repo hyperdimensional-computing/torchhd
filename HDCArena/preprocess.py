@@ -88,4 +88,4 @@ def preprocess(dataset, batch_size, device, partial_data):
 
     train_loader = data.DataLoader(train_ds, batch_size=batch_size, shuffle=True)
     test_loader = data.DataLoader(test_ds, batch_size=batch_size)
-    return train_loader, test_loader, num_classes, num_feat
+    return train_loader, test_loader, num_classes, num_feat, train_ds
