@@ -100,7 +100,8 @@ def train_adjustHD(
     results_file,
 ):
     validation_ds, _ = data.random_split(train_ds, [int(len(train_ds)*0.1),len(train_ds)-int(len(train_ds)*0.1)])
-    validation_loader = data.DataLoader(validation_ds, shuffle=True)
+    if len(validation_ds) > 0:
+        validation_loader = data.DataLoader(validation_ds, shuffle=True)
     num_samples_per_split = num_classes*3
     num_splits = 4
     while num_splits*num_samples_per_split > len(train_ds):
@@ -117,15 +118,17 @@ def train_adjustHD(
 
             samples_hv = encode(samples)
             model.add_adjust(samples_hv, labels, lr=lr)
-        accuracies.append(validate(validation_loader, device, encode, model, num_classes))
+        if len(validation_ds) > 0:
+            accuracies.append(validate(validation_loader, device, encode, model, num_classes))
         model.reset_parameters()
 
-    for samples, labels in tqdm(data.DataLoader(splits[torch.argmax(torch.tensor(accuracies))], shuffle=True), desc="Training"):
-        samples = samples.to(device)
-        labels = labels.to(device)
+    if len(validation_ds) > 0:
+        for samples, labels in tqdm(data.DataLoader(splits[torch.argmax(torch.tensor(accuracies))], shuffle=True), desc="Training"):
+            samples = samples.to(device)
+            labels = labels.to(device)
 
-        samples_hv = encode(samples)
-        model.add_adjust(samples_hv, labels, lr=lr)
+            samples_hv = encode(samples)
+            model.add_adjust(samples_hv, labels, lr=lr)
 
     train_time = time.time()
     with torch.no_grad():
