@@ -43,7 +43,7 @@ __all__ = [
     "level",
     "thermometer",
     "circular",
-    "fractional_power_encoding",
+    "FractionalPowerEncoding",
     "bind",
     "bundle",
     "permute",
@@ -618,24 +618,12 @@ def circular(
     hv.requires_grad = requires_grad
     return hv.as_subclass(vsa_tensor)
 
-
-def fractional_power_encoding(
-    values: Tensor,
-    dimensions: int,
-    kernel_shape="sinc",
-    bandwidth: float = 1.0,
-    vsa: VSAOptions = "FHRR",
-    *,
-    requires_grad=False,
-    **kwargs,
-) -> VSATensor:
-    """Creates a fractional power encoding (FPE) hypervectors for given values, kernel shape, bandwidth, and  dimensionality.
-
-    Implements similarity-preserving hypervectors approximating desired kernel shape as described in `Computing on Functions Using Randomized Vector Representations <https://arxiv.org/abs/2109.03429>`_.
+class FractionalPowerEncoding:
+    """Class for fractional power encoding (FPE) method that forms hypervectors for given values, kernel shape, bandwidth, and dimensionality. Implements similarity-preserving hypervectors approximating desired kernel shape as described in `Computing on Functions Using Randomized Vector Representations <https://arxiv.org/abs/2109.03429>`_.
 
     Args:
-        values (Tensor): values for which FPE hypervectors should be generated.
         dimensions (int): the dimensionality of the hypervectors.
+        data_dimensions (int): the dimensionality of input data 
         kernel_shape (str, optional): hyperparameter defining the shape of the kernel by specifying a particular probability distribution that is used to sample the base hypervector(s).  Default: ``"sinc"``.
         bandwidth (float, optional): positive hyperparameter defining the width of the similarity kernel. Lower values lead to broader kernels while larger values lead to more narrow kernels. Default: ``1.0``.
         vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"FHRR"``.
@@ -645,54 +633,111 @@ def fractional_power_encoding(
 
     Examples::
 
-        >>> torchhd.fractional_power_encoding(torch.arange(1, 4, 1.), 6, "sinc", 1.0, "FHRR")
-        (FHRRTensor([[-0.8418+0.5398j,  0.9728+0.2316j,  0.9480-0.3184j,  0.5133+0.8582j,
-              0.8673-0.4978j, -0.8920+0.4521j],
-            [ 0.4172-0.9088j,  0.8927+0.4506j,  0.7973-0.6036j, -0.4730+0.8810j,
-              0.5044-0.8635j,  0.5912-0.8065j],
-            [ 0.1394+0.9902j,  0.7641+0.6451j,  0.5636-0.8260j, -0.9989+0.0463j,
-              0.0076-1.0000j, -0.1627+0.9867j]]),
-         FHRRTensor([[-0.8418+0.5398j,  0.9728+0.2316j,  0.9480-0.3184j,  0.5133+0.8582j,
-              0.8673-0.4978j, -0.8920+0.4521j]]))
+        >>> torchhd.FractionalPowerEncoding(6, 1, "sinc", 1.0, "FHRR").encoding(torch.arange(1, 4, 1.))
+        FHRRTensor([[-0.7181-0.6959j, -0.5269+0.8499j, -0.0848+0.9964j,  0.9720-0.2348j,
+              0.6358+0.7718j,  0.4352+0.9003j],
+            [ 0.0314+0.9995j, -0.4447-0.8957j, -0.9856-0.1689j,  0.8897-0.4565j,
+             -0.1915+0.9815j, -0.6212+0.7836j],
+            [ 0.6730-0.7396j,  0.9956+0.0940j,  0.2519-0.9678j,  0.7576-0.6527j,
+             -0.8793+0.4762j, -0.9759-0.2183j]])
 
     """
-    vsa_tensor = get_vsa_tensor_class(vsa)
-    # initialize an empty tensor as a placeholder to get dtype and device
-    base_hv = vsa_tensor.empty(
-        1,
-        dimensions,
-        **kwargs,
-    )
 
-    # Check HD/VSA model type
-    if vsa_tensor == FHRRTensor:
-        # Generate the base vector that determines the shape of the FPE kernel
-        if kernel_shape == "sinc":
-            # Draw angles from a uniform  distribution for base hypervector(s)
-            angle = torch.empty(
-                base_hv.size(), dtype=torch.float64, device=base_hv.device
-            )
-            angle.uniform_(-math.pi, math.pi)
+    def __init__(
+        self,
+        dimensions: int,
+        data_dimensions: int,
+        kernel_shape: Optional[Callable] = "sinc",
+        bandwidth: float = 1.0,
+        vsa: VSAOptions = "FHRR",
+        requires_grad: bool = False,
+    ):
+        self.dimensions = dimensions
+        self.data_dimensions = data_dimensions
+        self.kernel_shape = kernel_shape
+        self.bandwidth = bandwidth
+        self.requires_grad = requires_grad
+        self.vsa_tensor = get_vsa_tensor_class(vsa)
+        
+        super().__init__()        
+        
+        
+        self.base_hv, self.angle = self.generate_base()
+
+
+    def generate_base(self):
+        """Generate the basis hypervector(s) to be used for encoding the data."""
+        
+        # Set the values of the base hypervector(s).
+        base_hv = self.vsa_tensor.empty(
+            self.data_dimensions,
+            self.dimensions,
+        )
+        
+        # Check HD/VSA model type
+        if self.vsa_tensor == FHRRTensor:
+            # Generate the base vector that determines the shape of the FPE kernel
+            if self.kernel_shape == "sinc":
+                #Define the corresppnding distribution
+                self.kernel_dist = torch.distributions.Uniform(torch.tensor([-math.pi]), torch.tensor([math.pi]))
+                
+                # Draw angles from a uniform  distribution for base hypervector(s). Note that data dimensions here are independent but this does not have to be always the case
+                angle = torch.reshape(self.kernel_dist.sample(sample_shape=torch.Size([self.data_dimensions*self.dimensions])), (self.data_dimensions, self.dimensions))
+    
+            elif self.kernel_shape == "Gaussian":
+                #Define the corresppnding distribution
+                self.kernel_dist = torch.distributions.Normal(torch.tensor([0.0]), torch.tensor([1.0]))
+                
+                # Draw angles from a uniform  distribution for base hypervector(s). Note that data dimensions here are independent but this does not have to be always the case
+                angle = torch.reshape(self.kernel_dist.sample(sample_shape=torch.Size([self.data_dimensions*self.dimensions])), (self.data_dimensions, self.dimensions))
+                
+            else:
+                raise ValueError(f"{self.kernel_shape} kernel is not supported at the moment.")
+    
+            # Set the values of the base hypervector(s).
+            base_hv[:, :] = torch.complex(angle.cos(), angle.sin())
+    
         else:
-            raise ValueError(f"{kernel_shape} kernel is not supported at the moment.")
+            raise ValueError(
+                f"{self.vsa_tensor} Fractioncal Power Encoding for this HD/VSA model is not implemented or defined."
+            )        
+                
+        return base_hv, angle
 
-        # Set the values of the base hypervector(s)
-        base_hv[:, :] = torch.complex(angle.cos(), angle.sin())
+    def encoding(self, values):
+        """Creates a fractional power encoding (FPE) for given values.
+        
+        Args:
+            values (Tensor): values for which FPE hypervectors should be generated.
+    
+        """
 
-        # Perform FPE of the desired values using the base hypervector(s)
-        hv = torch.pow(
-            base_hv.repeat(values.size(0), 1),
-            torch.transpose(bandwidth * values.repeat(dimensions, 1), 0, 1),
+        hv = self.vsa_tensor.empty(
+            values.size()[0],
+            self.dimensions,
         )
+    
+         #Check if input data is uni or multi-dimensional to smoothly support both
+        try:
+            torch.any(values, dim=1);
+        except:
+            #In case the input is one-dimensional, add an extra singleton dimension
+            values = torch.unsqueeze(values, 1)   
 
-    else:
-        raise ValueError(
-            f"{vsa_tensor} Fractioncal Power Encoding for this HD/VSA model is not implemented or defined."
-        )
-
-    hv.requires_grad = requires_grad
-    return hv, base_hv
-
+        if self.vsa_tensor == FHRRTensor:
+            # Perform FPE of the desired values using the base hypervector(s)
+            #Simultaneously computes angles for given values and their sum that is equivalent to the binding     
+            hv_angles = torch.matmul(self.bandwidth * values, self.angle)
+            hv[:, :] = torch.complex(hv_angles.cos(), hv_angles.sin())
+         
+        else:
+            raise ValueError(
+                f"{self.vsa_tensor} Fractioncal Power Encoding for this HD/VSA model is not implemented or defined."
+            )        
+ 
+        hv.requires_grad = self.requires_grad
+        return hv
+    
 
 def bind(input: VSATensor, other: VSATensor) -> VSATensor:
     r"""Binds two hypervectors which produces a hypervector dissimilar to both.
