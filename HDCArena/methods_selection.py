@@ -762,7 +762,7 @@ configs = [
 ]
 
 configs = [
-{
+    {
         "method": "adapt",
         "multi_reduce_subclass": None,
         "threshold": None,
