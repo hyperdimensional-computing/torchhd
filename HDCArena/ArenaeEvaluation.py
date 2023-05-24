@@ -72,17 +72,17 @@ def exec_arena(
 
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid","generic"]
-ENCODINGS = ["density"]
+ENCODINGS = ["hashmap"]
 
 configurations = methods_selection.configs
 
 REPEATS = 1
 DIMENSIONS = [10000]
 ITERATIONS = 30
-PARTIAL_DATA = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-# PARTIAL_DATA = [1]
-ROBUSTNESS = [1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70]
-# ROBUSTNESS = [0]
+#PARTIAL_DATA = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+PARTIAL_DATA = [1]
+#ROBUSTNESS = [0, 1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70]
+ROBUSTNESS = [0]
 arena = False
 
 if arena:
