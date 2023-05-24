@@ -20,7 +20,6 @@ def create_min_max_normalize(min: Tensor, max: Tensor, device):
 
 
 def preprocess(dataset, batch_size, device, partial_data, method):
-
     if dataset.name == "EuropeanLanguages":
         MAX_INPUT_SIZE = 128
         PADDING_IDX = 0
@@ -51,7 +50,9 @@ def preprocess(dataset, batch_size, device, partial_data, method):
         test_ds = Languages("../data", train=False, transform=transform, download=True)
         num_classes = len(train_ds.classes)
         partial_data = int(partial_data * len(train_ds))
-        train_ds = torch.utils.data.random_split(train_ds, [partial_data, len(train_ds) - partial_data])[0]
+        train_ds = torch.utils.data.random_split(
+            train_ds, [partial_data, len(train_ds) - partial_data]
+        )[0]
     elif dataset.name in ["PAMAP", "EMGHandGestures"]:
         if dataset.name == "EMGHandGestures":
             num_feat = dataset.train[0][0].size(-1) * dataset.train[0][0].size(-2)
@@ -69,7 +70,9 @@ def preprocess(dataset, batch_size, device, partial_data, method):
         test_size = len(dataset.train) - train_size
         train_ds, test_ds = data.random_split(dataset.train, [train_size, test_size])
         partial_data = int(partial_data * len(train_ds))
-        train_ds = torch.utils.data.random_split(train_ds, [partial_data, len(train_ds) - partial_data])[0]
+        train_ds = torch.utils.data.random_split(
+            train_ds, [partial_data, len(train_ds) - partial_data]
+        )[0]
     else:
         # Number of features in the dataset.
         if dataset.name not in ["MNIST", "CIFAR10"]:
@@ -103,7 +106,9 @@ def preprocess(dataset, batch_size, device, partial_data, method):
             else:
                 train_ds = dataset.train
                 partial_data = int(partial_data * len(train_ds))
-                train_ds = torch.utils.data.random_split(train_ds, [partial_data, len(train_ds) - partial_data])[0]
+                train_ds = torch.utils.data.random_split(
+                    train_ds, [partial_data, len(train_ds) - partial_data]
+                )[0]
         else:
             if method == "rvfl":
                 min_val = torch.min(torch.tensor(dataset.train.data), 0).values.to(
@@ -121,7 +126,9 @@ def preprocess(dataset, batch_size, device, partial_data, method):
             else:
                 train_ds = dataset.train
                 partial_data = int(partial_data * len(train_ds))
-                train_ds = torch.utils.data.random_split(train_ds, [partial_data, len(train_ds) - partial_data])[0]
+                train_ds = torch.utils.data.random_split(
+                    train_ds, [partial_data, len(train_ds) - partial_data]
+                )[0]
 
         test_ds = dataset.test
 
