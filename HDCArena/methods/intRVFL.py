@@ -165,8 +165,12 @@ def train_rvfl(
 ):
     # dims, alpha, kappa = INT_RVFL_HYPER[dataset.train.name]
     alpha = 1
-    model = IntRVFL(dataset.train[0][0].size(-1), dimensions, num_classes, kappa=3, device=device)
-    model.fit_ridge_regression(train_ds, torch.tensor(dataset.train.targets), alpha=alpha)
+    model = IntRVFL(
+        dataset.train[0][0].size(-1), dimensions, num_classes, kappa=3, device=device
+    )
+    model.fit_ridge_regression(
+        train_ds, torch.tensor(dataset.train.targets), alpha=alpha
+    )
 
     train_time = time.time()
 
