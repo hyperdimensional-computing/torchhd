@@ -31,7 +31,7 @@ def exec_arena(
                 train_ds,
                 test_ds,
             ) = preprocess(dataset, batch_size, device, partial_data, config["method"])
-
+            print(encoding)
             encode = Encoder(num_feat, dimensions, encoding, dataset.name)
             encode = encode.to(device)
 
@@ -49,6 +49,7 @@ def exec_arena(
                 model,
                 device,
                 dataset,
+                encoding=encoding,
                 method=config["method"],
                 dimensions=dimensions,
                 iterations=iterations,
