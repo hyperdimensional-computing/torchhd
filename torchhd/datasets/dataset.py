@@ -502,6 +502,7 @@ class UCIClassificationBenchmark:
         "Yeast",
         "Zoo",
     ]
+
     dataset_names_ = [
         "BalanceScale",
     ]
