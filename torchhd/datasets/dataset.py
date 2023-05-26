@@ -503,7 +503,7 @@ class UCIClassificationBenchmark:
         "Zoo",
     ]
 
-    dataset_names_ = [
+    dataset_names = [
         "BalanceScale",
     ]
 
