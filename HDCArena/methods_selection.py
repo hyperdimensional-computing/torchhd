@@ -705,7 +705,7 @@ configs = [
         "chunks": None,
         "s": None,
     },
-{
+    {
         "method": "online_iterative",
         "multi_reduce_subclass": None,
         "threshold": None,
