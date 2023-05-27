@@ -1,7 +1,7 @@
 import pandas as pd
 
 df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/adaptive_methods"
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/multicentroid_method"
 )
 print(df.head())
 
