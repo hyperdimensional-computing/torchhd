@@ -781,9 +781,9 @@ configs = [
 
 configs = [
     {
-        "method": "multicentroid",
-        "multi_reduce_subclass": "drop",
-        "threshold": 0.03,
+        "method": "add",
+        "multi_reduce_subclass": None,
+        "threshold": None,
         "lr": 1,
         "epsilon": None,
         "model_quantize": None,

@@ -72,8 +72,8 @@ def exec_arena(
             )
 
 
-# ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid","generic"]
-ENCODINGS = ["hashmap"]
+ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid","generic"]
+# ENCODINGS = ["hashmap"]
 
 configurations = methods_selection.configs
 
