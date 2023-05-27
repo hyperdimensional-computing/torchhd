@@ -106,6 +106,8 @@ def preprocess(dataset, batch_size, device, partial_data, method):
             else:
                 train_ds = dataset.train
                 partial_data = int(partial_data * len(train_ds))
+                if partial_data == 0:
+                    partial_data = 1
                 train_ds = torch.utils.data.random_split(
                     train_ds, [partial_data, len(train_ds) - partial_data]
                 )[0]

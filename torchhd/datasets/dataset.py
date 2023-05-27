@@ -504,7 +504,7 @@ class UCIClassificationBenchmark:
     ]
 
     dataset_names_ = [
-        "BalanceScale",
+        "Trains",
     ]
 
     # Specify namedtuple format
