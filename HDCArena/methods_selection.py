@@ -780,7 +780,7 @@ configs = [
 ]
 
 configs = [
-{
+    {
         "method": "neural_iterative",
         "multi_reduce_subclass": None,
         "threshold": None,
