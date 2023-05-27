@@ -688,7 +688,7 @@ configs = [
         "s": None,
     },
     {
-        "method": "online_iterative",
+        "method": "adjust_iterative",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 5,
@@ -705,8 +705,8 @@ configs = [
         "chunks": None,
         "s": None,
     },
-    {
-        "method": "adjust_iterative",
+{
+        "method": "online_iterative",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 5,
@@ -781,20 +781,20 @@ configs = [
 
 configs = [
     {
-        "method": "neural_iterative",
+        "method": "online_iterative",
         "multi_reduce_subclass": None,
         "threshold": None,
-        "lr": 1,
+        "lr": 5,
         "epsilon": None,
         "model_quantize": None,
-        "model_sparse": "class",
+        "model_sparse": None,
         "sparsity": None,
         "lazy_regeneration": None,
-        "model_neural": "reset",
-        "r": 0.1,
-        "alpha": 4,
-        "beta": 2,
-        "theta": 1,
+        "model_neural": None,
+        "r": None,
+        "alpha": None,
+        "beta": None,
+        "theta": None,
         "chunks": None,
         "s": None,
     },
