@@ -815,10 +815,10 @@ configs = [
 
 configs = [
     {
-        "method": "adjust_iterative",
+        "method": "semi",
         "multi_reduce_subclass": None,
         "threshold": None,
-        "lr": 5,
+        "lr": 1,
         "epsilon": None,
         "model_quantize": None,
         "model_sparse": None,
@@ -830,7 +830,7 @@ configs = [
         "beta": None,
         "theta": None,
         "chunks": None,
-        "s": None,
+        "s": 0.05,
     },
 ]
 

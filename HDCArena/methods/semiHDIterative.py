@@ -72,7 +72,7 @@ def train_semiHD(
             labels = labels.to(device)
 
             samples_hv = encode(samples)
-            model.add(samples_hv, labels)
+            model.add_adjust(samples_hv, labels)
 
     with torch.no_grad():
         q = deque(maxlen=3)
