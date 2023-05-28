@@ -94,6 +94,7 @@ def train_semiHD(
             top_data = torch.topk(torch.tensor(diff), k=top_amount)
             new_data = []
             new_labels = []
+            update = False
             for index, (samples, labels) in enumerate(tqdm(unlabeled_loader, desc="Training")):
                 samples = samples.to(device)
                 labels = labels.to(device)
@@ -103,10 +104,12 @@ def train_semiHD(
                     model.add(samples_hv, labels)
                     outputs = model.forward(samples_hv, dot=False)
                     accuracy_train.update(outputs.to(device), labels.to(device))
+                    update = True
                 else:
                     new_data.append(samples)
                     new_labels.append(labels)
-
+            if not update:
+                break
             unlabeled_ds = CustomDataset(torch.stack(new_data), torch.tensor(new_labels))
             unlabeled_loader = data.DataLoader(unlabeled_ds, batch_size=1, shuffle=True)
 

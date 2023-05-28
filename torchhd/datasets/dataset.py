@@ -504,7 +504,7 @@ class UCIClassificationBenchmark:
     ]
 
     dataset_names_ = [
-        "Trains",
+        "Balloons",
     ]
 
     # Specify namedtuple format
