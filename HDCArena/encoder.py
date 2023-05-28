@@ -42,6 +42,8 @@ class Encoder(nn.Module):
             levels = 100
             self.keys = embeddings.Random(size, dimensions)
             self.embed = embeddings.Level(levels, dimensions)
+        if self.encoding == "fractional":
+            self.fractional = torchhd.functional.FractionalPowerEncoding(dimensions, size, "sinc", 1.0, "FHRR")
         self.flatten = torch.nn.Flatten()
 
     def forward(self, x):
@@ -64,4 +66,7 @@ class Encoder(nn.Module):
             sample_hv = self.embed(x).sign()
         if self.encoding == "generic":
             sample_hv = torchhd.functional.generic(self.keys.weight, self.embed(x), 3)
+        if self.encoding == "fractional":
+            sample_hv = self.fractional.encoding(x)
+            return sample_hv
         return torchhd.hard_quantize(sample_hv)

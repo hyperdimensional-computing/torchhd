@@ -17,6 +17,7 @@ from methods import sparseHDIterative
 from methods import neuralHDIterative
 from methods import distHDIterative
 from methods import intRVFL
+from methods import semiHDIterative
 
 results_file = "results/results" + str(time.time()) + ".csv"
 
@@ -522,7 +523,39 @@ def select_model(
             model_neural,
             results_file,
         )
-
+    elif method == "semi":
+        semiHDIterative.train_semiHD(
+            train_ds,
+            test_ds,
+            train_loader,
+            test_loader,
+            num_classes,
+            encode,
+            model,
+            device,
+            dataset.name,
+            method,
+            encoding,
+            iterations,
+            dimensions,
+            lr,
+            chunks,
+            threshold,
+            reduce_subclasses,
+            model_quantize,
+            epsilon,
+            model_sparse,
+            s,
+            alpha,
+            beta,
+            theta,
+            r,
+            partial_data,
+            robustness,
+            lazy_regeneration,
+            model_neural,
+            results_file,
+        )
 
 configs = [
     {
@@ -780,41 +813,23 @@ configs = [
 ]
 
 configs = [
-    {
-        "method": "neural_iterative",
+{
+        "method": "semi",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 1,
         "epsilon": None,
         "model_quantize": None,
-        "model_sparse": "class",
-        "sparsity": None,
-        "lazy_regeneration": None,
-        "model_neural": "reset",
-        "r": 0.1,
-        "alpha": 4,
-        "beta": 2,
-        "theta": 1,
-        "chunks": None,
-        "s": None,
-    },
-    {
-        "method": "dist_iterative",
-        "multi_reduce_subclass": None,
-        "threshold": None,
-        "lr": 1,
-        "epsilon": None,
-        "model_quantize": None,
-        "model_sparse": "class",
+        "model_sparse": None,
         "sparsity": None,
         "lazy_regeneration": None,
         "model_neural": None,
-        "r": 0.05,
-        "alpha": 4,
-        "beta": 2,
-        "theta": 1,
+        "r": None,
+        "alpha": None,
+        "beta": None,
+        "theta": None,
         "chunks": None,
-        "s": None,
+        "s": 0.05,
     },
 ]
 
