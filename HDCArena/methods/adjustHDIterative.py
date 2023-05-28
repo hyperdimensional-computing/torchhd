@@ -40,13 +40,6 @@ def train_adjustHD(
     results_file,
 ):
     train_time = time.time()
-    with torch.no_grad():
-        for samples, labels in tqdm(train_loader, desc="Training"):
-            samples = samples.to(device)
-            labels = labels.to(device)
-
-            samples_hv = encode(samples)
-            model.add(samples_hv, labels)
 
     with torch.no_grad():
         q = deque(maxlen=3)
@@ -63,7 +56,7 @@ def train_adjustHD(
                 model.add_adjust(samples_hv, labels, lr=lr)
                 outputs = model.forward(samples_hv, dot=False)
                 accuracy_train.update(outputs.to(device), labels.to(device))
-
+            model.adjust_reset()
             lr = (1 - accuracy_train.compute().item()) * 10
 
             if len(q) == 3:

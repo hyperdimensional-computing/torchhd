@@ -41,14 +41,6 @@ def train_onlineHD(
 ):
     train_time = time.time()
     with torch.no_grad():
-        for samples, labels in tqdm(train_loader, desc="Training"):
-            samples = samples.to(device)
-            labels = labels.to(device)
-
-            samples_hv = encode(samples)
-            model.add(samples_hv, labels)
-
-    with torch.no_grad():
         q = deque(maxlen=3)
         for iter in range(iterations):
             accuracy_train = torchmetrics.Accuracy(
