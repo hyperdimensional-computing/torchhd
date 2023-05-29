@@ -815,7 +815,7 @@ configs = [
 
 configs = [
     {
-        "method": "semi",
+        "method": "add",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 1,
@@ -830,7 +830,7 @@ configs = [
         "beta": None,
         "theta": None,
         "chunks": None,
-        "s": 0.05,
+        "s": None,
     },
 ]
 
