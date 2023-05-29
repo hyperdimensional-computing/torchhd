@@ -757,7 +757,6 @@ configs = [
         "chunks": None,
         "s": None,
     },
-
     {
         "method": "dist_iterative",
         "multi_reduce_subclass": None,
