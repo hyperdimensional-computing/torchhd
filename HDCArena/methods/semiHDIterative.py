@@ -74,7 +74,7 @@ def train_semiHD(
             labels = labels.to(device)
 
             samples_hv = encode(samples)
-            model.add_adjust(samples_hv, labels)
+            model.add(samples_hv, labels)
 
     if int(0.1 * len(train_ds)) > 0:
         with torch.no_grad():
