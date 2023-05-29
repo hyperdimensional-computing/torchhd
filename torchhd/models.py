@@ -338,7 +338,7 @@ class Centroid(nn.Module):
             if logit.max(1).values.item() < val:
                 alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
                 self.weight.index_add_(0, target, lr * alpha1 * input)
-                #self.weight.index_add_(0, target, input)
+                # self.weight.index_add_(0, target, input)
             return
 
         self.error_count += 1
