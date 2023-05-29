@@ -815,7 +815,7 @@ configs = [
 
 configs = [
     {
-        "method": "adjust",
+        "method": "online",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 1,
