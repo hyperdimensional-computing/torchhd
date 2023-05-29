@@ -59,7 +59,8 @@ def train_semiHD(
 ):
     if int(0.1 * len(train_ds)) > 0:
         train_ds, unlabeled_ds = torch.utils.data.random_split(
-            train_ds, [int(0.1 * len(train_ds)), len(train_ds) - int(0.1 * len(train_ds))]
+            train_ds,
+            [int(0.1 * len(train_ds)), len(train_ds) - int(0.1 * len(train_ds))],
         )
 
         train_loader = data.DataLoader(train_ds, batch_size=1, shuffle=True)
@@ -89,7 +90,9 @@ def train_semiHD(
                     samples = samples.to(device)
 
                     samples_hv = encode(samples)
-                    outputs = torch.topk(model.forward(samples_hv, dot=False), k=2)[1][0]
+                    outputs = torch.topk(model.forward(samples_hv, dot=False), k=2)[1][
+                        0
+                    ]
                     diff.append(outputs[0] - outputs[1])
 
                 top_amount = int(len(diff) * s)
@@ -117,7 +120,9 @@ def train_semiHD(
                 unlabeled_ds = CustomDataset(
                     torch.stack(new_data), torch.tensor(new_labels)
                 )
-                unlabeled_loader = data.DataLoader(unlabeled_ds, batch_size=1, shuffle=True)
+                unlabeled_loader = data.DataLoader(
+                    unlabeled_ds, batch_size=1, shuffle=True
+                )
 
                 lr = (1 - accuracy_train.compute().item()) * 10
                 if len(q) == 3:
