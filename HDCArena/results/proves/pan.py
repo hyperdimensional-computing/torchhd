@@ -1,7 +1,7 @@
 import pandas as pd
 
 df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/semi_methods"
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/add_prova"
 )
 print(df.head())
 
