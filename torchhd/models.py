@@ -142,9 +142,7 @@ class Centroid(nn.Module):
     @torch.no_grad()
     def add(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
         """Adds the input vectors scaled by the lr to the target prototype vectors."""
-        logit = self(input)
-        alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
-        self.weight.index_add_(0, target, alpha1*input, alpha=lr)
+        self.weight.index_add_(0, target, input, alpha=lr)
 
     @torch.no_grad()
     def add_stable(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
