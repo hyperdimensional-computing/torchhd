@@ -43,7 +43,6 @@ from torchhd.functional import (
     level,
     thermometer,
     circular,
-    FractionalPowerEncoding,
     bind,
     bundle,
     permute,
