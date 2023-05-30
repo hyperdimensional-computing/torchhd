@@ -833,7 +833,7 @@ configs = [
 
 configs = [
     {
-        "method": "semi",
+        "method": "adapt",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 1,
@@ -848,7 +848,25 @@ configs = [
         "beta": None,
         "theta": None,
         "chunks": None,
-        "s": 0.05,
+        "s": None,
+    },
+    {
+        "method": "online",
+        "multi_reduce_subclass": None,
+        "threshold": None,
+        "lr": 1,
+        "epsilon": None,
+        "model_quantize": None,
+        "model_sparse": None,
+        "sparsity": None,
+        "lazy_regeneration": None,
+        "model_neural": None,
+        "r": None,
+        "alpha": None,
+        "beta": None,
+        "theta": None,
+        "chunks": None,
+        "s": None,
     },
 ]
 
