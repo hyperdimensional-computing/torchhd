@@ -6,9 +6,13 @@ df = pd.read_csv(
 
 latex = 1
 pand = 1
-df = df[df['robustness_failed_dimensions'] == 0]
-mean_of_encoding = df.groupby(["encoding","partial_data"])["accuracy"].mean().round(3).reset_index().T
-var_of_encoding = df.groupby(["encoding","partial_data"])["accuracy"].var().round(3).reset_index().T
+df = df[df["robustness_failed_dimensions"] == 0]
+mean_of_encoding = (
+    df.groupby(["encoding", "partial_data"])["accuracy"].mean().round(3).reset_index().T
+)
+var_of_encoding = (
+    df.groupby(["encoding", "partial_data"])["accuracy"].var().round(3).reset_index().T
+)
 
 if pand:
     print(mean_of_encoding)
