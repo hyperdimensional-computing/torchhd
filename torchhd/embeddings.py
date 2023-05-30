@@ -976,7 +976,7 @@ class FractionalPower(nn.Module):
 
     Args:
         in_features (int): the dimensionality of the input feature vector.
-        out_features (int): the dimensionality of the hypervectors.        
+        out_features (int): the dimensionality of the hypervectors.
         distribution (str, optional): hyperparameter defining the shape of the kernel by specifying a particular probability distribution that is used to sample the base hypervector(s).  Default: ``"sinc"``.
         bandwidth (float, optional): positive hyperparameter defining the width of the similarity kernel. Lower values lead to broader kernels while larger values lead to more narrow kernels. Default: ``1.0``.
         vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"FHRR"``.
@@ -996,17 +996,21 @@ class FractionalPower(nn.Module):
              -0.8793+0.4762j, -0.9759-0.2183j]])
 
     """
-    
+
     # The collection of distributions for basic predefined kernels
     predefined_kernels = {
-        "sinc": torch.distributions.Uniform(torch.tensor([-math.pi]), torch.tensor([math.pi])),
-        "Gaussian": torch.distributions.Normal(torch.tensor([0.0]), torch.tensor([1.0])),
+        "sinc": torch.distributions.Uniform(
+            torch.tensor([-math.pi]), torch.tensor([math.pi])
+        ),
+        "Gaussian": torch.distributions.Normal(
+            torch.tensor([0.0]), torch.tensor([1.0])
+        ),
     }
 
     def __init__(
         self,
         in_features: int,
-        out_features: int,     
+        out_features: int,
         distribution: Optional[Callable] = "sinc",
         bandwidth: float = 1.0,
         vsa: VSAOptions = "FHRR",
@@ -1017,7 +1021,7 @@ class FractionalPower(nn.Module):
         factory_kwargs = {"device": device, "dtype": dtype}
         # Have to call Module init explicitly in order not to use the Embedding init
         nn.Module.__init__(self)
-        
+
         self.dimensions = out_features
         self.data_dimensions = in_features
         self.bandwidth = bandwidth
@@ -1027,17 +1031,19 @@ class FractionalPower(nn.Module):
         # If the distribution is a string use the presets in predefined_kernels
         if isinstance(distribution, str):
             try:
-                 self.distribution = self.predefined_kernels[distribution]
+                self.distribution = self.predefined_kernels[distribution]
             except KeyError:
                 raise ValueError(
                     f"{distribution} kernel is not supported at the moment."
                 )
         else:
-            self.distribution = distribution        
+            self.distribution = distribution
         # Initialize encoding's parameters
-        self.weight = nn.Parameter(torch.empty(self.data_dimensions, self.dimensions), requires_grad)
-        self.reset_parameters()        
-        
+        self.weight = nn.Parameter(
+            torch.empty(self.data_dimensions, self.dimensions), requires_grad
+        )
+        self.reset_parameters()
+
     # Sample the angles using the provided distribution
     def reset_parameters(self) -> None:
         """Generate the angles for basis hypervector(s) to be used for encoding the data."""
@@ -1045,9 +1051,9 @@ class FractionalPower(nn.Module):
         # Check HD/VSA model type
         if self.vsa_tensor == FHRRTensor:
             # Generate the angles for base hypervector(s) that determines the shape of the FPE kernel
-            # If the distribution is one-dimensional this implies that base hypervectors are independent so it is safe to generate self.data_dimensions * self.dimensions independent samples  
-            if self.distribution.sample().numel() == 1:            
-                # Draw angles from a uniform  distribution for base hypervector(s). Note that data dimensions here are independent but this does not have to be always the case 
+            # If the distribution is one-dimensional this implies that base hypervectors are independent so it is safe to generate self.data_dimensions * self.dimensions independent samples
+            if self.distribution.sample().numel() == 1:
+                # Draw angles from a uniform  distribution for base hypervector(s). Note that data dimensions here are independent but this does not have to be always the case
                 self.weight.data.copy_(
                     torch.reshape(
                         self.distribution.sample(
@@ -1059,12 +1065,10 @@ class FractionalPower(nn.Module):
                     )
                 )
             # If base hypervectors are correlated then the dimensionality of the distribution should match that of the data
-            elif self.distribution.sample().numel() == self.data_dimensions:    
+            elif self.distribution.sample().numel() == self.data_dimensions:
                 self.weight.data.copy_(
                     self.distribution.sample(
-                        sample_shape=torch.Size(
-                            [self.dimensions]
-                        )
+                        sample_shape=torch.Size([self.dimensions])
                     ).transpose(0, 1)
                 )
             # Raise error due to the ambiguity of the situation
@@ -1078,8 +1082,6 @@ class FractionalPower(nn.Module):
                 f"{self.vsa_tensor} Fractioncal Power Encoding for this HD/VSA model is not implemented or defined."
             )
 
-        
-        
     # Return the values of the base hypervector(s).
     def basis(self):
         # Initialize the values of the base hypervector(s).
@@ -1089,14 +1091,13 @@ class FractionalPower(nn.Module):
         )
         if self.vsa_tensor == FHRRTensor:
             # Use the angles in self.weight to obtain the values of the base hypervector(s)
-            base_hv[:, :] = torch.complex(self.weight.cos(), self.weight.sin())              
+            base_hv[:, :] = torch.complex(self.weight.cos(), self.weight.sin())
         else:
             raise ValueError(
                 f"{self.vsa_tensor} Fractioncal Power Encoding for this HD/VSA model is not implemented or defined."
-            )            
-        
-        return base_hv    
+            )
 
+        return base_hv
 
     def forward(self, input: Tensor) -> Tensor:
         """Creates a fractional power encoding (FPE) for given values.
@@ -1131,6 +1132,3 @@ class FractionalPower(nn.Module):
 
         hv.requires_grad = self.requires_grad
         return hv
-
-
-
