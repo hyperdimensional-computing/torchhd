@@ -8,20 +8,8 @@ print(df.head())
 latex = 1
 pand = 1
 
-mean_of_encoding = (
-    df.groupby(["method"])["accuracy"]
-    .mean()
-    .round(3)
-    .reset_index()
-    .T
-)
-var_of_encoding = (
-    df.groupby(["method"])["accuracy"]
-    .var()
-    .round(3)
-    .reset_index()
-    .T
-)
+mean_of_encoding = df.groupby(["method"])["accuracy"].mean().round(3).reset_index().T
+var_of_encoding = df.groupby(["method"])["accuracy"].var().round(3).reset_index().T
 
 if pand:
     print(mean_of_encoding)
@@ -38,4 +26,3 @@ if latex:
     )
     print(latex_table)
     pd.options.display.float_format = None
-
