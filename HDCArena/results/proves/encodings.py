@@ -83,7 +83,7 @@ if latex:
         index=False, caption="Encodings accuracy mean"
     )
     print(latex_table)
-    #pd.options.display.float_format = "{:.2e}".format
+    # pd.options.display.float_format = "{:.2e}".format
     latex_table = var_of_encoding.to_latex(
         index=False, caption="Encodings accuracy variance"
     )
@@ -100,7 +100,6 @@ if latex:
             index=False, caption="Encodings train time var"
         )
         print(latex_table)
-
 
     if test_time:
         latex_table = mean_of_encoding_test_time.to_latex(
