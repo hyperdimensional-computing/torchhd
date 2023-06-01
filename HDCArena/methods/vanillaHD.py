@@ -43,7 +43,7 @@ def train_vanillaHD(
             samples = samples.to(device)
             labels = labels.to(device)
 
-            samples_hv = encode(samples)
+            samples_hv = encode(samples, device)
             model.add(samples_hv, labels)
     train_time = time.time() - train_time
 

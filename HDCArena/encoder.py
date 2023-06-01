@@ -48,7 +48,7 @@ class Encoder(nn.Module):
             )
         self.flatten = torch.nn.Flatten()
 
-    def forward(self, x):
+    def forward(self, x, device=None):
         x = self.flatten(x).float()
         if self.encoding == "bundle":
             sample_hv = torchhd.multiset(self.embed(x.long()))
@@ -69,6 +69,6 @@ class Encoder(nn.Module):
         if self.encoding == "generic":
             sample_hv = torchhd.functional.generic(self.keys.weight, self.embed(x), 3)
         if self.encoding == "fractional":
-            sample_hv = self.fractional.encoding(x)
+            sample_hv = self.fractional.encoding(x, device)
             return sample_hv
         return torchhd.hard_quantize(sample_hv)

@@ -1842,6 +1842,7 @@ class FractionalPowerEncoding:
         bandwidth: float = 1.0,
         vsa: VSAOptions = "FHRR",
         requires_grad: bool = False,
+        device=None
     ):
         self.dimensions = dimensions
         self.data_dimensions = data_dimensions
@@ -1913,7 +1914,7 @@ class FractionalPowerEncoding:
 
         return base_hv, angle
 
-    def encoding(self, values):
+    def encoding(self, values, device=None):
         """Creates a fractional power encoding (FPE) for given values.
 
         Args:
@@ -1936,7 +1937,7 @@ class FractionalPowerEncoding:
         if self.vsa_tensor == FHRRTensor:
             # Perform FPE of the desired values using the base hypervector(s)
             # Simultaneously computes angles for given values and their sum that is equivalent to the binding
-            hv_angles = torch.matmul(self.bandwidth * values, self.angle)
+            hv_angles = torch.matmul(self.bandwidth * values.to(device), self.angle.to(device))
             hv[:, :] = torch.complex(hv_angles.cos(), hv_angles.sin())
 
         else:

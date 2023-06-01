@@ -102,7 +102,7 @@ def test_eval(
         with torch.no_grad():
             for samples, labels in tqdm(test_loader, desc="Testing"):
                 samples = samples.to(device)
-                samples_hv = encode(samples)
+                samples_hv = encode(samples, device)
 
                 if method == "comp":
                     samples_hv = model.compress_hv(samples_hv, chunks, device)
