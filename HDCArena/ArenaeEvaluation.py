@@ -77,7 +77,7 @@ def exec_arena(
 
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid","generic"]
-ENCODINGS = ["hashmap"]
+ENCODINGS = ["fractional"]
 
 configurations = methods_selection.configs
 
@@ -89,7 +89,7 @@ PARTIAL_DATA = [1]
 # ROBUSTNESS = [0, 1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80]
 #
 ROBUSTNESS = [0]
-arena = True
+arena = False
 
 if arena:
     benchmark = HDCArena("../data", download=True)

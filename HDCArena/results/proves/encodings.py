@@ -27,7 +27,7 @@ df = pd.read_csv(
 
 for i in df["encoding"].unique():
     variance_accuracy_by_dimension_and_method = (
-        df[df["encoding"] == i].groupby(["name", "method"])["accuracy"].var()
+        df[df["encoding"] == i].groupby(["name", "method"])["accuracy"].std()
     )
     # print(variance_accuracy_by_dimension_and_method.mean())
 
@@ -38,7 +38,7 @@ mean_of_encoding = (
 
 var_of_encoding = (
     df.groupby(["encoding", "name", "method"])["accuracy"]
-    .var()
+    .std()
     .groupby("encoding")
     .mean()
     .reset_index()
@@ -53,6 +53,23 @@ mean_of_encoding_test_time = (
     df.groupby(["encoding"])["test_time"].mean().round(3).reset_index().T
 )[embeddings_order]
 
+
+var_of_encoding_train_time = (
+    df.groupby(["encoding", "name", "method"])["train_time"]
+    .std()
+    .groupby("encoding")
+    .mean()
+    .reset_index()
+    .T
+)[embeddings_order]
+
+
+mean_of_encoding_train_time = df.groupby(["encoding"])["train_time"]
+mean_of_encoding_train_time = mean_of_encoding_train_time.agg(["mean"]).reset_index()
+
+var_of_encoding_train_time = df.groupby(["encoding"])["train_time"]
+var_of_encoding_train_time = var_of_encoding_train_time.agg(["std"]).reset_index()
+
 if pand:
     print(mean_of_encoding)
     print(var_of_encoding)
@@ -66,7 +83,7 @@ if latex:
         index=False, caption="Encodings accuracy mean"
     )
     print(latex_table)
-    pd.options.display.float_format = "{:.2e}".format
+    #pd.options.display.float_format = "{:.2e}".format
     latex_table = var_of_encoding.to_latex(
         index=False, caption="Encodings accuracy variance"
     )
@@ -78,6 +95,13 @@ if latex:
             index=False, caption="Encodings train time mean"
         )
         print(latex_table)
+
+        latex_table = var_of_encoding_train_time.to_latex(
+            index=False, caption="Encodings train time var"
+        )
+        print(latex_table)
+
+
     if test_time:
         latex_table = mean_of_encoding_test_time.to_latex(
             index=False, caption="Encodings test time mean"

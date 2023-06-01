@@ -1,7 +1,7 @@
 import pandas as pd
 
 df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/adjust_iterative"
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/semi"
 )
 print(df.head())
 
