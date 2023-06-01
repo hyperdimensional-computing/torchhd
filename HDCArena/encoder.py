@@ -69,6 +69,6 @@ class Encoder(nn.Module):
         if self.encoding == "generic":
             sample_hv = torchhd.functional.generic(self.keys.weight, self.embed(x), 3)
         if self.encoding == "fractional":
-            sample_hv = self.fractional.encoding(x, device)
+            sample_hv = self.fractional.encoding(x, device).to(device)
             return sample_hv
         return torchhd.hard_quantize(sample_hv)
