@@ -14,7 +14,6 @@ mean_of_encoding = df.groupby(["method"])["accuracy"].mean().round(3).reset_inde
 var_of_encoding = df.groupby(["method"])["accuracy"].std().round(3).reset_index().T
 
 
-
 # time_of_encoding = df.groupby(["method"])["train_time"].mean().round(3).reset_index().T
 # var_time_of_encoding = df.groupby(["method","name"])["train_time"].var().round(3).reset_index().T
 mean_of_encoding_train_time = (
