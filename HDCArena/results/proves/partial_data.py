@@ -1,7 +1,7 @@
 import pandas as pd
 
 df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/multicentroid_robust_partial"
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/semi_robust_partial"
 )
 
 latex = 1
@@ -29,3 +29,15 @@ if latex:
     )
     print(latex_table)
     pd.options.display.float_format = None
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_columns', None)
+    # Apply the function to each row
+    def join_with_commas(row):
+        return ', '.join(str(value) for value in row)
+
+
+    joined_values = mean_of_encoding.apply(join_with_commas, axis=1)
+
+    # Print the joined values
+    print(joined_values['partial_data'])
+    print(joined_values['accuracy'])

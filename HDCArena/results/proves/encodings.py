@@ -15,15 +15,16 @@ embeddings_order = [
     "hashmap",
     "density",
     "flocet",
-    "generic",
+    #"generic",
     "random",
     "sinusoid",
-    "fractional",
+    #"fractional",
 ]
 embeddings_order = [0, 7, 5, 4, 1, 2, 3, 6, 8]
+embeddings_order = [0, 1,2,3,4,5,6,7]
 
 df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/encodings"
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/encodings_arena"
 )
 
 for i in df["encoding"].unique():

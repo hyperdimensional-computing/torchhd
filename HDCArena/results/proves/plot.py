@@ -4,15 +4,16 @@ import warnings
 warnings.filterwarnings("ignore")
 
 df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/semi_arena"
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/adjust_iterative_arena"
 )
-
-
+print(df.groupby(["method"])["accuracy"].mean())
 latex = 1
 pand = 1
 
 mean_of_encoding = df.groupby(["method"])["accuracy"].mean().round(3).reset_index().T
 var_of_encoding = df.groupby(["method"])["accuracy"].std().round(3).reset_index().T
+
+
 
 # time_of_encoding = df.groupby(["method"])["train_time"].mean().round(3).reset_index().T
 # var_time_of_encoding = df.groupby(["method","name"])["train_time"].var().round(3).reset_index().T

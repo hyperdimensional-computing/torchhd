@@ -325,7 +325,6 @@ class Centroid(nn.Module):
         where :math:`\epsilon` is the cosine similarity of the input with the mispredicted class prototype
         and :math:`\delta` is the cosine similarity of the input with the target class prototype.
         """
-        # Adapted from: https://gitlab.com/biaslab/onlinehd/-/blob/master/onlinehd/onlinehd.py
         logit = self(input)
         pred = logit.argmax(1)
         is_wrong = target != pred

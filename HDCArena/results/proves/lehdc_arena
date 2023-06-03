@@ -1,0 +1,8 @@
+name,accuracy,train_time,test_time,dimensions,method,encoding,iterations,lr,chunks,threshold,reduce_subclass,model_quantize,epsilon,alpha,beta,theta,r,lazy_regeneration,model_neural,lazy_regeneration,model_neural,partial_data,robustness_failed_dimensions,weight_decay,learning_rate,dropout_rate
+CIFAR10,0.3416000008583069,5611.574685335159,59.6691677570343,10000,lehdc,hashmap,30,1,,,,,,,,,,,,5,reset,1,0,0.05,0.01,0.5
+EuropeanLanguages,0.049666665494441986,9764.987674713135,89.08015084266663,10000,lehdc,hashmap,30,1,,,,,,,,,,,,5,reset,1,0,0.05,0.01,0.5
+MNIST,0.8824999928474426,3843.372482061386,40.245264768600464,10000,lehdc,hashmap,30,1,,,,,,,,,,,,5,reset,1,0,0.05,0.01,0.5
+EMGHandGestures,0.9936708807945251,23.742924451828003,0.8901240825653076,10000,lehdc,hashmap,30,1,,,,,,,,,,,,5,reset,1,0,0.05,0.01,0.5
+PAMAP,0.9717240929603577,8135.920021057129,222.50639367103577,10000,lehdc,hashmap,30,1,,,,,,,,,,,,5,reset,1,0,0.05,0.01,0.5
+ISOLET,0.8864656686782837,364.06757044792175,5.482818126678467,10000,lehdc,hashmap,30,1,,,,,,,,,,,,5,reset,1,0,0.05,0.01,0.5
+UCIHAR,0.7757040858268738,418.08835554122925,9.754010915756226,10000,lehdc,hashmap,30,1,,,,,,,,,,,,5,reset,1,0,0.05,0.01,0.5

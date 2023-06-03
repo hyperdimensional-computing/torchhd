@@ -1,14 +1,14 @@
 import pandas as pd
 
 df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/dist_robust_partial"
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/multicentroid_robust_partial"
 )
 latex = 1
 pand = 1
 df = df[df["partial_data"] == 1]
 
 mean_of_encoding = (
-    df.groupby(["encoding", "robustness_failed_dimensions"])["accuracy"]
+    df.groupby(["method", "robustness_failed_dimensions"])["accuracy"]
     .mean()
     .round(3)
     .reset_index()
@@ -16,7 +16,7 @@ mean_of_encoding = (
 )
 
 var_of_encoding = (
-    df.groupby(["encoding", "robustness_failed_dimensions"])["accuracy"]
+    df.groupby(["method", "robustness_failed_dimensions"])["accuracy"]
     .std()
     .round(3)
     .reset_index()
@@ -38,3 +38,18 @@ if latex:
     )
     print(latex_table)
     pd.options.display.float_format = None
+
+
+    def join_with_commas(row):
+        return ', '.join(str(value) for value in row)
+
+
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_columns', None)
+    # Apply the function to each row
+    joined_values = mean_of_encoding.apply(join_with_commas, axis=1)
+
+    # Print the joined values
+    print(joined_values['robustness_failed_dimensions'])
+    print(joined_values['accuracy'])
+
