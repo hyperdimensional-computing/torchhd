@@ -988,7 +988,7 @@ configs = [
 
 configs = [
     {
-        "method": "neural_iterative",
+        "method": "dist_iterative",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 1,
@@ -997,8 +997,8 @@ configs = [
         "model_sparse": "class",
         "sparsity": None,
         "lazy_regeneration": None,
-        "model_neural": "reset",
-        "r": 0.1,
+        "model_neural": None,
+        "r": 0.05,
         "alpha": 4,
         "beta": 2,
         "theta": 1,
