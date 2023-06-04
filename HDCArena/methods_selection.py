@@ -988,13 +988,13 @@ configs = [
 
 configs = [
     {
-        "method": "sparse_iterative",
+        "method": "comp",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 1,
-        "epsilon": 0.01,
+        "epsilon": None,
         "model_quantize": None,
-        "model_sparse": "class",
+        "model_sparse": None,
         "sparsity": None,
         "lazy_regeneration": None,
         "model_neural": None,
@@ -1002,8 +1002,8 @@ configs = [
         "alpha": None,
         "beta": None,
         "theta": None,
-        "chunks": None,
-        "s": 0.5,
+        "chunks": 2,
+        "s": None,
         "weight_decay": None,
         "learning_rate": None,
         "dropout_rate": None,
