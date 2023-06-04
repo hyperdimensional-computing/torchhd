@@ -988,7 +988,7 @@ configs = [
 
 configs = [
     {
-        "method": "lehdc",
+        "method": "add",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 1,
@@ -1004,9 +1004,9 @@ configs = [
         "theta": None,
         "chunks": None,
         "s": None,
-        "weight_decay": 5e-2,
-        "learning_rate": 1e-2,
-        "dropout_rate": 0.5,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
 ]
 
