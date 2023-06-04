@@ -4,7 +4,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/adjust_iterative_arena"
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/lehdc"
 )
 print(df.groupby(["method"])["accuracy"].mean())
 latex = 1
