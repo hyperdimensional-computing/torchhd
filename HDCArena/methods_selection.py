@@ -988,12 +988,12 @@ configs = [
 
 configs = [
     {
-        "method": "adjust_iterative",
+        "method": "quant_iterative",
         "multi_reduce_subclass": None,
         "threshold": None,
-        "lr": 5,
-        "epsilon": None,
-        "model_quantize": None,
+        "lr": 1.5,
+        "epsilon": 0.01,
+        "model_quantize": "binary",
         "model_sparse": None,
         "sparsity": None,
         "lazy_regeneration": None,
