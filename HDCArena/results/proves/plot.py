@@ -8,7 +8,7 @@ file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/adju
 
 df = pd.read_csv(file)
 
-#df = df[df['Dimensions'] == 10000]
+# df = df[df['Dimensions'] == 10000]
 
 print(df.groupby(["method"])["accuracy"].mean())
 latex = 1
