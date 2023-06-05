@@ -3,9 +3,13 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/lehdc"
-)
+file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/adjust_iterative"
+# file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/final_results/dimensions_arenaaa.csv"
+
+df = pd.read_csv(file)
+
+#df = df[df['Dimensions'] == 10000]
+
 print(df.groupby(["method"])["accuracy"].mean())
 latex = 1
 pand = 1
