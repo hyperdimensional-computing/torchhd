@@ -988,7 +988,7 @@ configs = [
 
 configs = [
     {
-        "method": "online_iterative",
+        "method": "adapt_iterative",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 5,
