@@ -1044,7 +1044,7 @@ configs = [
 
 configs = [
     {
-        "method": "online",
+        "method": "adjust",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 1,
