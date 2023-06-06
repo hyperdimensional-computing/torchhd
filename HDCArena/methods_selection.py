@@ -7,6 +7,7 @@ from methods import vanillaHD
 from methods import adaptHD
 from methods import onlineHD
 from methods import adjustHD
+from methods import adjustSemiHD
 from methods import compHD
 from methods import multiCentroidHD
 from methods import adaptHDIterative
@@ -129,6 +130,40 @@ def select_model(
     elif method == "adjust":
         adjustHD.train_adjustHD(
             train_ds,
+            train_loader,
+            test_loader,
+            num_classes,
+            encode,
+            model,
+            device,
+            dataset.name,
+            method,
+            encoding,
+            iterations,
+            dimensions,
+            lr,
+            chunks,
+            threshold,
+            reduce_subclasses,
+            model_quantize,
+            epsilon,
+            model_sparse,
+            s,
+            alpha,
+            beta,
+            theta,
+            r,
+            partial_data,
+            robustness,
+            lazy_regeneration,
+            model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
+            results_file,
+        )
+    elif method == "adjust_semi":
+        adjustSemiHD.train_adjustSemiHD(
             train_loader,
             test_loader,
             num_classes,
@@ -984,14 +1019,35 @@ configs = [
         "learning_rate": 1e-2,
         "dropout_rate": 0.5,
     },
+    {
+        "method": "adjust_semi",
+        "multi_reduce_subclass": None,
+        "threshold": None,
+        "lr": 1,
+        "epsilon": None,
+        "model_quantize": None,
+        "model_sparse": None,
+        "sparsity": None,
+        "lazy_regeneration": None,
+        "model_neural": None,
+        "r": None,
+        "alpha": None,
+        "beta": None,
+        "theta": None,
+        "chunks": None,
+        "s": None,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
+    },
 ]
 
 configs = [
     {
-        "method": "adjust_iterative",
+        "method": "add",
         "multi_reduce_subclass": None,
         "threshold": None,
-        "lr": 5,
+        "lr": 1,
         "epsilon": None,
         "model_quantize": None,
         "model_sparse": None,

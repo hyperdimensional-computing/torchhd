@@ -96,6 +96,9 @@ class Centroid(nn.Module):
         self.error_similarity_sum = 0
         self.error_count = 0
 
+        self.sim = 0
+        self.sim_count = 0
+
         weight = torch.empty((out_features, in_features), **factory_kwargs)
         self.weight = Parameter(weight, requires_grad=requires_grad)
 
@@ -313,6 +316,20 @@ class Centroid(nn.Module):
         self.count = 0
         self.error_similarity_sum = 0
         self.error_count = 0
+
+    @torch.no_grad()
+    def add_adjustSemi(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
+        logit = self(input)
+        pred = logit.argmax(1)
+        is_wrong = target != pred
+        self.sim_count += 1
+        if is_wrong.sum().item() == 0:
+            self.sim += logit.max(1).values
+            if logit.max(1).values <= self.sim / self.sim_count:
+                self.weight.index_add_(0, target, input, alpha=lr)
+            return False, logit.gather(1, target.unsqueeze(1))
+        else:
+            return True, logit.gather(1, pred.unsqueeze(1))
 
     @torch.no_grad()
     def add_adjust(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
