@@ -3,8 +3,10 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/adjust_arena"
-#file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/final_results/adjust"
+file = (
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/adjust_arena"
+)
+# file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/final_results/adjust"
 # file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/final_results/dimensions_arenaaa.csv"
 
 df = pd.read_csv(file)
@@ -55,5 +57,7 @@ if latex:
     )
     print(latex_table)
 
-mean_of_encoding = df.groupby(["method","name"])["accuracy"].mean().round(3).reset_index().T
+mean_of_encoding = (
+    df.groupby(["method", "name"])["accuracy"].mean().round(3).reset_index().T
+)
 print(mean_of_encoding)

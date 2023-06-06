@@ -54,13 +54,13 @@ def train_adjustSemiHD(
             samples_hv = encode(samples)
             add, v = model.add_adjustSemi(samples_hv, labels, lr=lr)
             if add:
-               hvs.append((samples_hv, labels))
-               err += 1
-               err_ += v
+                hvs.append((samples_hv, labels))
+                err += 1
+                err_ += v
             else:
                 cor += 1
                 cor_ += v
-        print(name, err_/err, cor_/cor)
+        print(name, err_ / err, cor_ / cor)
         utils.test_eval(
             test_loader,
             num_classes,
