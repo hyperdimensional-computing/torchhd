@@ -1044,7 +1044,7 @@ configs = [
 
 configs = [
     {
-        "method": "adapt",
+        "method": "online",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 1,
@@ -1064,6 +1064,7 @@ configs = [
         "learning_rate": None,
         "dropout_rate": None,
     },
+
 
 ]
 
