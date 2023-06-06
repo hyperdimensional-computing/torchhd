@@ -4,7 +4,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/adaptive_methods"
-file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/results1686012187.5832582.csv"
+file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/final_results/adjust"
 # file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/final_results/dimensions_arenaaa.csv"
 
 df = pd.read_csv(file)
