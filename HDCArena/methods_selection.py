@@ -1064,7 +1064,6 @@ configs = [
         "learning_rate": None,
         "dropout_rate": None,
     },
-
 ]
 
 # METHODS = ["add","adapt","online","adjust","comp","adapt_iterative","online_iterative","adjust_iterative",
