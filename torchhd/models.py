@@ -330,7 +330,7 @@ class Centroid(nn.Module):
         is_wrong = target != pred
 
         predx = torch.topk(logit, 2)
-        alpha = 1-(abs(predx[0][0][0])-abs(predx[0][0][1]))
+        alpha = 1 - (abs(predx[0][0][0]) - abs(predx[0][0][1]))
 
         self.similarity_sum += logit.max(1).values.item()
         self.count += 1
@@ -339,12 +339,11 @@ class Centroid(nn.Module):
         else:
             val = self.error_similarity_sum / self.error_count
         if is_wrong.sum().item() == 0:
-
             if logit.max(1).values.item() < val:
                 alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
                 self.weight.index_add_(0, target, lr * alpha1 * input)
                 # self.weight.index_add_(0, target, input)
-            #print("RIGHT", 1 / (predx[0][0][0] - predx[0][0][1]))
+            # print("RIGHT", 1 / (predx[0][0][0] - predx[0][0][1]))
 
             return
 
@@ -358,16 +357,18 @@ class Centroid(nn.Module):
         alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
         alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
 
-        #print(target, predx.indices)
-        #print(predx.values)
-        #print(alpha1,alpha2)
-        #print("WRONG", 1/(predx[0][0][0]-predx[0][0][1]))
+        # print(target, predx.indices)
+        # print(predx.values)
+        # print(alpha1,alpha2)
+        # print("WRONG", 1/(predx[0][0][0]-predx[0][0][1]))
 
         self.weight.index_add_(0, target, lr * alpha1 * alpha * input)
         self.weight.index_add_(0, pred, lr * alpha2 * alpha * input)
 
     @torch.no_grad()
-    def add_adjust_iterative(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
+    def add_adjust_iterative(
+        self, input: Tensor, target: Tensor, lr: float = 1.0
+    ) -> None:
         r"""Only updates the prototype vectors on wrongly predicted inputs.
 
         Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
