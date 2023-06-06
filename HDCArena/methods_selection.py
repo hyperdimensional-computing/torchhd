@@ -1044,7 +1044,7 @@ configs = [
 
 configs = [
     {
-        "method": "adapt_iterative",
+        "method": "online_iterative",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 5,
@@ -1064,6 +1064,7 @@ configs = [
         "learning_rate": None,
         "dropout_rate": None,
     },
+
 ]
 
 # METHODS = ["add","adapt","online","adjust","comp","adapt_iterative","online_iterative","adjust_iterative",
