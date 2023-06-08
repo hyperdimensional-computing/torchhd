@@ -9,8 +9,8 @@ import torchmetrics
 from collections import deque
 from torchhd import functional
 
-def orthogonality(tensor_of_tensors, classes, name):
 
+def orthogonality(tensor_of_tensors, classes, name):
     dot_products = torch.zeros(classes, classes)
 
     for i in range(classes):
@@ -22,6 +22,7 @@ def orthogonality(tensor_of_tensors, classes, name):
     # Print the result
     orthogonalit = torch.sum(dot_products)
     print(orthogonalit, classes, name)
+
 
 def train_adjustHD(
     train_loader,
@@ -77,7 +78,9 @@ def train_adjustHD(
             lr = (1 - accuracy_train.compute().item()) * 10
 
             if prev_o == None:
-                prev_o = orthogonality(model.weight.data, classes=num_classes, name=name)
+                prev_o = orthogonality(
+                    model.weight.data, classes=num_classes, name=name
+                )
             else:
                 o = orthogonality(model.weight.data, classes=num_classes, name=name)
                 if o <= prev_o:
@@ -97,8 +100,8 @@ def train_adjustHD(
                 samples_hv = encode(samples)
                 outputs = model.forward(samples_hv, dot=False)
                 accuracy_test.update(outputs.to(device), labels.to(device))
-            print("Train",accuracy_train.compute().item())
-            print("Test",accuracy_test.compute().item())
+            print("Train", accuracy_train.compute().item())
+            print("Test", accuracy_test.compute().item())
             accuracy_test.reset()
             accuracy_train.reset()
     train_time = time.time() - train_time

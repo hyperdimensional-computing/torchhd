@@ -109,7 +109,6 @@ def test_eval(
         )
         test_time = time.time()
         with torch.no_grad():
-
             for samples, labels in tqdm(test_loader, desc="Testing"):
                 samples = samples.to(device)
                 samples_hv = encode(samples, device)

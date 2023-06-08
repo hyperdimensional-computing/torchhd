@@ -523,7 +523,7 @@ class UCIClassificationBenchmark:
         "TicTacToe",
         "Trains",
         "Wine",
-        "Zoo"
+        "Zoo",
     ]
 
     # Specify namedtuple format

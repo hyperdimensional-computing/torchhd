@@ -1,6 +1,7 @@
 import pandas as pd
 import warnings
 import numpy as np
+
 warnings.filterwarnings("ignore")
 
 file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/add_dimensions_arena"
@@ -11,21 +12,25 @@ df = pd.read_csv(file)
 
 # df = df[df['Dimensions'] == 10000]
 
-print(df.groupby(["method","name"])["accuracy"].mean())
+print(df.groupby(["method", "name"])["accuracy"].mean())
 latex = 1
 pand = 1
 
-mean_of_encoding = df.groupby(["method","name"])["accuracy"].mean().round(3).reset_index().T
-var_of_encoding = df.groupby(["method","name"])["accuracy"].std().round(3).reset_index().T
+mean_of_encoding = (
+    df.groupby(["method", "name"])["accuracy"].mean().round(3).reset_index().T
+)
+var_of_encoding = (
+    df.groupby(["method", "name"])["accuracy"].std().round(3).reset_index().T
+)
 
 
 # time_of_encoding = df.groupby(["method"])["train_time"].mean().round(3).reset_index().T
 # var_time_of_encoding = df.groupby(["method","name"])["train_time"].var().round(3).reset_index().T
 mean_of_encoding_train_time = (
-    df.groupby(["method","name"])["train_time"].mean().round(3).reset_index().T
+    df.groupby(["method", "name"])["train_time"].mean().round(3).reset_index().T
 )
 var_of_encoding_train_time = (
-    df.groupby(["method","name"])["train_time"].std().round(3).reset_index().T
+    df.groupby(["method", "name"])["train_time"].std().round(3).reset_index().T
 )
 
 if pand:
@@ -56,15 +61,23 @@ if latex:
     print(latex_table)
 
 mean_of_encoding = (
-    df.groupby(["method", "dimensions","name"])["accuracy"].mean().round(3).reset_index().T
+    df.groupby(["method", "dimensions", "name"])["accuracy"]
+    .mean()
+    .round(3)
+    .reset_index()
+    .T
 )
 print(mean_of_encoding)
+
+
 def std(x):
     return np.std(x)
-var_of_encoding = (
-    df.groupby(["method", "dimensions","name"])["accuracy"].agg(['mean', 'max', std])
+
+
+var_of_encoding = df.groupby(["method", "dimensions", "name"])["accuracy"].agg(
+    ["mean", "max", std]
 )
-print(df.groupby(["dimensions","name"])["accuracy"].agg(['min']))
-print(df.groupby(["dimensions","name"])["accuracy"].agg(['max']))
-result = df.groupby(["dimensions","name"])["accuracy"].agg(['std', 'mean'])
+print(df.groupby(["dimensions", "name"])["accuracy"].agg(["min"]))
+print(df.groupby(["dimensions", "name"])["accuracy"].agg(["max"]))
+result = df.groupby(["dimensions", "name"])["accuracy"].agg(["std", "mean"])
 print(df)
