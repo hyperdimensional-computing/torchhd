@@ -619,6 +619,7 @@ class UCIClassificationBenchmark:
     ]
 
     dataset_names_ = ["Annealing"]
+
     # Specify namedtuple format
     class DatasetEntry(NamedTuple):
         name: str

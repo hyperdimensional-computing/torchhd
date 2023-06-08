@@ -3,10 +3,12 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-#file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/refine_dimensions_arena"
+# file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/refine_dimensions_arena"
 # file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/final_results/adjust"
 # file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/final_results/dimensions_arenaaa.csv"
-file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/PROVESITER"
+file = (
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/PROVESITER"
+)
 
 df = pd.read_csv(file)
 

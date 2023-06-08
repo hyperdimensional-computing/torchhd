@@ -11,6 +11,7 @@ from torchhd import functional
 
 t = True
 
+
 def orthogonality(tensor_of_tensors, classes, name):
     dot_products = torch.zeros(classes, classes)
 
@@ -21,10 +22,11 @@ def orthogonality(tensor_of_tensors, classes, name):
             dot_products[j, i] = dot_product
 
     # Print the result
-    #print(torch.sum(dot_products)/((classes*classes-classes)/2))
-    orthogonalit = torch.sum(dot_products/((classes*classes-classes)))
-    #print(orthogonalit, classes, name)
+    # print(torch.sum(dot_products)/((classes*classes-classes)/2))
+    orthogonalit = torch.sum(dot_products / ((classes * classes - classes)))
+    # print(orthogonalit, classes, name)
     return orthogonalit
+
 
 def train_adjustHD(
     train_loader,
@@ -59,7 +61,6 @@ def train_adjustHD(
     dropout_rate,
     results_file,
 ):
-
     train_time = time.time()
     with torch.no_grad():
         for iter in range(iterations):
@@ -77,7 +78,7 @@ def train_adjustHD(
                 accuracy_train.update(outputs.to(device), labels.to(device))
             model.adjust_reset()
             lr = (1 - accuracy_train.compute().item()) * 10
-            '''
+            """
             accuracy_test = torchmetrics.Accuracy(
                 "multiclass", num_classes=num_classes
             ).to(device)
@@ -91,7 +92,7 @@ def train_adjustHD(
                 accuracy_test.update(outputs.to(device), labels.to(device))
             #print("Train", accuracy_train.compute().item())
             accuracy_test.reset()
-            '''
+            """
             accuracy_train.reset()
     train_time = time.time() - train_time
 
