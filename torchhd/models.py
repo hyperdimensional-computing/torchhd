@@ -344,7 +344,7 @@ class Centroid(nn.Module):
         and :math:`\delta` is the cosine similarity of the input with the target class prototype.
         """
         logit = self(input)
-        pred = logit.argmax(1)
+        # pred = logit.argmax(1)
         predx = torch.topk(logit, 2)
         pred = torch.tensor([predx.indices[0][0]])
 

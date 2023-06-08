@@ -9,6 +9,7 @@ import torchmetrics
 from collections import deque
 from torchhd import functional
 
+t = True
 
 def orthogonality(tensor_of_tensors, classes, name):
     dot_products = torch.zeros(classes, classes)
@@ -20,9 +21,10 @@ def orthogonality(tensor_of_tensors, classes, name):
             dot_products[j, i] = dot_product
 
     # Print the result
-    orthogonalit = torch.sum(dot_products)
-    print(orthogonalit, classes, name)
-
+    #print(torch.sum(dot_products)/((classes*classes-classes)/2))
+    orthogonalit = torch.sum(dot_products/((classes*classes-classes)))
+    #print(orthogonalit, classes, name)
+    return orthogonalit
 
 def train_adjustHD(
     train_loader,
@@ -57,16 +59,15 @@ def train_adjustHD(
     dropout_rate,
     results_file,
 ):
+
     train_time = time.time()
-    prev_o = None
     with torch.no_grad():
-        q = deque(maxlen=3)
         for iter in range(iterations):
             accuracy_train = torchmetrics.Accuracy(
                 "multiclass", num_classes=num_classes
             ).to(device)
 
-            for samples, labels in tqdm(train_loader, desc="Training"):
+            for samples, labels in tqdm(train_loader, desc="Training", disable=t):
                 samples = samples.to(device)
                 labels = labels.to(device)
 
@@ -76,33 +77,21 @@ def train_adjustHD(
                 accuracy_train.update(outputs.to(device), labels.to(device))
             model.adjust_reset()
             lr = (1 - accuracy_train.compute().item()) * 10
-
-            if prev_o == None:
-                prev_o = orthogonality(
-                    model.weight.data, classes=num_classes, name=name
-                )
-            else:
-                o = orthogonality(model.weight.data, classes=num_classes, name=name)
-                if o <= prev_o:
-                    iterations = iter
-                    break
-                else:
-                    prev_o = o
-
+            '''
             accuracy_test = torchmetrics.Accuracy(
                 "multiclass", num_classes=num_classes
             ).to(device)
 
-            for samples, labels in tqdm(test_loader, desc="Training"):
+            for samples, labels in tqdm(test_loader, desc="Training", disable=t):
                 samples = samples.to(device)
                 labels = labels.to(device)
 
                 samples_hv = encode(samples)
                 outputs = model.forward(samples_hv, dot=False)
                 accuracy_test.update(outputs.to(device), labels.to(device))
-            print("Train", accuracy_train.compute().item())
-            print("Test", accuracy_test.compute().item())
+            #print("Train", accuracy_train.compute().item())
             accuracy_test.reset()
+            '''
             accuracy_train.reset()
     train_time = time.time() - train_time
 
