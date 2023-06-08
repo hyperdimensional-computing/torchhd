@@ -104,7 +104,7 @@ PARTIAL_DATA = [0.2, 0.4, 0.6, 0.8, 1]
 PARTIAL_DATA = [1]
 ROBUSTNESS = [0, 1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80]
 ROBUSTNESS = [0]
-arena = False
+arena = True
 
 if arena:
     benchmark = HDCArena("../data", download=True)

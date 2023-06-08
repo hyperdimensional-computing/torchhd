@@ -503,7 +503,7 @@ class UCIClassificationBenchmark:
         "Zoo",
     ]
 
-    dataset_names = [
+    dataset_names_ = [
         "AcuteInflammation",
         "AcuteNephritis",
         "Balloons",
