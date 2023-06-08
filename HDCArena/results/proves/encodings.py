@@ -21,7 +21,7 @@ embeddings_order = [
     "fractional",
 ]
 embeddings_order = [0, 7, 5, 4, 1, 2, 3, 6, 8]
-#embeddings_order = [0, 1, 2, 3, 4, 5, 6, 7]
+# embeddings_order = [0, 1, 2, 3, 4, 5, 6, 7]
 
 df = pd.read_csv(
     "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/encodings_arena"
@@ -67,14 +67,10 @@ var_of_encoding_train_time = (
 
 
 mean_of_encoding_train_time = df.groupby(["encoding"])["train_time"]
-mean_of_encoding_train_time = (
-    mean_of_encoding_train_time.agg(["mean"]).round(3).T
-)
+mean_of_encoding_train_time = mean_of_encoding_train_time.agg(["mean"]).round(3).T
 
 var_of_encoding_train_time = df.groupby(["encoding"])["train_time"]
-var_of_encoding_train_time = (
-    var_of_encoding_train_time.agg(["std"]).round(3).T
-)
+var_of_encoding_train_time = var_of_encoding_train_time.agg(["std"]).round(3).T
 
 if pand:
     print(mean_of_encoding)
@@ -113,7 +109,12 @@ if latex:
         )
         print(latex_table)
 
-var_of_encoding = df.groupby(["encoding","method", "dimensions", "name"])["accuracy"].std().round(3).T
+var_of_encoding = (
+    df.groupby(["encoding", "method", "dimensions", "name"])["accuracy"]
+    .std()
+    .round(3)
+    .T
+)
 embeddings_order = [
     "bundle",
     "sequence",
@@ -129,9 +130,8 @@ embeddings_order = [
 
 print(mean_of_encoding_train_time)
 print(var_of_encoding_train_time)
-#for i in embeddings_order:
+# for i in embeddings_order:
 #    print(var_of_encoding_train_time[i].mean().round(3),end=",")
 
-#for i in embeddings_order:
+# for i in embeddings_order:
 #    print(mean_of_encoding[i].mean().round(3),end=",")
-

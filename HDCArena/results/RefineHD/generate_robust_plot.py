@@ -3,7 +3,10 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import make_interp_spline
 import pandas as pd
 from matplotlib import cm
-file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/arena_robust"
+
+file = (
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/arena_robust"
+)
 
 df = pd.read_csv(file)
 

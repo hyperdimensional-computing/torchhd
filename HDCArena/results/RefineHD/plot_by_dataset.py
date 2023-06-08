@@ -10,7 +10,7 @@ file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/ad
 
 df = pd.read_csv(file)
 
-df = df[df['dimensions'] == 10000]
+df = df[df["dimensions"] == 10000]
 
 print(df.groupby(["method", "name"])["accuracy"].mean())
 latex = 0
@@ -68,17 +68,23 @@ mean_of_encoding = (
     .T
 )
 print(mean_of_encoding)
-print(mean_of_encoding.T['accuracy'].mean())
+print(mean_of_encoding.T["accuracy"].mean())
 
 
 def std(x):
     return np.std(x)
 
 
-var_of_encoding = df.groupby(["method", "dimensions", "name"])["accuracy"].std().round(3).reset_index().T
+var_of_encoding = (
+    df.groupby(["method", "dimensions", "name"])["accuracy"]
+    .std()
+    .round(3)
+    .reset_index()
+    .T
+)
 
-#print(df.groupby(["dimensions", "name"])["accuracy"].agg(["min"]))
-#print(df.groupby(["dimensions", "name"])["accuracy"].agg(["max"]))
-#result = df.groupby(["dimensions", "name"])["accuracy"].agg(["std", "mean"])
-#print(var_of_encoding)
-print(var_of_encoding.T['accuracy'].mean())
+# print(df.groupby(["dimensions", "name"])["accuracy"].agg(["min"]))
+# print(df.groupby(["dimensions", "name"])["accuracy"].agg(["max"]))
+# result = df.groupby(["dimensions", "name"])["accuracy"].agg(["std", "mean"])
+# print(var_of_encoding)
+print(var_of_encoding.T["accuracy"].mean())
