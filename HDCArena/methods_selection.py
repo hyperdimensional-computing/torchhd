@@ -21,7 +21,7 @@ from methods import intRVFL
 from methods import semiHDIterative
 from methods import LeHDC
 
-results_file = "results/results" + str(time.time()) + ".csv"
+results_file = "adjust/results" + str(time.time()) + ".csv"
 
 with open(results_file, "w", newline="") as file:
     writer = csv.writer(file)
