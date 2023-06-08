@@ -3,7 +3,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/adapt_dimensions_arena"
+file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/refine_dimensions_arena"
 # file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/final_results/adjust"
 # file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/final_results/dimensions_arenaaa.csv"
 
@@ -59,3 +59,7 @@ mean_of_encoding = (
     df.groupby(["method", "dimensions"])["accuracy"].mean().round(3).reset_index().T
 )
 print(mean_of_encoding)
+var_of_encoding = (
+    df.groupby(["method", "dimensions"])["accuracy"].std().round(3).reset_index().T
+)
+print(var_of_encoding)

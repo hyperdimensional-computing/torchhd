@@ -109,6 +109,7 @@ def test_eval(
         )
         test_time = time.time()
         with torch.no_grad():
+
             for samples, labels in tqdm(test_loader, desc="Testing"):
                 samples = samples.to(device)
                 samples_hv = encode(samples, device)
@@ -151,7 +152,7 @@ def test_eval(
                 else:
                     outputs = model(samples_hv, dot=False)
                 accuracy.update(outputs.to(device), labels.to(device))
-
+        print(accuracy.compute().item())
         test_time = time.time() - test_time
         write_results(
             results_file,

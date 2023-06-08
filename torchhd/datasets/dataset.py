@@ -503,8 +503,27 @@ class UCIClassificationBenchmark:
         "Zoo",
     ]
 
-    dataset_names_ = [
-        "Blood",
+    dataset_names = [
+        "AcuteInflammation",
+        "AcuteNephritis",
+        "Balloons",
+        "Fertility",
+        "Iris",
+        "Lenses",
+        "LungCancer",
+        "Lymphography",
+        "MolecBiolPromoter",
+        "Monks2",
+        "Monks3",
+        "Parkinsons",
+        "PittsburgBridgesMaterial",
+        "PittsburgBridgesTOrD",
+        "PostOperative",
+        "Spect",
+        "TicTacToe",
+        "Trains",
+        "Wine",
+        "Zoo"
     ]
 
     # Specify namedtuple format

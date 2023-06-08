@@ -64,6 +64,7 @@ def train_onlineHD(
             if len(q) == 3:
                 if all(abs(q[i] - q[i - 1]) < 0.001 for i in range(1, len(q))):
                     iterations = iter
+                    break
                 q.append(accuracy_train.compute().item())
             else:
                 q.append(accuracy_train.compute().item())
