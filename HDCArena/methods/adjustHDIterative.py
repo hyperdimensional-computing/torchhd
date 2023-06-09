@@ -11,7 +11,6 @@ from torchhd import functional
 
 t = True
 
-
 def orthogonality(tensor_of_tensors, classes, name):
     dot_products = torch.zeros(classes, classes)
 
@@ -22,11 +21,10 @@ def orthogonality(tensor_of_tensors, classes, name):
             dot_products[j, i] = dot_product
 
     # Print the result
-    # print(torch.sum(dot_products)/((classes*classes-classes)/2))
-    orthogonalit = torch.sum(dot_products / ((classes * classes - classes)))
-    # print(orthogonalit, classes, name)
+    #print(torch.sum(dot_products)/((classes*classes-classes)/2))
+    orthogonalit = torch.sum(dot_products/((classes*classes-classes)))
+    #print(orthogonalit, classes, name)
     return orthogonalit
-
 
 def train_adjustHD(
     train_loader,
@@ -61,7 +59,10 @@ def train_adjustHD(
     dropout_rate,
     results_file,
 ):
+
     train_time = time.time()
+    q = deque(maxlen=3)
+
     with torch.no_grad():
         for iter in range(iterations):
             accuracy_train = torchmetrics.Accuracy(
@@ -78,21 +79,13 @@ def train_adjustHD(
                 accuracy_train.update(outputs.to(device), labels.to(device))
             model.adjust_reset()
             lr = (1 - accuracy_train.compute().item()) * 10
-            """
-            accuracy_test = torchmetrics.Accuracy(
-                "multiclass", num_classes=num_classes
-            ).to(device)
-
-            for samples, labels in tqdm(test_loader, desc="Training", disable=t):
-                samples = samples.to(device)
-                labels = labels.to(device)
-
-                samples_hv = encode(samples)
-                outputs = model.forward(samples_hv, dot=False)
-                accuracy_test.update(outputs.to(device), labels.to(device))
-            #print("Train", accuracy_train.compute().item())
-            accuracy_test.reset()
-            """
+            if len(q) == 3:
+                if all(abs(q[i] - q[i - 1]) < 0.001 for i in range(1, len(q))):
+                    iterations = iter
+                    break
+                q.append(accuracy_train.compute().item())
+            else:
+                q.append(accuracy_train.compute().item())
             accuracy_train.reset()
     train_time = time.time() - train_time
 

@@ -618,7 +618,7 @@ class UCIClassificationBenchmark:
         "Cardiotocography3Clases",
     ]
 
-    dataset_names_ = ["Annealing"]
+    dataset_names = ["Annealing"]
 
     # Specify namedtuple format
     class DatasetEntry(NamedTuple):
