@@ -10,19 +10,11 @@ df = df[df["robustness_failed_dimensions"] == 0]
 df = df[df["dimensions"] == 10000]
 print(df)
 mean_of_encoding = (
-    df.groupby(["method", "partial_data"])["accuracy"]
-    .mean()
-    .round(3)
-    .reset_index()
-    .T
+    df.groupby(["method", "partial_data"])["accuracy"].mean().round(3).reset_index().T
 )
 
 var_of_encoding = (
-    df.groupby(["method", "partial_data"])["accuracy"]
-    .std()
-    .round(3)
-    .reset_index()
-    .T
+    df.groupby(["method", "partial_data"])["accuracy"].std().round(3).reset_index().T
 )
 
 if pand:

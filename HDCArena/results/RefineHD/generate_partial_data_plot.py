@@ -23,7 +23,9 @@ for i, (_, row) in enumerate(df.iterrows()):
     axes[0].plot(x_smooth, y2_smooth, label=lab[i])
 
 
-file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/partial_data"
+file = (
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/partial_data"
+)
 
 df = pd.read_csv(file)
 # Extract the required columns
