@@ -1,13 +1,15 @@
 import pandas as pd
 
-file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/refine_robust_partial"
+file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/refine_robust_partial_arena"
 
 df = pd.read_csv(file)
 
 latex = 1
 pand = 1
-df = df[df["partial_data"] == 1]
 
+df = df[df["partial_data"] == 1]
+df = df[df["dimensions"] == 10000]
+print(df)
 mean_of_encoding = (
     df.groupby(["method", "robustness_failed_dimensions"])["accuracy"]
     .mean()

@@ -1,0 +1,11 @@
+name,accuracy,train_time,test_time,dimensions,method,encoding,iterations,lr,chunks,threshold,reduce_subclass,model_quantize,epsilon,alpha,beta,theta,r,lazy_regeneration,model_neural,lazy_regeneration,model_neural,partial_data,robustness_failed_dimensions,weight_decay,learning_rate,dropout_rate
+CIFAR10,0.3382999897003174,9407.095752477646,45.27505660057068,10000,adapt_iterative,hashmap,30,1.0851997137069702,,,,,,,,,,,,5,reset,1,0
+CIFAR10,0.3262999951839447,8927.227982282639,61.54534912109375,10000,adapt_iterative,hashmap,30,1.0659998655319214,,,,,,,,,,,,5,reset,1,0
+MNIST,0.9333000183105469,7663.54948091507,34.61343050003052,10000,adapt_iterative,hashmap,29,0.40333330631256104,,,,,,,,,,,,5,reset,1,0
+MNIST,0.9341999888420105,8122.043393135071,33.893977880477905,10000,adapt_iterative,hashmap,29,0.40366649627685547,,,,,,,,,,,,5,reset,1,0
+EMGHandGestures,1.0,49.56559777259827,0.9035317897796631,10000,adapt_iterative,hashmap,29,0.0,,,,,,,,,,,,5,reset,1,0
+EMGHandGestures,0.9936708807945251,42.37621784210205,0.43755316734313965,10000,adapt_iterative,hashmap,29,0.0,,,,,,,,,,,,5,reset,1,0
+PAMAP,0.9923276305198669,17321.66977572441,259.3703510761261,10000,adapt_iterative,hashmap,29,0.07223665714263916,,,,,,,,,,,,5,reset,1,0
+PAMAP,0.9922332167625427,17710.247131586075,226.25754523277283,10000,adapt_iterative,hashmap,29,0.07165908813476562,,,,,,,,,,,,5,reset,1,0
+ISOLET,0.9223861694335938,594.8945364952087,5.354956865310669,10000,adapt_iterative,hashmap,29,0.03206133842468262,,,,,,,,,,,,5,reset,1,0
+ISOLET,0.9339320063591003,625.0717282295227,4.205610752105713,10000,adapt_iterative,hashmap,29,0.028855204582214355,,,,,,,,,,,,5,reset,1,0
