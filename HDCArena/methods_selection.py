@@ -21,7 +21,7 @@ from methods import intRVFL
 from methods import semiHDIterative
 from methods import LeHDC
 
-results_file = "adjust/results" + str(time.time()) + ".csv"
+results_file = "scrap/results" + str(time.time()) + ".csv"
 
 with open(results_file, "w", newline="") as file:
     writer = csv.writer(file)
@@ -1044,13 +1044,13 @@ configs = [
 
 configs = [
     {
-        "method": "sparse_iterative",
-        "multi_reduce_subclass": None,
-        "threshold": None,
+        "method": "multicentroid",
+        "multi_reduce_subclass": "drop",
+        "threshold": 0.03,
         "lr": 1,
-        "epsilon": 0.01,
+        "epsilon": None,
         "model_quantize": None,
-        "model_sparse": "class",
+        "model_sparse": None,
         "sparsity": None,
         "lazy_regeneration": None,
         "model_neural": None,
@@ -1059,7 +1059,7 @@ configs = [
         "beta": None,
         "theta": None,
         "chunks": None,
-        "s": 0.5,
+        "s": None,
         "weight_decay": None,
         "learning_rate": None,
         "dropout_rate": None,
