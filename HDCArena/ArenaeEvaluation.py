@@ -104,6 +104,7 @@ ITERATIONS = 30
 PARTIAL_DATA = [0.4, 0.5, 0.6]
 
 # PARTIAL_DATA = [1]
+
 ROBUSTNESS = [0, 1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80]
 # ROBUSTNESS = [0]
 arena = False
