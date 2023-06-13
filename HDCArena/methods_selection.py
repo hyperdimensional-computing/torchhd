@@ -1044,9 +1044,9 @@ configs = [
 
 configs = [
     {
-        "method": "semi",
-        "multi_reduce_subclass": None,
-        "threshold": None,
+        "method": "multicentroid",
+        "multi_reduce_subclass": "drop",
+        "threshold": 0.03,
         "lr": 1,
         "epsilon": None,
         "model_quantize": None,
@@ -1059,7 +1059,7 @@ configs = [
         "beta": None,
         "theta": None,
         "chunks": None,
-        "s": 0.05,
+        "s": None,
         "weight_decay": None,
         "learning_rate": None,
         "dropout_rate": None,
