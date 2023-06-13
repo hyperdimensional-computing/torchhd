@@ -97,7 +97,7 @@ ENCODINGS = ["flocet"]
 configurations = methods_selection.configs
 
 REPEATS = 1
-DIMENSIONS = [10000]
+DIMENSIONS = [500]
 ITERATIONS = 30
 # PARTIAL_DATA = [0.2, 0.4, 0.6, 0.8, 1]
 # , 0.6, 0.7, 0.8, 0.9, 1]
