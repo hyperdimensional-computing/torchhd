@@ -1044,7 +1044,7 @@ configs = [
 
 configs = [
     {
-        "method": "comp",
+        "method": "semi",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 1,
@@ -1058,8 +1058,8 @@ configs = [
         "alpha": None,
         "beta": None,
         "theta": None,
-        "chunks": 2,
-        "s": None,
+        "chunks": None,
+        "s": 0.05,
         "weight_decay": None,
         "learning_rate": None,
         "dropout_rate": None,
