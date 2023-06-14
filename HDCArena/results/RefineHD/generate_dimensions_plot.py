@@ -15,7 +15,15 @@ x = df["dimensions"]
 x_smooth = np.linspace(x.min(), x.max(), 300)
 fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
 
-lab = ["Baseline", "AdaptHD", "OnlineHD", "RefineHD", "AdaptHD Iterative", "OnlineHD Iterative", "RefineHD Iterative"]
+lab = [
+    "Baseline",
+    "AdaptHD",
+    "OnlineHD",
+    "RefineHD",
+    "AdaptHD Iterative",
+    "OnlineHD Iterative",
+    "RefineHD Iterative",
+]
 for idx, method in enumerate(range(len(lab))):
     a = df["method"].unique()
     method = a[idx]

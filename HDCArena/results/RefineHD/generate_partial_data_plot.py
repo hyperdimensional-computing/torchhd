@@ -15,7 +15,15 @@ x = list(map(int, df.columns[1:]))
 x_smooth = np.linspace(min(x), max(x), 200)
 fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
 
-lab = ["Baseline", "AdaptHD", "OnlineHD", "RefineHD", "AdaptHD Iterative", "OnlineHD Iterative", "RefineHD Iterative"]
+lab = [
+    "Baseline",
+    "AdaptHD",
+    "OnlineHD",
+    "RefineHD",
+    "AdaptHD Iterative",
+    "OnlineHD Iterative",
+    "RefineHD Iterative",
+]
 for i, (_, row) in enumerate(df.iterrows()):
     l = row["method"]
     row = row.drop("method")
