@@ -1044,12 +1044,12 @@ configs = [
 
 configs = [
     {
-        "method": "quant_iterative",
+        "method": "semi",
         "multi_reduce_subclass": None,
         "threshold": None,
-        "lr": 1.5,
-        "epsilon": 0.01,
-        "model_quantize": "binary",
+        "lr": 1,
+        "epsilon": None,
+        "model_quantize": None,
         "model_sparse": None,
         "sparsity": None,
         "lazy_regeneration": None,
@@ -1059,7 +1059,7 @@ configs = [
         "beta": None,
         "theta": None,
         "chunks": None,
-        "s": None,
+        "s": 0.05,
         "weight_decay": None,
         "learning_rate": None,
         "dropout_rate": None,
