@@ -1044,10 +1044,10 @@ configs = [
 
 configs = [
     {
-        "method": "multicentroid",
-        "multi_reduce_subclass": "drop",
-        "threshold": 0.03,
-        "lr": 1,
+        "method": "adapt_iterative",
+        "multi_reduce_subclass": None,
+        "threshold": None,
+        "lr": 5,
         "epsilon": None,
         "model_quantize": None,
         "model_sparse": None,
