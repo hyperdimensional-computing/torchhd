@@ -1,18 +1,22 @@
 import pandas as pd
 
 df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/semi_robust_partial"
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/lehdc_robust_partial_arena"
 )
-
-latex = 1
+latex = 0
 pand = 1
+
 df = df[df["robustness_failed_dimensions"] == 0]
+
+print(df.sort_values(['partial_data'],ascending=False).groupby(["partial_data","name"])["accuracy"].mean().to_string())
 mean_of_encoding = (
-    df.groupby(["encoding", "partial_data"])["accuracy"].mean().round(3).reset_index().T
+    df.sort_values(['partial_data'],ascending=False).groupby(["partial_data","name"])["accuracy"].mean().round(3).reset_index()
 )
+mean_of_encoding = mean_of_encoding.groupby(["partial_data"])["accuracy"].mean().round(3).reset_index().T
 var_of_encoding = (
-    df.groupby(["encoding", "partial_data"])["accuracy"].std().round(3).reset_index().T
+    df.sort_values(['partial_data'],ascending=False).groupby(["partial_data","name"])["accuracy"].std().round(3).reset_index()
 )
+var_of_encoding = var_of_encoding.groupby(["partial_data"])["accuracy"].mean().round(3).reset_index().T
 
 if pand:
     print(mean_of_encoding)
