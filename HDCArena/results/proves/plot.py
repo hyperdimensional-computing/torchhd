@@ -3,7 +3,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-#file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/adapt_dimensions_arena"
+# file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/adapt_dimensions_arena"
 file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/multicentroid_arena"
 # file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/final_results/dimensions_arenaaa.csv"
 

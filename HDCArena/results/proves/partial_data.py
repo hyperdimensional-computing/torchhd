@@ -8,15 +8,40 @@ pand = 1
 
 df = df[df["robustness_failed_dimensions"] == 0]
 
-print(df.sort_values(['partial_data'],ascending=False).groupby(["partial_data","name"])["accuracy"].mean().to_string())
+print(
+    df.sort_values(["partial_data"], ascending=False)
+    .groupby(["partial_data", "name"])["accuracy"]
+    .mean()
+    .to_string()
+)
 mean_of_encoding = (
-    df.sort_values(['partial_data'],ascending=False).groupby(["partial_data","name"])["accuracy"].mean().round(3).reset_index()
+    df.sort_values(["partial_data"], ascending=False)
+    .groupby(["partial_data", "name"])["accuracy"]
+    .mean()
+    .round(3)
+    .reset_index()
 )
-mean_of_encoding = mean_of_encoding.groupby(["partial_data"])["accuracy"].mean().round(3).reset_index().T
+mean_of_encoding = (
+    mean_of_encoding.groupby(["partial_data"])["accuracy"]
+    .mean()
+    .round(3)
+    .reset_index()
+    .T
+)
 var_of_encoding = (
-    df.sort_values(['partial_data'],ascending=False).groupby(["partial_data","name"])["accuracy"].std().round(3).reset_index()
+    df.sort_values(["partial_data"], ascending=False)
+    .groupby(["partial_data", "name"])["accuracy"]
+    .std()
+    .round(3)
+    .reset_index()
 )
-var_of_encoding = var_of_encoding.groupby(["partial_data"])["accuracy"].mean().round(3).reset_index().T
+var_of_encoding = (
+    var_of_encoding.groupby(["partial_data"])["accuracy"]
+    .mean()
+    .round(3)
+    .reset_index()
+    .T
+)
 
 if pand:
     print(mean_of_encoding)
