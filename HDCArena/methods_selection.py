@@ -1044,12 +1044,12 @@ configs = [
 
 configs = [
     {
-        "method": "quant_iterative",
-        "multi_reduce_subclass": None,
-        "threshold": None,
-        "lr": 1.5,
-        "epsilon": 0.01,
-        "model_quantize": "binary",
+        "method": "multicentroid",
+        "multi_reduce_subclass": "drop",
+        "threshold": 0.03,
+        "lr": 1,
+        "epsilon": None,
+        "model_quantize": None,
         "model_sparse": None,
         "sparsity": None,
         "lazy_regeneration": None,
@@ -1063,7 +1063,7 @@ configs = [
         "weight_decay": None,
         "learning_rate": None,
         "dropout_rate": None,
-    }
+    },
 ]
 
 # METHODS = ["add","adapt","online","adjust","comp","adapt_iterative","online_iterative","adjust_iterative",
