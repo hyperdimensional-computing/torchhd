@@ -1044,7 +1044,7 @@ configs = [
 
 configs = [
     {
-        "method": "lehdc",
+        "method": "semi",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 1,
@@ -1059,10 +1059,10 @@ configs = [
         "beta": None,
         "theta": None,
         "chunks": None,
-        "s": None,
-        "weight_decay": 5e-2,
-        "learning_rate": 1e-2,
-        "dropout_rate": 0.5,
+        "s": 0.05,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
 ]
 
