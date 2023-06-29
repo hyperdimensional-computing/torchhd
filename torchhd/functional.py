@@ -43,7 +43,6 @@ __all__ = [
     "level",
     "thermometer",
     "circular",
-    "FractionalPowerEncoding",
     "bind",
     "bundle",
     "permute",
