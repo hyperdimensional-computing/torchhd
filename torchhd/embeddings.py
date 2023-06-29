@@ -1008,7 +1008,9 @@ class FractionalPower(nn.Module):
         self,
         in_features: int,
         out_features: int,
-        distribution: Union[torch.distributions.Distribution, Literal["sinc", "gaussian"]] = "sinc",
+        distribution: Union[
+            torch.distributions.Distribution, Literal["sinc", "gaussian"]
+        ] = "sinc",
         bandwidth: float = 1.0,
         vsa: Literal["HRR", "FHRR"] = "FHRR",
         device=None,
@@ -1024,7 +1026,9 @@ class FractionalPower(nn.Module):
         self.requires_grad = requires_grad
 
         if vsa not in {"HRR", "FHRR"}:
-            raise ValueError(f"FractionalPower embedding only supports HRR and FHRR but provided: {vsa}")
+            raise ValueError(
+                f"FractionalPower embedding only supports HRR and FHRR but provided: {vsa}"
+            )
 
         self.vsa_tensor = functional.get_vsa_tensor_class(vsa)
 
@@ -1042,8 +1046,8 @@ class FractionalPower(nn.Module):
 
         # Initialize encoding's parameters
         self.weight = nn.Parameter(
-            torch.empty(self.out_features, self.in_features, **factory_kwargs), 
-            requires_grad
+            torch.empty(self.out_features, self.in_features, **factory_kwargs),
+            requires_grad,
         )
         self.reset_parameters()
 
@@ -1092,16 +1096,20 @@ class FractionalPower(nn.Module):
                 raise ValueError(
                     f"The provided distribution has shape {sample_shape} while the input data expects shape () or ({self.in_features},) so there is a mismatch."
                 )
-            
+
             # Make the generated angles negatively symmetric so they look as a spectrum
             phases = torch.cat(
-                (phases, torch.zeros(1, self.in_features), -torch.flip(phases, dims=[0])), dim=0
+                (
+                    phases,
+                    torch.zeros(1, self.in_features),
+                    -torch.flip(phases, dims=[0]),
+                ),
+                dim=0,
             )
             if self.out_features % 2 == 0:
                 phases = torch.cat((torch.zeros(1, self.in_features), phases), dim=0)
             # Set the generated angles to the object's parameters
             self.weight.data.copy_(phases)
-
 
     def basis(self):
         """Return the values of the base hypervector(s)"""
@@ -1113,9 +1121,11 @@ class FractionalPower(nn.Module):
 
         elif self.vsa_tensor == HRRTensor:
             complex_hv = torch.complex(self.weight.cos(), self.weight.sin()).T
-            hvs = torch.real(torch.fft.ifft(torch.fft.ifftshift(complex_hv, dim=1), dim=1))
+            hvs = torch.real(
+                torch.fft.ifft(torch.fft.ifftshift(complex_hv, dim=1), dim=1)
+            )
             hvs = hvs.as_subclass(HRRTensor)
-            
+
         return hvs
 
     def forward(self, input: Tensor) -> Tensor:
