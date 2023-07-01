@@ -1,7 +1,24 @@
 import pandas as pd
 
+'''
+VANILLA
+ADAPT
+ONLINE
+ADAPT_ITER
+ONLINE_ITER
+NERUAL
+DIST
+SPARES
+QUANT
+COMP
+SEMI
+MULTI
+RVFL
+LEHDC
+'''
+
 df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/lehdc_robust_partial_arena"
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/multicentroid_robust_partial"
 )
 latex = 0
 pand = 1
@@ -70,3 +87,4 @@ if latex:
     # Print the joined values
     print(joined_values["partial_data"])
     print(joined_values["accuracy"])
+

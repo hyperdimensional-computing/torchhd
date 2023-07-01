@@ -1,6 +1,6 @@
 import pandas as pd
 
-file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/adapt_iterative_robust_partial_arena"
+file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/refine_iterative_robust_partial_arena"
 
 df = pd.read_csv(file)
 
@@ -10,17 +10,31 @@ pand = 1
 df = df[df["partial_data"] == 1]
 df = df[df["dimensions"] == 10000]
 print(df)
+
 mean_of_encoding = (
-    df.groupby(["method", "robustness_failed_dimensions"])["accuracy"]
+    df.sort_values(["robustness_failed_dimensions"], ascending=False)
+    .groupby(["robustness_failed_dimensions", "name"])["accuracy"]
+    .mean()
+    .round(3)
+    .reset_index()
+)
+mean_of_encoding = (
+    mean_of_encoding.groupby(["robustness_failed_dimensions"])["accuracy"]
     .mean()
     .round(3)
     .reset_index()
     .T
 )
-
 var_of_encoding = (
-    df.groupby(["method", "robustness_failed_dimensions"])["accuracy"]
+    df.sort_values(["robustness_failed_dimensions"], ascending=False)
+    .groupby(["robustness_failed_dimensions", "name"])["accuracy"]
     .std()
+    .round(3)
+    .reset_index()
+)
+var_of_encoding = (
+    var_of_encoding.groupby(["robustness_failed_dimensions"])["accuracy"]
+    .mean()
     .round(3)
     .reset_index()
     .T

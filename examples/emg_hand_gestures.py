@@ -52,7 +52,7 @@ def experiment(subjects=[0]):
 
     train_ld = data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
     test_ld = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
-
+    print(ds[0][0].size(-1) * ds[0][0].size(-2))
     encode = Encoder(ds[0][0].size(-1) * ds[0][0].size(-2))
     encode = encode.to(device)
 
@@ -62,11 +62,16 @@ def experiment(subjects=[0]):
 
     with torch.no_grad():
         for samples, targets in tqdm(train_ld, desc="Training"):
+
             samples = samples.to(device)
             targets = targets.to(device)
 
             sample_hv = encode(samples)
-            model.add(sample_hv, targets)
+            print(sample_hv.shape)
+            print(targets.shape)
+            model.add_online(sample_hv, targets)
+
+            break
 
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes)
 
@@ -74,10 +79,12 @@ def experiment(subjects=[0]):
         model.normalize()
 
         for samples, targets in tqdm(test_ld, desc="Testing"):
+            break
             samples = samples.to(device)
 
             sample_hv = encode(samples)
             output = model(sample_hv, dot=True)
+            print(output.cpu(), targets)
             accuracy.update(output.cpu(), targets)
 
     print(f"Testing accuracy of {(accuracy.compute().item() * 100):.3f}%")
