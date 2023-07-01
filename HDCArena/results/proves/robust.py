@@ -1,5 +1,6 @@
 import pandas as pd
-'''
+
+"""
 VANILLA
 ADAPT
 ONLINE
@@ -14,8 +15,7 @@ SEMI
 MULTI
 RVFL
 LEHDC
-'''
-
+"""
 
 
 df = pd.read_csv(
@@ -59,8 +59,6 @@ var_of_encoding = (
     .reset_index()
     .T
 )
-
-
 
 
 if pand:

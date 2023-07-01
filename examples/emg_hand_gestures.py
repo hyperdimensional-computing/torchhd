@@ -62,7 +62,6 @@ def experiment(subjects=[0]):
 
     with torch.no_grad():
         for samples, targets in tqdm(train_ld, desc="Training"):
-
             samples = samples.to(device)
             targets = targets.to(device)
 
