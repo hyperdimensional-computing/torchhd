@@ -22,7 +22,7 @@
 # SOFTWARE.
 #
 import math
-from typing import Type, Union, Optional
+from typing import Type, Union, Optional, Literal, Callable
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -32,7 +32,10 @@ from torch.nn.parameter import Parameter
 import torchhd.functional as functional
 from torchhd.tensors.base import VSATensor
 from torchhd.tensors.map import MAPTensor
+from torchhd.tensors.fhrr import FHRRTensor
+from torchhd.tensors.hrr import HRRTensor
 from torchhd.types import VSAOptions
+
 
 __all__ = [
     "Empty",
@@ -44,6 +47,7 @@ __all__ = [
     "Projection",
     "Sinusoid",
     "Density",
+    "FractionalPower",
 ]
 
 
@@ -966,3 +970,194 @@ class Density(nn.Module):
         output = functional.bind(self.key.weight, self.density_encoding(input))
         # Perform the superposition operation on the bound key-value pairs
         return functional.multibundle(output)
+
+
+class FractionalPower(nn.Module):
+    """Class for fractional power encoding (FPE) method that forms hypervectors for given values, kernel shape, bandwidth, and dimensionality. Implements similarity-preserving hypervectors approximating desired kernel shape as described in `Computing on Functions Using Randomized Vector Representations <https://arxiv.org/abs/2109.03429>`_.
+
+    Args:
+        in_features (int): the dimensionality of the input feature vector.
+        out_features (int): the dimensionality of the hypervectors.
+        distribution (str, optional): hyperparameter defining the shape of the kernel by specifying a particular probability distribution that is used to sample the base hypervector(s).  Default: ``"sinc"``.
+        bandwidth (float, optional): positive hyperparameter defining the width of the similarity kernel. Lower values lead to broader kernels while larger values lead to more narrow kernels. Default: ``1.0``.
+        vsa: (``VSAOptions``, optional): specifies the hypervector type to be instantiated. Default: ``"FHRR"``.
+        dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``None`` depends on VSATensor.
+        device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
+        requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
+
+    Examples::
+
+        >>> embed = embeddings.FractionalPower(1, 6, "sinc", 1.0, "FHRR")
+        >>> embed(torch.arange(1, 4, 1.).view(-1, 1))
+        FHRRTensor([[-0.7181-0.6959j, -0.5269+0.8499j, -0.0848+0.9964j,  0.9720-0.2348j,
+              0.6358+0.7718j,  0.4352+0.9003j],
+            [ 0.0314+0.9995j, -0.4447-0.8957j, -0.9856-0.1689j,  0.8897-0.4565j,
+             -0.1915+0.9815j, -0.6212+0.7836j],
+            [ 0.6730-0.7396j,  0.9956+0.0940j,  0.2519-0.9678j,  0.7576-0.6527j,
+             -0.8793+0.4762j, -0.9759-0.2183j]])
+
+    """
+
+    # The collection of distributions for basic predefined kernels
+    predefined_kernels = {
+        "sinc": torch.distributions.Uniform(-math.pi, math.pi),
+        "gaussian": torch.distributions.Normal(0.0, 1.0),
+    }
+
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        distribution: Union[
+            torch.distributions.Distribution, Literal["sinc", "gaussian"]
+        ] = "sinc",
+        bandwidth: float = 1.0,
+        vsa: Literal["HRR", "FHRR"] = "FHRR",
+        device=None,
+        dtype=None,
+        requires_grad: bool = False,
+    ) -> None:
+        factory_kwargs = {"device": device, "dtype": dtype}
+        super(FractionalPower, self).__init__()
+
+        self.in_features = in_features  # data dimensions
+        self.out_features = out_features  # hypervector dimensions
+        self.bandwidth = bandwidth
+        self.requires_grad = requires_grad
+
+        if vsa not in {"HRR", "FHRR"}:
+            raise ValueError(
+                f"FractionalPower embedding only supports HRR and FHRR but provided: {vsa}"
+            )
+
+        self.vsa_tensor = functional.get_vsa_tensor_class(vsa)
+
+        if dtype not in self.vsa_tensor.supported_dtypes:
+            raise ValueError(f"dtype {dtype} not supported by {vsa}")
+
+        # If the distribution is a string use the presets in predefined_kernels
+        if isinstance(distribution, str):
+            try:
+                self.distribution = self.predefined_kernels[distribution]
+            except KeyError:
+                available_names = ", ".join(list(self.predefined_kernels.keys()))
+                raise ValueError(
+                    f"{distribution} kernel is not supported, use one of: {available_names}, or provide a custom torch distribution."
+                )
+        else:
+            self.distribution = distribution
+
+        # Initialize encoding's parameters
+        self.weight = nn.Parameter(
+            torch.empty(self.out_features, self.in_features, **factory_kwargs),
+            requires_grad,
+        )
+        self.reset_parameters()
+
+    # Sample the angles using the provided distribution
+    def reset_parameters(self) -> None:
+        """Generate the angles for basis hypervector(s) to be used for encoding the data."""
+
+        sample_shape = self.distribution.sample().shape
+
+        # Check HD/VSA model type
+        if self.vsa_tensor == FHRRTensor:
+            # Generate the angles for base hypervector(s) that determines the shape of the FPE kernel
+            # If the distribution is one-dimensional this implies that base hypervectors are independent so it is safe to generate self.in_features * self.out_features independent samples
+            if sample_shape == ():
+                # Draw angles from a uniform  distribution for base hypervector(s). Note that data dimensions here are independent but this does not have to be always the case
+                phases = self.distribution.sample((self.out_features, self.in_features))
+                phases = phases.to(self.weight)
+                self.weight.data.copy_(phases)
+
+            # If base hypervectors are correlated then the dimensionality of the distribution should match that of the data
+            elif sample_shape == (self.in_features,):
+                phases = self.distribution.sample((self.out_features,))
+                phases = phases.to(self.weight)
+                self.weight.data.copy_(phases)
+
+            # Raise error due to the ambiguity of the situation
+            else:
+                raise ValueError(
+                    f"The provided distribution has shape {sample_shape} while the input data expects shape () or ({self.in_features},) so there is a mismatch."
+                )
+
+        elif self.vsa_tensor == HRRTensor:
+            # Fewer angles are needed
+            dimensions_real = int((self.out_features - 1) / 2)
+
+            # Generate the angles for base hypervector(s) that determines the shape of the FPE kernel
+            # If the distribution is one-dimensional this implies that base hypervectors are independent so it is safe to generate self.in_features * self.out_features independent samples
+            if sample_shape == ():
+                # Draw angles from a uniform  distribution for base hypervector(s). Note that data dimensions here are independent but this does not have to be always the case
+                phases = self.distribution.sample((dimensions_real, self.in_features))
+
+            # If base hypervectors are correlated then the dimensionality of the distribution should match that of the data
+            elif sample_shape == (self.in_features,):
+                phases = self.distribution.sample((dimensions_real,))
+
+            # Raise error due to the ambiguity of the situation
+            else:
+                raise ValueError(
+                    f"The provided distribution has shape {sample_shape} while the input data expects shape () or ({self.in_features},) so there is a mismatch."
+                )
+
+            # Make the generated angles negatively symmetric so they look as a spectrum
+            phases = torch.cat(
+                (
+                    phases,
+                    torch.zeros(1, self.in_features),
+                    -torch.flip(phases, dims=[0]),
+                ),
+                dim=0,
+            )
+            if self.out_features % 2 == 0:
+                phases = torch.cat((torch.zeros(1, self.in_features), phases), dim=0)
+
+            phases = phases.to(self.weight)
+            # Set the generated angles to the object's parameters
+            self.weight.data.copy_(phases)
+
+    def basis(self):
+        """Return the values of the base hypervector(s)"""
+
+        # Use the angles in self.weight to obtain the values of the base hypervector(s)
+        if self.vsa_tensor == FHRRTensor:
+            hvs = torch.complex(self.weight.cos(), self.weight.sin()).T
+            hvs = hvs.as_subclass(FHRRTensor)
+
+        elif self.vsa_tensor == HRRTensor:
+            complex_hv = torch.complex(self.weight.cos(), self.weight.sin()).T
+            hvs = torch.real(
+                torch.fft.ifft(torch.fft.ifftshift(complex_hv, dim=1), dim=1)
+            )
+            hvs = hvs.as_subclass(HRRTensor)
+
+        return hvs
+
+    def forward(self, input: Tensor) -> Tensor:
+        """Creates a fractional power encoding (FPE) for given values.
+
+        Args:
+            input (Tensor): values for which FPE hypervectors should be generated. Either a vector or a batch of vectors.
+
+        Shapes:
+            - Input: :math:`(*, f)` where f is the in_features and * is an optional batch dimension.
+            - Output: :math:`(*, d)` where d is the out_features and * is an optional batch dimension.
+
+        """
+
+        # Perform FPE of the desired values using the base hypervector(s)
+        # Simultaneously computes angles for given values and their sum that is equivalent to the binding
+        if self.vsa_tensor == FHRRTensor:
+            phases = F.linear(self.bandwidth * input, self.weight)
+            hv = torch.complex(phases.cos(), phases.sin())
+            hv = hv.as_subclass(FHRRTensor)
+
+        elif self.vsa_tensor == HRRTensor:
+            phases = F.linear(self.bandwidth * input, self.weight)
+            hv = torch.complex(phases.cos(), phases.sin())
+            hv = torch.real(torch.fft.ifft(torch.fft.ifftshift(hv, dim=1), dim=1))
+            hv = hv.as_subclass(HRRTensor)
+
+        return hv

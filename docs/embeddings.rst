@@ -18,3 +18,4 @@ torchhd.embeddings
     Projection
     Sinusoid
     Density
+    FractionalPower
