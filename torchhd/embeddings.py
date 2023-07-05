@@ -1132,7 +1132,11 @@ class FractionalPower(nn.Module):
         """Creates a fractional power encoding (FPE) for given values.
 
         Args:
-            values (Tensor): values for which FPE hypervectors should be generated.
+            input (Tensor): values for which FPE hypervectors should be generated. Either a vector or a batch of vectors.
+
+        Shapes:
+            - Input: :math:`(*, f)` where f is the in_features and * is an optional batch dimension.
+            - Output: :math:`(*, d)` where d is the out_features and * is an optional batch dimension.
 
         """
 
