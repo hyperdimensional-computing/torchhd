@@ -1110,7 +1110,7 @@ class FractionalPower(nn.Module):
             )
             if self.out_features % 2 == 0:
                 phases = torch.cat((torch.zeros(1, self.in_features), phases), dim=0)
-            
+
             phases = phases.to(self.weight)
             # Set the generated angles to the object's parameters
             self.weight.data.copy_(phases)
