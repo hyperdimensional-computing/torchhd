@@ -32,7 +32,7 @@ from torchhd.tensors.bsc import BSCTensor
 from torchhd.tensors.map import MAPTensor
 from torchhd.tensors.hrr import HRRTensor
 from torchhd.tensors.fhrr import FHRRTensor
-from torchhd.tensors.ssv import SSVTensor
+from torchhd.tensors.bsv import BSVTensor
 from torchhd.types import VSAOptions
 
 
@@ -83,8 +83,8 @@ def get_vsa_tensor_class(vsa: VSAOptions) -> Type[VSATensor]:
         return HRRTensor
     elif vsa == "FHRR":
         return FHRRTensor
-    elif vsa == "SSV":
-        return SSVTensor
+    elif vsa == "BSV":
+        return BSVTensor
 
     raise ValueError(f"Provided VSA model is not supported, specified: {vsa}")
 
