@@ -50,7 +50,7 @@ class SSVTensor(VSATensor):
         num_vectors: int,
         dimensions: int,
         *,
-        segment_size:int=1024,
+        segment_size: int = 1024,
         generator=None,
         dtype=torch.int64,
         device=None,
@@ -82,7 +82,7 @@ class SSVTensor(VSATensor):
             raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
         result = torch.randint(
-            0, 
+            0,
             segment_size,
             (num_vectors, dimensions),
             generator=generator,
@@ -101,7 +101,7 @@ class SSVTensor(VSATensor):
         num_vectors: int,
         dimensions: int,
         *,
-        segment_size:int=1024,
+        segment_size: int = 1024,
         dtype=torch.int64,
         device=None,
         requires_grad=False,
@@ -148,7 +148,7 @@ class SSVTensor(VSATensor):
         num_vectors: int,
         dimensions: int,
         *,
-        segment_size:int=1024,
+        segment_size: int = 1024,
         generator=None,
         dtype=torch.int64,
         device=None,
@@ -184,7 +184,7 @@ class SSVTensor(VSATensor):
             raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
         result = torch.randint(
-            0, 
+            0,
             segment_size,
             (num_vectors, dimensions),
             generator=generator,
@@ -262,7 +262,9 @@ class SSVTensor(VSATensor):
 
     def multibind(self) -> "SSVTensor":
         """Bind multiple hypervectors"""
-        return torch.remainder(torch.sum(self, dim=-2, dtype=self.dtype), self.segment_size)
+        return torch.remainder(
+            torch.sum(self, dim=-2, dtype=self.dtype), self.segment_size
+        )
 
     def inverse(self) -> "SSVTensor":
         r"""Invert the hypervector for binding.
