@@ -23,4 +23,4 @@
 #
 from typing import Literal
 
-VSAOptions = Literal["BSC", "MAP", "HRR", "FHRR", "SSV"]
+VSAOptions = Literal["BSC", "MAP", "HRR", "FHRR", "BSV"]

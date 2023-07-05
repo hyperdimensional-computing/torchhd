@@ -337,10 +337,15 @@ class BSVTensor(VSATensor):
 
     @classmethod
     def __torch_function__(cls, func, types, args=(), kwargs=None):
+        """Ensure that all the build-in torch operations on this Tensor subclass maintain the segment_size property"""
+
         if kwargs is None:
             kwargs = {}
+
         segment_sizes = set(a.segment_size for a in args if hasattr(a, "segment_size"))
         assert len(segment_sizes) == 1, "must be exactly one segment size"
+
+        # Call with super to avoid infinite recursion
         ret = super().__torch_function__(func, types, args, kwargs)
 
         if isinstance(ret, BSVTensor):
@@ -350,4 +355,5 @@ class BSVTensor(VSATensor):
                 if isinstance(x, BSVTensor):
                     x.segment_size = list(segment_sizes)[0]
 
+        # TODO: handle more return types
         return ret
