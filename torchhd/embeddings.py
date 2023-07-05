@@ -1064,11 +1064,13 @@ class FractionalPower(nn.Module):
             if sample_shape == ():
                 # Draw angles from a uniform  distribution for base hypervector(s). Note that data dimensions here are independent but this does not have to be always the case
                 phases = self.distribution.sample((self.out_features, self.in_features))
+                phases = phases.to(self.weight)
                 self.weight.data.copy_(phases)
 
             # If base hypervectors are correlated then the dimensionality of the distribution should match that of the data
             elif sample_shape == (self.in_features,):
                 phases = self.distribution.sample((self.out_features,))
+                phases = phases.to(self.weight)
                 self.weight.data.copy_(phases)
 
             # Raise error due to the ambiguity of the situation
@@ -1108,6 +1110,8 @@ class FractionalPower(nn.Module):
             )
             if self.out_features % 2 == 0:
                 phases = torch.cat((torch.zeros(1, self.in_features), phases), dim=0)
+            
+            phases = phases.to(self.weight)
             # Set the generated angles to the object's parameters
             self.weight.data.copy_(phases)
 
