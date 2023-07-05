@@ -33,7 +33,7 @@ class BSVTensor(VSATensor):
     r"""Binary Sparse Vector representation
 
     Proposed in `High-dimensional computing with sparse vectors <https://ieeexplore.ieee.org/document/7348414>`_, this model works with sparse vector segments.
-    
+
     Because the vectors are sparse and have a fixed magnitude, we only represent the index of the non-zero value.
     """
     segment_size: int
@@ -334,12 +334,12 @@ class BSVTensor(VSATensor):
         """Cosine similarity with other hypervectors"""
         magnitude = self.size(-1)
         return self.dot_similarity(others) / magnitude
-    
+
     @classmethod
     def __torch_function__(cls, func, types, args=(), kwargs=None):
         if kwargs is None:
             kwargs = {}
-        segment_sizes = set(a.segment_size for a in args if hasattr(a, 'segment_size'))
+        segment_sizes = set(a.segment_size for a in args if hasattr(a, "segment_size"))
         assert len(segment_sizes) == 1, "must be exactly one segment size"
         ret = super().__torch_function__(func, types, args, kwargs)
 
