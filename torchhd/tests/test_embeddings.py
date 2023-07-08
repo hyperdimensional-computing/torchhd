@@ -23,11 +23,13 @@
 #
 import pytest
 import torch
+import math
 
 import torchhd
 from torchhd import functional
 from torchhd import embeddings
 from torchhd.tensors.hrr import HRRTensor
+from torchhd.tensors.fhrr import type_conversion as fhrr_type_conversion
 
 
 from .utils import (
@@ -540,3 +542,104 @@ class TestDensity:
             )
             > 0.99
         )
+
+
+class TestFractionalPower:
+    @pytest.mark.parametrize("vsa", vsa_tensors)
+    def test_default_dtype(self, vsa):
+        dimensions = 1000
+        embedding = 10
+
+        if vsa not in {"HRR", "FHRR"}:
+            with pytest.raises(ValueError):
+                embeddings.FractionalPower(embedding, dimensions, vsa=vsa)
+
+            return
+
+        emb = embeddings.FractionalPower(embedding, dimensions, vsa=vsa)
+        x = torch.randn(2, embedding)
+        y = emb(x)
+        assert y.shape == (2, dimensions)
+        
+        if vsa == "HRR":
+            assert y.dtype == torch.float32
+        elif vsa == "FHRR":
+            assert y.dtype == torch.complex64
+        else:
+            return
+        
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_dtype(self, dtype):
+        dimensions = 1456
+        embedding = 2
+
+        if dtype not in {torch.float32, torch.float64}:
+            with pytest.raises(ValueError):
+                embeddings.FractionalPower(embedding, dimensions, vsa="HRR", dtype=dtype)  
+        else:        
+            emb = embeddings.FractionalPower(embedding, dimensions, vsa="HRR", dtype=dtype)
+
+            x = torch.randn(13, embedding, dtype=dtype)
+            y = emb(x)
+            assert y.shape == (13, dimensions)
+            assert y.dtype == dtype
+
+        if dtype not in {torch.complex64, torch.complex128}:
+            with pytest.raises(ValueError):
+                embeddings.FractionalPower(embedding, dimensions, vsa="FHRR", dtype=dtype)  
+        else:        
+            emb = embeddings.FractionalPower(embedding, dimensions, vsa="FHRR", dtype=dtype)
+
+            x = torch.randn(13, embedding, dtype=fhrr_type_conversion[dtype])
+            y = emb(x)
+            assert y.shape == (13, dimensions)
+            assert y.dtype == dtype
+
+    def test_device(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        emb = embeddings.FractionalPower(35, 1000, "gaussian", device=device)
+
+        x = torchhd.random(5, 35, device=device)
+        y = emb(x)
+        assert y.shape == (5, 1000)
+        assert y.device.type == device.type
+
+    def test_custom_dist_iid(self):
+        kernel_shape = torch.distributions.Normal(0, 1)
+        band = 3.0
+
+        emb = embeddings.FractionalPower(3, 1000, kernel_shape, band)
+        x = torch.randn(1, 3)
+        y = emb(x)
+        assert y.shape == (1, 1000)
+    
+    def test_custom_dist_2d(self):
+        # Phase distribution for periodic Sinc kernel
+        class HexDisc(torch.distributions.Categorical):
+            def __init__(self):
+                super().__init__(torch.ones(6))
+                self.r = 1
+                self.side = self.r * math.sqrt(3) / 2
+                self.phases = torch.tensor(
+                    [
+                        [-self.r, 0.0],
+                        [-self.r / 2, self.side],
+                        [self.r / 2, self.side],
+                        [self.r, 0.0],
+                        [self.r / 2, -self.side],
+                        [-self.r / 2, -self.side],
+                    ]
+                )
+
+            def sample(self, sample_shape=torch.Size()):
+                return self.phases[super().sample(sample_shape), :]
+            
+        kernel_shape = HexDisc()
+        band = 3.0
+
+        emb = embeddings.FractionalPower(2, 1000, kernel_shape, band)
+        x = torch.randn(5, 2)
+        y = emb(x)
+        assert y.shape == (5, 1000)
+
