@@ -32,7 +32,7 @@ from torch.nn.parameter import Parameter
 import torchhd.functional as functional
 from torchhd.tensors.base import VSATensor
 from torchhd.tensors.map import MAPTensor
-from torchhd.tensors.fhrr import FHRRTensor
+from torchhd.tensors.fhrr import FHRRTensor, type_conversion as fhrr_type_conversion
 from torchhd.tensors.hrr import HRRTensor
 from torchhd.types import VSAOptions
 
@@ -1017,7 +1017,6 @@ class FractionalPower(nn.Module):
         dtype=None,
         requires_grad: bool = False,
     ) -> None:
-        factory_kwargs = {"device": device, "dtype": dtype}
         super(FractionalPower, self).__init__()
 
         self.in_features = in_features  # data dimensions
@@ -1032,8 +1031,15 @@ class FractionalPower(nn.Module):
 
         self.vsa_tensor = functional.get_vsa_tensor_class(vsa)
 
-        if dtype not in self.vsa_tensor.supported_dtypes:
+        # If a specific dtype is specified make sure it is supported by the VSA model
+        if dtype != None and dtype not in self.vsa_tensor.supported_dtypes:
             raise ValueError(f"dtype {dtype} not supported by {vsa}")
+
+        # The internal weights/phases are stored as floats even if the output is a complex tensor
+        if dtype != None and vsa == "FHRR":
+            dtype = fhrr_type_conversion[dtype]
+
+        factory_kwargs = {"device": device, "dtype": dtype}
 
         # If the distribution is a string use the presets in predefined_kernels
         if isinstance(distribution, str):
