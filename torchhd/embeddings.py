@@ -1032,9 +1032,6 @@ class FractionalPower(nn.Module):
 
         self.vsa_tensor = functional.get_vsa_tensor_class(vsa)
 
-        if dtype not in self.vsa_tensor.supported_dtypes:
-            raise ValueError(f"dtype {dtype} not supported by {vsa}")
-
         # If the distribution is a string use the presets in predefined_kernels
         if isinstance(distribution, str):
             try:
