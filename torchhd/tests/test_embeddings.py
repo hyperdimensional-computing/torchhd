@@ -560,14 +560,14 @@ class TestFractionalPower:
         x = torch.randn(2, embedding)
         y = emb(x)
         assert y.shape == (2, dimensions)
-        
+
         if vsa == "HRR":
             assert y.dtype == torch.float32
         elif vsa == "FHRR":
             assert y.dtype == torch.complex64
         else:
             return
-        
+
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_dtype(self, dtype):
         dimensions = 1456
@@ -575,9 +575,13 @@ class TestFractionalPower:
 
         if dtype not in {torch.float32, torch.float64}:
             with pytest.raises(ValueError):
-                embeddings.FractionalPower(embedding, dimensions, vsa="HRR", dtype=dtype)  
-        else:        
-            emb = embeddings.FractionalPower(embedding, dimensions, vsa="HRR", dtype=dtype)
+                embeddings.FractionalPower(
+                    embedding, dimensions, vsa="HRR", dtype=dtype
+                )
+        else:
+            emb = embeddings.FractionalPower(
+                embedding, dimensions, vsa="HRR", dtype=dtype
+            )
 
             x = torch.randn(13, embedding, dtype=dtype)
             y = emb(x)
@@ -586,9 +590,13 @@ class TestFractionalPower:
 
         if dtype not in {torch.complex64, torch.complex128}:
             with pytest.raises(ValueError):
-                embeddings.FractionalPower(embedding, dimensions, vsa="FHRR", dtype=dtype)  
-        else:        
-            emb = embeddings.FractionalPower(embedding, dimensions, vsa="FHRR", dtype=dtype)
+                embeddings.FractionalPower(
+                    embedding, dimensions, vsa="FHRR", dtype=dtype
+                )
+        else:
+            emb = embeddings.FractionalPower(
+                embedding, dimensions, vsa="FHRR", dtype=dtype
+            )
 
             x = torch.randn(13, embedding, dtype=fhrr_type_conversion[dtype])
             y = emb(x)
@@ -613,7 +621,7 @@ class TestFractionalPower:
         x = torch.randn(1, 3)
         y = emb(x)
         assert y.shape == (1, 1000)
-    
+
     def test_custom_dist_2d(self):
         # Phase distribution for periodic Sinc kernel
         class HexDisc(torch.distributions.Categorical):
@@ -634,7 +642,7 @@ class TestFractionalPower:
 
             def sample(self, sample_shape=torch.Size()):
                 return self.phases[super().sample(sample_shape), :]
-            
+
         kernel_shape = HexDisc()
         band = 3.0
 
@@ -642,4 +650,3 @@ class TestFractionalPower:
         x = torch.randn(5, 2)
         y = emb(x)
         assert y.shape == (5, 1000)
-

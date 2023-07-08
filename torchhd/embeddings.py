@@ -1034,9 +1034,9 @@ class FractionalPower(nn.Module):
         # If a specific dtype is specified make sure it is supported by the VSA model
         if dtype != None and dtype not in self.vsa_tensor.supported_dtypes:
             raise ValueError(f"dtype {dtype} not supported by {vsa}")
-        
+
         # The internal weights/phases are stored as floats even if the output is a complex tensor
-        if dtype != None and  vsa == "FHRR":
+        if dtype != None and vsa == "FHRR":
             dtype = fhrr_type_conversion[dtype]
 
         factory_kwargs = {"device": device, "dtype": dtype}
