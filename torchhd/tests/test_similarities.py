@@ -49,23 +49,39 @@ class TestDotSimilarity:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.dot_similarity(hv[0], hv[1])
         assert similarity.shape == ()
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.dot_similarity(hv[0], hv)
         assert similarity.shape == (2,)
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
-        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.dot_similarity(hv, hv2)
         assert similarity.shape == (2, 4)
 
-        hv1 = functional.random(6, 100, vsa, generator=generator, dtype=dtype).view(
-            2, 3, 100
-        )
-        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv1 = functional.random(6, 100, vsa, generator=generator, dtype=dtype, block_size=1024).view(2, 3, 100)
+        else:
+            hv1 = functional.random(6, 100, vsa, generator=generator, dtype=dtype).view(2, 3, 100)
+        if vsa == "SBC":
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.dot_similarity(hv1, hv2)
         assert similarity.shape == (2, 3, 4)
 
@@ -173,7 +189,11 @@ class TestDotSimilarity:
         generator = torch.Generator(device)
         generator.manual_seed(seed)
 
-        hv = functional.random(
+        if vsa == "SBC":
+            hv = functional.random(
+            3, 100, vsa, generator=generator, dtype=dtype, device=device,block_size=1024)
+        else:
+            hv = functional.random(
             3, 100, vsa, generator=generator, dtype=dtype, device=device
         )
 
@@ -192,23 +212,40 @@ class TestCosSimilarity:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.cosine_similarity(hv[0], hv[1])
         assert similarity.shape == ()
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.cosine_similarity(hv[0], hv)
         assert similarity.shape == (2,)
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
-        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.cosine_similarity(hv, hv2)
         assert similarity.shape == (2, 4)
 
-        hv1 = functional.random(6, 100, vsa, generator=generator, dtype=dtype).view(
-            2, 3, 100
-        )
-        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv1 = functional.random(6, 100, vsa, generator=generator, dtype=dtype, block_size=1024).view(2, 3, 100)
+        else:
+            hv1 = functional.random(6, 100, vsa, generator=generator, dtype=dtype).view(2, 3, 100)
+            
+        if vsa == "SBC":
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.cosine_similarity(hv1, hv2)
         assert similarity.shape == (2, 3, 4)
 
@@ -335,23 +372,40 @@ class TestHammingSimilarity:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.hamming_similarity(hv[0], hv[1])
         assert similarity.shape == ()
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.hamming_similarity(hv[0], hv)
         assert similarity.shape == (2,)
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
-        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.hamming_similarity(hv, hv2)
         assert similarity.shape == (2, 4)
 
-        hv1 = functional.random(6, 100, vsa, generator=generator, dtype=dtype).view(
-            2, 3, 100
-        )
-        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv1 = functional.random(6, 100, vsa, generator=generator, dtype=dtype, block_size=1024).view(2, 3, 100)
+        else:
+            hv1 = functional.random(6, 100, vsa, generator=generator, dtype=dtype).view(2, 3, 100)
+            
+        if vsa == "SBC":
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.hamming_similarity(hv1, hv2)
         assert similarity.shape == (2, 3, 4)
 

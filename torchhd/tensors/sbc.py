@@ -36,11 +36,10 @@ class SBCTensor(VSATensor):
 
     Because the vectors are sparse and have a fixed magnitude, we only represent the index of the non-zero value.
     """
-    segment_size: int
+    block_size: int
     supported_dtypes: Set[torch.dtype] = {
         torch.float32,
         torch.float64,
-        torch.int8,
         torch.int16,
         torch.int32,
         torch.int64,
@@ -52,7 +51,7 @@ class SBCTensor(VSATensor):
         num_vectors: int,
         dimensions: int,
         *,
-        segment_size: int,
+        block_size: int,
         generator=None,
         dtype=torch.int64,
         device=None,
@@ -66,27 +65,31 @@ class SBCTensor(VSATensor):
         Args:
             num_vectors (int): the number of hypervectors to generate.
             dimensions (int): the dimensionality of the hypervectors.
-            segment_size (int): the number of elements per segment which controls the angular granularity.
+            block_size (int): the number of elements per block which controls the angular granularity.
             dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``int64`` depends on VSATensor.
             device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
             requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
         Examples::
 
-            >>> torchhd.SBCTensor.empty(3, 6, segment_size=64)
+            >>> torchhd.SBCTensor.empty(3, 6, block_size=64)
             SBCTensor([[54,  3, 22, 27, 41, 21],
                        [17, 31, 55,  3, 44, 52],
                        [42, 37, 60, 54, 13, 41]])
 
         """
+
+        if dtype == None:
+            dtype = torch.int64
+
         if dtype not in cls.supported_dtypes:
             name = cls.__name__
             options = ", ".join([str(x) for x in cls.supported_dtypes])
-            raise ValueError(f"{name} vectors must be one of dtype {options}.")
+            raise ValueError(f"{name} vectors must be one of dtype {options}, got {dtype}.")
 
         result = torch.randint(
             0,
-            segment_size,
+            block_size,
             (num_vectors, dimensions),
             generator=generator,
             dtype=dtype,
@@ -95,7 +98,7 @@ class SBCTensor(VSATensor):
         )
 
         result = result.as_subclass(cls)
-        result.segment_size = segment_size
+        result.block_size = block_size
         return result
 
     @classmethod
@@ -104,7 +107,7 @@ class SBCTensor(VSATensor):
         num_vectors: int,
         dimensions: int,
         *,
-        segment_size: int,
+        block_size: int,
         dtype=torch.int64,
         device=None,
         requires_grad=False,
@@ -116,23 +119,26 @@ class SBCTensor(VSATensor):
         Args:
             num_vectors (int): the number of hypervectors to generate.
             dimensions (int): the dimensionality of the hypervectors.
-            segment_size (int): the number of elements per segment which controls the angular granularity.
+            block_size (int): the number of elements per block which controls the angular granularity.
             dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``int64`` depends on VSATensor.
             device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
             requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
         Examples::
 
-            >>> torchhd.SBCTensor.identity(3, 6, segment_size=64)
+            >>> torchhd.SBCTensor.identity(3, 6, block_size=64)
             SBCTensor([[0, 0, 0, 0, 0, 0],
                        [0, 0, 0, 0, 0, 0],
                        [0, 0, 0, 0, 0, 0]])
 
         """
+        if dtype == None:
+            dtype = torch.int64
+
         if dtype not in cls.supported_dtypes:
             name = cls.__name__
             options = ", ".join([str(x) for x in cls.supported_dtypes])
-            raise ValueError(f"{name} vectors must be one of dtype {options}.")
+            raise ValueError(f"{name} vectors must be one of dtype {options}, got {dtype}.")
 
         result = torch.zeros(
             num_vectors,
@@ -143,7 +149,7 @@ class SBCTensor(VSATensor):
         )
 
         result = result.as_subclass(cls)
-        result.segment_size = segment_size
+        result.block_size = block_size
         return result
 
     @classmethod
@@ -152,7 +158,7 @@ class SBCTensor(VSATensor):
         num_vectors: int,
         dimensions: int,
         *,
-        segment_size: int,
+        block_size: int,
         generator=None,
         dtype=torch.int64,
         device=None,
@@ -165,7 +171,7 @@ class SBCTensor(VSATensor):
         Args:
             num_vectors (int): the number of hypervectors to generate.
             dimensions (int): the dimensionality of the hypervectors.
-            segment_size (int): the number of elements per segment which controls the angular granularity.
+            block_size (int): the number of elements per block which controls the angular granularity.
             generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
             dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``int64`` depends on VSATensor.
             device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
@@ -173,24 +179,27 @@ class SBCTensor(VSATensor):
 
         Examples::
 
-            >>> torchhd.SBCTensor.random(3, 6, segment_size=64)
+            >>> torchhd.SBCTensor.random(3, 6, block_size=64)
             SBCTensor([[ 7,  1, 39,  8, 55, 22],
                        [51, 38, 59, 45, 13, 29],
                        [19, 26, 30,  5, 15, 51]])
-            >>> torchhd.SBCTensor.random(3, 6, segment_size=128, dtype=torch.float32)
+            >>> torchhd.SBCTensor.random(3, 6, block_size=128, dtype=torch.float32)
             SBCTensor([[116.,  25., 100.,  10.,  21.,  86.],
                        [ 69.,  49.,   2.,  56.,  78.,  70.],
                        [ 77.,  47.,  37., 106.,   8.,  30.]])
 
         """
+        if dtype == None:
+            dtype = torch.int64
+
         if dtype not in cls.supported_dtypes:
             name = cls.__name__
             options = ", ".join([str(x) for x in cls.supported_dtypes])
-            raise ValueError(f"{name} vectors must be one of dtype {options}.")
+            raise ValueError(f"{name} vectors must be one of dtype {options}, got {dtype}.")
 
         result = torch.randint(
             0,
-            segment_size,
+            block_size,
             (num_vectors, dimensions),
             generator=generator,
             dtype=dtype,
@@ -199,7 +208,7 @@ class SBCTensor(VSATensor):
         )
 
         result = result.as_subclass(cls)
-        result.segment_size = segment_size
+        result.block_size = block_size
         return result
 
     def bundle(self, other: "SBCTensor", *, generator=None) -> "SBCTensor":
@@ -231,7 +240,7 @@ class SBCTensor(VSATensor):
             SBCTensor([32, 26, 39, 54, 27, 60,  2,  4, 40,  5])
 
         """
-        assert self.segment_size == other.segment_size
+        assert self.block_size == other.block_size
         select = torch.empty_like(self, dtype=torch.bool)
         select.bernoulli_(0.5, generator=generator)
         return torch.where(select, self, other)
@@ -258,7 +267,7 @@ class SBCTensor(VSATensor):
 
         Examples::
 
-            >>> a, b = torchhd.SBCTensor.random(2, 10, segment_size=64)
+            >>> a, b = torchhd.SBCTensor.random(2, 10, block_size=64)
             >>> a
             SBCTensor([18, 55, 40, 62, 39, 26, 35, 24, 49, 41])
             >>> b
@@ -267,13 +276,13 @@ class SBCTensor(VSATensor):
             SBCTensor([ 0, 27, 61, 21,  0, 38,  0, 13, 39, 18])
 
         """
-        assert self.segment_size == other.segment_size
-        return torch.remainder(torch.add(self, other), self.segment_size)
+        assert self.block_size == other.block_size
+        return torch.remainder(torch.add(self, other), self.block_size)
 
     def multibind(self) -> "SBCTensor":
         """Bind multiple hypervectors"""
         return torch.remainder(
-            torch.sum(self, dim=-2, dtype=self.dtype), self.segment_size
+            torch.sum(self, dim=-2, dtype=self.dtype), self.block_size
         )
 
     def inverse(self) -> "SBCTensor":
@@ -295,7 +304,7 @@ class SBCTensor(VSATensor):
 
         """
 
-        return torch.remainder(torch.negative(self), self.segment_size)
+        return torch.remainder(torch.negative(self), self.block_size)
 
     def permute(self, shifts: int = 1) -> "SBCTensor":
         r"""Permute the hypervector.
@@ -337,23 +346,24 @@ class SBCTensor(VSATensor):
 
     @classmethod
     def __torch_function__(cls, func, types, args=(), kwargs=None):
-        """Ensure that all the build-in torch operations on this Tensor subclass maintain the segment_size property"""
+        """Ensure that all the build-in torch operations on this Tensor subclass maintain the block_size property"""
 
         if kwargs is None:
             kwargs = {}
 
-        segment_sizes = set(a.segment_size for a in args if hasattr(a, "segment_size"))
-        assert len(segment_sizes) == 1, "must be exactly one segment size"
+        block_sizes = set(a.block_size for a in args if hasattr(a, "block_size"))
+        if len(block_sizes) != 1:
+            raise RuntimeError(f"Call to {func} must contain exactly one block size, got {list(block_sizes)}")
 
         # Call with super to avoid infinite recursion
         ret = super().__torch_function__(func, types, args, kwargs)
 
         if isinstance(ret, SBCTensor):
-            ret.segment_size = list(segment_sizes)[0]
+            ret.block_size = list(block_sizes)[0]
         elif isinstance(ret, (tuple, list)):
             for x in ret:
                 if isinstance(x, SBCTensor):
-                    x.segment_size = list(segment_sizes)[0]
+                    x.block_size = list(block_sizes)[0]
 
         # TODO: handle more return types
         return ret

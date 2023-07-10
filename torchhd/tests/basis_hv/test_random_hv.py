@@ -41,7 +41,11 @@ class Testrandom:
     @pytest.mark.parametrize("d", [84, 10])
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_shape(self, n, d, vsa):
-        hv = functional.random(n, d, vsa)
+
+        if vsa == "SBC":
+            hv = functional.random(n, d, vsa, block_size=64)
+        else:
+            hv = functional.random(n, d, vsa)
 
         assert hv.dim() == 2
         assert hv.size(0) == n
@@ -51,12 +55,19 @@ class Testrandom:
     def test_generator(self, vsa):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        hv1 = functional.random(20, 10000, vsa, generator=generator)
+
+        if vsa == "SBC":
+            hv1 = functional.random(20, 10000, vsa, generator=generator, block_size=64)
+        else:
+            hv1 = functional.random(20, 10000, vsa, generator=generator)
 
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv2 = functional.random(20, 10000, vsa, generator=generator)
+        if vsa == "SBC":
+            hv2 = functional.random(20, 10000, vsa, generator=generator, block_size=64)
+        else:
+            hv2 = functional.random(20, 10000, vsa, generator=generator)
         assert torch.all(hv1 == hv2).item()
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
@@ -64,14 +75,20 @@ class Testrandom:
     def test_value(self, dtype, vsa):
         if not supported_dtype(dtype, vsa):
             with pytest.raises(ValueError):
-                functional.random(3, 26, vsa, dtype=dtype)
+                if vsa == "SBC":
+                    functional.random(3, 26, vsa, dtype=dtype, block_size=64)
+                else:
+                    functional.random(3, 26, vsa, dtype=dtype)
 
             return
 
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(8, 26000, vsa, dtype=dtype, generator=generator)
+        if vsa == "SBC":
+            hv = functional.random(8, 26000, vsa, dtype=dtype, generator=generator, block_size=64)
+        else:
+            hv = functional.random(8, 26000, vsa, dtype=dtype, generator=generator)
         assert hv.requires_grad == False
         assert hv.dim() == 2
         assert hv.size(0) == 8
@@ -92,6 +109,9 @@ class Testrandom:
         elif vsa == "FHRR":
             mag = hv.abs()
             assert torch.allclose(mag, torch.tensor(1.0, dtype=mag.dtype))
+
+        elif vsa == "SBC":
+            assert torch.all((hv < 64) & (hv >= 0))
 
     @pytest.mark.parametrize("sparsity", [0.0, 0.1, 0.756, 1.0])
     @pytest.mark.parametrize("dtype", torch_dtypes)
@@ -123,7 +143,11 @@ class Testrandom:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(100, 10000, vsa, dtype=dtype, generator=generator)
+        if vsa == "SBC":
+            hv = functional.random(100, 10000, vsa, dtype=dtype, generator=generator, block_size=1042)
+        else:
+            hv = functional.random(100, 10000, vsa, dtype=dtype, generator=generator)
+
         sims = functional.cosine_similarity(hv[0], hv[1:])
         assert torch.allclose(
             sims.mean(), torch.tensor(0.0, dtype=sims.dtype), atol=0.002
@@ -136,7 +160,10 @@ class Testrandom:
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        hv = functional.random(3, 52, vsa, device=device, dtype=dtype)
+        if vsa == "SBC":
+            hv = functional.random(3, 52, vsa, device=device, dtype=dtype, block_size=64)
+        else:
+            hv = functional.random(3, 52, vsa, device=device, dtype=dtype)
         assert hv.device.type == device.type
 
     def test_uses_default_dtype(self):
@@ -157,6 +184,9 @@ class Testrandom:
 
         hv = functional.random(3, 52, "FHRR")
         assert hv.dtype == torch.complex64
+
+        hv = functional.random(3, 52, "SBC", block_size=64)
+        assert hv.dtype == torch.int64
 
     def test_requires_grad(self):
         hv = functional.random(3, 52, "MAP", requires_grad=True)

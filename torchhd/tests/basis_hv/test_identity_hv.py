@@ -41,7 +41,10 @@ class Testidentity:
     @pytest.mark.parametrize("d", [84, 10])
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_shape(self, n, d, vsa):
-        hv = functional.identity(n, d, vsa)
+        if vsa == "SBC":
+            hv = functional.identity(n, d, vsa, block_size=1042)
+        else:
+            hv = functional.identity(n, d, vsa)
 
         assert hv.dim() == 2
         assert hv.size(0) == n
@@ -52,11 +55,17 @@ class Testidentity:
     def test_value(self, dtype, vsa):
         if not supported_dtype(dtype, vsa):
             with pytest.raises(ValueError):
-                functional.identity(3, 26, vsa, dtype=dtype)
+                if vsa == "SBC":
+                    functional.identity(3, 26, vsa, dtype=dtype, block_size=1042)
+                else:
+                    functional.identity(3, 26, vsa, dtype=dtype)
 
             return
 
-        hv = functional.identity(8, 26, vsa, dtype=dtype)
+        if vsa == "SBC":
+            hv = functional.identity(8, 26, vsa, dtype=dtype, block_size=1042)
+        else:
+            hv = functional.identity(8, 26, vsa, dtype=dtype)
         assert hv.requires_grad == False
         assert hv.dim() == 2
         assert hv.size(0) == 8
@@ -70,6 +79,9 @@ class Testidentity:
             x = torch.fft.fft(hv)
             assert torch.allclose(x, torch.full_like(x, 1.0))
 
+        elif vsa == "SBC":
+            assert torch.all(hv == 0)
+
         else:
             hv = functional.identity(8, 26, vsa, dtype=dtype)
             assert torch.all(hv == 1.0).item()
@@ -81,7 +93,10 @@ class Testidentity:
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        hv = functional.identity(3, 52, vsa, device=device, dtype=dtype)
+        if vsa == "SBC":
+            hv = functional.identity(3, 52, vsa, device=device, dtype=dtype, block_size=1042)
+        else:
+            hv = functional.identity(3, 52, vsa, device=device, dtype=dtype)
         assert hv.device.type == device.type
 
     def test_uses_default_dtype(self):
@@ -102,6 +117,9 @@ class Testidentity:
 
         hv = functional.identity(3, 52, "FHRR")
         assert hv.dtype == torch.complex64
+
+        hv = functional.identity(3, 52, "SBC", block_size=1024)
+        assert hv.dtype == torch.int64
 
     def test_requires_grad(self):
         hv = functional.identity(3, 52, "MAP", requires_grad=True)

@@ -108,6 +108,7 @@ class Empty(nn.Embedding):
         sparse: bool = False,
         device=None,
         dtype=None,
+        **kwargs,
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
         # Have to call Module init explicitly in order not to use the Embedding init
@@ -116,6 +117,7 @@ class Empty(nn.Embedding):
         self.num_embeddings = num_embeddings
         self.embedding_dim = embedding_dim
         self.vsa = vsa
+        self.vsa_kwargs = kwargs
 
         if padding_idx is not None:
             if padding_idx > 0:
@@ -135,7 +137,7 @@ class Empty(nn.Embedding):
         self.sparse = sparse
 
         embeddings = functional.empty(
-            num_embeddings, embedding_dim, self.vsa, **factory_kwargs
+            num_embeddings, embedding_dim, self.vsa, **factory_kwargs, **self.vsa_kwargs
         )
         # Have to provide requires grad at the creation of the parameters to
         # prevent errors when instantiating a non-float embedding
@@ -148,7 +150,7 @@ class Empty(nn.Embedding):
 
         with torch.no_grad():
             embeddings = functional.empty(
-                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs
+                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs, **self.vsa_kwargs
             )
             self.weight.copy_(embeddings)
 
@@ -214,6 +216,7 @@ class Identity(nn.Embedding):
         sparse: bool = False,
         device=None,
         dtype=None,
+        **kwargs,
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
         # Have to call Module init explicitly in order not to use the Embedding init
@@ -222,6 +225,7 @@ class Identity(nn.Embedding):
         self.num_embeddings = num_embeddings
         self.embedding_dim = embedding_dim
         self.vsa = vsa
+        self.vsa_kwargs = kwargs
 
         if padding_idx is not None:
             if padding_idx > 0:
@@ -241,7 +245,7 @@ class Identity(nn.Embedding):
         self.sparse = sparse
 
         embeddings = functional.identity(
-            num_embeddings, embedding_dim, self.vsa, **factory_kwargs
+            num_embeddings, embedding_dim, self.vsa, **factory_kwargs, **self.vsa_kwargs
         )
         # Have to provide requires grad at the creation of the parameters to
         # prevent errors when instantiating a non-float embedding
@@ -254,7 +258,7 @@ class Identity(nn.Embedding):
 
         with torch.no_grad():
             embeddings = functional.identity(
-                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs
+                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs, **self.vsa_kwargs
             )
             self.weight.copy_(embeddings)
 
@@ -266,7 +270,7 @@ class Identity(nn.Embedding):
         if self.padding_idx is not None:
             with torch.no_grad():
                 empty = functional.empty(
-                    1, self.embedding_dim, self.vsa, **factory_kwargs
+                    1, self.embedding_dim, self.vsa, **factory_kwargs, **self.vsa_kwargs
                 )
                 self.weight[self.padding_idx].copy_(empty.squeeze(0))
 
@@ -332,6 +336,7 @@ class Random(nn.Embedding):
         sparse: bool = False,
         device=None,
         dtype=None,
+        **kwargs,
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
         # Have to call Module init explicitly in order not to use the Embedding init
@@ -340,6 +345,7 @@ class Random(nn.Embedding):
         self.num_embeddings = num_embeddings
         self.embedding_dim = embedding_dim
         self.vsa = vsa
+        self.vsa_kwargs = kwargs
 
         if padding_idx is not None:
             if padding_idx > 0:
@@ -359,7 +365,7 @@ class Random(nn.Embedding):
         self.sparse = sparse
 
         embeddings = functional.random(
-            num_embeddings, embedding_dim, self.vsa, **factory_kwargs
+            num_embeddings, embedding_dim, self.vsa, **factory_kwargs, **self.vsa_kwargs
         )
         # Have to provide requires grad at the creation of the parameters to
         # prevent errors when instantiating a non-float embedding
@@ -372,7 +378,7 @@ class Random(nn.Embedding):
 
         with torch.no_grad():
             embeddings = functional.random(
-                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs
+                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs, **self.vsa_kwargs
             )
             self.weight.copy_(embeddings)
 
@@ -384,7 +390,7 @@ class Random(nn.Embedding):
         if self.padding_idx is not None:
             with torch.no_grad():
                 empty = functional.empty(
-                    1, self.embedding_dim, self.vsa, **factory_kwargs
+                    1, self.embedding_dim, self.vsa, **factory_kwargs, **self.vsa_kwargs
                 )
                 self.weight[self.padding_idx].copy_(empty.squeeze(0))
 
@@ -469,6 +475,7 @@ class Level(nn.Embedding):
         sparse: bool = False,
         device=None,
         dtype=None,
+        **kwargs,
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
         # Have to call Module init explicitly in order not to use the Embedding init
@@ -477,6 +484,7 @@ class Level(nn.Embedding):
         self.num_embeddings = num_embeddings
         self.embedding_dim = embedding_dim
         self.vsa = vsa
+        self.vsa_kwargs = kwargs
         self.low = low
         self.high = high
         self.randomness = randomness
@@ -493,6 +501,7 @@ class Level(nn.Embedding):
             self.vsa,
             randomness=randomness,
             **factory_kwargs,
+            **self.vsa_kwargs,
         )
         # Have to provide requires grad at the creation of the parameters to
         # prevent errors when instantiating a non-float embedding
@@ -508,6 +517,7 @@ class Level(nn.Embedding):
                 self.vsa,
                 randomness=self.randomness,
                 **factory_kwargs,
+                **self.vsa_kwargs,
             )
             self.weight.copy_(embeddings)
 
@@ -592,6 +602,7 @@ class Thermometer(nn.Embedding):
         sparse: bool = False,
         device=None,
         dtype=None,
+        **kwargs,
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
         # Have to call Module init explicitly in order not to use the Embedding init
@@ -600,6 +611,7 @@ class Thermometer(nn.Embedding):
         self.num_embeddings = num_embeddings
         self.embedding_dim = embedding_dim
         self.vsa = vsa
+        self.vsa_kwargs = kwargs
         self.low = low
         self.high = high
 
@@ -610,7 +622,7 @@ class Thermometer(nn.Embedding):
         self.sparse = sparse
 
         embeddings = functional.thermometer(
-            num_embeddings, embedding_dim, self.vsa, **factory_kwargs
+            num_embeddings, embedding_dim, self.vsa, **factory_kwargs, **self.vsa_kwargs
         )
         # Have to provide requires grad at the creation of the parameters to
         # prevent errors when instantiating a non-float embedding
@@ -621,7 +633,7 @@ class Thermometer(nn.Embedding):
 
         with torch.no_grad():
             embeddings = functional.thermometer(
-                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs
+                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs, **self.vsa_kwargs
             )
             self.weight.copy_(embeddings)
 
@@ -704,6 +716,7 @@ class Circular(nn.Embedding):
         sparse: bool = False,
         device=None,
         dtype=None,
+        **kwargs,
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
         # Have to call Module init explicitly in order not to use the Embedding init
@@ -712,6 +725,7 @@ class Circular(nn.Embedding):
         self.num_embeddings = num_embeddings
         self.embedding_dim = embedding_dim
         self.vsa = vsa
+        self.vsa_kwargs = kwargs
         self.phase = phase
         self.period = period
         self.randomness = randomness
@@ -728,6 +742,7 @@ class Circular(nn.Embedding):
             self.vsa,
             randomness=randomness,
             **factory_kwargs,
+            **self.vsa_kwargs
         )
         # Have to provide requires grad at the creation of the parameters to
         # prevent errors when instantiating a non-float embedding
@@ -743,6 +758,7 @@ class Circular(nn.Embedding):
                 self.vsa,
                 randomness=self.randomness,
                 **factory_kwargs,
+                **self.vsa_kwargs
             )
             self.weight.copy_(embeddings)
 

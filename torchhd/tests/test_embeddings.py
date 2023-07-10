@@ -44,21 +44,30 @@ class TestEmpty:
     def test_embedding_dim(self, vsa):
         dimensions = 1000
         embedding = 10
-        emb = embeddings.Empty(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Empty(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Empty(embedding, dimensions, vsa=vsa)
         assert emb.embedding_dim == dimensions
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_num_embeddings(self, vsa):
         dimensions = 1000
         embedding = 10
-        emb = embeddings.Empty(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Empty(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Empty(embedding, dimensions, vsa=vsa)
         assert emb.num_embeddings == embedding
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_dtype(self, vsa):
         dimensions = 4
         embedding = 6
-        emb = embeddings.Empty(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Empty(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Empty(embedding, dimensions, vsa=vsa)
         idx = torch.LongTensor([0, 1, 3])
 
         if vsa == "BSC":
@@ -76,7 +85,10 @@ class TestEmpty:
     def test_value(self, vsa):
         dimensions = 10000
         embedding = 4
-        emb = embeddings.Empty(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Empty(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Empty(embedding, dimensions, vsa=vsa)
 
         if vsa == "BSC":
             assert abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.5e-1
@@ -104,14 +116,20 @@ class TestIdentity:
     def test_embedding_dim(self, vsa):
         dimensions = 1000
         embedding = 10
-        emb = embeddings.Identity(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Identity(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Identity(embedding, dimensions, vsa=vsa)
         assert emb.embedding_dim == dimensions
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_num_embeddings(self, vsa):
         dimensions = 1000
         embedding = 10
-        emb = embeddings.Identity(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Identity(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Identity(embedding, dimensions, vsa=vsa)
         assert emb.num_embeddings == embedding
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
@@ -120,7 +138,10 @@ class TestIdentity:
         embedding = 6
         idx = torch.LongTensor([0, 1, 3])
 
-        emb = embeddings.Identity(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Identity(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Identity(embedding, dimensions, vsa=vsa)
         if vsa == "BSC":
             assert emb(idx).dtype == torch.bool
         elif vsa == "MAP" or vsa == "HRR":
@@ -133,7 +154,10 @@ class TestIdentity:
         dimensions = 6
         embedding = 4
 
-        emb = embeddings.Identity(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Identity(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Identity(embedding, dimensions, vsa=vsa)
         if vsa == "BSC":
             assert torch.all(emb.weight == False).item()
         elif vsa == "MAP":
@@ -175,21 +199,30 @@ class TestRandom:
     def test_embedding_dim(self, vsa):
         dimensions = 1000
         embedding = 10
-        emb = embeddings.Random(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Random(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Random(embedding, dimensions, vsa=vsa)
         assert emb.embedding_dim == dimensions
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_num_embeddings(self, vsa):
         dimensions = 1000
         embedding = 10
-        emb = embeddings.Random(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Random(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Random(embedding, dimensions, vsa=vsa)
         assert emb.num_embeddings == embedding
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_dtype(self, vsa):
         dimensions = 4
         embedding = 6
-        emb = embeddings.Random(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Random(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Random(embedding, dimensions, vsa=vsa)
         idx = torch.LongTensor([0, 1, 3])
         if vsa == "BSC":
             assert emb(idx).dtype == torch.bool
@@ -202,7 +235,10 @@ class TestRandom:
     def test_value(self, vsa):
         dimensions = 10000
         embedding = 4
-        emb = embeddings.Random(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Random(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Random(embedding, dimensions, vsa=vsa)
         assert abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.5e-1
 
         emb.reset_parameters()
@@ -214,21 +250,30 @@ class TestLevel:
     def test_embedding_dim(self, vsa):
         dimensions = 1000
         embedding = 10
-        emb = embeddings.Level(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Level(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Level(embedding, dimensions, vsa=vsa)
         assert emb.embedding_dim == dimensions
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_num_embeddings(self, vsa):
         dimensions = 1000
         embedding = 10
-        emb = embeddings.Level(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Level(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Level(embedding, dimensions, vsa=vsa)
         assert emb.num_embeddings == embedding
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_dtype(self, vsa):
         dimensions = 4
         embedding = 6
-        emb = embeddings.Level(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Level(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Level(embedding, dimensions, vsa=vsa)
         idx = torch.LongTensor([0, 1, 3])
         if vsa == "BSC":
             assert emb(idx).dtype == torch.bool
@@ -241,7 +286,10 @@ class TestLevel:
     def test_value(self, vsa):
         dimensions = 100000
         embedding = 4
-        emb = embeddings.Level(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Level(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Level(embedding, dimensions, vsa=vsa)
         assert (
             abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.67
             and abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) > 0.65
@@ -267,7 +315,10 @@ class TestCircular:
             return
         dimensions = 1000
         embedding = 10
-        emb = embeddings.Circular(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Circular(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Circular(embedding, dimensions, vsa=vsa)
         assert emb.embedding_dim == dimensions
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
@@ -276,7 +327,10 @@ class TestCircular:
             return
         dimensions = 1000
         embedding = 10
-        emb = embeddings.Circular(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Circular(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Circular(embedding, dimensions, vsa=vsa)
         assert emb.num_embeddings == embedding
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
@@ -285,7 +339,10 @@ class TestCircular:
             return
         dimensions = 4
         embedding = 6
-        emb = embeddings.Circular(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Circular(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Circular(embedding, dimensions, vsa=vsa)
         angle = torch.tensor([0.0, 3.141, 6.282, 9.423])
 
         if vsa == "BSC":
@@ -306,7 +363,10 @@ class TestCircular:
             return
         dimensions = 100000
         embedding = 4
-        emb = embeddings.Circular(embedding, dimensions, vsa=vsa)
+        if vsa == "SBC":
+            emb = embeddings.Circular(embedding, dimensions, vsa=vsa, block_size=1024)
+        else:
+            emb = embeddings.Circular(embedding, dimensions, vsa=vsa)
         assert (
             abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) < 0.51
             and abs(torchhd.cosine_similarity(emb.weight[0], emb.weight[1])) > 0.49
@@ -328,7 +388,7 @@ class TestCircular:
 class TestThermometer:
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_embedding_dim(self, vsa):
-        if vsa == "HRR":
+        if vsa in {"HRR", "SBC"}:
             return
         dimensions = 1000
         embedding = 10
@@ -337,7 +397,7 @@ class TestThermometer:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_num_embeddings(self, vsa):
-        if vsa == "HRR":
+        if vsa in {"HRR", "SBC"}:
             return
         dimensions = 1000
         embedding = 10
@@ -346,7 +406,7 @@ class TestThermometer:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_dtype(self, vsa):
-        if vsa == "HRR":
+        if vsa in {"HRR", "SBC"}:
             return
         dimensions = 6
         embedding = 4
@@ -366,7 +426,7 @@ class TestThermometer:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_value(self, vsa):
-        if vsa == "HRR":
+        if vsa in {"HRR", "SBC"}:
             return
         dimensions = 100000
         embedding = 4
@@ -392,7 +452,7 @@ class TestThermometer:
 class TestProjection:
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_in_features(self, vsa):
-        if vsa == "BSC" or vsa == "FHRR":
+        if vsa in {"BSC", "FHRR", "SBC"}:
             return
         in_features = 1000
         out_features = 10
@@ -401,7 +461,7 @@ class TestProjection:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_out_features(self, vsa):
-        if vsa == "BSC" or vsa == "FHRR":
+        if vsa in {"BSC", "FHRR", "SBC"}:
             return
         in_features = 1000
         out_features = 10
@@ -410,7 +470,7 @@ class TestProjection:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_dtype(self, vsa):
-        if vsa == "BSC" or vsa == "FHRR":
+        if vsa in {"BSC", "FHRR", "SBC"}:
             return
         in_features = 1000
         out_features = 10
@@ -423,7 +483,7 @@ class TestProjection:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_value(self, vsa):
-        if vsa == "BSC" or vsa == "FHRR":
+        if vsa in {"BSC", "FHRR", "SBC"}:
             return
         in_features = 100000
         out_features = 100
@@ -437,7 +497,7 @@ class TestProjection:
 class TestSinusoid:
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_in_features(self, vsa):
-        if vsa == "BSC" or vsa == "FHRR":
+        if vsa in {"BSC", "FHRR", "SBC"}:
             return
         in_features = 1000
         out_features = 10
@@ -446,7 +506,7 @@ class TestSinusoid:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_out_features(self, vsa):
-        if vsa == "BSC" or vsa == "FHRR":
+        if vsa in {"BSC", "FHRR", "SBC"}:
             return
         in_features = 1000
         out_features = 10
@@ -455,7 +515,7 @@ class TestSinusoid:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_dtype(self, vsa):
-        if vsa == "BSC" or vsa == "FHRR":
+        if vsa in {"BSC", "FHRR", "SBC"}:
             return
         in_features = 1000
         out_features = 10
@@ -468,7 +528,7 @@ class TestSinusoid:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_value(self, vsa):
-        if vsa == "BSC" or vsa == "FHRR":
+        if vsa in {"BSC", "FHRR", "SBC"}:
             return
         in_features = 100000
         out_features = 10
@@ -483,7 +543,7 @@ class TestSinusoid:
 class TestDensity:
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_embedding_dim(self, vsa):
-        if vsa == "HRR":
+        if vsa in {"HRR", "SBC"}:
             return
         dimensions = 1000
         embedding = 10
@@ -492,7 +552,7 @@ class TestDensity:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_num_embedings(self, vsa):
-        if vsa == "HRR":
+        if vsa in {"HRR", "SBC"}:
             return
         dimensions = 1000
         embedding = 10
@@ -501,7 +561,7 @@ class TestDensity:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_dtype(self, vsa):
-        if vsa == "HRR":
+        if vsa in {"HRR", "SBC"}:
             return
         dimensions = 1000
         embedding = 10
@@ -518,7 +578,7 @@ class TestDensity:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_value(self, vsa):
-        if vsa == "HRR":
+        if vsa in {"HRR", "SBC"}:
             return
         dimensions = 1000
         embedding = 10

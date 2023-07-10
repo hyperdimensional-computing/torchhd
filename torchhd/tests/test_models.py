@@ -68,8 +68,6 @@ class TestCentroid:
         assert torch.allclose(model(samples, dot=True), torchhd.dot(samples, c))
 
         model.normalize()
-        print(model(samples, dot=True))
-        print(torchhd.cos(samples, c))
         assert torch.allclose(
             model(samples, dot=True), torchhd.dot(samples, F.normalize(c))
         )
