@@ -75,7 +75,9 @@ class VTBTensor(VSATensor):
 
         has_int_sqrt = math.isclose(math.sqrt(dimensions) % 1.0, 0.0, abs_tol=1e-9)
         if not has_int_sqrt:
-            raise ValueError(f"The dimensionality of VTB tensors must have an integer square root, got {dimensions} with square root {math.sqrt(dimensions)}")
+            raise ValueError(
+                f"The dimensionality of VTB tensors must have an integer square root, got {dimensions} with square root {math.sqrt(dimensions)}"
+            )
 
         if dtype is None:
             dtype = torch.get_default_dtype()
@@ -130,7 +132,9 @@ class VTBTensor(VSATensor):
 
         has_int_sqrt = math.isclose(math.sqrt(dimensions) % 1.0, 0.0, abs_tol=1e-9)
         if not has_int_sqrt:
-            raise ValueError(f"The dimensionality of VTB tensors must have an integer square root, got {dimensions} with square root {math.sqrt(dimensions)}")
+            raise ValueError(
+                f"The dimensionality of VTB tensors must have an integer square root, got {dimensions} with square root {math.sqrt(dimensions)}"
+            )
 
         if dtype is None:
             dtype = torch.get_default_dtype()
@@ -152,7 +156,7 @@ class VTBTensor(VSATensor):
             dtype=dtype,
             device=device,
         )
-        result[:, 0::subd + 1] = mag
+        result[:, 0 :: subd + 1] = mag
         result.requires_grad = requires_grad
         return result.as_subclass(cls)
 
@@ -193,7 +197,9 @@ class VTBTensor(VSATensor):
 
         has_int_sqrt = math.isclose(math.sqrt(dimensions) % 1.0, 0.0, abs_tol=1e-9)
         if not has_int_sqrt:
-            raise ValueError(f"The dimensionality of VTB tensors must have an integer square root, got {dimensions} with square root {math.sqrt(dimensions)}")
+            raise ValueError(
+                f"The dimensionality of VTB tensors must have an integer square root, got {dimensions} with square root {math.sqrt(dimensions)}"
+            )
 
         if dtype is None:
             dtype = torch.get_default_dtype()
@@ -290,7 +296,7 @@ class VTBTensor(VSATensor):
         vy = torch.kron(torch.eye(sub_d), other.view(sub_d, sub_d))
         output = math.sqrt(sub_d) * torch.dot(vy, self)
         return output
-    
+
     def _get_sub_d(self, d):
         sub_d = int(math.sqrt(d))
         assert sub_d * sub_d == d
