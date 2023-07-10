@@ -180,7 +180,9 @@ class TestDotSimilarity:
         generator.manual_seed(seed)
 
         if vsa == "SBC":
-            hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+            hv = functional.random(
+                3, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
         else:
             hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
 
@@ -368,7 +370,9 @@ class TestCosSimilarity:
         generator.manual_seed(seed)
 
         if vsa == "SBC":
-            hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+            hv = functional.random(
+                3, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
         else:
             hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
 
@@ -396,7 +400,13 @@ class TestCosSimilarity:
 
         if vsa == "SBC":
             hv = functional.random(
-                3, 100, vsa, generator=generator, dtype=dtype, device=device, block_size=1024,
+                3,
+                100,
+                vsa,
+                generator=generator,
+                dtype=dtype,
+                device=device,
+                block_size=1024,
             )
         else:
             hv = functional.random(
@@ -549,7 +559,9 @@ class TestHammingSimilarity:
         generator.manual_seed(seed)
 
         if vsa == "SBC":
-            hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+            hv = functional.random(
+                3, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
         else:
             hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
 
@@ -569,7 +581,13 @@ class TestHammingSimilarity:
 
         if vsa == "SBC":
             hv = functional.random(
-                3, 100, vsa, generator=generator, dtype=dtype, device=device, block_size=1024
+                3,
+                100,
+                vsa,
+                generator=generator,
+                dtype=dtype,
+                device=device,
+                block_size=1024,
             )
         else:
             hv = functional.random(
