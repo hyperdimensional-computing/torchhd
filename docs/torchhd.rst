@@ -85,7 +85,7 @@ VSA Models
     MAPTensor
     HRRTensor
     FHRRTensor
-    BSVTensor
+    SBCTensor
 
 
 Utilities
