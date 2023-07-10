@@ -83,7 +83,7 @@ def supported_dtype(
 
     if not issubclass(vsa_tensor, torchhd.VSATensor):
         raise ValueError("Must provide a VSATensor class")
-    
+
     return dtype in vsa_tensor.supported_dtypes
 
 

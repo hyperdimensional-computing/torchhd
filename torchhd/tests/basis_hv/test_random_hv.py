@@ -41,7 +41,6 @@ class Testrandom:
     @pytest.mark.parametrize("d", [84, 10])
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_shape(self, n, d, vsa):
-
         if vsa == "SBC":
             hv = functional.random(n, d, vsa, block_size=64)
         else:
@@ -86,7 +85,9 @@ class Testrandom:
         generator.manual_seed(seed)
 
         if vsa == "SBC":
-            hv = functional.random(8, 26000, vsa, dtype=dtype, generator=generator, block_size=64)
+            hv = functional.random(
+                8, 26000, vsa, dtype=dtype, generator=generator, block_size=64
+            )
         else:
             hv = functional.random(8, 26000, vsa, dtype=dtype, generator=generator)
         assert hv.requires_grad == False
@@ -144,7 +145,9 @@ class Testrandom:
         generator.manual_seed(seed)
 
         if vsa == "SBC":
-            hv = functional.random(100, 10000, vsa, dtype=dtype, generator=generator, block_size=1042)
+            hv = functional.random(
+                100, 10000, vsa, dtype=dtype, generator=generator, block_size=1042
+            )
         else:
             hv = functional.random(100, 10000, vsa, dtype=dtype, generator=generator)
 
@@ -161,7 +164,9 @@ class Testrandom:
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if vsa == "SBC":
-            hv = functional.random(3, 52, vsa, device=device, dtype=dtype, block_size=64)
+            hv = functional.random(
+                3, 52, vsa, device=device, dtype=dtype, block_size=64
+            )
         else:
             hv = functional.random(3, 52, vsa, device=device, dtype=dtype)
         assert hv.device.type == device.type

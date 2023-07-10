@@ -58,14 +58,18 @@ class Testcircular:
         generator = torch.Generator()
         generator.manual_seed(seed)
         if vsa == "SBC":
-            hv1 = functional.circular(20, 10000, vsa, generator=generator, block_size=1024)
+            hv1 = functional.circular(
+                20, 10000, vsa, generator=generator, block_size=1024
+            )
         else:
             hv1 = functional.circular(20, 10000, vsa, generator=generator)
 
         generator = torch.Generator()
         generator.manual_seed(seed)
         if vsa == "SBC":
-            hv2 = functional.circular(20, 10000, vsa, generator=generator, block_size=1024)
+            hv2 = functional.circular(
+                20, 10000, vsa, generator=generator, block_size=1024
+            )
         else:
             hv2 = functional.circular(20, 10000, vsa, generator=generator)
         assert torch.all(hv1 == hv2).item()
@@ -92,7 +96,9 @@ class Testcircular:
         generator.manual_seed(seed)
 
         if vsa == "SBC":
-            hv = functional.circular(50, 26000, vsa, dtype=dtype, generator=generator, block_size=1024)
+            hv = functional.circular(
+                50, 26000, vsa, dtype=dtype, generator=generator, block_size=1024
+            )
         else:
             hv = functional.circular(50, 26000, vsa, dtype=dtype, generator=generator)
         assert hv.requires_grad == False
@@ -114,7 +120,9 @@ class Testcircular:
             assert torch.all((hv >= 0) | (hv < 1024)).item()
 
         if vsa == "SBC":
-            hv = functional.circular(8, 1000000, vsa, generator=generator, dtype=dtype, block_size=1024)
+            hv = functional.circular(
+                8, 1000000, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
         else:
             hv = functional.circular(8, 1000000, vsa, generator=generator, dtype=dtype)
         sims = functional.cosine_similarity(hv[0], hv)
@@ -169,7 +177,9 @@ class Testcircular:
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if vsa == "SBC":
-            hv = functional.circular(3, 52, vsa, device=device, dtype=dtype, block_size=1024)
+            hv = functional.circular(
+                3, 52, vsa, device=device, dtype=dtype, block_size=1024
+            )
         else:
             hv = functional.circular(3, 52, vsa, device=device, dtype=dtype)
         assert hv.device.type == device.type

@@ -61,7 +61,7 @@ class Testempty:
                     functional.empty(3, 26, vsa, dtype=dtype)
 
             return
-        
+
         if vsa == "SBC":
             hv = functional.empty(8, 26, vsa, dtype=dtype, block_size=1024)
         else:
@@ -89,7 +89,9 @@ class Testempty:
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if vsa == "SBC":
-            hv = functional.empty(3, 52, vsa, device=device, dtype=dtype, block_size=1024)
+            hv = functional.empty(
+                3, 52, vsa, device=device, dtype=dtype, block_size=1024
+            )
         else:
             hv = functional.empty(3, 52, vsa, device=device, dtype=dtype)
         assert hv.device.type == device.type

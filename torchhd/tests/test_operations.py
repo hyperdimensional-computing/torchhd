@@ -51,6 +51,7 @@ class TestBind:
             assert torch.all(res == torch.mul(hv[0], hv[1])).item()
         elif vsa == "HRR":
             from torch.fft import fft, ifft
+
             assert torch.all(res == ifft(torch.mul(fft(hv[0]), fft(hv[1])))).item()
         elif vsa == "SBC":
             assert torch.all(res == ((hv[0] + hv[1]) % 1024))
@@ -84,7 +85,9 @@ class TestBundle:
 
         if vsa == "BSC":
             for i in range(10):
-                assert (res[i].item() == hv[0][i].item()) or (res[i].item() == hv[1][i].item())
+                assert (res[i].item() == hv[0][i].item()) or (
+                    res[i].item() == hv[1][i].item()
+                )
 
         if vsa == "MAP":
             hv[0] = torch.tensor([1, 1, -1, -1, 1, 1, 1, 1, -1, -1])
@@ -100,7 +103,9 @@ class TestBundle:
 
         if vsa == "SBC":
             for i in range(10):
-                assert (res[i].item() == hv[0][i].item()) or (res[i].item() == hv[1][i].item())
+                assert (res[i].item() == hv[0][i].item()) or (
+                    res[i].item() == hv[1][i].item()
+                )
 
         assert res.dtype == dtype
 
@@ -193,11 +198,15 @@ class TestCleanup:
         generator.manual_seed(2147483644)
 
         if vsa == "SBC":
-            hv = functional.random(5, 100, vsa, dtype=dtype, generator=generator, block_size=1024)
+            hv = functional.random(
+                5, 100, vsa, dtype=dtype, generator=generator, block_size=1024
+            )
         else:
             hv = functional.random(5, 100, vsa, dtype=dtype, generator=generator)
         if vsa == "SBC":
-            noise = functional.random(1, 100, vsa, dtype=dtype, generator=generator, block_size=1024)
+            noise = functional.random(
+                1, 100, vsa, dtype=dtype, generator=generator, block_size=1024
+            )
         else:
             noise = functional.random(1, 100, vsa, dtype=dtype, generator=generator)
         res = functional.cleanup(functional.bundle(hv[0], noise), hv)
@@ -213,11 +222,15 @@ class TestCleanup:
         generator.manual_seed(2147483644)
 
         if vsa == "SBC":
-            hv = functional.random(5, 100, vsa, dtype=dtype, generator=generator, block_size=1024)
+            hv = functional.random(
+                5, 100, vsa, dtype=dtype, generator=generator, block_size=1024
+            )
         else:
             hv = functional.random(5, 100, vsa, dtype=dtype, generator=generator)
         if vsa == "SBC":
-            noise = functional.random(1, 100, vsa, dtype=dtype, generator=generator, block_size=1024)
+            noise = functional.random(
+                1, 100, vsa, dtype=dtype, generator=generator, block_size=1024
+            )
         else:
             noise = functional.random(1, 100, vsa, dtype=dtype, generator=generator)
         res = functional.cleanup(functional.bundle(hv[0], noise), hv, threshold=0.3)
@@ -231,7 +244,9 @@ class TestCleanup:
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if vsa == "SBC":
-            hv = functional.random(5, 100, vsa, dtype=dtype, device=device, block_size=1024)
+            hv = functional.random(
+                5, 100, vsa, dtype=dtype, device=device, block_size=1024
+            )
         else:
             hv = functional.random(5, 100, vsa, dtype=dtype, device=device)
         res = functional.cleanup(hv[0], hv)
@@ -248,21 +263,27 @@ class TestRandsel:
         generator.manual_seed(2147483644)
 
         if vsa == "SBC":
-            a, b = functional.random(2, 1000, vsa, dtype=dtype, generator=generator, block_size=1024)
+            a, b = functional.random(
+                2, 1000, vsa, dtype=dtype, generator=generator, block_size=1024
+            )
         else:
             a, b = functional.random(2, 1000, vsa, dtype=dtype, generator=generator)
         res = functional.randsel(a, b, p=0, generator=generator)
         assert torch.all(a == res)
 
         if vsa == "SBC":
-            a, b = functional.random(2, 1000, vsa, dtype=dtype, generator=generator, block_size=1024)
+            a, b = functional.random(
+                2, 1000, vsa, dtype=dtype, generator=generator, block_size=1024
+            )
         else:
             a, b = functional.random(2, 1000, vsa, dtype=dtype, generator=generator)
         res = functional.randsel(a, b, p=1, generator=generator)
         assert torch.all(b == res)
 
         if vsa == "SBC":
-            a, b = functional.random(2, 1000, vsa, dtype=dtype, generator=generator, block_size=1024)
+            a, b = functional.random(
+                2, 1000, vsa, dtype=dtype, generator=generator, block_size=1024
+            )
         else:
             a, b = functional.random(2, 1000, vsa, dtype=dtype, generator=generator)
         res = functional.randsel(a, b, generator=generator)
@@ -277,7 +298,9 @@ class TestRandsel:
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if vsa == "SBC":
-            a, b = functional.random(2, 100, vsa, dtype=dtype, device=device, block_size=1024)
+            a, b = functional.random(
+                2, 100, vsa, dtype=dtype, device=device, block_size=1024
+            )
         else:
             a, b = functional.random(2, 100, vsa, dtype=dtype, device=device)
         res = functional.randsel(a, b)

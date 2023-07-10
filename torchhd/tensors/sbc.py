@@ -85,7 +85,9 @@ class SBCTensor(VSATensor):
         if dtype not in cls.supported_dtypes:
             name = cls.__name__
             options = ", ".join([str(x) for x in cls.supported_dtypes])
-            raise ValueError(f"{name} vectors must be one of dtype {options}, got {dtype}.")
+            raise ValueError(
+                f"{name} vectors must be one of dtype {options}, got {dtype}."
+            )
 
         result = torch.randint(
             0,
@@ -138,7 +140,9 @@ class SBCTensor(VSATensor):
         if dtype not in cls.supported_dtypes:
             name = cls.__name__
             options = ", ".join([str(x) for x in cls.supported_dtypes])
-            raise ValueError(f"{name} vectors must be one of dtype {options}, got {dtype}.")
+            raise ValueError(
+                f"{name} vectors must be one of dtype {options}, got {dtype}."
+            )
 
         result = torch.zeros(
             num_vectors,
@@ -195,7 +199,9 @@ class SBCTensor(VSATensor):
         if dtype not in cls.supported_dtypes:
             name = cls.__name__
             options = ", ".join([str(x) for x in cls.supported_dtypes])
-            raise ValueError(f"{name} vectors must be one of dtype {options}, got {dtype}.")
+            raise ValueError(
+                f"{name} vectors must be one of dtype {options}, got {dtype}."
+            )
 
         result = torch.randint(
             0,
@@ -353,7 +359,9 @@ class SBCTensor(VSATensor):
 
         block_sizes = set(a.block_size for a in args if hasattr(a, "block_size"))
         if len(block_sizes) != 1:
-            raise RuntimeError(f"Call to {func} must contain exactly one block size, got {list(block_sizes)}")
+            raise RuntimeError(
+                f"Call to {func} must contain exactly one block size, got {list(block_sizes)}"
+            )
 
         # Call with super to avoid infinite recursion
         ret = super().__torch_function__(func, types, args, kwargs)

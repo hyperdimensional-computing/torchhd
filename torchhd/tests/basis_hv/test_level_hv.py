@@ -83,7 +83,9 @@ class Testlevel:
         generator.manual_seed(seed)
 
         if vsa == "SBC":
-            hv = functional.level(50, 26000, vsa, dtype=dtype, generator=generator, block_size=1024)
+            hv = functional.level(
+                50, 26000, vsa, dtype=dtype, generator=generator, block_size=1024
+            )
         else:
             hv = functional.level(50, 26000, vsa, dtype=dtype, generator=generator)
         assert hv.requires_grad == False
@@ -115,7 +117,9 @@ class Testlevel:
         assert torch.all(sims_diff > 0).item(), "similarity must be decreasing"
 
         if vsa == "SBC":
-            hv = functional.level(5, 1000000, vsa, generator=generator, dtype=dtype, block_size=1024)
+            hv = functional.level(
+                5, 1000000, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
         else:
             hv = functional.level(5, 1000000, vsa, generator=generator, dtype=dtype)
         sims = functional.cosine_similarity(hv[0], hv)
@@ -153,7 +157,9 @@ class Testlevel:
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if vsa == "SBC":
-            hv = functional.level(3, 52, vsa, device=device, dtype=dtype, block_size=1024)
+            hv = functional.level(
+                3, 52, vsa, device=device, dtype=dtype, block_size=1024
+            )
         else:
             hv = functional.level(3, 52, vsa, device=device, dtype=dtype)
         assert hv.device.type == device.type

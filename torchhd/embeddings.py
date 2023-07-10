@@ -150,7 +150,11 @@ class Empty(nn.Embedding):
 
         with torch.no_grad():
             embeddings = functional.empty(
-                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs, **self.vsa_kwargs
+                self.num_embeddings,
+                self.embedding_dim,
+                self.vsa,
+                **factory_kwargs,
+                **self.vsa_kwargs,
             )
             self.weight.copy_(embeddings)
 
@@ -258,7 +262,11 @@ class Identity(nn.Embedding):
 
         with torch.no_grad():
             embeddings = functional.identity(
-                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs, **self.vsa_kwargs
+                self.num_embeddings,
+                self.embedding_dim,
+                self.vsa,
+                **factory_kwargs,
+                **self.vsa_kwargs,
             )
             self.weight.copy_(embeddings)
 
@@ -378,7 +386,11 @@ class Random(nn.Embedding):
 
         with torch.no_grad():
             embeddings = functional.random(
-                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs, **self.vsa_kwargs
+                self.num_embeddings,
+                self.embedding_dim,
+                self.vsa,
+                **factory_kwargs,
+                **self.vsa_kwargs,
             )
             self.weight.copy_(embeddings)
 
@@ -633,7 +645,11 @@ class Thermometer(nn.Embedding):
 
         with torch.no_grad():
             embeddings = functional.thermometer(
-                self.num_embeddings, self.embedding_dim, self.vsa, **factory_kwargs, **self.vsa_kwargs
+                self.num_embeddings,
+                self.embedding_dim,
+                self.vsa,
+                **factory_kwargs,
+                **self.vsa_kwargs,
             )
             self.weight.copy_(embeddings)
 
@@ -742,7 +758,7 @@ class Circular(nn.Embedding):
             self.vsa,
             randomness=randomness,
             **factory_kwargs,
-            **self.vsa_kwargs
+            **self.vsa_kwargs,
         )
         # Have to provide requires grad at the creation of the parameters to
         # prevent errors when instantiating a non-float embedding
@@ -758,7 +774,7 @@ class Circular(nn.Embedding):
                 self.vsa,
                 randomness=self.randomness,
                 **factory_kwargs,
-                **self.vsa_kwargs
+                **self.vsa_kwargs,
             )
             self.weight.copy_(embeddings)
 

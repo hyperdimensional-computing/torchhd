@@ -94,7 +94,9 @@ class Testidentity:
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if vsa == "SBC":
-            hv = functional.identity(3, 52, vsa, device=device, dtype=dtype, block_size=1042)
+            hv = functional.identity(
+                3, 52, vsa, device=device, dtype=dtype, block_size=1042
+            )
         else:
             hv = functional.identity(3, 52, vsa, device=device, dtype=dtype)
         assert hv.device.type == device.type
