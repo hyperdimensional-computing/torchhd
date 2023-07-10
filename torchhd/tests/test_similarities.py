@@ -179,7 +179,10 @@ class TestDotSimilarity:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
 
         similarity = functional.dot_similarity(hv, hv)
 
@@ -364,7 +367,10 @@ class TestCosSimilarity:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
 
         similarity = functional.cosine_similarity(hv, hv)
 
@@ -388,9 +394,14 @@ class TestCosSimilarity:
         generator = torch.Generator(device)
         generator.manual_seed(seed)
 
-        hv = functional.random(
-            3, 100, vsa, generator=generator, dtype=dtype, device=device
-        )
+        if vsa == "SBC":
+            hv = functional.random(
+                3, 100, vsa, generator=generator, dtype=dtype, device=device, block_size=1024,
+            )
+        else:
+            hv = functional.random(
+                3, 100, vsa, generator=generator, dtype=dtype, device=device
+            )
 
         similarity = functional.cosine_similarity(hv, hv)
 
@@ -537,7 +548,10 @@ class TestHammingSimilarity:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "SBC":
+            hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype, block_size=1024)
+        else:
+            hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
 
         similarity = functional.hamming_similarity(hv, hv)
 
@@ -553,9 +567,14 @@ class TestHammingSimilarity:
         generator = torch.Generator(device)
         generator.manual_seed(seed)
 
-        hv = functional.random(
-            3, 100, vsa, generator=generator, dtype=dtype, device=device
-        )
+        if vsa == "SBC":
+            hv = functional.random(
+                3, 100, vsa, generator=generator, dtype=dtype, device=device, block_size=1024
+            )
+        else:
+            hv = functional.random(
+                3, 100, vsa, generator=generator, dtype=dtype, device=device
+            )
 
         similarity = functional.hamming_similarity(hv, hv)
 
