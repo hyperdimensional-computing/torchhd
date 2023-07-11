@@ -806,9 +806,9 @@ class Projection(nn.Module):
         self.out_features = out_features
         self.vsa = vsa
 
-        if vsa not in {"MAP", "HRR"}:
+        if vsa not in {"MAP", "HRR", "VTB"}:
             raise ValueError(
-                f"Projection embedding only supports MAP and HRR but provided: {vsa}"
+                f"Projection embedding supports MAP, HRR, VTB but provided: {vsa}"
             )
 
         self.weight = nn.parameter.Parameter(
@@ -877,9 +877,9 @@ class Sinusoid(nn.Module):
         self.out_features = out_features
         self.vsa = vsa
 
-        if vsa not in {"MAP", "HRR"}:
+        if vsa not in {"MAP", "HRR", "VTB"}:
             raise ValueError(
-                f"Sinusoid embedding only supports MAP and HRR but provided: {vsa}"
+                f"Sinusoid embedding supports MAP, HRR, VTB but provided: {vsa}"
             )
 
         self.weight = nn.parameter.Parameter(

@@ -158,7 +158,7 @@ class TestDotSimilarity:
                 assert similarity.dtype == torch.float
             elif dtype == torch.complex128:
                 assert similarity.dtype == torch.double
-        elif vsa == "HRR":
+        elif vsa == "HRR" or vsa == "VTB":
             assert similarity.dtype == dtype
         else:
             assert similarity.dtype == torch.get_default_dtype()
@@ -301,7 +301,7 @@ class TestCosSimilarity:
                 assert similarity.dtype == torch.float
             elif dtype == torch.complex128:
                 assert similarity.dtype == torch.double
-        elif vsa == "HRR":
+        elif vsa == "HRR" or vsa == "VTB":
             assert similarity.dtype == dtype
         else:
             assert similarity.dtype == torch.get_default_dtype()

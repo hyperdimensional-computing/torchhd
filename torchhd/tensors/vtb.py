@@ -33,7 +33,7 @@ from torchhd.tensors.base import VSATensor
 class VTBTensor(VSATensor):
     """Vector-Derived Transformation Binding
 
-    Proposed in `Vector-Derived Transformation Binding: An Improved Binding Operation for Deep Symbol-Like Processing in Neural Networks <https://direct.mit.edu/neco/article/31/5/849/8469/Vector-Derived-Transformation-Binding-An-Improved>`_, as an improvement upon HRR, this model also uses real valued hypervectors.
+    Proposed in `Vector-Derived Transformation Binding: An Improved Binding Operation for Deep Symbol-Like Processing in Neural Networks <https://direct.mit.edu/neco/article/31/5/849/8469/Vector-Derived-Transformation-Binding-An-Improved>`_, as an improvement upon Holographic Reduced Representations (HRR), this model also uses real valued hypervectors.
     """
 
     supported_dtypes: Set[torch.dtype] = {torch.float32, torch.float64}
@@ -144,11 +144,8 @@ class VTBTensor(VSATensor):
             options = ", ".join([str(x) for x in cls.supported_dtypes])
             raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
-        mag = dimensions**0.25
-        subd = cls._get_sub_d(dimensions)
-
-        # result = (torch.eye(cls._get_sub_d(dimensions), dtype=dtype, device=device) / mag).ravel().unsqueeze(-1).expand(num_vectors, -1)
-        # every subd + 1 th element is of size mag
+        mag = dimensions**(-0.25)
+        sqrt_d = int(math.sqrt(dimensions))
 
         result = torch.zeros(
             num_vectors,
@@ -156,7 +153,7 @@ class VTBTensor(VSATensor):
             dtype=dtype,
             device=device,
         )
-        result[:, 0 :: subd + 1] = mag
+        result[:, 0 :: sqrt_d + 1] = mag
         result.requires_grad = requires_grad
         return result.as_subclass(cls)
 
@@ -216,7 +213,7 @@ class VTBTensor(VSATensor):
 
         result.requires_grad = requires_grad
         return result.as_subclass(cls)
-
+    
     def bundle(self, other: "VTBTensor") -> "VTBTensor":
         r"""Bundle the hypervector with other using element-wise sum.
 
@@ -291,21 +288,23 @@ class VTBTensor(VSATensor):
             HRR([-0.0362, -0.0910,  0.0114,  0.0445,  0.1244,  0.0388], dtype=torch.float64)
 
         """
-        assert len(self.size(-1)) == len(other.size(-1))
-        sub_d = self._get_sub_d(self.size(-1))
-        vy = torch.kron(torch.eye(sub_d), other.view(sub_d, sub_d))
-        output = math.sqrt(sub_d) * torch.dot(vy, self)
+        sqrt_d = int(math.sqrt(self.size(-1)))
+        
+        # Reshape the individual vectors as square matrices
+        shape1 = list(self.shape)[:-1] + [1, sqrt_d, sqrt_d]
+        # Copy each matrix sqrt_d times
+        expand = [-1 for _ in shape1]
+        expand[-3] = sqrt_d
+        # Combine the batch dimensions and the matrix copies
+        batches = math.prod(shape1[:-3])
+        shape2 = [sqrt_d * batches, sqrt_d, sqrt_d]
+        vy = other.reshape(*shape1).expand(*expand).reshape(shape2)
+
+        x = self.unfold(-1, sqrt_d, sqrt_d).reshape(sqrt_d * batches, sqrt_d, 1)
+        
+        # Efficient batched block-diagonal matrix-vector multiply
+        output = math.sqrt(sqrt_d) * torch.bmm(vy, x).reshape_as(self)
         return output
-
-    def _get_sub_d(self, d):
-        sub_d = int(math.sqrt(d))
-        assert sub_d * sub_d == d
-        return sub_d
-
-    # def multibind(self) -> "VTBTensor":
-    #     """Bind multiple hypervectors"""
-    #     result = ifft(torch.prod(fft(self), dim=-2, dtype=self.dtype))
-    #     return torch.real(result)
 
     def inverse(self) -> "VTBTensor":
         r"""Stable inversion of the hypervector for binding.
@@ -331,8 +330,11 @@ class VTBTensor(VSATensor):
             HRR([[ 0.0090, -0.1744, -0.2351,  0.0441,  0.0836,  0.2620]], dtype=torch.float64)
 
         """
-        sub_d = self._get_sub_d(self.size(-1))
-        return self.view(sub_d, sub_d).T.ravel()
+        sqrt_d = int(math.sqrt(self.size(-1)))
+
+        # Change only the view of the last dimension, not the batch dimensions
+        shape = list(self.shape)[:-1] + [sqrt_d, sqrt_d]
+        return self.reshape(*shape).transpose(-2, -1).reshape_as(self)
 
     def negative(self) -> "VTBTensor":
         r"""Negate the hypervector for the bundling inverse.
@@ -391,6 +393,7 @@ class VTBTensor(VSATensor):
         """Inner product with other hypervectors"""
         if others.dim() >= 2:
             others = others.transpose(-2, -1)
+            
         return torch.matmul(self, others)
 
     def cosine_similarity(self, others: "VTBTensor", *, eps=1e-08) -> Tensor:
