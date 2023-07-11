@@ -144,7 +144,7 @@ class VTBTensor(VSATensor):
             options = ", ".join([str(x) for x in cls.supported_dtypes])
             raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
-        mag = dimensions**(-0.25)
+        mag = dimensions ** (-0.25)
         sqrt_d = int(math.sqrt(dimensions))
 
         result = torch.zeros(
@@ -213,7 +213,7 @@ class VTBTensor(VSATensor):
 
         result.requires_grad = requires_grad
         return result.as_subclass(cls)
-    
+
     def bundle(self, other: "VTBTensor") -> "VTBTensor":
         r"""Bundle the hypervector with other using element-wise sum.
 
@@ -289,7 +289,7 @@ class VTBTensor(VSATensor):
 
         """
         sqrt_d = int(math.sqrt(self.size(-1)))
-        
+
         # Reshape the individual vectors as square matrices
         shape1 = list(self.shape)[:-1] + [1, sqrt_d, sqrt_d]
         # Copy each matrix sqrt_d times
@@ -301,7 +301,7 @@ class VTBTensor(VSATensor):
         vy = other.reshape(*shape1).expand(*expand).reshape(shape2)
 
         x = self.unfold(-1, sqrt_d, sqrt_d).reshape(sqrt_d * batches, sqrt_d, 1)
-        
+
         # Efficient batched block-diagonal matrix-vector multiply
         output = math.sqrt(sqrt_d) * torch.bmm(vy, x).reshape_as(self)
         return output
@@ -393,7 +393,7 @@ class VTBTensor(VSATensor):
         """Inner product with other hypervectors"""
         if others.dim() >= 2:
             others = others.transpose(-2, -1)
-            
+
         return torch.matmul(self, others)
 
     def cosine_similarity(self, others: "VTBTensor", *, eps=1e-08) -> Tensor:

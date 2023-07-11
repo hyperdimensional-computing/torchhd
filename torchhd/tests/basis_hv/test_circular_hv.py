@@ -40,7 +40,7 @@ class Testcircular:
     def test_shape(self, n, d, vsa):
         if vsa == "HRR" or vsa == "VTB":
             return
-        
+
         hv = functional.circular(n, d, vsa)
 
         assert hv.dim() == 2

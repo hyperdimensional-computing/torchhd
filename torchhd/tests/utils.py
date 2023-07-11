@@ -100,7 +100,7 @@ def supported_dtype(
 
     elif vsa_tensor == torchhd.FHRRTensor:
         return dtype in {torch.complex64, torch.complex128}
-    
+
     elif vsa_tensor == torchhd.VTBTensor:
         return dtype in vsa_tensor.supported_dtypes
 

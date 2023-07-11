@@ -41,11 +41,10 @@ class Testidentity:
     @pytest.mark.parametrize("d", [84, 16])
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_shape(self, n, d, vsa):
-
         if vsa == "VTB" and d == 84:
             with pytest.raises(ValueError):
                 hv = functional.identity(n, d, vsa)
-            
+
             return
 
         hv = functional.identity(n, d, vsa)
@@ -79,7 +78,7 @@ class Testidentity:
 
         elif vsa == "VTB":
             hv = functional.identity(8, 25, vsa, dtype=dtype)
-            
+
         else:
             hv = functional.identity(8, 25, vsa, dtype=dtype)
             assert torch.all(hv == 1.0).item()

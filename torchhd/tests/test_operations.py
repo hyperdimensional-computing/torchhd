@@ -77,10 +77,12 @@ class TestBundle:
 
         if vsa == "BSC":
             x = torch.tensor(
-                [False, False, True, False, False, True, True, True, False, False], dtype=dtype
+                [False, False, True, False, False, True, True, True, False, False],
+                dtype=dtype,
             )
             y = torch.tensor(
-                [True, False, True, False, False, True, False, False, True, False], dtype=dtype
+                [True, False, True, False, False, True, False, False, True, False],
+                dtype=dtype,
             )
 
             res = functional.bundle(x, y)

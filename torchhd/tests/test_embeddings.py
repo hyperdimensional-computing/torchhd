@@ -351,7 +351,7 @@ class TestThermometer:
         if vsa not in {"BSC", "MAP", "FHRR"}:
             with pytest.raises(ValueError):
                 emb = embeddings.Thermometer(embedding, dimensions, vsa=vsa)
-            
+
             return
 
         emb = embeddings.Thermometer(embedding, dimensions, vsa=vsa)
@@ -361,7 +361,7 @@ class TestThermometer:
     def test_num_embeddings(self, vsa):
         if vsa not in {"BSC", "MAP", "FHRR"}:
             return
-        
+
         dimensions = 1024
         embedding = 10
         emb = embeddings.Thermometer(embedding, dimensions, vsa=vsa)
@@ -371,7 +371,7 @@ class TestThermometer:
     def test_dtype(self, vsa):
         if vsa not in {"BSC", "MAP", "FHRR"}:
             return
-        
+
         dimensions = 6
         embedding = 4
         emb = embeddings.Thermometer(embedding, dimensions, vsa=vsa)
@@ -392,7 +392,7 @@ class TestThermometer:
     def test_value(self, vsa):
         if vsa not in {"BSC", "MAP", "FHRR"}:
             return
-        
+
         dimensions = 99856
         embedding = 4
         emb = embeddings.Thermometer(embedding, dimensions, vsa=vsa)
@@ -514,9 +514,9 @@ class TestDensity:
         if vsa not in {"BSC", "MAP", "FHRR"}:
             with pytest.raises(ValueError):
                 emb = embeddings.Density(embedding, dimensions, vsa=vsa)
-            
+
             return
-        
+
         emb = embeddings.Density(embedding, dimensions, vsa=vsa)
         assert emb.density_encoding.embedding_dim == dimensions
 
@@ -524,7 +524,7 @@ class TestDensity:
     def test_num_embedings(self, vsa):
         if vsa not in {"BSC", "MAP", "FHRR"}:
             return
-        
+
         dimensions = 1024
         embedding = 16
         emb = embeddings.Density(embedding, dimensions, vsa=vsa)
@@ -534,7 +534,7 @@ class TestDensity:
     def test_dtype(self, vsa):
         if vsa not in {"BSC", "MAP", "FHRR"}:
             return
-        
+
         dimensions = 1024
         embedding = 16
         emb = embeddings.Density(embedding, dimensions, vsa=vsa)
@@ -553,7 +553,7 @@ class TestDensity:
     def test_value(self, vsa):
         if vsa not in {"BSC", "MAP", "FHRR"}:
             return
-        
+
         dimensions = 1024
         embedding = 16
 
