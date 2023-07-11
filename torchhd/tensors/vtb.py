@@ -51,7 +51,7 @@ class VTBTensor(VSATensor):
         """Creates a set of hypervectors representing empty sets.
 
         When bundled with a random-hypervector :math:`x`, the result is :math:`x`.
-        The empty vector of the HRR model is simply a set of 0 values.
+        The empty vector of the VTB model is simply a set of 0 values.
 
         Args:
             num_vectors (int): the number of hypervectors to generate.
@@ -62,14 +62,14 @@ class VTBTensor(VSATensor):
 
         Examples::
 
-            >>> torchhd.VTBTensor.empty(3, 6)
-            HRR([[0., 0., 0., 0., 0., 0.],
-                [0., 0., 0., 0., 0., 0.],
-                [0., 0., 0., 0., 0., 0.]])
-            >>> torchhd.VTBTensor.empty(3, 6, dtype=torch.float64)
-            HRR([[0., 0., 0., 0., 0., 0.],
-                [0., 0., 0., 0., 0., 0.],
-                [0., 0., 0., 0., 0., 0.]], dtype=torch.float64)
+            >>> torchhd.VTBTensor.empty(3, 9)
+            VTBTensor([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                    [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                    [0., 0., 0., 0., 0., 0., 0., 0., 0.]])
+            >>> torchhd.VTBTensor.empty(3, 9, dtype=torch.float64)
+                VTBTensor([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                        [0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                        [0., 0., 0., 0., 0., 0., 0., 0., 0.]], dtype=torch.float64)
 
         """
 
@@ -119,14 +119,15 @@ class VTBTensor(VSATensor):
 
         Examples::
 
-            >>> torchhd.VTBTensor.identity(3, 6)
-            HRR([[1., 0., 0., 0., 0., 0.],
-                 [1., 0., 0., 0., 0., 0.],
-                 [1., 0., 0., 0., 0., 0.]])
-            >>> torchhd.VTBTensor.identity(3, 6, dtype=torch.float64)
-            HRR([[1., 0., 0., 0., 0., 0.],
-                 [1., 0., 0., 0., 0., 0.],
-                 [1., 0., 0., 0., 0., 0.]], dtype=torch.float64)
+            >>> torchhd.VTBTensor.identity(3, 9)
+                VTBTensor([[0.577, 0.000, 0.000, 0.000, 0.577, 0.000, 0.000, 0.000, 0.577],
+                        [0.577, 0.000, 0.000, 0.000, 0.577, 0.000, 0.000, 0.000, 0.577],
+                        [0.577, 0.000, 0.000, 0.000, 0.577, 0.000, 0.000, 0.000, 0.577]])
+            >>> torchhd.VTBTensor.identity(3, 9, dtype=torch.float64)
+                VTBTensor([[0.577, 0.000, 0.000, 0.000, 0.577, 0.000, 0.000, 0.000, 0.577],
+                        [0.577, 0.000, 0.000, 0.000, 0.577, 0.000, 0.000, 0.000, 0.577],
+                        [0.577, 0.000, 0.000, 0.000, 0.577, 0.000, 0.000, 0.000, 0.577]],
+                        dtype=torch.float64)
 
         """
 
@@ -182,14 +183,14 @@ class VTBTensor(VSATensor):
 
         Examples::
 
-            >>> torchhd.VTBTensor.random(3, 6)
-            HRR([[ 0.2520, -0.0048, -0.0351,  0.2067,  0.0638, -0.0729],
-                 [-0.2695,  0.0815,  0.0103,  0.2211, -0.1202,  0.2134],
-                 [ 0.0086, -0.1748, -0.1715,  0.3215, -0.1353,  0.0044]])
-            >>> torchhd.VTBTensor.random(3, 6, dtype=torch.float64)
-            HRR([[-0.1327, -0.0396, -0.0065,  0.0886, -0.4665,  0.2656],
-                 [-0.2879, -0.1070, -0.0851, -0.4366, -0.1311,  0.3976],
-                 [-0.0472,  0.2987, -0.1567,  0.1496, -0.0098,  0.0344]], dtype=torch.float64)
+            >>> torchhd.VTBTensor.random(3, 9)
+                VTBTensor([[-0.420, -0.069,  0.014, -0.226,  0.399,  0.066, -0.606, -0.184, 0.451],
+                        [-0.074,  0.270, -0.044,  0.691,  0.456, -0.144, -0.252, -0.170, -0.349],
+                        [ 0.197,  0.347,  0.596, -0.323, -0.397, -0.173, -0.317,  0.217, -0.215]])
+            >>> torchhd.VTBTensor.random(3, 9, dtype=torch.float64)
+                VTBTensor([[ 0.308,  0.055, -0.471, -0.587,  0.054,  0.371, -0.038,  0.432, 0.080],
+                        [-0.267, -0.510, -0.301,  0.435,  0.244,  0.122, -0.094,  0.552, 0.033],
+                        [-0.571,  0.540,  0.135, -0.112, -0.048, -0.516, -0.019, -0.226, 0.177]], dtype=torch.float64)
         """
 
         has_int_sqrt = math.isclose(math.sqrt(dimensions) % 1.0, 0.0, abs_tol=1e-9)
@@ -222,7 +223,7 @@ class VTBTensor(VSATensor):
         The bundling operation is used to aggregate information into a single hypervector.
 
         Args:
-            other (HRR): other input hypervector
+            other (VTB): other input hypervector
 
         Shapes:
             - Self: :math:`(*)`
@@ -231,21 +232,21 @@ class VTBTensor(VSATensor):
 
         Examples::
 
-            >>> a, b = torchhd.VTBTensor.random(2, 6)
+            >>> a, b = torchhd.VTBTensor.random(2, 9)
             >>> a
-            HRR([ 0.1916, -0.1451, -0.0678,  0.0829,  0.3816, -0.0906])
+            VTBTensor([ 0.276,  0.206, -0.383,  0.553,  0.050,  0.334,  0.336, -0.067, 0.445])
             >>> b
-            HRR([-0.2825,  0.3788,  0.0885, -0.1269, -0.0481, -0.3029])
+            VTBTensor([-0.315,  0.626, -0.460, -0.345,  0.194,  0.121, -0.234, -0.207, -0.170])
             >>> a.bundle(b)
-            HRR([-0.0909,  0.2336,  0.0207, -0.0440,  0.3336, -0.3935])
+            VTBTensor([-0.039,  0.832, -0.842,  0.209,  0.244,  0.455,  0.101, -0.274, 0.275])
 
-            >>> a, b = torchhd.VTBTensor.random(2, 6, dtype=torch.float64)
+            >>> a, b = torchhd.VTBTensor.random(2, 9, dtype=torch.float64)
             >>> a
-            HRR([ 0.3879, -0.0452, -0.0082, -0.2262, -0.2764,  0.0166], dtype=torch.float64)
+            VTBTensor([-0.063,  0.154, -0.061, -0.229, -0.880,  0.365,  0.009, -0.057, -0.076], dtype=torch.float64)
             >>> b
-            HRR([ 0.0738, -0.0306,  0.4948,  0.1209,  0.1482,  0.1268], dtype=torch.float64)
+            VTBTensor([-0.259, -0.158, -0.167, -0.599,  0.171,  0.033, -0.406,  0.361, -0.443], dtype=torch.float64)
             >>> a.bundle(b)
-            HRR([ 0.4618, -0.0758,  0.4866, -0.1053, -0.1281,  0.1434], dtype=torch.float64)
+            VTBTensor([-0.321, -0.003, -0.228, -0.827, -0.709,  0.398, -0.397,  0.304, -0.519], dtype=torch.float64)
 
         """
         return torch.add(self, other)
@@ -255,14 +256,14 @@ class VTBTensor(VSATensor):
         return torch.sum(self, dim=-2, dtype=self.dtype)
 
     def bind(self, other: "VTBTensor") -> "VTBTensor":
-        r"""Bind the hypervector with other using circular convolution.
+        r"""Bind the hypervector with other using the proposed binding method.
 
         This produces a hypervector dissimilar to both.
 
         Binding is used to associate information, for instance, to assign values to variables.
 
         Args:
-            other (HRR): other input hypervector
+            other (VTB): other input hypervector
 
         Shapes:
             - Self: :math:`(*)`
@@ -271,21 +272,21 @@ class VTBTensor(VSATensor):
 
         Examples::
 
-            >>> a, b = torchhd.VTBTensor.random(2, 6)
+            >>> a, b = torchhd.VTBTensor.random(2, 9)
             >>> a
-            HRR([ 0.0101, -0.2474, -0.0097, -0.0788,  0.1541, -0.1766])
+            VTBTensor([-0.173, -0.731,  0.026,  0.110,  0.326,  0.147,  0.105,  0.407, -0.343])
             >>> b
-            HRR([-0.0338,  0.0340,  0.0289, -0.1498,  0.1178, -0.2822])
+            VTBTensor([ 0.170,  0.049, -0.141,  0.873,  0.186,  0.262, -0.108,  0.171, 0.208])
             >>> a.bind(b)
-            HRR([ 0.0786, -0.0260,  0.0591, -0.0706,  0.0799, -0.0216])
+            VTBTensor([-0.119, -0.485, -0.175,  0.024,  0.338,  0.129,  0.149,  0.133, -0.023])
 
-            >>> a, b = torchhd.VTBTensor.random(2, 6, dtype=torch.float64)
+            >>> a, b = torchhd.VTBTensor.random(2, 9, dtype=torch.float64)
             >>> a
-            HRR([ 0.0354, -0.0818,  0.0216,  0.0384,  0.2961,  0.1976], dtype=torch.float64)
+            VTBTensor([-0.168,  0.244, -0.418,  0.236,  0.382, -0.369, -0.006, -0.621, 0.123], dtype=torch.float64)
             >>> b
-            HRR([ 0.3640, -0.0640, -0.1033, -0.1454,  0.0999,  0.0299], dtype=torch.float64)
+            VTBTensor([-0.284,  0.464,  0.021, -0.459, -0.414, -0.346,  0.241, -0.083, 0.372], dtype=torch.float64)
             >>> a.bind(b)
-            HRR([-0.0362, -0.0910,  0.0114,  0.0445,  0.1244,  0.0388], dtype=torch.float64)
+            VTBTensor([ 0.263,  0.209, -0.374,  0.177, -0.240, -0.194, -0.491,  0.376, 0.166], dtype=torch.float64)
 
         """
         sqrt_d = int(math.sqrt(self.size(-1)))
@@ -307,9 +308,9 @@ class VTBTensor(VSATensor):
         return output
 
     def inverse(self) -> "VTBTensor":
-        r"""Stable inversion of the hypervector for binding.
+        r"""Inversion of the hypervector for binding.
 
-        For HRR the stable inverse of hypervector is its conjugate in the frequency domain, this returns the conjugate of the hypervector.
+        For VTB the inverse is an approximate opperation.
 
         Shapes:
             - Self: :math:`(*)`
@@ -317,17 +318,18 @@ class VTBTensor(VSATensor):
 
         Examples::
 
-            >>> a = torchhd.VTBTensor.random(1, 6)
-            >>> a
-            HRR([[ 0.1406,  0.0014, -0.0502,  0.2888,  0.2969, -0.2637]])
-            >>> a.inverse()
-            HRR([[ 0.1406, -0.2637,  0.2969,  0.2888, -0.0502,  0.0014]])
+            >>> a = torchhd.VTBTensor.random(1, 9)
 
-            >>> a = torchhd.VTBTensor.random(1, 6, dtype=torch.float64)
             >>> a
-            HRR([[ 0.0090,  0.2620,  0.0836,  0.0441, -0.2351, -0.1744]], dtype=torch.float64)
+            VTBTensor([[-0.117,  0.322, -0.747, -0.196, -0.059,  0.103, -0.099,  0.389, -0.332]])
             >>> a.inverse()
-            HRR([[ 0.0090, -0.1744, -0.2351,  0.0441,  0.0836,  0.2620]], dtype=torch.float64)
+            VTBTensor([[-0.117, -0.196, -0.099,  0.322, -0.059,  0.389, -0.747,  0.103, -0.332]])
+
+            >>> a = torchhd.VTBTensor.random(1, 9, dtype=torch.float64)
+            >>> a
+            VTBTensor([[-0.307, -0.019, -0.105,  0.174, -0.316,  0.366, -0.675, -0.147, 0.391]], dtype=torch.float64)
+            >>> a.inverse()
+            VTBTensor([[-0.307,  0.174, -0.675, -0.019, -0.316, -0.147, -0.105,  0.366, 0.391]], dtype=torch.float64)
 
         """
         sqrt_d = int(math.sqrt(self.size(-1)))
@@ -345,17 +347,17 @@ class VTBTensor(VSATensor):
 
         Examples::
 
-            >>> a = torchhd.VTBTensor.random(1, 6)
+            >>> a = torchhd.VTBTensor.random(1, 9)
             >>> a
-            HRR([[ 0.2658, -0.2808,  0.1436,  0.1131,  0.1567, -0.1426]])
+            VTBTensor([[ 0.1692, -0.0420,  0.1477,  0.4790, -0.3863, -0.2593,  0.3213, -0.1168, -0.6205]])
             >>> a.negative()
-            HRR([[-0.2658,  0.2808, -0.1436, -0.1131, -0.1567,  0.1426]])
+            VTBTensor([[-0.1692,  0.0420, -0.1477, -0.4790,  0.3863,  0.2593, -0.3213, 0.1168,  0.6205]])
 
-            >>> a = torchhd.VTBTensor.random(1, 6, dtype=torch.float64)
+            >>> a = torchhd.VTBTensor.random(1, 9, dtype=torch.float64)
             >>> a
-            HRR([[ 0.0318,  0.1944,  0.1229,  0.0193,  0.0135, -0.2521]], dtype=torch.float64)
+            VTBTensor([[ 0.2905,  0.2212,  0.2049,  0.1753, -0.5277, -0.6216, -0.2118, -0.2753, -0.0915]], dtype=torch.float64)
             >>> a.negative()
-            HRR([[-0.0318, -0.1944, -0.1229, -0.0193, -0.0135,  0.2521]], dtype=torch.float64)
+            VTBTensor([[-0.2905, -0.2212, -0.2049, -0.1753,  0.5277,  0.6216,  0.2118, 0.2753,  0.0915]], dtype=torch.float64)
 
         """
         return torch.negative(self)
@@ -374,17 +376,17 @@ class VTBTensor(VSATensor):
 
         Examples::
 
-            >>> a = torchhd.VTBTensor.random(1, 6)
+            >>> a = torchhd.VTBTensor.random(1, 9)
             >>> a
-            HRR([[-0.2521,  0.1140, -0.1647, -0.1490, -0.2091, -0.0618]])
+            VTBTensor([[ 0.1913, -0.5592,  0.3474, -0.1385,  0.5625,  0.0223, -0.1456, 0.2509, -0.3313]])
             >>> a.permute()
-            HRR([[-0.0618, -0.2521,  0.1140, -0.1647, -0.1490, -0.2091]])
+            VTBTensor([[-0.3313,  0.1913, -0.5592,  0.3474, -0.1385,  0.5625,  0.0223, -0.1456,  0.2509]])
 
-            >>> a = torchhd.VTBTensor.random(1, 6, dtype=torch.float64)
+            >>> a = torchhd.VTBTensor.random(1, 9, dtype=torch.float64)
             >>> a
-            HRR([[-0.0495, -0.0318,  0.3923, -0.3205,  0.1587,  0.1926]], dtype=torch.float64)
+            VTBTensor([[ 0.6705,  0.1316,  0.2595,  0.1193, -0.4884, -0.4052,  0.0730, -0.2022,  0.0513]], dtype=torch.float64)
             >>> a.permute()
-            HRR([[ 0.1926, -0.0495, -0.0318,  0.3923, -0.3205,  0.1587]], dtype=torch.float64)
+            VTBTensor([[ 0.0513,  0.6705,  0.1316,  0.2595,  0.1193, -0.4884, -0.4052, 0.0730, -0.2022]], dtype=torch.float64)
 
         """
         return torch.roll(self, shifts=shifts, dims=-1)
