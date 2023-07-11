@@ -66,7 +66,8 @@ class SBCTensor(VSATensor):
             num_vectors (int): the number of hypervectors to generate.
             dimensions (int): the dimensionality of the hypervectors.
             block_size (int): the number of elements per block which controls the angular granularity.
-            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``int64`` depends on VSATensor.
+            generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
+            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: ``int64``.
             device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
             requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
@@ -177,7 +178,7 @@ class SBCTensor(VSATensor):
             dimensions (int): the dimensionality of the hypervectors.
             block_size (int): the number of elements per block which controls the angular granularity.
             generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
-            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``int64`` depends on VSATensor.
+            dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: ``int64``.
             device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
             requires_grad (bool, optional): If autograd should record operations on the returned tensor. Default: ``False``.
 
@@ -237,7 +238,7 @@ class SBCTensor(VSATensor):
 
         Examples::
 
-            >>> a, b = torchhd.SBCTensor.random(2, 10)
+            >>> a, b = torchhd.SBCTensor.random(2, 10, block_size=64)
             >>> a
             SBCTensor([32, 26, 22, 22, 34, 30,  2,  2, 40, 43])
             >>> b
@@ -294,15 +295,13 @@ class SBCTensor(VSATensor):
     def inverse(self) -> "SBCTensor":
         r"""Invert the hypervector for binding.
 
-        Each hypervector in MAP is its own inverse, so this returns a copy of self.
-
         Shapes:
             - Self: :math:`(*)`
             - Output: :math:`(*)`
 
         Examples::
 
-            >>> a = torchhd.SBCTensor.random(1, 10)
+            >>> a = torchhd.SBCTensor.random(1, 10, block_size=64)
             >>> a
             SBCTensor([[ 5, 30, 15, 43, 19, 36,  4, 14, 57, 34]])
             >>> a.inverse()
@@ -326,7 +325,7 @@ class SBCTensor(VSATensor):
 
         Examples::
 
-            >>> a = torchhd.SBCTensor.random(1, 10)
+            >>> a = torchhd.SBCTensor.random(1, 10, block_size=64)
             >>> a
             SBCTensor([[33, 24,  1, 36,  2, 57, 11, 59, 33,  3]])
             >>> a.permute(4)
@@ -352,7 +351,7 @@ class SBCTensor(VSATensor):
 
     @classmethod
     def __torch_function__(cls, func, types, args=(), kwargs=None):
-        """Ensure that all the build-in torch operations on this Tensor subclass maintain the block_size property"""
+        # Ensure that all the build-in torch operations on this Tensor subclass maintain the block_size property
 
         if kwargs is None:
             kwargs = {}
