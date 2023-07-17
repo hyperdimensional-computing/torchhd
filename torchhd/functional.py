@@ -32,6 +32,7 @@ from torchhd.tensors.bsc import BSCTensor
 from torchhd.tensors.map import MAPTensor
 from torchhd.tensors.hrr import HRRTensor
 from torchhd.tensors.fhrr import FHRRTensor
+from torchhd.tensors.vtb import VTBTensor
 from torchhd.types import VSAOptions
 
 
@@ -82,6 +83,8 @@ def get_vsa_tensor_class(vsa: VSAOptions) -> Type[VSATensor]:
         return HRRTensor
     elif vsa == "FHRR":
         return FHRRTensor
+    elif vsa == "VTB":
+        return VTBTensor
 
     raise ValueError(f"Provided VSA model is not supported, specified: {vsa}")
 
@@ -540,9 +543,9 @@ def circular(
     """
     vsa_tensor = get_vsa_tensor_class(vsa)
 
-    if vsa_tensor == HRRTensor:
+    if vsa == "HRR" or vsa == "VTB":
         raise ValueError(
-            "The circular hypervectors don't currently work with the HRR model. We are not sure why, if you have any insight that could help please share it at: https://github.com/hyperdimensional-computing/torchhd/issues/108."
+            "The circular hypervectors do currently not work with the HRR and VTB models. We are not sure why, if you have any insight that could help please share it at: https://github.com/hyperdimensional-computing/torchhd/issues/108."
         )
 
     # convert from normalized "randomness" variable r to

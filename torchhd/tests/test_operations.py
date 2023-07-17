@@ -40,11 +40,11 @@ class TestBind:
         if not supported_dtype(dtype, vsa):
             return
 
-        hv = functional.empty(2, 10, vsa, dtype=dtype)
+        hv = functional.empty(2, 16, vsa, dtype=dtype)
         res = functional.bind(hv[0], hv[1])
         if vsa == "BSC":
             assert torch.all(res == torch.logical_xor(hv[0], hv[1])).item()
-        elif vsa == "FHRR" or vsa == "MAP":
+        elif vsa == "FHRR" or vsa == "MAP" or vsa == "VTB":
             assert torch.all(res == torch.mul(hv[0], hv[1])).item()
         elif vsa == "HRR":
             from torch.fft import fft, ifft
@@ -72,42 +72,46 @@ class TestBundle:
         if not supported_dtype(dtype, vsa):
             return
 
-        hv = functional.random(2, 10, vsa, dtype=dtype)
+        hv = functional.random(2, 16, vsa, dtype=dtype)
         res = functional.bundle(hv[0], hv[1])
 
         if vsa == "BSC":
-            hv[0] = torch.tensor(
-                [False, False, True, False, False, True, True, True, False, False]
+            x = torch.tensor(
+                [False, False, True, False, False, True, True, True, False, False],
+                dtype=dtype,
             )
-            hv[1] = torch.tensor(
-                [True, False, True, False, False, True, False, False, True, False]
+            y = torch.tensor(
+                [True, False, True, False, False, True, False, False, True, False],
+                dtype=dtype,
             )
 
-            res = functional.bundle(hv[0], hv[1])
+            res = functional.bundle(x, y)
             for i in range(10):
                 assert (
                     (
-                        hv[0][i].item() == hv[1][i].item()
-                        and hv[1][i].item() == True
+                        x[i].item() == y[i].item()
+                        and y[i].item() == True
                         and res[i].item()
                     )
                     or (
-                        hv[0][i].item() == hv[1][i].item()
-                        and hv[1][i].item() == False
+                        x[i].item() == y[i].item()
+                        and y[i].item() == False
                         and not res[i].item()
                     )
-                    or (hv[0][i].item() != hv[1][i].item())
+                    or (x[i].item() != y[i].item())
                 )
 
         if vsa == "MAP":
-            hv[0] = torch.tensor([1, 1, -1, -1, 1, 1, 1, 1, -1, -1])
-            hv[1] = torch.tensor([1, 1, -1, -1, -1, -1, -1, -1, 1, -1])
+            x = torch.tensor([1, 1, -1, -1, 1, 1, 1, 1, -1, -1], dtype=dtype)
+            y = torch.tensor([1, 1, -1, -1, -1, -1, -1, -1, 1, -1], dtype=dtype)
 
-            res = functional.bundle(hv[0], hv[1])
+            res = functional.bundle(x, y)
             assert torch.all(
                 res == torch.tensor([2, 2, -2, -2, 0, 0, 0, 0, 0, -2], dtype=dtype)
             ).item()
         if vsa == "FHRR":
+            assert torch.all(res == hv[0].add(hv[1])).item()
+        if vsa == "VTB":
             assert torch.all(res == hv[0].add(hv[1])).item()
         assert res.dtype == dtype
 
@@ -241,15 +245,15 @@ class TestRandsel:
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        a, b = functional.random(2, 1000, vsa, dtype=dtype, generator=generator)
+        a, b = functional.random(2, 1024, vsa, dtype=dtype, generator=generator)
         res = functional.randsel(a, b, p=0, generator=generator)
         assert torch.all(a == res)
 
-        a, b = functional.random(2, 1000, vsa, dtype=dtype, generator=generator)
+        a, b = functional.random(2, 1024, vsa, dtype=dtype, generator=generator)
         res = functional.randsel(a, b, p=1, generator=generator)
         assert torch.all(b == res)
 
-        a, b = functional.random(2, 1000, vsa, dtype=dtype, generator=generator)
+        a, b = functional.random(2, 1024, vsa, dtype=dtype, generator=generator)
         res = functional.randsel(a, b, generator=generator)
         assert torch.all((b == res) | (a == res))
         assert res.dtype == dtype
@@ -279,20 +283,20 @@ class TestMultiRandsel:
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        x = functional.random(4, 1000, vsa, dtype=dtype)
+        x = functional.random(4, 1024, vsa, dtype=dtype)
 
         res = functional.multirandsel(
             x, p=torch.tensor([0.0, 0.0, 1.0, 0.0]), generator=generator
         )
         assert torch.all(x[2] == res)
 
-        x = functional.random(4, 1000, vsa, dtype=dtype)
+        x = functional.random(4, 1024, vsa, dtype=dtype)
         res = functional.multirandsel(
             x, p=torch.tensor([0.5, 0.0, 0.5, 0.0]), generator=generator
         )
         assert torch.all((x[0] == res) | (x[2] == res))
 
-        x = functional.random(4, 1000, vsa, dtype=dtype)
+        x = functional.random(4, 1024, vsa, dtype=dtype)
         res = functional.multirandsel(x, generator=generator)
         assert torch.all((x[0] == res) | (x[1] == res) | (x[2] == res) | (x[3] == res))
         assert res.dtype == dtype
