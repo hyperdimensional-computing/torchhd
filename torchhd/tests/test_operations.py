@@ -100,7 +100,7 @@ class TestBundle:
 
         if vsa == "FHRR":
             assert torch.all(res == hv[0].add(hv[1])).item()
-            
+
         if vsa == "VTB":
             assert torch.all(res == hv[0].add(hv[1])).item()
 

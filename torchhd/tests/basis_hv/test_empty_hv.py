@@ -71,7 +71,7 @@ class Testempty:
             hv = functional.empty(8, 25, vsa, dtype=dtype, block_size=1024)
         else:
             hv = functional.empty(8, 25, vsa, dtype=dtype)
-            
+
         assert hv.requires_grad == False
         assert hv.dim() == 2
         assert hv.size(0) == 8

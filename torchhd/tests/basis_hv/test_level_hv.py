@@ -39,13 +39,13 @@ class Testlevel:
     def test_shape(self, n, d, vsa):
         if vsa == "SBC":
             hv = functional.level(n, d, vsa, block_size=1024)
-     
+
         elif vsa == "VTB" and d == 84:
             with pytest.raises(ValueError):
                 hv = functional.level(n, d, vsa)
 
             return
-        
+
         else:
             hv = functional.level(n, d, vsa)
 

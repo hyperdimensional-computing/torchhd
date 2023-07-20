@@ -48,7 +48,7 @@ class Testidentity:
                 hv = functional.identity(n, d, vsa)
 
             return
-        
+
         else:
             hv = functional.identity(n, d, vsa)
 
@@ -72,7 +72,7 @@ class Testidentity:
             hv = functional.identity(8, 25, vsa, dtype=dtype, block_size=1042)
         else:
             hv = functional.identity(8, 25, vsa, dtype=dtype)
-            
+
         assert hv.requires_grad == False
         assert hv.dim() == 2
         assert hv.size(0) == 8
@@ -88,7 +88,7 @@ class Testidentity:
 
         elif vsa == "SBC":
             assert torch.all(hv == 0)
-            
+
         elif vsa == "VTB":
             hv = functional.identity(8, 25, vsa, dtype=dtype)
 

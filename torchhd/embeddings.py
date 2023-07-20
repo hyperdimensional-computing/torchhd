@@ -990,7 +990,13 @@ class Density(nn.Module):
         self.key = Random(in_features, out_features, vsa, **factory_kwargs, **kwargs)
         # Thermometer encoding used for transforming input data.
         self.density_encoding = Thermometer(
-            out_features + 1, out_features, vsa, low=low, high=high, **factory_kwargs, **kwargs
+            out_features + 1,
+            out_features,
+            vsa,
+            low=low,
+            high=high,
+            **factory_kwargs,
+            **kwargs,
         )
 
     def reset_parameters(self) -> None:

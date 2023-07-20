@@ -43,7 +43,7 @@ class Testrandom:
     def test_shape(self, n, d, vsa):
         if vsa == "SBC":
             hv = functional.random(n, d, vsa, block_size=64)
-        
+
         elif vsa == "VTB" and d == 84:
             with pytest.raises(ValueError):
                 hv = functional.random(n, d, vsa)

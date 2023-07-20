@@ -574,10 +574,11 @@ class TestDensity:
         embedding = 16
 
         if vsa not in {"BSC", "MAP", "FHRR"}:
-
             if vsa == "SBC":
                 with pytest.raises(ValueError):
-                    emb = embeddings.Density(embedding, dimensions, vsa=vsa, block_size=1024)
+                    emb = embeddings.Density(
+                        embedding, dimensions, vsa=vsa, block_size=1024
+                    )
             else:
                 with pytest.raises(ValueError):
                     emb = embeddings.Density(embedding, dimensions, vsa=vsa)
