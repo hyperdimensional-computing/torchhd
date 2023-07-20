@@ -41,13 +41,16 @@ class Testidentity:
     @pytest.mark.parametrize("d", [84, 16])
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_shape(self, n, d, vsa):
-        if vsa == "VTB" and d == 84:
+        if vsa == "BSBC":
+            hv = functional.identity(n, d, vsa, block_size=1042)
+        elif vsa == "VTB" and d == 84:
             with pytest.raises(ValueError):
                 hv = functional.identity(n, d, vsa)
 
             return
 
-        hv = functional.identity(n, d, vsa)
+        else:
+            hv = functional.identity(n, d, vsa)
 
         assert hv.dim() == 2
         assert hv.size(0) == n
@@ -58,11 +61,18 @@ class Testidentity:
     def test_value(self, dtype, vsa):
         if not supported_dtype(dtype, vsa):
             with pytest.raises(ValueError):
-                functional.identity(3, 25, vsa, dtype=dtype)
+                if vsa == "BSBC":
+                    functional.identity(3, 26, vsa, dtype=dtype, block_size=1042)
+                else:
+                    functional.identity(3, 25, vsa, dtype=dtype)
 
             return
 
-        hv = functional.identity(8, 25, vsa, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.identity(8, 25, vsa, dtype=dtype, block_size=1042)
+        else:
+            hv = functional.identity(8, 25, vsa, dtype=dtype)
+
         assert hv.requires_grad == False
         assert hv.dim() == 2
         assert hv.size(0) == 8
@@ -75,6 +85,9 @@ class Testidentity:
             hv = functional.identity(8, 25, vsa, dtype=dtype)
             x = torch.fft.fft(hv)
             assert torch.allclose(x, torch.full_like(x, 1.0))
+
+        elif vsa == "BSBC":
+            assert torch.all(hv == 0)
 
         elif vsa == "VTB":
             hv = functional.identity(8, 25, vsa, dtype=dtype)
@@ -90,7 +103,12 @@ class Testidentity:
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        hv = functional.identity(3, 49, vsa, device=device, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.identity(
+                3, 52, vsa, device=device, dtype=dtype, block_size=1042
+            )
+        else:
+            hv = functional.identity(3, 49, vsa, device=device, dtype=dtype)
         assert hv.device.type == device.type
 
     def test_uses_default_dtype(self):
@@ -115,6 +133,9 @@ class Testidentity:
 
         hv = functional.identity(3, 49, "FHRR")
         assert hv.dtype == torch.complex64
+
+        hv = functional.identity(3, 52, "BSBC", block_size=1024)
+        assert hv.dtype == torch.int64
 
     def test_requires_grad(self):
         hv = functional.identity(3, 49, "MAP", requires_grad=True)

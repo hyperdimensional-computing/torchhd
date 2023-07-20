@@ -85,6 +85,7 @@ VSA Models
     MAPTensor
     HRRTensor
     FHRRTensor
+    BSBCTensor
     VTBTensor
 
 

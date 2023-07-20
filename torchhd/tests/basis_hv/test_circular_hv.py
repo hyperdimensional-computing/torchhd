@@ -41,7 +41,10 @@ class Testcircular:
         if vsa == "HRR" or vsa == "VTB":
             return
 
-        hv = functional.circular(n, d, vsa)
+        if vsa == "BSBC":
+            hv = functional.circular(n, d, vsa, block_size=1024)
+        else:
+            hv = functional.circular(n, d, vsa)
 
         assert hv.dim() == 2
         assert hv.size(0) == n
@@ -54,12 +57,21 @@ class Testcircular:
 
         generator = torch.Generator()
         generator.manual_seed(seed)
-        hv1 = functional.circular(20, 10000, vsa, generator=generator)
+        if vsa == "BSBC":
+            hv1 = functional.circular(
+                20, 10000, vsa, generator=generator, block_size=1024
+            )
+        else:
+            hv1 = functional.circular(20, 10000, vsa, generator=generator)
 
         generator = torch.Generator()
         generator.manual_seed(seed)
-
-        hv2 = functional.circular(20, 10000, vsa, generator=generator)
+        if vsa == "BSBC":
+            hv2 = functional.circular(
+                20, 10000, vsa, generator=generator, block_size=1024
+            )
+        else:
+            hv2 = functional.circular(20, 10000, vsa, generator=generator)
         assert torch.all(hv1 == hv2).item()
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
@@ -67,7 +79,10 @@ class Testcircular:
     def test_value(self, dtype, vsa):
         if not supported_dtype(dtype, vsa):
             with pytest.raises(ValueError):
-                functional.circular(3, 26, vsa, dtype=dtype)
+                if vsa == "BSBC":
+                    functional.circular(3, 26, vsa, dtype=dtype, block_size=1024)
+                else:
+                    functional.circular(3, 26, vsa, dtype=dtype)
 
             return
 
@@ -80,7 +95,12 @@ class Testcircular:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.circular(50, 26569, vsa, dtype=dtype, generator=generator)
+        if vsa == "BSBC":
+            hv = functional.circular(
+                50, 26569, vsa, dtype=dtype, generator=generator, block_size=1024
+            )
+        else:
+            hv = functional.circular(50, 26569, vsa, dtype=dtype, generator=generator)
         assert hv.requires_grad == False
         assert hv.dim() == 2
         assert hv.size(0) == 50
@@ -96,7 +116,15 @@ class Testcircular:
             mag = hv.abs()
             assert torch.allclose(mag, torch.tensor(1.0, dtype=mag.dtype))
 
-        hv = functional.circular(8, 1000000, vsa, generator=generator, dtype=dtype)
+        elif vsa == "BSBC":
+            assert torch.all((hv >= 0) | (hv < 1024)).item()
+
+        if vsa == "BSBC":
+            hv = functional.circular(
+                8, 1000000, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv = functional.circular(8, 1000000, vsa, generator=generator, dtype=dtype)
         sims = functional.cosine_similarity(hv[0], hv)
         sims_diff = sims[:-1] - sims[1:]
         assert torch.all(
@@ -147,7 +175,12 @@ class Testcircular:
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        hv = functional.circular(3, 49, vsa, device=device, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.circular(
+                3, 52, vsa, device=device, dtype=dtype, block_size=1024
+            )
+        else:
+            hv = functional.circular(3, 49, vsa, device=device, dtype=dtype)
         assert hv.device.type == device.type
 
     def test_uses_default_dtype(self):
@@ -164,6 +197,9 @@ class Testcircular:
 
         hv = functional.circular(3, 52, "FHRR")
         assert hv.dtype == torch.complex64
+
+        hv = functional.circular(3, 52, "BSBC", block_size=1024)
+        assert hv.dtype == torch.int64
 
     def test_requires_grad(self):
         hv = functional.circular(3, 52, "MAP", requires_grad=True)

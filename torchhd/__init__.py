@@ -34,6 +34,7 @@ from torchhd.tensors.bsc import BSCTensor
 from torchhd.tensors.map import MAPTensor
 from torchhd.tensors.hrr import HRRTensor
 from torchhd.tensors.fhrr import FHRRTensor
+from torchhd.tensors.bsbc import BSBCTensor
 from torchhd.tensors.vtb import VTBTensor
 
 from torchhd.functional import (
@@ -85,6 +86,7 @@ __all__ = [
     "MAPTensor",
     "HRRTensor",
     "FHRRTensor",
+    "BSBCTensor",
     "VTBTensor",
     "functional",
     "embeddings",

@@ -41,13 +41,15 @@ class Testempty:
     @pytest.mark.parametrize("d", [84, 16])
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_shape(self, n, d, vsa):
-        if vsa == "VTB" and d == 84:
+        if vsa == "BSBC":
+            hv = functional.empty(n, d, vsa, block_size=1024)
+        elif vsa == "VTB" and d == 84:
             with pytest.raises(ValueError):
                 hv = functional.empty(n, d, vsa)
 
             return
-
-        hv = functional.empty(n, d, vsa)
+        else:
+            hv = functional.empty(n, d, vsa)
 
         assert hv.dim() == 2
         assert hv.size(0) == n
@@ -58,11 +60,18 @@ class Testempty:
     def test_value(self, dtype, vsa):
         if not supported_dtype(dtype, vsa):
             with pytest.raises(ValueError):
-                functional.empty(3, 25, vsa, dtype=dtype)
+                if vsa == "BSBC":
+                    functional.empty(3, 25, vsa, dtype=dtype, block_size=1024)
+                else:
+                    functional.empty(3, 25, vsa, dtype=dtype)
 
             return
 
-        hv = functional.empty(8, 25, vsa, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.empty(8, 25, vsa, dtype=dtype, block_size=1024)
+        else:
+            hv = functional.empty(8, 25, vsa, dtype=dtype)
+
         assert hv.requires_grad == False
         assert hv.dim() == 2
         assert hv.size(0) == 8
@@ -70,6 +79,9 @@ class Testempty:
 
         if vsa == "BSC":
             assert torch.all((hv == False) | (hv == True)).item()
+
+        elif vsa == "BSBC":
+            assert torch.all((hv >= 0) | (hv < 1024)).item()
 
         else:
             hv = functional.empty(8, 25, vsa, dtype=dtype)
@@ -82,7 +94,12 @@ class Testempty:
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        hv = functional.empty(3, 49, vsa, device=device, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.empty(
+                3, 52, vsa, device=device, dtype=dtype, block_size=1024
+            )
+        else:
+            hv = functional.empty(3, 49, vsa, device=device, dtype=dtype)
         assert hv.device.type == device.type
 
     def test_uses_default_dtype(self):
@@ -107,6 +124,9 @@ class Testempty:
 
         hv = functional.empty(3, 49, "FHRR")
         assert hv.dtype == torch.complex64
+
+        hv = functional.empty(3, 52, "BSBC", block_size=1024)
+        assert hv.dtype == torch.int64
 
     def test_requires_grad(self):
         hv = functional.empty(3, 49, "MAP", requires_grad=True)
