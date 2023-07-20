@@ -29,8 +29,8 @@ from typing import Set
 from torchhd.tensors.base import VSATensor
 
 
-class SBCTensor(VSATensor):
-    r"""Sparse Block Codes
+class BSBCTensor(VSATensor):
+    r"""Binary Sparse Block Codes (B-SBC)
 
     Proposed in `High-dimensional computing with sparse vectors <https://ieeexplore.ieee.org/document/7348414>`_, this model works with sparse vector segments.
 
@@ -49,14 +49,14 @@ class SBCTensor(VSATensor):
     def empty(
         cls,
         num_vectors: int,
-        dimensions: int,
+        num_blocks: int,
         *,
         block_size: int,
         generator=None,
         dtype=torch.int64,
         device=None,
         requires_grad=False,
-    ) -> "SBCTensor":
+    ) -> "BSBCTensor":
         r"""Creates a set of hypervectors representing empty sets.
 
         When bundled with a hypervector :math:`x`, the result is :math:`x`.
@@ -64,7 +64,7 @@ class SBCTensor(VSATensor):
 
         Args:
             num_vectors (int): the number of hypervectors to generate.
-            dimensions (int): the dimensionality of the hypervectors.
+            num_blocks (int): the number of sparse blocks of the hypervectors.
             block_size (int): the number of elements per block which controls the angular granularity.
             generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
             dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: ``int64``.
@@ -73,8 +73,8 @@ class SBCTensor(VSATensor):
 
         Examples::
 
-            >>> torchhd.SBCTensor.empty(3, 6, block_size=64)
-            SBCTensor([[54,  3, 22, 27, 41, 21],
+            >>> torchhd.BSBCTensor.empty(3, 6, block_size=64)
+            BSBCTensor([[54,  3, 22, 27, 41, 21],
                        [17, 31, 55,  3, 44, 52],
                        [42, 37, 60, 54, 13, 41]])
 
@@ -93,7 +93,7 @@ class SBCTensor(VSATensor):
         result = torch.randint(
             0,
             block_size,
-            (num_vectors, dimensions),
+            (num_vectors, num_blocks),
             generator=generator,
             dtype=dtype,
             device=device,
@@ -108,20 +108,20 @@ class SBCTensor(VSATensor):
     def identity(
         cls,
         num_vectors: int,
-        dimensions: int,
+        num_blocks: int,
         *,
         block_size: int,
         dtype=torch.int64,
         device=None,
         requires_grad=False,
-    ) -> "SBCTensor":
+    ) -> "BSBCTensor":
         r"""Creates a set of identity hypervectors.
 
         When bound with a random-hypervector :math:`x`, the result is :math:`x`.
 
         Args:
             num_vectors (int): the number of hypervectors to generate.
-            dimensions (int): the dimensionality of the hypervectors.
+            num_blocks (int): the number of sparse blocks of the hypervectors.
             block_size (int): the number of elements per block which controls the angular granularity.
             dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: if ``int64`` depends on VSATensor.
             device (``torch.device``, optional):  the desired device of returned tensor. Default: if ``None``, uses the current device for the default tensor type (see torch.set_default_tensor_type()). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
@@ -129,8 +129,8 @@ class SBCTensor(VSATensor):
 
         Examples::
 
-            >>> torchhd.SBCTensor.identity(3, 6, block_size=64)
-            SBCTensor([[0, 0, 0, 0, 0, 0],
+            >>> torchhd.BSBCTensor.identity(3, 6, block_size=64)
+            BSBCTensor([[0, 0, 0, 0, 0, 0],
                        [0, 0, 0, 0, 0, 0],
                        [0, 0, 0, 0, 0, 0]])
 
@@ -147,7 +147,7 @@ class SBCTensor(VSATensor):
 
         result = torch.zeros(
             num_vectors,
-            dimensions,
+            num_blocks,
             dtype=dtype,
             device=device,
             requires_grad=requires_grad,
@@ -161,21 +161,21 @@ class SBCTensor(VSATensor):
     def random(
         cls,
         num_vectors: int,
-        dimensions: int,
+        num_blocks: int,
         *,
         block_size: int,
         generator=None,
         dtype=torch.int64,
         device=None,
         requires_grad=False,
-    ) -> "SBCTensor":
+    ) -> "BSBCTensor":
         r"""Creates a set of random independent hypervectors.
 
-        The resulting hypervectors are sampled uniformly at random from the ``dimensions``-dimensional hyperspace.
+        The resulting hypervectors sample uniformly random integers between 0 and ``block_size``.
 
         Args:
             num_vectors (int): the number of hypervectors to generate.
-            dimensions (int): the dimensionality of the hypervectors.
+            num_blocks (int): the dimensionality of the hypervectors.
             block_size (int): the number of elements per block which controls the angular granularity.
             generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
             dtype (``torch.dtype``, optional): the desired data type of returned tensor. Default: ``int64``.
@@ -184,12 +184,12 @@ class SBCTensor(VSATensor):
 
         Examples::
 
-            >>> torchhd.SBCTensor.random(3, 6, block_size=64)
-            SBCTensor([[ 7,  1, 39,  8, 55, 22],
+            >>> torchhd.BSBCTensor.random(3, 6, block_size=64)
+            BSBCTensor([[ 7,  1, 39,  8, 55, 22],
                        [51, 38, 59, 45, 13, 29],
                        [19, 26, 30,  5, 15, 51]])
-            >>> torchhd.SBCTensor.random(3, 6, block_size=128, dtype=torch.float32)
-            SBCTensor([[116.,  25., 100.,  10.,  21.,  86.],
+            >>> torchhd.BSBCTensor.random(3, 6, block_size=128, dtype=torch.float32)
+            BSBCTensor([[116.,  25., 100.,  10.,  21.,  86.],
                        [ 69.,  49.,   2.,  56.,  78.,  70.],
                        [ 77.,  47.,  37., 106.,   8.,  30.]])
 
@@ -207,7 +207,7 @@ class SBCTensor(VSATensor):
         result = torch.randint(
             0,
             block_size,
-            (num_vectors, dimensions),
+            (num_vectors, num_blocks),
             generator=generator,
             dtype=dtype,
             device=device,
@@ -218,7 +218,7 @@ class SBCTensor(VSATensor):
         result.block_size = block_size
         return result
 
-    def bundle(self, other: "SBCTensor", *, generator=None) -> "SBCTensor":
+    def bundle(self, other: "BSBCTensor", *, generator=None) -> "BSBCTensor":
         r"""Bundle the hypervector with other using majority voting.
 
         This produces a hypervector maximally similar to both.
@@ -238,13 +238,13 @@ class SBCTensor(VSATensor):
 
         Examples::
 
-            >>> a, b = torchhd.SBCTensor.random(2, 10, block_size=64)
+            >>> a, b = torchhd.BSBCTensor.random(2, 10, block_size=64)
             >>> a
-            SBCTensor([32, 26, 22, 22, 34, 30,  2,  2, 40, 43])
+            BSBCTensor([32, 26, 22, 22, 34, 30,  2,  2, 40, 43])
             >>> b
-            SBCTensor([33, 27, 39, 54, 27, 60, 60,  4, 24,  5])
+            BSBCTensor([33, 27, 39, 54, 27, 60, 60,  4, 24,  5])
             >>> a.bundle(b)
-            SBCTensor([32, 26, 39, 54, 27, 60,  2,  4, 40,  5])
+            BSBCTensor([32, 26, 39, 54, 27, 60,  2,  4, 40,  5])
 
         """
         assert self.block_size == other.block_size
@@ -252,12 +252,12 @@ class SBCTensor(VSATensor):
         select.bernoulli_(0.5, generator=generator)
         return torch.where(select, self, other)
 
-    def multibundle(self) -> "SBCTensor":
+    def multibundle(self) -> "BSBCTensor":
         """Bundle multiple hypervectors"""
         # TODO: handle the likely case that there is a tie and choose one randomly
         return torch.mode(self, dim=-2).values
 
-    def bind(self, other: "SBCTensor") -> "SBCTensor":
+    def bind(self, other: "BSBCTensor") -> "BSBCTensor":
         r"""Bind the hypervector with other using circular convolution.
 
         This produces a hypervector dissimilar to both.
@@ -265,7 +265,7 @@ class SBCTensor(VSATensor):
         Binding is used to associate information, for instance, to assign values to variables.
 
         Args:
-            other (SBCTensor): other input hypervector
+            other (BSBCTensor): other input hypervector
 
         Shapes:
             - Self: :math:`(*)`
@@ -274,25 +274,25 @@ class SBCTensor(VSATensor):
 
         Examples::
 
-            >>> a, b = torchhd.SBCTensor.random(2, 10, block_size=64)
+            >>> a, b = torchhd.BSBCTensor.random(2, 10, block_size=64)
             >>> a
-            SBCTensor([18, 55, 40, 62, 39, 26, 35, 24, 49, 41])
+            BSBCTensor([18, 55, 40, 62, 39, 26, 35, 24, 49, 41])
             >>> b
-            SBCTensor([46, 36, 21, 23, 25, 12, 29, 53, 54, 41])
+            BSBCTensor([46, 36, 21, 23, 25, 12, 29, 53, 54, 41])
             >>> a.bind(b)
-            SBCTensor([ 0, 27, 61, 21,  0, 38,  0, 13, 39, 18])
+            BSBCTensor([ 0, 27, 61, 21,  0, 38,  0, 13, 39, 18])
 
         """
         assert self.block_size == other.block_size
         return torch.remainder(torch.add(self, other), self.block_size)
 
-    def multibind(self) -> "SBCTensor":
+    def multibind(self) -> "BSBCTensor":
         """Bind multiple hypervectors"""
         return torch.remainder(
             torch.sum(self, dim=-2, dtype=self.dtype), self.block_size
         )
 
-    def inverse(self) -> "SBCTensor":
+    def inverse(self) -> "BSBCTensor":
         r"""Invert the hypervector for binding.
 
         Shapes:
@@ -301,17 +301,17 @@ class SBCTensor(VSATensor):
 
         Examples::
 
-            >>> a = torchhd.SBCTensor.random(1, 10, block_size=64)
+            >>> a = torchhd.BSBCTensor.random(1, 10, block_size=64)
             >>> a
-            SBCTensor([[ 5, 30, 15, 43, 19, 36,  4, 14, 57, 34]])
+            BSBCTensor([[ 5, 30, 15, 43, 19, 36,  4, 14, 57, 34]])
             >>> a.inverse()
-            SBCTensor([[59, 34, 49, 21, 45, 28, 60, 50,  7, 30]])
+            BSBCTensor([[59, 34, 49, 21, 45, 28, 60, 50,  7, 30]])
 
         """
 
         return torch.remainder(torch.negative(self), self.block_size)
 
-    def permute(self, shifts: int = 1) -> "SBCTensor":
+    def permute(self, shifts: int = 1) -> "BSBCTensor":
         r"""Permute the hypervector.
 
         The permutation operator is commonly used to assign an order to hypervectors.
@@ -325,16 +325,16 @@ class SBCTensor(VSATensor):
 
         Examples::
 
-            >>> a = torchhd.SBCTensor.random(1, 10, block_size=64)
+            >>> a = torchhd.BSBCTensor.random(1, 10, block_size=64)
             >>> a
-            SBCTensor([[33, 24,  1, 36,  2, 57, 11, 59, 33,  3]])
+            BSBCTensor([[33, 24,  1, 36,  2, 57, 11, 59, 33,  3]])
             >>> a.permute(4)
-            SBCTensor([[11, 59, 33,  3, 33, 24,  1, 36,  2, 57]])
+            BSBCTensor([[11, 59, 33,  3, 33, 24,  1, 36,  2, 57]])
 
         """
         return torch.roll(self, shifts=shifts, dims=-1)
 
-    def dot_similarity(self, others: "SBCTensor") -> Tensor:
+    def dot_similarity(self, others: "BSBCTensor") -> Tensor:
         """Inner product with other hypervectors"""
         dtype = torch.get_default_dtype()
 
@@ -344,7 +344,7 @@ class SBCTensor(VSATensor):
 
         return torch.sum(self == others, dim=-1, dtype=dtype)
 
-    def cosine_similarity(self, others: "SBCTensor") -> Tensor:
+    def cosine_similarity(self, others: "BSBCTensor") -> Tensor:
         """Cosine similarity with other hypervectors"""
         magnitude = self.size(-1)
         return self.dot_similarity(others) / magnitude
@@ -365,11 +365,11 @@ class SBCTensor(VSATensor):
         # Call with super to avoid infinite recursion
         ret = super().__torch_function__(func, types, args, kwargs)
 
-        if isinstance(ret, SBCTensor):
+        if isinstance(ret, BSBCTensor):
             ret.block_size = list(block_sizes)[0]
         elif isinstance(ret, (tuple, list)):
             for x in ret:
-                if isinstance(x, SBCTensor):
+                if isinstance(x, BSBCTensor):
                     x.block_size = list(block_sizes)[0]
 
         # TODO: handle more return types

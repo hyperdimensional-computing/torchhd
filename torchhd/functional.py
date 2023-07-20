@@ -32,7 +32,7 @@ from torchhd.tensors.bsc import BSCTensor
 from torchhd.tensors.map import MAPTensor
 from torchhd.tensors.hrr import HRRTensor
 from torchhd.tensors.fhrr import FHRRTensor
-from torchhd.tensors.sbc import SBCTensor
+from torchhd.tensors.bsbc import BSBCTensor
 from torchhd.tensors.vtb import VTBTensor
 from torchhd.types import VSAOptions
 
@@ -84,8 +84,8 @@ def get_vsa_tensor_class(vsa: VSAOptions) -> Type[VSATensor]:
         return HRRTensor
     elif vsa == "FHRR":
         return FHRRTensor
-    elif vsa == "SBC":
-        return SBCTensor
+    elif vsa == "BSBC":
+        return BSBCTensor
     elif vsa == "VTB":
         return VTBTensor
 
@@ -356,7 +356,7 @@ def level(
         device=span_hv.device,
     ).as_subclass(vsa_tensor)
 
-    if vsa == "SBC":
+    if vsa == "BSBC":
         hv.block_size = span_hv.block_size
 
     for i in range(num_vectors):
@@ -583,7 +583,7 @@ def circular(
         device=span_hv.device,
     ).as_subclass(vsa_tensor)
 
-    if vsa == "SBC":
+    if vsa == "BSBC":
         hv.block_size = span_hv.block_size
 
     mutation_history = deque()

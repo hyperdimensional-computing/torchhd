@@ -37,7 +37,7 @@ class Testlevel:
     @pytest.mark.parametrize("d", [84, 16])
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_shape(self, n, d, vsa):
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv = functional.level(n, d, vsa, block_size=1024)
 
         elif vsa == "VTB" and d == 84:
@@ -49,7 +49,7 @@ class Testlevel:
         else:
             hv = functional.level(n, d, vsa)
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             assert hv.block_size == 1024
 
         assert hv.dim() == 2
@@ -60,7 +60,7 @@ class Testlevel:
     def test_generator(self, vsa):
         generator = torch.Generator()
         generator.manual_seed(seed)
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv1 = functional.level(20, 10000, vsa, generator=generator, block_size=1024)
         else:
             hv1 = functional.level(20, 10000, vsa, generator=generator)
@@ -68,7 +68,7 @@ class Testlevel:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv2 = functional.level(20, 10000, vsa, generator=generator, block_size=1024)
         else:
             hv2 = functional.level(20, 10000, vsa, generator=generator)
@@ -79,7 +79,7 @@ class Testlevel:
     def test_value(self, dtype, vsa):
         if not supported_dtype(dtype, vsa):
             with pytest.raises(ValueError):
-                if vsa == "SBC":
+                if vsa == "BSBC":
                     functional.level(3, 25, vsa, dtype=dtype, block_size=1024)
                 else:
                     functional.level(3, 25, vsa, dtype=dtype)
@@ -89,7 +89,7 @@ class Testlevel:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv = functional.level(
                 50, 25921, vsa, dtype=dtype, generator=generator, block_size=1024
             )
@@ -103,7 +103,7 @@ class Testlevel:
         if vsa == "BSC":
             assert torch.all((hv == False) | (hv == True)).item()
 
-        elif vsa == "SBC":
+        elif vsa == "BSBC":
             assert torch.all((hv >= 0) | (hv < 1024)).item()
 
         elif vsa == "MAP":
@@ -123,7 +123,7 @@ class Testlevel:
         sims_diff = sims[:-1] - sims[1:]
         assert torch.all(sims_diff > 0).item(), "similarity must be decreasing"
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv = functional.level(
                 5, 1000000, vsa, generator=generator, dtype=dtype, block_size=1024
             )
@@ -163,7 +163,7 @@ class Testlevel:
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv = functional.level(
                 3, 49, vsa, device=device, dtype=dtype, block_size=1024
             )
@@ -194,7 +194,7 @@ class Testlevel:
         hv = functional.level(3, 49, "FHRR")
         assert hv.dtype == torch.complex64
 
-        hv = functional.level(3, 52, "SBC", block_size=1024)
+        hv = functional.level(3, 52, "BSBC", block_size=1024)
         assert hv.dtype == torch.int64
 
     def test_requires_grad(self):

@@ -40,7 +40,7 @@ class TestBind:
         if not supported_dtype(dtype, vsa):
             return
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv = functional.empty(2, 10, vsa, dtype=dtype, block_size=1024)
         else:
             hv = functional.empty(2, 16, vsa, dtype=dtype)
@@ -53,7 +53,7 @@ class TestBind:
             from torch.fft import fft, ifft
 
             assert torch.all(res == ifft(torch.mul(fft(hv[0]), fft(hv[1])))).item()
-        elif vsa == "SBC":
+        elif vsa == "BSBC":
             assert torch.all(res == ((hv[0] + hv[1]) % 1024))
         assert dtype == res.dtype
 
@@ -77,7 +77,7 @@ class TestBundle:
         if not supported_dtype(dtype, vsa):
             return
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv = functional.random(2, 10, vsa, dtype=dtype, block_size=1024)
         else:
             hv = functional.random(2, 16, vsa, dtype=dtype)
@@ -104,7 +104,7 @@ class TestBundle:
         if vsa == "VTB":
             assert torch.all(res == hv[0].add(hv[1])).item()
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             for i in range(10):
                 assert (res[i].item() == hv[0][i].item()) or (
                     res[i].item() == hv[1][i].item()
@@ -132,7 +132,7 @@ class TestPermute:
         if not supported_dtype(dtype, vsa):
             return
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv = functional.random(2, 100, vsa, dtype=dtype, block_size=1024)
         else:
             hv = functional.random(2, 100, vsa, dtype=dtype)
@@ -168,7 +168,7 @@ class TestPermute:
                 0
             ), "all element must not be the same"
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv = functional.random(1, 10000, vsa, dtype=dtype, block_size=1024)
         else:
             hv = functional.random(1, 10000, vsa, dtype=dtype)
@@ -200,13 +200,13 @@ class TestCleanup:
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv = functional.random(
                 5, 100, vsa, dtype=dtype, generator=generator, block_size=1024
             )
         else:
             hv = functional.random(5, 100, vsa, dtype=dtype, generator=generator)
-        if vsa == "SBC":
+        if vsa == "BSBC":
             noise = functional.random(
                 1, 100, vsa, dtype=dtype, generator=generator, block_size=1024
             )
@@ -224,13 +224,13 @@ class TestCleanup:
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv = functional.random(
                 5, 100, vsa, dtype=dtype, generator=generator, block_size=1024
             )
         else:
             hv = functional.random(5, 100, vsa, dtype=dtype, generator=generator)
-        if vsa == "SBC":
+        if vsa == "BSBC":
             noise = functional.random(
                 1, 100, vsa, dtype=dtype, generator=generator, block_size=1024
             )
@@ -246,7 +246,7 @@ class TestCleanup:
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv = functional.random(
                 5, 100, vsa, dtype=dtype, device=device, block_size=1024
             )
@@ -265,7 +265,7 @@ class TestRandsel:
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             a, b = functional.random(
                 2, 1000, vsa, dtype=dtype, generator=generator, block_size=1024
             )
@@ -274,7 +274,7 @@ class TestRandsel:
         res = functional.randsel(a, b, p=0, generator=generator)
         assert torch.all(a == res)
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             a, b = functional.random(
                 2, 1000, vsa, dtype=dtype, generator=generator, block_size=1024
             )
@@ -283,7 +283,7 @@ class TestRandsel:
         res = functional.randsel(a, b, p=1, generator=generator)
         assert torch.all(b == res)
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             a, b = functional.random(
                 2, 1000, vsa, dtype=dtype, generator=generator, block_size=1024
             )
@@ -300,7 +300,7 @@ class TestRandsel:
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        if vsa == "SBC":
+        if vsa == "BSBC":
             a, b = functional.random(
                 2, 100, vsa, dtype=dtype, device=device, block_size=1024
             )
@@ -323,7 +323,7 @@ class TestMultiRandsel:
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             x = functional.random(4, 1000, vsa, dtype=dtype, block_size=1024)
         else:
             x = functional.random(4, 1024, vsa, dtype=dtype)
@@ -333,7 +333,7 @@ class TestMultiRandsel:
         )
         assert torch.all(x[2] == res)
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             x = functional.random(4, 1000, vsa, dtype=dtype, block_size=1024)
         else:
             x = functional.random(4, 1024, vsa, dtype=dtype)
@@ -342,7 +342,7 @@ class TestMultiRandsel:
         )
         assert torch.all((x[0] == res) | (x[2] == res))
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             x = functional.random(4, 1000, vsa, dtype=dtype, block_size=1024)
         else:
             x = functional.random(4, 1024, vsa, dtype=dtype)
@@ -369,7 +369,7 @@ class TestRandomPermute:
         if not supported_dtype(dtype, vsa):
             return
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             x = functional.random(4, 100, vsa, block_size=1024)
         else:
             x = functional.random(4, 100, vsa)

@@ -41,7 +41,7 @@ class Testcircular:
         if vsa == "HRR" or vsa == "VTB":
             return
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv = functional.circular(n, d, vsa, block_size=1024)
         else:
             hv = functional.circular(n, d, vsa)
@@ -57,7 +57,7 @@ class Testcircular:
 
         generator = torch.Generator()
         generator.manual_seed(seed)
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv1 = functional.circular(
                 20, 10000, vsa, generator=generator, block_size=1024
             )
@@ -66,7 +66,7 @@ class Testcircular:
 
         generator = torch.Generator()
         generator.manual_seed(seed)
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv2 = functional.circular(
                 20, 10000, vsa, generator=generator, block_size=1024
             )
@@ -79,7 +79,7 @@ class Testcircular:
     def test_value(self, dtype, vsa):
         if not supported_dtype(dtype, vsa):
             with pytest.raises(ValueError):
-                if vsa == "SBC":
+                if vsa == "BSBC":
                     functional.circular(3, 26, vsa, dtype=dtype, block_size=1024)
                 else:
                     functional.circular(3, 26, vsa, dtype=dtype)
@@ -95,7 +95,7 @@ class Testcircular:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv = functional.circular(
                 50, 26569, vsa, dtype=dtype, generator=generator, block_size=1024
             )
@@ -116,10 +116,10 @@ class Testcircular:
             mag = hv.abs()
             assert torch.allclose(mag, torch.tensor(1.0, dtype=mag.dtype))
 
-        elif vsa == "SBC":
+        elif vsa == "BSBC":
             assert torch.all((hv >= 0) | (hv < 1024)).item()
 
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv = functional.circular(
                 8, 1000000, vsa, generator=generator, dtype=dtype, block_size=1024
             )
@@ -175,7 +175,7 @@ class Testcircular:
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        if vsa == "SBC":
+        if vsa == "BSBC":
             hv = functional.circular(
                 3, 52, vsa, device=device, dtype=dtype, block_size=1024
             )
@@ -198,7 +198,7 @@ class Testcircular:
         hv = functional.circular(3, 52, "FHRR")
         assert hv.dtype == torch.complex64
 
-        hv = functional.circular(3, 52, "SBC", block_size=1024)
+        hv = functional.circular(3, 52, "BSBC", block_size=1024)
         assert hv.dtype == torch.int64
 
     def test_requires_grad(self):
