@@ -35,10 +35,10 @@ seed = 2147483644
 
 class Testcircular:
     @pytest.mark.parametrize("n", [1, 3, 55])
-    @pytest.mark.parametrize("d", [84, 10])
+    @pytest.mark.parametrize("d", [84, 16])
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_shape(self, n, d, vsa):
-        if vsa == "HRR":
+        if vsa == "HRR" or vsa == "VTB":
             return
 
         if vsa == "SBC":
@@ -52,7 +52,7 @@ class Testcircular:
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_generator(self, vsa):
-        if vsa == "HRR":
+        if vsa == "HRR" or vsa == "VTB":
             return
 
         generator = torch.Generator()
@@ -86,7 +86,7 @@ class Testcircular:
 
             return
 
-        if vsa == "HRR":
+        if vsa == "HRR" or vsa == "VTB":
             with pytest.raises(ValueError):
                 functional.circular(3, 26, vsa, dtype=dtype)
 
@@ -97,14 +97,14 @@ class Testcircular:
 
         if vsa == "SBC":
             hv = functional.circular(
-                50, 26000, vsa, dtype=dtype, generator=generator, block_size=1024
+                50, 26569, vsa, dtype=dtype, generator=generator, block_size=1024
             )
         else:
-            hv = functional.circular(50, 26000, vsa, dtype=dtype, generator=generator)
+            hv = functional.circular(50, 26569, vsa, dtype=dtype, generator=generator)
         assert hv.requires_grad == False
         assert hv.dim() == 2
         assert hv.size(0) == 50
-        assert hv.size(1) == 26000
+        assert hv.size(1) == 26569
 
         if vsa == "BSC":
             assert torch.all((hv == False) | (hv == True)).item()
@@ -162,8 +162,7 @@ class Testcircular:
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        hv = functional.circular(3, 52, device=device, dtype=dtype)
-        hv = functional.circular(3, 52, device=device, dtype=dtype)
+        hv = functional.circular(3, 49, device=device, dtype=dtype)
         assert hv.device.type == device.type
 
     @pytest.mark.parametrize("dtype", torch_dtypes)
@@ -172,7 +171,7 @@ class Testcircular:
         if not supported_dtype(dtype, vsa):
             return
 
-        if vsa == "HRR":
+        if vsa == "HRR" or vsa == "VTB":
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -181,7 +180,7 @@ class Testcircular:
                 3, 52, vsa, device=device, dtype=dtype, block_size=1024
             )
         else:
-            hv = functional.circular(3, 52, vsa, device=device, dtype=dtype)
+            hv = functional.circular(3, 49, vsa, device=device, dtype=dtype)
         assert hv.device.type == device.type
 
     def test_uses_default_dtype(self):

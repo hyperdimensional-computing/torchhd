@@ -86,6 +86,7 @@ VSA Models
     HRRTensor
     FHRRTensor
     SBCTensor
+    VTBTensor
 
 
 Utilities

@@ -838,9 +838,9 @@ class Projection(nn.Module):
         self.out_features = out_features
         self.vsa = vsa
 
-        if vsa not in {"MAP", "HRR"}:
+        if vsa not in {"MAP", "HRR", "VTB"}:
             raise ValueError(
-                f"Projection embedding only supports MAP and HRR but provided: {vsa}"
+                f"Projection embedding supports MAP, HRR, VTB but provided: {vsa}"
             )
 
         self.weight = nn.parameter.Parameter(
@@ -909,9 +909,9 @@ class Sinusoid(nn.Module):
         self.out_features = out_features
         self.vsa = vsa
 
-        if vsa not in {"MAP", "HRR"}:
+        if vsa not in {"MAP", "HRR", "VTB"}:
             raise ValueError(
-                f"Sinusoid embedding only supports MAP and HRR but provided: {vsa}"
+                f"Sinusoid embedding supports MAP, HRR, VTB but provided: {vsa}"
             )
 
         self.weight = nn.parameter.Parameter(
@@ -977,6 +977,7 @@ class Density(nn.Module):
         device=None,
         dtype=None,
         requires_grad: bool = False,
+        **kwargs,
     ):
         factory_kwargs = {
             "device": device,
@@ -986,10 +987,10 @@ class Density(nn.Module):
         super(Density, self).__init__()
 
         # A set of random vectors used as unique IDs for features of the dataset.
-        self.key = Random(in_features, out_features, vsa, **factory_kwargs)
+        self.key = Random(in_features, out_features, vsa, **factory_kwargs, **kwargs)
         # Thermometer encoding used for transforming input data.
         self.density_encoding = Thermometer(
-            out_features + 1, out_features, vsa, low=low, high=high, **factory_kwargs
+            out_features + 1, out_features, vsa, low=low, high=high, **factory_kwargs, **kwargs
         )
 
     def reset_parameters(self) -> None:

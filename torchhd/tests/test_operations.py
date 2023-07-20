@@ -43,11 +43,11 @@ class TestBind:
         if vsa == "SBC":
             hv = functional.empty(2, 10, vsa, dtype=dtype, block_size=1024)
         else:
-            hv = functional.empty(2, 10, vsa, dtype=dtype)
+            hv = functional.empty(2, 16, vsa, dtype=dtype)
         res = functional.bind(hv[0], hv[1])
         if vsa == "BSC":
             assert torch.all(res == torch.logical_xor(hv[0], hv[1])).item()
-        elif vsa == "FHRR" or vsa == "MAP":
+        elif vsa == "FHRR" or vsa == "MAP" or vsa == "VTB":
             assert torch.all(res == torch.mul(hv[0], hv[1])).item()
         elif vsa == "HRR":
             from torch.fft import fft, ifft
@@ -80,7 +80,7 @@ class TestBundle:
         if vsa == "SBC":
             hv = functional.random(2, 10, vsa, dtype=dtype, block_size=1024)
         else:
-            hv = functional.random(2, 10, vsa, dtype=dtype)
+            hv = functional.random(2, 16, vsa, dtype=dtype)
         res = functional.bundle(hv[0], hv[1])
 
         if vsa == "BSC":
@@ -90,15 +90,18 @@ class TestBundle:
                 )
 
         if vsa == "MAP":
-            hv[0] = torch.tensor([1, 1, -1, -1, 1, 1, 1, 1, -1, -1])
-            hv[1] = torch.tensor([1, 1, -1, -1, -1, -1, -1, -1, 1, -1])
+            x = torch.tensor([1, 1, -1, -1, 1, 1, 1, 1, -1, -1], dtype=dtype)
+            y = torch.tensor([1, 1, -1, -1, -1, -1, -1, -1, 1, -1], dtype=dtype)
 
-            res = functional.bundle(hv[0], hv[1])
+            res = functional.bundle(x, y)
             assert torch.all(
                 res == torch.tensor([2, 2, -2, -2, 0, 0, 0, 0, 0, -2], dtype=dtype)
             ).item()
 
         if vsa == "FHRR":
+            assert torch.all(res == hv[0].add(hv[1])).item()
+            
+        if vsa == "VTB":
             assert torch.all(res == hv[0].add(hv[1])).item()
 
         if vsa == "SBC":
@@ -267,7 +270,7 @@ class TestRandsel:
                 2, 1000, vsa, dtype=dtype, generator=generator, block_size=1024
             )
         else:
-            a, b = functional.random(2, 1000, vsa, dtype=dtype, generator=generator)
+            a, b = functional.random(2, 1024, vsa, dtype=dtype, generator=generator)
         res = functional.randsel(a, b, p=0, generator=generator)
         assert torch.all(a == res)
 
@@ -276,7 +279,7 @@ class TestRandsel:
                 2, 1000, vsa, dtype=dtype, generator=generator, block_size=1024
             )
         else:
-            a, b = functional.random(2, 1000, vsa, dtype=dtype, generator=generator)
+            a, b = functional.random(2, 1024, vsa, dtype=dtype, generator=generator)
         res = functional.randsel(a, b, p=1, generator=generator)
         assert torch.all(b == res)
 
@@ -285,7 +288,7 @@ class TestRandsel:
                 2, 1000, vsa, dtype=dtype, generator=generator, block_size=1024
             )
         else:
-            a, b = functional.random(2, 1000, vsa, dtype=dtype, generator=generator)
+            a, b = functional.random(2, 1024, vsa, dtype=dtype, generator=generator)
         res = functional.randsel(a, b, generator=generator)
         assert torch.all((b == res) | (a == res))
         assert res.dtype == dtype
@@ -323,7 +326,7 @@ class TestMultiRandsel:
         if vsa == "SBC":
             x = functional.random(4, 1000, vsa, dtype=dtype, block_size=1024)
         else:
-            x = functional.random(4, 1000, vsa, dtype=dtype)
+            x = functional.random(4, 1024, vsa, dtype=dtype)
 
         res = functional.multirandsel(
             x, p=torch.tensor([0.0, 0.0, 1.0, 0.0]), generator=generator
@@ -333,7 +336,7 @@ class TestMultiRandsel:
         if vsa == "SBC":
             x = functional.random(4, 1000, vsa, dtype=dtype, block_size=1024)
         else:
-            x = functional.random(4, 1000, vsa, dtype=dtype)
+            x = functional.random(4, 1024, vsa, dtype=dtype)
         res = functional.multirandsel(
             x, p=torch.tensor([0.5, 0.0, 0.5, 0.0]), generator=generator
         )
@@ -342,7 +345,7 @@ class TestMultiRandsel:
         if vsa == "SBC":
             x = functional.random(4, 1000, vsa, dtype=dtype, block_size=1024)
         else:
-            x = functional.random(4, 1000, vsa, dtype=dtype)
+            x = functional.random(4, 1024, vsa, dtype=dtype)
         res = functional.multirandsel(x, generator=generator)
         assert torch.all((x[0] == res) | (x[1] == res) | (x[2] == res) | (x[3] == res))
         assert res.dtype == dtype
