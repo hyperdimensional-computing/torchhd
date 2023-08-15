@@ -141,7 +141,7 @@ Consider citing [our paper](https://jmlr.org/papers/v24/23-0300.html) published 
 
 ```
 @article{JMLR:v24:23-0300,
-  author  = {Mike Heddes and Igor Nunes and Pere VergÃ©s and Denis Kleyko and Danny Abraham and Tony Givargis and Alexandru Nicolau and Alexander Veidenbaum},
+  author  = {Heddes, Mike and Nunes, Igor and Vergés, Pere and Kleyko, Denis and Abraham, Danny and Givargis, Tony and Nicolau, Alexandru and Veidenbaum, Alex},
   title   = {Torchhd: An Open Source Python Library to Support Research on Hyperdimensional Computing and Vector Symbolic Architectures},
   journal = {Journal of Machine Learning Research},
   year    = {2023},
