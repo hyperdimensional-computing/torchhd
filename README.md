@@ -93,6 +93,8 @@ Currently, the library supports the following HDC/VSA models:
 - [Binary Spatter Codes (BSC)](https://torchhd.readthedocs.io/en/stable/generated/torchhd.BSCTensor.html)
 - [Holographic Reduced Representations (HRR)](https://torchhd.readthedocs.io/en/stable/generated/torchhd.HRRTensor.html)
 - [Fourier Holographic Reduced Representations (FHRR)](https://torchhd.readthedocs.io/en/stable/generated/torchhd.FHRRTensor.html)
+- [Binary Sparse Block Codes (B-SBC)](https://torchhd.readthedocs.io/en/stable/generated/torchhd.BSBCTensor.html)
+- [Vector-Derived Transformation Binding (VTB)](https://torchhd.readthedocs.io/en/stable/generated/torchhd.VTBTensor.html)
 
 We welcome anyone to help with contributing more models to the library!
 
@@ -135,13 +137,17 @@ To add the license to all source files, first install [`licenseheaders`](https:/
 
 ## Cite
 
-Consider citing [our paper](https://arxiv.org/abs/2205.09208) if you use Torchhd in your work:
+Consider citing [our paper](https://jmlr.org/papers/v24/23-0300.html) published in the Journal of Machine Learning Research (JMLR) if you use Torchhd in your work:
 
 ```
-@article{heddes2022torchhd,
-  title={Torchhd: An Open-Source Python Library to Support Hyperdimensional Computing Research},
-  author={Heddes, Mike and Nunes, Igor and Vergés, Pere and Desai, Dheyay and Givargis, Tony and Nicolau, Alexandru},
-  journal={arXiv preprint arXiv:2205.09208},
-  year={2022}
+@article{JMLR:v24:23-0300,
+  author  = {Mike Heddes and Igor Nunes and Pere VergÃ©s and Denis Kleyko and Danny Abraham and Tony Givargis and Alexandru Nicolau and Alexander Veidenbaum},
+  title   = {Torchhd: An Open Source Python Library to Support Research on Hyperdimensional Computing and Vector Symbolic Architectures},
+  journal = {Journal of Machine Learning Research},
+  year    = {2023},
+  volume  = {24},
+  number  = {255},
+  pages   = {1--10},
+  url     = {http://jmlr.org/papers/v24/23-0300.html}
 }
 ```
