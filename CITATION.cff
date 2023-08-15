@@ -1,0 +1,49 @@
+cff-version: 1.2.0
+message: "If you use this code for your research, please cite our paper."
+authors:
+- family-names: "Heddes"
+  given-names: "Mike"
+  orcid: "https://orcid.org/0000-0002-9276-458X"
+- family-names: "Nunes"
+  given-names: "Igor"
+- family-names: "Vergés"
+  given-names: "Pere"
+- family-names: "Kleyko"
+  given-names: "Denis"
+- family-names: "Abraham"
+  given-names: "Danny"
+- family-names: "Givargis"
+  given-names: "Tony"
+- family-names: "Nicolau"
+  given-names: "Alexandru"
+- family-names: "Veidenbaum"
+  given-names: "Alex"
+title: "Torchhd: An Open Source Python Library to Support Research on Hyperdimensional Computing and Vector Symbolic Architectures"
+url: "https://github.com/hyperdimensional-computing/torchhd"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Heddes"
+    given-names: "Mike"
+    orcid: "https://orcid.org/0000-0002-9276-458X"
+  - family-names: "Nunes"
+    given-names: "Igor"
+  - family-names: "Vergés"
+    given-names: "Pere"
+  - family-names: "Kleyko"
+    given-names: "Denis"
+  - family-names: "Abraham"
+    given-names: "Danny"
+  - family-names: "Givargis"
+    given-names: "Tony"
+  - family-names: "Nicolau"
+    given-names: "Alexandru"
+  - family-names: "Veidenbaum"
+    given-names: "Alex"
+  title: "Torchhd: An Open Source Python Library to Support Research on Hyperdimensional Computing and Vector Symbolic Architectures"
+  journal: "Journal of Machine Learning Research"
+  start: 1 # First page number
+  end: 10 # Last page number
+  volume: 24
+  year: 2023
+  url: http://jmlr.org/papers/v24/23-0300.html
