@@ -22,15 +22,15 @@ df = pd.read_csv(
 )
 latex = 1
 pand = 0
-#print(df)
+# print(df)
 
 df = df[df["robustness_failed_dimensions"] == 0]
-#print(
+# print(
 #    df.sort_values(["partial_data"], ascending=False)
 #    .groupby(["partial_data", "name"])["accuracy"]
 #    .mean()
 #    .to_string()
-#)
+# )
 mean_of_encoding = (
     df.sort_values(["partial_data"], ascending=False)
     .groupby(["partial_data", "name"])["accuracy"]
@@ -73,7 +73,7 @@ if latex:
     latex_table = var_of_encoding.to_latex(
         index=False, caption="Encodings accuracy variance"
     )
-    #print(latex_table)
+    # print(latex_table)
     pd.options.display.float_format = None
     pd.set_option("display.max_rows", None)
     pd.set_option("display.max_columns", None)
@@ -85,6 +85,5 @@ if latex:
     joined_values = mean_of_encoding.apply(join_with_commas, axis=1)
 
     # Print the joined values
-    #print(joined_values["partial_data"])
-    #print(joined_values["accuracy"])
-
+    # print(joined_values["partial_data"])
+    # print(joined_values["accuracy"])

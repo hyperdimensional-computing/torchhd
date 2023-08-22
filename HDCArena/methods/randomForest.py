@@ -9,6 +9,7 @@ import utils
 import torch
 from sklearn.metrics import accuracy_score
 
+
 def train_random_forest(
     train_data,
     test_data,

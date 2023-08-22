@@ -4,7 +4,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/adapt_dimensions_arena"
-#file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/rasp"
+# file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/rasp"
 file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/rasp_arena"
 
 
@@ -32,8 +32,8 @@ var_of_encoding_train_time = (
 if pand:
     print(mean_of_encoding)
     print(var_of_encoding)
-    #print(mean_of_encoding_train_time)
-    #print(var_of_encoding_train_time)
+    # print(mean_of_encoding_train_time)
+    # print(var_of_encoding_train_time)
 
 if latex:
     latex_table = mean_of_encoding.to_latex(

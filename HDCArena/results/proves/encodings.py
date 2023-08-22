@@ -33,9 +33,11 @@ for i in df["encoding"].unique():
     )
     # print(variance_accuracy_by_dimension_and_method.mean())
 
-pivot_df = df.pivot_table(index='name', columns='encoding', values='accuracy', aggfunc='mean')
+pivot_df = df.pivot_table(
+    index="name", columns="encoding", values="accuracy", aggfunc="mean"
+)
 pivot_df = pivot_df.T
-pivot_df['MEAN'] = pivot_df.mean(axis=1)
+pivot_df["MEAN"] = pivot_df.mean(axis=1)
 pivot_df = pivot_df.T.round(3)
 print(pivot_df)
 
@@ -46,7 +48,7 @@ latex_table = pivot_df.to_latex()
 
 print(latex_table)
 #  print(df[["name", "accuracy", "encoding"]])
-print(df.groupby(["name"])["accuracy","encoding"].mean().round(3).reset_index())
+print(df.groupby(["name"])["accuracy", "encoding"].mean().round(3).reset_index())
 
 print()
 print()

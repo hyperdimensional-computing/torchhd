@@ -26,13 +26,13 @@ lab = [
 ]
 
 linestyle_str = [
-     ('dotted', 'dotted'),    # Same as (0, (1, 1)) or ':'
-     ('dotted', 'dotted'),    # Same as (0, (1, 1)) or ':'
-     ('dotted', 'dotted'),    # Same as (0, (1, 1)) or ':'
-     ('dotted', 'dotted'),    # Same as (0, (1, 1)) or ':'
-    ('solid', 'solid'),  # Same as (0, (1, 1)) or ':'
-    ('solid', 'solid'),  # Same as '--'
-    ('solid', 'solid')
+    ("dotted", "dotted"),  # Same as (0, (1, 1)) or ':'
+    ("dotted", "dotted"),  # Same as (0, (1, 1)) or ':'
+    ("dotted", "dotted"),  # Same as (0, (1, 1)) or ':'
+    ("dotted", "dotted"),  # Same as (0, (1, 1)) or ':'
+    ("solid", "solid"),  # Same as (0, (1, 1)) or ':'
+    ("solid", "solid"),  # Same as '--'
+    ("solid", "solid"),
 ]  # Same as '-.'
 
 markers = [
@@ -52,7 +52,7 @@ colors = [
     "tab:red",
     "tab:orange",
     "tab:green",
-    "tab:red"
+    "tab:red",
 ]
 
 for i, (_, row) in enumerate(df.iterrows()):
@@ -60,7 +60,15 @@ for i, (_, row) in enumerate(df.iterrows()):
     row = row.drop("method")
     row = row[:10]
     y2_smooth = make_interp_spline(x[:10], row[:10], k=1)(x_smooth)
-    axes[0].plot(x_smooth, y2_smooth, color=colors[i], linestyle=linestyle_str[i][0], marker=markers[i],markevery=15, label=lab[i])
+    axes[0].plot(
+        x_smooth,
+        y2_smooth,
+        color=colors[i],
+        linestyle=linestyle_str[i][0],
+        marker=markers[i],
+        markevery=15,
+        label=lab[i],
+    )
 
 
 file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/robustness_results"
@@ -79,7 +87,15 @@ for i, (_, row) in enumerate(df.iterrows()):
     row = row.drop("method")
     y2_smooth = make_interp_spline(x[:10], row[:10], k=1)(x_smooth)
 
-    axes[1].plot(x_smooth, y2_smooth, color=colors[i], linestyle=linestyle_str[i][0], marker=markers[i],markevery=15, label=lab[i])
+    axes[1].plot(
+        x_smooth,
+        y2_smooth,
+        color=colors[i],
+        linestyle=linestyle_str[i][0],
+        marker=markers[i],
+        markevery=15,
+        label=lab[i],
+    )
 
 axes[0].title.set_text("HDC Benchmark")
 axes[1].title.set_text("UCI Benchmark")
