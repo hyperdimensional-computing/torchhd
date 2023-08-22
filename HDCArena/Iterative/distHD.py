@@ -12,10 +12,8 @@ def train_distHD(
     model,
     iterations,
     lr=1,
-    r=0.05,
-    alpha=4,
-    beta=2,
-    theta=1,
+
+
     dimensions=10000,
 ):
     with torch.no_grad():

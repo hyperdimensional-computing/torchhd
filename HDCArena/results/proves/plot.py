@@ -4,15 +4,16 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/adapt_dimensions_arena"
-file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/rasp"
-# file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/final_results/dimensions_arenaaa.csv"
+#file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/rasp"
+file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/rasp_arena"
+
 
 df = pd.read_csv(file)
 
 # df = df[df['Dimensions'] == 10000]
 
 print(df.groupby(["method"])["accuracy"].mean())
-latex = 1
+latex = 0
 pand = 1
 
 mean_of_encoding = df.groupby(["method"])["accuracy"].mean().round(3).reset_index().T
@@ -31,7 +32,8 @@ var_of_encoding_train_time = (
 if pand:
     print(mean_of_encoding)
     print(var_of_encoding)
-    print(var_of_encoding_train_time)
+    #print(mean_of_encoding_train_time)
+    #print(var_of_encoding_train_time)
 
 if latex:
     latex_table = mean_of_encoding.to_latex(

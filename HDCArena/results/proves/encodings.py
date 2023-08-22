@@ -20,11 +20,11 @@ embeddings_order = [
     "sinusoid",
     "fractional",
 ]
-embeddings_order = [0, 7, 5, 4, 1, 2, 3, 6, 8]
+# embeddings_order = [0, 7, 5, 4, 1, 2, 3, 6, 8]
 # embeddings_order = [0, 1, 2, 3, 4, 5, 6, 7]
 
 df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/encodings_arena"
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/encodings"
 )
 
 for i in df["encoding"].unique():
@@ -33,7 +33,25 @@ for i in df["encoding"].unique():
     )
     # print(variance_accuracy_by_dimension_and_method.mean())
 
+pivot_df = df.pivot_table(index='name', columns='encoding', values='accuracy', aggfunc='mean')
+pivot_df = pivot_df.T
+pivot_df['MEAN'] = pivot_df.mean(axis=1)
+pivot_df = pivot_df.T.round(3)
+print(pivot_df)
 
+pivot_df = pivot_df.reindex(columns=embeddings_order)
+
+print(pivot_df)
+latex_table = pivot_df.to_latex()
+
+print(latex_table)
+#  print(df[["name", "accuracy", "encoding"]])
+print(df.groupby(["name"])["accuracy","encoding"].mean().round(3).reset_index())
+
+print()
+print()
+print()
+print()
 mean_of_encoding = (
     df.groupby(["encoding"])["accuracy"].mean().round(3).reset_index().T
 )[embeddings_order]

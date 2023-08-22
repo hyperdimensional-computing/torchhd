@@ -24,11 +24,52 @@ lab = [
     "OnlineHD Iterative",
     "RefineHD Iterative",
 ]
+
+markersizes = [
+    6,
+    6,
+    6,
+    8,
+    6,
+    6,
+    8
+]
+
+linestyle_str = [
+     ('dotted', 'dotted'),    # Same as (0, (1, 1)) or ':'
+     ('dotted', 'dotted'),    # Same as (0, (1, 1)) or ':'
+     ('dotted', 'dotted'),    # Same as (0, (1, 1)) or ':'
+     ('dotted', 'dotted'),    # Same as (0, (1, 1)) or ':'
+    ('solid', 'solid'),  # Same as (0, (1, 1)) or ':'
+    ('solid', 'solid'),  # Same as '--'
+    ('solid', 'solid')
+]  # Same as '-.'
+
+markers = [
+    ",",
+    ".",
+    "*",
+    "P",
+    ".",
+    "*",
+    "P",
+]
+
+colors = [
+    "tab:blue",
+    "tab:orange",
+    "tab:green",
+    "tab:red",
+    "tab:orange",
+    "tab:green",
+    "tab:red"
+]
+
 for i, (_, row) in enumerate(df.iterrows()):
     l = row["method"]
     row = row.drop("method")
     y2_smooth = make_interp_spline(x, row, k=1)(x_smooth)
-    axes[0].plot(x_smooth, y2_smooth, label=lab[i])
+    axes[0].plot(x_smooth, y2_smooth,linestyle=linestyle_str[i][0], color=colors[i], markersize=markersizes[i], marker=markers[i],markevery=10, label=lab[i])
 
 
 file = (
@@ -50,7 +91,8 @@ for i, (_, row) in enumerate(df.iterrows()):
         row = row.drop("method")
         y2_smooth = make_interp_spline(x, row, k=1)(x_smooth)
 
-        axes[1].plot(x_smooth, y2_smooth, label=lab[i])
+        axes[1].plot(x_smooth, y2_smooth, linestyle=linestyle_str[i][0], color=colors[i], markersize=markersizes[i], marker=markers[i],
+                     markevery=10, label=lab[i])
 
 axes[0].title.set_text("HDC Benchmark")
 axes[1].title.set_text("UCI Benchmark")

@@ -5,7 +5,7 @@ import pandas as pd
 from matplotlib import cm
 
 df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/partial_data_results"
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/partial_data_arena_results"
 )
 
 x = list(map(int, df.columns[1:]))

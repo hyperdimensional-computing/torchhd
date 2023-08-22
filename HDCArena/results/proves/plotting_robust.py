@@ -8,6 +8,7 @@ df = pd.read_csv(
     "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/robustness_results"
 )
 
+print(df)
 x = list(map(int, df.columns[1:]))
 # Generate more data points for smooth curves
 x_smooth = np.linspace(min(x), max(x), 200)
@@ -16,7 +17,7 @@ x_smooth = np.linspace(min(x), max(x), 200)
 for i, (_, row) in enumerate(df.iterrows()):
     l = row["model"]
     row = row.drop("model")
-    y2_smooth = make_interp_spline(x, row)(x_smooth)
+    y2_smooth = make_interp_spline(x, row, k=1)(x_smooth)
 
     plt.plot(x_smooth, y2_smooth, label=l)
     # , color=cmap(i/len(x)))

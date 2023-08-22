@@ -20,8 +20,9 @@ from methods import distHDIterative
 from methods import intRVFL
 from methods import semiHDIterative
 from methods import LeHDC
+from methods import randomForest
 
-results_file = "scrap_n/results" + str(time.time()) + ".csv"
+results_file = "results/results" + str(time.time()) + ".csv"
 
 with open(results_file, "w", newline="") as file:
     writer = csv.writer(file)
@@ -93,6 +94,42 @@ def select_model(
     learning_rate=0,
     dropout_rate=0,
 ):
+    if method == "random_forest":
+        randomForest.train_random_forest(
+            train_ds,
+            test_ds,
+            train_loader,
+            test_loader,
+            num_classes,
+            encode,
+            model,
+            device,
+            dataset.name,
+            method,
+            encoding,
+            iterations,
+            dimensions,
+            lr,
+            chunks,
+            threshold,
+            reduce_subclasses,
+            model_quantize,
+            epsilon,
+            model_sparse,
+            s,
+            alpha,
+            beta,
+            theta,
+            r,
+            partial_data,
+            robustness,
+            lazy_regeneration,
+            model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
+            results_file,
+        )
     if method == "add":
         vanillaHD.train_vanillaHD(
             train_loader,
@@ -1044,7 +1081,7 @@ configs = [
 
 configs = [
     {
-        "method": "online_iterative",
+        "method": "random_forest",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 5,

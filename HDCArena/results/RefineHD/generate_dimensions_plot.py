@@ -24,6 +24,50 @@ lab = [
     "OnlineHD Iterative",
     "RefineHD Iterative",
 ]
+
+
+linestyle_str = [
+     ('dotted', 'dotted'),    # Same as (0, (1, 1)) or ':'
+     ('dotted', 'dotted'),    # Same as (0, (1, 1)) or ':'
+     ('dotted', 'dotted'),    # Same as (0, (1, 1)) or ':'
+     ('dotted', 'dotted'),    # Same as (0, (1, 1)) or ':'
+    ('solid', 'solid'),  # Same as (0, (1, 1)) or ':'
+    ('solid', 'solid'),  # Same as '--'
+    ('solid', 'solid')
+]  # Same as '-.'
+
+markers = [
+    ",",
+    ".",
+    "*",
+    "P",
+    ".",
+    "*",
+    "P",
+]
+
+markersizes = [
+    6,
+    6,
+    6,
+    8,
+    6,
+    6,
+    8
+]
+
+
+colors = [
+    "tab:blue",
+    "tab:orange",
+    "tab:green",
+    "tab:red",
+    "tab:orange",
+    "tab:green",
+    "tab:red"
+]
+
+
 for idx, method in enumerate(range(len(lab))):
     a = df["method"].unique()
     method = a[idx]
@@ -44,7 +88,7 @@ for idx, method in enumerate(range(len(lab))):
     # plt.plot(x_smooth, y_smooth, label=method)
     # plt.fill_between(x_smooth, lower_smooth, upper_smooth, alpha=0.3)
 
-    axes[0].plot(x_smooth, y_smooth, label=lab[idx])
+    axes[0].plot(x_smooth, y_smooth, linewidth = 1, color=colors[idx], markersize=markersizes[idx], linestyle=linestyle_str[idx][0], marker=markers[idx],markevery=25, label=lab[idx])
     # axes[0].fill_between(x_smooth, lower_smooth, upper_smooth, alpha=0.25)
 
 file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/uci_dimensions"
@@ -74,7 +118,7 @@ for idx, method in enumerate(df["method"].unique()):
     # plt.plot(x_smooth, y_smooth, label=method)
     # plt.fill_between(x_smooth, lower_smooth, upper_smooth, alpha=0.3)
 
-    axes[1].plot(x_smooth, y_smooth, label=lab[idx])
+    axes[1].plot(x_smooth, y_smooth, linewidth = 1, color=colors[idx], markersize=markersizes[idx], linestyle=linestyle_str[idx][0], marker=markers[idx],markevery=25, label=lab[idx])
     # plt.fill_between(x_smooth, lower_smooth, upper_smooth, alpha=0.25)
 axes[0].title.set_text("HDC Benchmark")
 axes[1].title.set_text("UCI Benchmark")

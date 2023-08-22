@@ -32,7 +32,7 @@ def exec_arena(
                 train_ds,
                 test_ds,
             ) = preprocess(dataset, batch_size, device, partial_data, config["method"])
-            print(encoding)
+
             encode = Encoder(num_feat, dimensions, encoding, dataset.name)
             encode = encode.to(device)
 
@@ -53,7 +53,6 @@ def exec_arena(
                     dimensions, num_classes, method=config["method"], dtype=t
                 )
             model = model.to(device)
-
             methods_selection.select_model(
                 train_ds,
                 test_ds,
@@ -96,7 +95,7 @@ ENCODINGS = ["flocet"]
 
 configurations = methods_selection.configs
 
-REPEATS = 1
+REPEATS = 5
 DIMENSIONS = [10000]
 ITERATIONS = 30
 # PARTIAL_DATA = [0.2, 0.4, 0.6, 0.8, 1]
@@ -108,7 +107,6 @@ PARTIAL_DATA = [0.4, 0.5, 0.6]
 ROBUSTNESS = [0, 1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80]
 # ROBUSTNESS = [0]
 arena = False
-
 
 if arena:
     benchmark = HDCArena("../data", download=True)

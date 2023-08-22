@@ -1,4 +1,4 @@
-name,accuracy,train_time,test_time,dimensions,method,encoding,iterations,lr,chunks,threshold,reduce_subclass,model_quantize,epsilon,alpha,beta,theta,r,lazy_regeneration,model_neural,lazy_regeneration,model_neural,partial_data,robustness_failed_dimensions
+name,accuracy,train_time,test_time,dimensions,method,encoding,iterations,lr,chunks,threshold,reduce_subclass,model_quantize,epsilon,alpha,beta,theta,r,lazy_regeneration,model_neural,lazy_regeneration,model_neural,partial_data,robustness_failed_dimensions,weight_decay,learning_rate,dropout_rate
 CIFAR10,0.365200012922287,213.01152181625366,56.108375787734985,10000,adapt,hashmap,30,1,,,,,,,,,,,,5,reset,1,0
 CIFAR10,0.36079999804496765,194.11752152442932,53.41343832015991,10000,adapt,hashmap,30,1,,,,,,,,,,,,5,reset,1,0
 CIFAR10,0.3294999897480011,201.13342380523682,67.10001420974731,10000,adapt,hashmap,30,1,,,,,,,,,,,,5,reset,1,0
