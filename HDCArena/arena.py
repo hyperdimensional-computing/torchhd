@@ -471,7 +471,9 @@ def exec_arena(
                     alpha = 1
                     kappa = 3
                 iterations_executed = 1
-                model = IntRVFL(num_feat, dimensions, num_classes, kappa=kappa, device=device)
+                model = IntRVFL(
+                    num_feat, dimensions, num_classes, kappa=kappa, device=device
+                )
                 intRVFL.train_rvfl(train_ds, encode, model, device, num_classes, alpha)
             train_time = time.time() - t
 
@@ -516,9 +518,7 @@ def exec_arena(
                     test_loader, device, encode, model, accuracy
                 )
             elif method == "rvfl":
-                intRVFL.test_rvfl(
-                    test_loader, device, encode, model, accuracy
-                )
+                intRVFL.test_rvfl(test_loader, device, encode, model, accuracy)
             test_time = time.time() - t
 
             benchmark.report(dataset, accuracy.compute().item())

@@ -2,6 +2,7 @@ import torch
 from tqdm import tqdm
 from torchhd import functional
 
+
 def train_rvfl(train_ds, encode, model, device, classes, alpha):
     samples = train_ds.data
     labels = train_ds.targets
@@ -12,7 +13,9 @@ def train_rvfl(train_ds, encode, model, device, classes, alpha):
     one_hot_labels = torch.zeros(n, classes)
     one_hot_labels[torch.arange(n), labels] = 1
 
-    weights = functional.ridge_regression(encodings, one_hot_labels.to(device), alpha=alpha).to(device)
+    weights = functional.ridge_regression(
+        encodings, one_hot_labels.to(device), alpha=alpha
+    ).to(device)
     model.weight.copy_(weights)
 
 
