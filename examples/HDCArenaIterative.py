@@ -299,7 +299,6 @@ def exec_arena(
                             "multiclass", num_classes=num_classes
                         ).to(device)
 
-
                         for samples, labels in tqdm(test_loader, desc="Testing"):
                             samples = samples.to(device)
 
