@@ -93,6 +93,7 @@ results_file = (
     + ".csv"
 )
 
+
 with open(results_file, "w", newline="") as file:
     writer = csv.writer(file)
     writer.writerow(
