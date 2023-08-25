@@ -291,7 +291,7 @@ class Centroid(nn.Module):
         if is_wrong.sum().item() == 0:
             self.weight.index_add_(0, target, input, alpha=lr)
         else:
-            self.weight.index_add_(0, target, input, alpha=lr*4)
+            self.weight.index_add_(0, target, input, alpha=lr * 4)
             self.weight.index_add_(0, pred, -input, alpha=lr)
 
 
@@ -696,7 +696,7 @@ class CentroidMiss(nn.Module):
 
         self.in_features = in_features
         self.out_features = out_features
-        self.warmup = warmup*0.2
+        self.warmup = warmup * 0.2
         print(self.warmup)
         self.similarity_sum = 0
         self.count = 0
@@ -710,8 +710,12 @@ class CentroidMiss(nn.Module):
         miss_predicted = torch.empty((out_features, in_features), **factory_kwargs)
         self.miss_predicted = Parameter(miss_predicted, requires_grad=requires_grad)
 
-        miss_predicted_large = torch.empty((out_features, out_features, in_features), **factory_kwargs)
-        self.miss_predicted_large = Parameter(miss_predicted_large, requires_grad=requires_grad)
+        miss_predicted_large = torch.empty(
+            (out_features, out_features, in_features), **factory_kwargs
+        )
+        self.miss_predicted_large = Parameter(
+            miss_predicted_large, requires_grad=requires_grad
+        )
 
         miss_predicted_counter = torch.empty((out_features, out_features, 1), **factory_kwargs)
         self.miss_predicted_counter = Parameter(miss_predicted_counter, requires_grad=requires_grad)
@@ -770,19 +774,18 @@ class CentroidMiss(nn.Module):
         if is_wrong.sum().item() == 0:
             return
 
-        self.weight.index_add_(0, target, input, alpha=lr*3)
+        self.weight.index_add_(0, target, input, alpha=lr * 3)
         self.weight.index_add_(0, pred, -input, alpha=lr)
 
-
-        #self.miss_predicted.index_add_(0, target, input, alpha=lr)
-        #print(pred, target)
-        #print(self.miss_predicted_large[target][0][pred])
-        #print("add")
-        #self.miss_predicted_large[pred].index_add_(0, target, input, alpha=lr)
-        #self.miss_predicted_large[pred][0][target][0].index_add_(0, target, input, alpha=lr)
-        self.miss_predicted_large[pred,target,:] += input
-        self.miss_predicted_counter[pred,target,:] += 1
-        #print(self.miss_predicted_large[pred,target,:], input)
+        # self.miss_predicted.index_add_(0, target, input, alpha=lr)
+        # print(pred, target)
+        # print(self.miss_predicted_large[target][0][pred])
+        # print("add")
+        # self.miss_predicted_large[pred].index_add_(0, target, input, alpha=lr)
+        # self.miss_predicted_large[pred][0][target][0].index_add_(0, target, input, alpha=lr)
+        self.miss_predicted_large[pred, target, :] += input
+        self.miss_predicted_counter[pred, target, :] += 1
+        # print(self.miss_predicted_large[pred,target,:], input)
 
 
     @torch.no_grad()
@@ -972,12 +975,12 @@ class CentroidIterative(nn.Module):
     weight: Tensor
 
     def __init__(
-            self,
-            in_features: int,
-            out_features: int,
-            device=None,
-            dtype=None,
-            requires_grad=False,
+        self,
+        in_features: int,
+        out_features: int,
+        device=None,
+        dtype=None,
+        requires_grad=False,
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
         super(CentroidIterative, self).__init__()
@@ -1052,8 +1055,8 @@ class CentroidIterative(nn.Module):
         target = target[is_wrong]
         pred = pred[is_wrong]
 
-        self.weight.index_add_(0, target, input*lr)
-        self.weight.index_add_(0, pred, -input*lr)
+        self.weight.index_add_(0, target, input * lr)
+        self.weight.index_add_(0, pred, -input * lr)
 
     @torch.no_grad()
     def add_online(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:

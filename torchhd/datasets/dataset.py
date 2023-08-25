@@ -522,7 +522,7 @@ class UCIClassificationBenchmark:
         "LungCancer",
         "Lymphography",
         "Mammographic",
-        #"Miniboone",
+        # "Miniboone",
         "MolecBiolPromoter",
         "Monks1",
         "Monks2",
@@ -561,10 +561,8 @@ class UCIClassificationBenchmark:
         "LedDisplay",
         "Lenses",
         "LungCancer",
-        "Lymphography"
+        "Lymphography",
     ]
-
-
 
     # Specify namedtuple format
     class DatasetEntry(NamedTuple):

@@ -14,7 +14,8 @@ import time
 import csv
 import torch.nn.functional as F
 import pandas as pd
-pd.set_option('display.max_columns', None)
+
+pd.set_option("display.max_columns", None)
 from collections import deque
 
 
@@ -82,9 +83,15 @@ class Encoder(nn.Module):
 
 
 # Get an instance of the UCI benchmark
-benchmark = UCIClassificationBenchmark("/Users/verges/Documents/PhD/TorchHd/torchhd/examples/data", download=True)
+benchmark = UCIClassificationBenchmark(
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/examples/data", download=True
+)
 # Perform evaluation
-results_file = "/Users/verges/Documents/PhD/TorchHd/torchhd/examples/results/results" + str(time.time()) + ".csv"
+results_file = (
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/examples/results/results"
+    + str(time.time())
+    + ".csv"
+)
 
 with open(results_file, "w", newline="") as file:
     writer = csv.writer(file)
@@ -245,7 +252,9 @@ def exec_arena(
             for iter in range(iterations):
                 accuracy_train = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(device)
                 iter_completed += 1
-                for samples, labels in tqdm(train_loader, desc="Training", disable=False):
+                for samples, labels in tqdm(
+                    train_loader, desc="Training", disable=False
+                ):
                     samples = samples.to(device)
                     labels = labels.to(device)
                     samples_hv = encode(samples)
@@ -271,7 +280,7 @@ def exec_arena(
                     accuracy_train.update(outputs.cpu(), labels)
 
                 # Changing learning rate Iteration Dependent
-                lr = (1-accuracy_train.compute().item())*10
+                lr = (1 - accuracy_train.compute().item()) * 10
 
                 # Stop decider
                 if len(q) == 3:
@@ -284,6 +293,7 @@ def exec_arena(
                 if iter == 0:
                     with torch.no_grad():
                         accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(device)
+
 
                         for samples, labels in tqdm(test_loader, desc="Testing"):
                             samples = samples.to(device)
@@ -305,7 +315,6 @@ def exec_arena(
                     outputs = model(samples_hv, dot=True)
                     accuracy.update(outputs.cpu(), labels)
 
-            
             benchmark.report(dataset, accuracy.compute().item())
             with open(results_file, "a", newline="") as file:
                 writer = csv.writer(file)
@@ -338,14 +347,14 @@ DIMENSIONS = [10000]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
-    #"hashmap",
+    # "hashmap",
     "flocet",
-    #"sinusoid",
+    # "sinusoid",
 ]
 # ENCODINGS = ["sinusoid"]
 # METHODS = ["add"]
 METHODS = [
-    #"add",
+    # "add",
     "add_adapt",
     "add_online",
     "add_adjust",
@@ -373,14 +382,13 @@ for i in DIMENSIONS:
 
 
 import pandas as pd
+
 df = pd.read_csv(results_file)
 var = "Method"
 acc = "Accuracy"
 methods_order = METHODS
 df_mean = df.groupby([var, "Name"])[acc].mean().to_frame()
-df_pivot = df_mean.reset_index().pivot(
-    index="Name", columns=var, values=acc
-)
+df_pivot = df_mean.reset_index().pivot(index="Name", columns=var, values=acc)
 df_pivot.loc["mean"] = df_pivot.mean(axis=0)
 df_pivot = df_pivot[methods_order].round(3)
 # Print the new DataFrame to the console
