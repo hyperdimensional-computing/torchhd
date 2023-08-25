@@ -430,14 +430,12 @@ class Centroid(nn.Module):
 
         _, top_m_ = m_.topk(r, largest=True)
         _, top_n_ = n_.topk(r, largest=True)
-        intersect = torch.unique(torch.cat((top_m_, top_n_), 0))
 
-        dimensions_regenerated = intersect[
-            torch.logical_and(
-                torch.sum(top_m_ == intersect.unsqueeze(1), dim=0) > 0,
-                torch.sum(top_n_ == intersect.unsqueeze(1), dim=0) > 0,
-            )
-        ]
+        # get the intersecting elements
+        intersect = list(set(top_m_).intersection(set(top_n_)))
+
+        # convert intersect back to a tensor
+        dimensions_regenerated = torch.tensor(intersect).long().to(device)
 
         self.weight.data[:, dimensions_regenerated] = (
             torch.randn(self.weight.size(0)).unsqueeze(1).to(device)
@@ -445,6 +443,7 @@ class Centroid(nn.Module):
         encode.embed.weight[:, dimensions_regenerated] = (
             torch.randn(encode.embed.weight.size(0)).unsqueeze(1).to(device)
         )
+
 
     def multi_similarity(self, input, device):
         return torch.cat(

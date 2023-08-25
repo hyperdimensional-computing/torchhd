@@ -423,7 +423,7 @@ def exec_arena(
             elif method == "neural_iterative":
                 # Suggested lr in the paper
                 lr = 1
-                model_neural = "reset"
+                model_neural = "continous"
                 iterations_executed = neuralHDiterative.train_neuralHD(
                     train_loader,
                     device,
@@ -540,7 +540,7 @@ def exec_arena(
 
 BATCH_SIZE = 1
 REPEATS = 1
-DIMENSIONS = [1000]
+DIMENSIONS = [10000]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
@@ -559,14 +559,14 @@ ENCODINGS = [
 METHODS = [
     # "quant_iterative",
      #"sparse_iterative",
-    #"neural_iterative",
-    # "dist_iterative",
-    # "multicentroid",
+    "neural_iterative",
+    "dist_iterative",
+    "multicentroid",
     'rvfl'
 ]
 
 ITERATIONS = 30
-arena = False
+arena = True
 
 if arena:
     benchmark = HDCArena("../data", download=True)

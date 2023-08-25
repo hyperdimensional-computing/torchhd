@@ -178,7 +178,7 @@ class HDCArena:
                         yield self.DatasetEntry(dataset_name, train_ds, test_ds)
 
                     elif dataset_name == "PAMAP":
-                        for i in range(8):
+                        for i in range(1):
                             train_ds = dataset(
                                 self.root, subjects=[i], download=self.download
                             )
@@ -188,7 +188,7 @@ class HDCArena:
                             yield self.DatasetEntry(dataset_name, train_ds, test_ds)
 
                     elif dataset_name == "EMGHandGestures":
-                        for i in range(5):
+                        for i in range(1):
                             train_ds = dataset(
                                 self.root, subjects=[i], download=self.download
                             )

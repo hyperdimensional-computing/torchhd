@@ -12,7 +12,7 @@ def train_neuralHD(
     model,
     iterations,
     model_neural,
-    lazy_regeneration=1,
+    lazy_regeneration=5,
     lr=1,
     r=0.05,
     dimensions=10000,
@@ -29,7 +29,7 @@ def train_neuralHD(
             if iter % lazy_regeneration == 0:
                 model.neural_regenerate(int(r * dimensions), encode, device)
                 model.normalize()
-                if model_neural == "reset":
+                if model_neural == "reset" and iter != iterations-1:
                     model.reset_parameters()
     return iterations
 
