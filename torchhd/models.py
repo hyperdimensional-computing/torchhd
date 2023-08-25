@@ -133,7 +133,6 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, target, input)
         self.weight.index_add_(0, pred, -input)
 
-
     @torch.no_grad()
     def add_online(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
         r"""Only updates the prototype vectors on wrongly predicted inputs.
@@ -165,7 +164,6 @@ class Centroid(nn.Module):
 
         self.weight.index_add_(0, target, lr * alpha1 * input)
         self.weight.index_add_(0, pred, lr * alpha2 * -input)
-
 
     @torch.no_grad()
     def add_adjust(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
@@ -206,7 +204,6 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, target, lr * alpha1 * input)
         alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
         self.weight.index_add_(0, pred, lr * alpha2 * input)
-
 
     @torch.no_grad()
     def normalize(self, eps=1e-12) -> None:

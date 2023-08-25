@@ -81,7 +81,14 @@ with open(results_file, "w", newline="") as file:
     writer.writerow(["Name", "Accuracy", "Time", "Dimensions", "Method", "Encoding"])
 
 
-def exec_arena(method="add", encoding='density', retrain=False, dimensions=10, repeats=1, batch_size=1):
+def exec_arena(
+    method="add",
+    encoding="density",
+    retrain=False,
+    dimensions=10,
+    repeats=1,
+    batch_size=1,
+):
     for dataset in benchmark.datasets():
         print(dataset.name)
         if dataset.name == "EuropeanLanguages":
@@ -151,7 +158,9 @@ def exec_arena(method="add", encoding='density', retrain=False, dimensions=10, r
                 dataset.train, [train_size, test_size]
             )
 
-            train_loader = data.DataLoader(train_ds, batch_size=batch_size, shuffle=True)
+            train_loader = data.DataLoader(
+                train_ds, batch_size=batch_size, shuffle=True
+            )
             test_loader = data.DataLoader(test_ds, batch_size=batch_size)
         else:
             # Number of features in the dataset.
@@ -178,7 +187,9 @@ def exec_arena(method="add", encoding='density', retrain=False, dimensions=10, r
                 dataset.test.transform = transform
 
             # Set up data loaders
-            train_loader = data.DataLoader(dataset.train, batch_size=batch_size, shuffle=True)
+            train_loader = data.DataLoader(
+                dataset.train, batch_size=batch_size, shuffle=True
+            )
             test_loader = data.DataLoader(dataset.test, batch_size=batch_size)
 
         # Run for the requested number of simulations
@@ -208,13 +219,13 @@ def exec_arena(method="add", encoding='density', retrain=False, dimensions=10, r
                     labels = labels.to(device)
 
                     samples_hv = encode(samples)
-                    if method == 'add':
+                    if method == "add":
                         model.add(samples_hv, labels)
-                    elif method == 'add_online':
+                    elif method == "add_online":
                         model.add_online(samples_hv, labels)
-                    elif method == 'add_adapt':
+                    elif method == "add_adapt":
                         model.add_adapt(samples_hv, labels)
-                    elif method == 'add_adjust':
+                    elif method == "add_adjust":
                         model.add_adapt(samples_hv, labels)
 
             with torch.no_grad():
@@ -236,8 +247,8 @@ def exec_arena(method="add", encoding='density', retrain=False, dimensions=10, r
                         accuracy.compute().item(),
                         time.time() - t,
                         dimensions,
-                        'retrain'+method if retrain else method,
-                        encoding
+                        "retrain" + method if retrain else method,
+                        encoding,
                     ]
                 )
             # print(f"{dataset.name} accuracy: {(accuracy.compute().item() * 100):.2f}%")
@@ -252,6 +263,23 @@ BATCH_SIZE = 10
 # Specifies how many random initializations of the model to evaluate for each dataset in the collection.
 REPEATS = 1
 # DIMENSIONS = [64, 128, 256, 512, 1024, 2048, 4096, 8192, 10000]
+DIMENSIONS = [500]
+
+ENCODINGS = [
+    "bundle",
+    "sequence",
+    "ngram",
+    "hashmap",
+    "flocet",
+    "density",
+    "random",
+    "sinusoid",
+]
+ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid"]
+ENCODINGS = ["hashmap"]
+METHODS = ["add_adjust"]
+METHODS = ["add_adapt", "add_online", "add_adjust"]
+RETRAIN = True
 
 DIMENSIONS = [10000]
 
@@ -270,4 +298,11 @@ print(benchmark.datasets())
 for i in DIMENSIONS:
     for j in ENCODINGS:
         for k in METHODS:
-            exec_arena(encoding=j, method=k, dimensions=i, repeats=REPEATS, batch_size=BATCH_SIZE, retrain=RETRAIN)
+            exec_arena(
+                encoding=j,
+                method=k,
+                dimensions=i,
+                repeats=REPEATS,
+                batch_size=BATCH_SIZE,
+                retrain=RETRAIN,
+            )
