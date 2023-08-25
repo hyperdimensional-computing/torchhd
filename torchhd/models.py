@@ -78,6 +78,7 @@ class Centroid(nn.Module):
         self,
         in_features: int,
         out_features: int,
+        warmup: int,
         device=None,
         dtype=None,
         requires_grad=False,
@@ -87,7 +88,7 @@ class Centroid(nn.Module):
 
         self.in_features = in_features
         self.out_features = out_features
-
+        self.warmup = warmup
         self.similarity_sum = 0
         self.count = 0
         self.error_similarity_sum = 0
@@ -348,6 +349,42 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, target, input)
         self.weight.index_add_(0, target, input)
         self.weight.index_add_(0, pred, -input)
+
+    @torch.no_grad()
+    def add_adjust_8(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
+        """Adds the input vectors scaled by the lr to the target prototype vectors."""
+        logit = self(input)
+        pred = logit.argmax(1)
+        is_wrong = target != pred
+
+        self.similarity_sum += logit.max(1).values.item()
+        self.count += 1
+        if self.error_count == 0:
+            val = self.similarity_sum / self.count
+        else:
+            val = self.error_similarity_sum / self.error_count
+        if is_wrong.sum().item() == 0:
+            #print(logit[pred]-logit[target], val)
+
+            if logit.max(1).values.item() < val:
+                self.weight.index_add_(0, target, input)
+            return
+        #print(pred, target, logit[0][target], logit[0][pred])
+
+        self.error_count += 1
+        self.error_similarity_sum += logit.max(1).values.item()
+
+        logit = logit[is_wrong]
+        input = input[is_wrong]
+        target = target[is_wrong]
+        pred = pred[is_wrong]
+
+        alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
+        self.weight.index_add_(0, target, lr * alpha1 * input)
+
+        if logit[0][target] != 0:
+            alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
+            self.weight.index_add_(0, pred, lr * alpha2 * input)
 
     @torch.no_grad()
     def normalize(self, eps=1e-12) -> None:
@@ -817,12 +854,14 @@ class CentroidMiss(nn.Module):
     __constants__ = ["in_features", "out_features"]
     in_features: int
     out_features: int
+    warmup: int
     weight: Tensor
 
     def __init__(
         self,
         in_features: int,
         out_features: int,
+        warmup: int,
         device=None,
         dtype=None,
         requires_grad=False,
@@ -832,7 +871,8 @@ class CentroidMiss(nn.Module):
 
         self.in_features = in_features
         self.out_features = out_features
-
+        self.warmup = warmup
+        print(self.warmup)
         self.similarity_sum = 0
         self.count = 0
         self.error_similarity_sum = 0
@@ -844,11 +884,15 @@ class CentroidMiss(nn.Module):
         # patterns de miss predictions
         miss_predicted = torch.empty((out_features, in_features), **factory_kwargs)
         self.miss_predicted = Parameter(miss_predicted, requires_grad=requires_grad)
+
+        miss_predicted_large = torch.empty((out_features, out_features, in_features), **factory_kwargs)
+        self.miss_predicted_large = Parameter(miss_predicted_large, requires_grad=requires_grad)
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
         init.zeros_(self.weight)
         init.zeros_(self.miss_predicted)
+        init.zeros_(self.miss_predicted_large)
 
     def forward(self, input: Tensor, dot: bool = False) -> Tensor:
         if dot:
@@ -877,59 +921,30 @@ class CentroidMiss(nn.Module):
         norms.clamp_(min=eps)
         self.miss_predicted.div_(norms)
 
-    @torch.no_grad()
-    def add_adjust(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
-        r"""Only updates the prototype vectors on wrongly predicted inputs.
-
-        Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
-
-        Adds the input to the mispredicted class prototype scaled by :math:`\epsilon - 1`
-        and adds the input to the target prototype scaled by :math:`1 - \delta`,
-        where :math:`\epsilon` is the cosine similarity of the input with the mispredicted class prototype
-        and :math:`\delta` is the cosine similarity of the input with the target class prototype.
-        """
-        # Adapted from: https://gitlab.com/biaslab/onlinehd/-/blob/master/onlinehd/onlinehd.py
-        logit = self(input)
-        pred = logit.argmax(1)
-        is_wrong = target != pred
-
-        self.similarity_sum += logit.max(1).values.item()
-        self.count += 1
-        if self.error_count == 0:
-            val = self.similarity_sum / self.count
-        else:
-            val = self.error_similarity_sum / self.error_count
-        if is_wrong.sum().item() == 0:
-            if logit.max(1).values.item() < val:
-                self.weight.index_add_(0, target, input)
-            return
-
-        self.error_count += 1
-        self.error_similarity_sum += logit.max(1).values.item()
-
-        logit = logit[is_wrong]
-        input = input[is_wrong]
-        target = target[is_wrong]
-        pred = pred[is_wrong]
-        self.miss_predicted.index_add_(0, target, input, alpha=lr)
-
-        alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
-        self.weight.index_add_(0, target, lr * alpha1 * input)
-        alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
-        self.weight.index_add_(0, pred, lr * alpha2 * input)
+        for i in self.miss_predicted_large:
+            norms = i.norm(dim=1, keepdim=True)
+            norms.clamp_(min=eps)
+            i.div_(norms)
 
     @torch.no_grad()
     def add(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
         """Adds the input vectors scaled by the lr to the target prototype vectors."""
+        self.weight.index_add_(0, target, input, alpha=lr)
+
         logit = self(input)
         pred = logit.argmax(1)
         is_wrong = target != pred
-        self.weight.index_add_(0, target, input, alpha=lr)
-
         if is_wrong.sum().item() == 0:
             return
 
         self.miss_predicted.index_add_(0, target, input, alpha=lr)
+        #print(pred, target)
+        #print(self.miss_predicted_large[target][0][pred])
+        #print("add")
+        #self.miss_predicted_large[pred].index_add_(0, target, input, alpha=lr)
+        #self.miss_predicted_large[pred][0][target][0].index_add_(0, target, input, alpha=lr)
+        self.miss_predicted_large[pred,target,:] += input
+        #print(self.miss_predicted_large[pred,target,:], input)
 
     @torch.no_grad()
     def add_adapt(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
@@ -999,7 +1014,6 @@ class CentroidMiss(nn.Module):
         logit = self(input)
         pred = logit.argmax(1)
         is_wrong = target != pred
-
         self.similarity_sum += logit.max(1).values.item()
         self.count += 1
         if self.error_count == 0:
@@ -1015,12 +1029,19 @@ class CentroidMiss(nn.Module):
         self.error_similarity_sum += logit.max(1).values.item()
         self.miss_predicted.index_add_(0, target, input, alpha=lr)
 
+
         logit = logit[is_wrong]
         input = input[is_wrong]
         target = target[is_wrong]
         pred = pred[is_wrong]
 
         alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
+        #if self.count > self.warmup:
+        #    print(torchhd.cosine_similarity(self.weight[target], input))
+        if self.count > self.warmup and torchhd.cosine_similarity(self.weight[target], input) < val:
+            #print(torchhd.cosine_similarity(self.miss_predicted[target], input))
+            self.miss_predicted.index_add_(0, target, alpha1*input, alpha=lr)
+
         self.weight.index_add_(0, target, lr * alpha1 * input)
         alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
         self.weight.index_add_(0, pred, lr * alpha2 * input)
