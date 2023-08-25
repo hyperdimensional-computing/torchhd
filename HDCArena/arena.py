@@ -196,6 +196,10 @@ class Encoder(nn.Module):
             self.embed = embeddings.Density(size, dimensions)
         if self.encoding == "flocet":
             self.embed = embeddings.DensityFlocet(size, dimensions)
+        if self.encoding == "generic":
+            levels = 100
+            self.keys = embeddings.Random(size, dimensions)
+            self.embed = embeddings.Level(levels, dimensions)
         self.flatten = torch.nn.Flatten()
 
     def forward(self, x):
@@ -216,6 +220,8 @@ class Encoder(nn.Module):
             sample_hv = self.embed(x).sign()
         if self.encoding == "flocet":
             sample_hv = self.embed(x).sign()
+        if self.encoding == "generic":
+            sample_hv = torchhd.functional.generic(self.keys.weight, self.embed(x), 3)
         return torchhd.hard_quantize(sample_hv)
 
     def neural_regeneration(self, idx):
@@ -423,7 +429,7 @@ def exec_arena(
             elif method == "neural_iterative":
                 # Suggested lr in the paper
                 lr = 1
-                model_neural = "continous"
+                model_neural = "reset"
                 iterations_executed = neuralHDiterative.train_neuralHD(
                     train_loader,
                     device,
@@ -544,7 +550,7 @@ DIMENSIONS = [10000]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
-    "hashmap",
+    "generic",
 ]
 # METHODS = ["add",
 # "adapt",
@@ -557,12 +563,13 @@ ENCODINGS = [
 # "dist_iterative",
 # "multicentroid"]
 METHODS = [
+    "add"
     # "quant_iterative",
     # "sparse_iterative",
-    "neural_iterative",
-    "dist_iterative",
-    "multicentroid",
-    "rvfl",
+    # "neural_iterative",
+    # "dist_iterative",
+    # "multicentroid",
+    # "rvfl",
 ]
 
 ITERATIONS = 30

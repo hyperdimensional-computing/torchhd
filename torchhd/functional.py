@@ -27,6 +27,7 @@ import torch
 from torch import LongTensor, FloatTensor, Tensor
 from collections import deque
 
+import torchhd
 from torchhd.tensors.base import VSATensor
 from torchhd.tensors.bsc import BSCTensor
 from torchhd.tensors.map import MAPTensor
@@ -71,6 +72,7 @@ __all__ = [
     "map_range",
     "value_to_index",
     "index_to_value",
+    "generic"
 ]
 
 
@@ -1793,3 +1795,10 @@ def index_to_value(
 
     """
     return map_range(input.float(), 0, index_length - 1, out_min, out_max)
+
+def generic(id, level, ngram):
+    result = torch.zeros((1, id.shape[1]))
+    for index, i in enumerate(id[-ngram]):
+        result = torchhd.bundle(result, torchhd.bind(i, torchhd.ngrams(level[0][index:index+ngram],ngram)))
+    return result
+
