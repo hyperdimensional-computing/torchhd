@@ -85,12 +85,25 @@ results_file = "results/results" + str(time.time()) + ".csv"
 
 with open(results_file, "w", newline="") as file:
     writer = csv.writer(file)
-    writer.writerow(["Name", "Accuracy", "Time", "Dimensions", "Method", "Encoding","Iterations","Retrain"])
+    writer.writerow(
+        [
+            "Name",
+            "Accuracy",
+            "Time",
+            "Dimensions",
+            "Method",
+            "Encoding",
+            "Iterations",
+            "Retrain",
+        ]
+    )
+
 
 
 def exec_arena(
     method="add",
     encoding="density",
+    iterations=1,
     retrain=False,
     dimensions=10,
     repeats=1,
@@ -253,7 +266,7 @@ def exec_arena(
                     elif method == "neural":
                         model.add_adapt(samples_hv, labels)
 
-                if iter in [5,10,15]:
+                if iter in [5, 10, 15]:
                     with torch.no_grad():
                         m = copy.deepcopy(model)
                         m.normalize()
@@ -277,7 +290,7 @@ def exec_arena(
                                 method,
                                 encoding,
                                 iter,
-                                retrain
+                                retrain,
                             ]
                         )
 
@@ -302,6 +315,8 @@ def exec_arena(
                         dimensions,
                         "retrain" + method if retrain else method,
                         encoding,
+                        iterations,
+                        retrain,
                     ]
                 )
             # print(f"{dataset.name} accuracy: {(accuracy.compute().item() * 100):.2f}%")
@@ -325,6 +340,7 @@ ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid"]
 METHODS = ["add","add_adapt","add_online","add_adjust","add_adjust_2","add_adjust_3"]
 #METHODS = ["neural"]
 RETRAIN = [True,False]
+
 ITERATIONS = 21
 
 print(benchmark.datasets())
@@ -340,3 +356,4 @@ for i in DIMENSIONS:
                 batch_size=BATCH_SIZE,
                 retrain=RETRAIN,
             )
+
