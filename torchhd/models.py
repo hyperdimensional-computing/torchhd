@@ -329,7 +329,7 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, target, lr * input)
         self.weight.index_add_(0, pred, lr * -input)
 
-    def neural_regenerate(self, r, encode):
+    def neural_regenerate(self, r, encode, device):
         max_vals, _ = torch.max(self.weight.data, dim=0)
         min_vals, _ = torch.min(self.weight.data, dim=0)
 
@@ -338,10 +338,10 @@ class Centroid(nn.Module):
 
         self.weight.data[:, dropped_indices] = torch.randn(
             self.weight.size(0)
-        ).unsqueeze(1)
+        ).unsqueeze(1).to(device)
         encode.embed.weight[:, dropped_indices] = torch.randn(
             encode.embed.weight.size(0)
-        ).unsqueeze(1)
+        ).unsqueeze(1).to(device)
 
     @torch.no_grad()
     def add_dist(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:

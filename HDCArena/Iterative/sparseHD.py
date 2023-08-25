@@ -62,4 +62,4 @@ def test_sparseHD(test_loader, device, encode, model, accuracy):
 
             samples_hv = encode(samples)
             outputs = model.sparse_similarity(samples_hv)
-            accuracy.update(outputs.to(device), labels)
+            accuracy.update(outputs.to(device), labels.to(device))

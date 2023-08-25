@@ -27,7 +27,7 @@ def train_neuralHD(
                 samples_hv = encode(samples)
                 model.add_neural(samples_hv, labels, lr=lr)
             if iter % lazy_regeneration == 0:
-                model.neural_regenerate(int(r * dimensions), encode)
+                model.neural_regenerate(int(r * dimensions), encode, device)
                 model.normalize()
                 if model_neural == "reset":
                     model.reset_parameters()
