@@ -1,3 +1,5 @@
+import copy
+
 import torch
 import torch.nn as nn
 import torch.utils.data as data
@@ -78,10 +80,11 @@ results_file = "results/results" + str(time.time()) + ".csv"
 
 with open(results_file, "w", newline="") as file:
     writer = csv.writer(file)
-    writer.writerow(["Name", "Accuracy", "Time", "Dimensions", "Method", "Encoding"])
+    writer.writerow(["Name", "Accuracy", "Time", "Dimensions", "Method", "Encoding","Iterations","Retrain"])
 
 
-def exec_arena(method="add", encoding='density', retrain=False, dimensions=10, repeats=1, batch_size=1):
+def exec_arena(method="add", encoding='density', iterations=1, retrain=False, dimensions=10, repeats=1, batch_size=1):
+    iterations -= 1
     for dataset in benchmark.datasets():
         for r in range(repeats):
             print(dataset.name)
@@ -203,7 +206,7 @@ def exec_arena(method="add", encoding='density', retrain=False, dimensions=10, r
                         samples_hv = encode(samples)
                         model.add(samples_hv, labels)
 
-            with torch.no_grad():
+            for iter in range(iterations):
                 for samples, labels in tqdm(train_loader, desc="Training"):
                     samples = samples.to(device)
                     labels = labels.to(device)
@@ -217,6 +220,34 @@ def exec_arena(method="add", encoding='density', retrain=False, dimensions=10, r
                         model.add_adapt(samples_hv, labels)
                     elif method == 'add_adjust':
                         model.add_adapt(samples_hv, labels)
+
+                if iter in [5,10,15]:
+                    with torch.no_grad():
+                        m = copy.deepcopy(model)
+                        m.normalize()
+
+                        for samples, labels in tqdm(test_loader, desc="Testing"):
+                            samples = samples.to(device)
+
+                            samples_hv = encode(samples)
+                            outputs = m(samples_hv, dot=True)
+                            accuracy.update(outputs.cpu(), labels)
+
+                    benchmark.report(dataset, accuracy.compute().item())
+                    with open(results_file, "a", newline="") as file:
+                        writer = csv.writer(file)
+                        writer.writerow(
+                            [
+                                dataset.name,
+                                accuracy.compute().item(),
+                                time.time() - t,
+                                dimensions,
+                                method,
+                                encoding,
+                                iter,
+                                retrain
+                            ]
+                        )
 
             with torch.no_grad():
                 model.normalize()
@@ -237,8 +268,10 @@ def exec_arena(method="add", encoding='density', retrain=False, dimensions=10, r
                         accuracy.compute().item(),
                         time.time() - t,
                         dimensions,
-                        'retrain'+method if retrain else method,
-                        encoding
+                        method,
+                        encoding,
+                        iterations,
+                        retrain
                     ]
                 )
             # print(f"{dataset.name} accuracy: {(accuracy.compute().item() * 100):.2f}%")
@@ -249,34 +282,25 @@ def exec_arena(method="add", encoding='density', retrain=False, dimensions=10, r
     # print(benchmark_accuracy)
 
 
-BATCH_SIZE = 10
+BATCH_SIZE = 16
 # Specifies how many random initializations of the model to evaluate for each dataset in the collection.
-REPEATS = 1
+REPEATS = 3
 # DIMENSIONS = [64, 128, 256, 512, 1024, 2048, 4096, 8192, 10000]
-DIMENSIONS = [500]
+DIMENSIONS = [10000]
 
 ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 #ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid"]
 #ENCODINGS = ["hashmap"]
-METHODS = ["add"]
-#METHODS = ["add_adapt","add_online","add_adjust"]
-RETRAIN = False
 
-DIMENSIONS = [10000]
-
-METHODS = [
-    "bundle",
-    "sequence",
-    "ngram",
-    "hashmap",
-    "flocet",
-    "density",
-    "random",
-    "sinusoid",
-]
+#METHODS = ["add"]
+METHODS = ["add","add_adapt","add_online","add_adjust"]
+#METHODS = ["add_adapt"]
+RETRAIN = [True,False]
+ITERATIONS = 21
 print(benchmark.datasets())
 
 for i in DIMENSIONS:
     for j in ENCODINGS:
         for k in METHODS:
-            exec_arena(encoding=j, method=k, dimensions=i, repeats=REPEATS, batch_size=BATCH_SIZE, retrain=RETRAIN)
+            for r in RETRAIN:
+                exec_arena(encoding=j, method=k, dimensions=i, repeats=REPEATS, retrain=r, batch_size=BATCH_SIZE, iterations=ITERATIONS)
