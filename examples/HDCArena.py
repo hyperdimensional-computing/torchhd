@@ -252,14 +252,19 @@ BATCH_SIZE = 10
 # Specifies how many random initializations of the model to evaluate for each dataset in the collection.
 REPEATS = 1
 # DIMENSIONS = [64, 128, 256, 512, 1024, 2048, 4096, 8192, 10000]
-DIMENSIONS = [500]
 
-ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
-ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid"]
-ENCODINGS = ["hashmap"]
-METHODS = ["add_adjust"]
-METHODS = ["add_adapt","add_online","add_adjust"]
-RETRAIN = True
+DIMENSIONS = [10000]
+
+METHODS = [
+    "bundle",
+    "sequence",
+    "ngram",
+    "hashmap",
+    "flocet",
+    "density",
+    "random",
+    "sinusoid",
+]
 print(benchmark.datasets())
 
 for i in DIMENSIONS:
