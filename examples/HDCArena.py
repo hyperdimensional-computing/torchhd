@@ -336,9 +336,16 @@ DIMENSIONS = [10000]
 ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid"]
 # ENCODINGS = ["sinusoid"]
 # METHODS = ["add"]
-METHODS = ["add","add_adapt", "add_online","add_adjust","add_adjust_2","add_adjust_3"]
+METHODS = [
+    "add",
+    "add_adapt",
+    "add_online",
+    "add_adjust",
+    "add_adjust_2",
+    "add_adjust_3",
+]
 # METHODS = ["neural"]
-RETRAIN = [True,False]
+RETRAIN = [True, False]
 
 ITERATIONS = 21
 
