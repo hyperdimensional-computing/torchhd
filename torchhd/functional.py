@@ -72,7 +72,7 @@ __all__ = [
     "map_range",
     "value_to_index",
     "index_to_value",
-    "generic"
+    "generic",
 ]
 
 
@@ -1799,4 +1799,3 @@ def index_to_value(
 def generic(id, level, ngram, device):
     levels = torch.stack([torchhd.ngrams(level[0][i:i + ngram], ngram) for i in range(id.shape[0] - ngram)]).to(device)
     return torchhd.multiset(torchhd.bind(id[:-ngram], levels)).unsqueeze(0)
-
