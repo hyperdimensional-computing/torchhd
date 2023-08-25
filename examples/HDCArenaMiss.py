@@ -303,7 +303,9 @@ def exec_arena(
 
                     samples_hv = encode(samples)
                     outputs = model(samples_hv, dot=True)
-                    outputs_misspredict = model.forward_misspredicted(samples_hv, dot=True)
+                    outputs_misspredict = model.forward_misspredicted(
+                        samples_hv, dot=True
+                    )
 
                     accuracy.update(outputs.cpu(), labels)
                     if torch.max(outputs) > torch.max(outputs_misspredict):
@@ -353,6 +355,7 @@ METHODS = [
     "add_adjust_2",
     "add_adjust_3",
 ]
+
 # METHODS = ["neural"]
 RETRAIN = [True, False]
 

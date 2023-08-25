@@ -931,7 +931,6 @@ class CentroidMiss(nn.Module):
 
         self.miss_predicted.index_add_(0, target, input, alpha=lr)
 
-
     @torch.no_grad()
     def add_adapt(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
         """Adds the input vectors scaled by the lr to the target prototype vectors."""
@@ -951,7 +950,6 @@ class CentroidMiss(nn.Module):
 
         self.weight.index_add_(0, target, input)
         self.weight.index_add_(0, pred, -input)
-
 
     @torch.no_grad()
     def add_online(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
