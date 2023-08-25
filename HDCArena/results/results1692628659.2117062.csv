@@ -1,0 +1,6 @@
+name,accuracy,train_time,test_time,dimensions,method,encoding,iterations,lr,chunks,threshold,reduce_subclass,model_quantize,epsilon,alpha,beta,theta,r,lazy_regeneration,model_neural,lazy_regeneration,model_neural,partial_data,robustness_failed_dimensions,weight_decay,learning_rate,dropout_rate
+MNIST,0.9641,14.855885028839111,1692628674.3227792,10000,random_forest,flocet,30,5,,,,,,,,,,,,5,reset,0.5,0,,,
+EMGHandGestures,1.0,0.31520605087280273,1692628677.3238997,10000,random_forest,flocet,30,5,,,,,,,,,,,,5,reset,0.5,0,,,
+PAMAP,0.9998112240770206,11.43795895576477,1692628691.8547988,10000,random_forest,flocet,30,5,,,,,,,,,,,,5,reset,0.5,0,,,
+ISOLET,0.9345734445157152,3.8253960609436035,1692628700.526045,10000,random_forest,flocet,30,5,,,,,,,,,,,,5,reset,0.5,0,,,
+UCIHAR,0.7770614183915847,3.6738009452819824,1692628704.9356709,10000,random_forest,flocet,30,5,,,,,,,,,,,,5,reset,0.5,0,,,

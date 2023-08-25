@@ -1,0 +1,8 @@
+name,accuracy,train_time,test_time,dimensions,method,encoding,iterations,lr,chunks,threshold,reduce_subclass,model_quantize,epsilon,alpha,beta,theta,r,lazy_regeneration,model_neural,lazy_regeneration,model_neural,partial_data,robustness_failed_dimensions,weight_decay,learning_rate,dropout_rate
+CIFAR10,0.4452,84.19795989990234,1692628814.1058362,10000,random_forest,flocet,30,5,,,,,,,,,,,,5,reset,0.5,0,,,
+EuropeanLanguages,0.27695238095238095,51.30068016052246,1692628867.97321,10000,random_forest,flocet,30,5,,,,,,,,,,,,5,reset,0.5,0,,,
+MNIST,0.962,13.624216079711914,1692628884.949611,10000,random_forest,flocet,30,5,,,,,,,,,,,,5,reset,0.5,0,,,
+EMGHandGestures,0.9936708860759493,0.11236929893493652,1692628888.1400952,10000,random_forest,flocet,30,5,,,,,,,,,,,,5,reset,0.5,0,,,
+PAMAP,0.9997707720935249,10.924411058425903,1692628902.7637732,10000,random_forest,flocet,30,5,,,,,,,,,,,,5,reset,0.5,0,,,
+ISOLET,0.9345734445157152,3.739081859588623,1692628911.215882,10000,random_forest,flocet,30,5,,,,,,,,,,,,5,reset,0.5,0,,,
+UCIHAR,0.7668815744825246,3.7570409774780273,1692628915.7197099,10000,random_forest,flocet,30,5,,,,,,,,,,,,5,reset,0.5,0,,,

@@ -1,0 +1,1 @@
+name,accuracy,train_time,test_time,dimensions,method,encoding,iterations,lr,chunks,threshold,reduce_subclass,model_quantize,epsilon,alpha,beta,theta,r,lazy_regeneration,model_neural,lazy_regeneration,model_neural,partial_data,robustness_failed_dimensions,weight_decay,learning_rate,dropout_rate
