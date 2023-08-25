@@ -496,7 +496,9 @@ class Centroid(nn.Module):
                 i for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind
             ]
             tensors_to_keep = torch.index_select(
-                self.multi_weight[r].to(device), dim=0, index=torch.tensor(indices_to_keep).to(device)
+                self.multi_weight[r].to(device),
+                dim=0,
+                index=torch.tensor(indices_to_keep).to(device),
             )
 
             self.multi_weight[r] = tensors_to_keep.to(device)
@@ -521,10 +523,18 @@ class Centroid(nn.Module):
             cluster = torchhd.multiset(to_cluster).to(device)
 
             indices_to_keep = [
+<<<<<<< HEAD
                 i for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind
+=======
+                i.to(device)
+                for i in range(self.multi_weight[r].shape[0])
+                if i not in remove_ind
+>>>>>>> eef33ce ([github-action] formatting fixes)
             ]
             tensors_to_keep = torch.index_select(
-                self.multi_weight[r].to(device), dim=0, index=torch.tensor(indices_to_keep).to(device)
+                self.multi_weight[r].to(device),
+                dim=0,
+                index=torch.tensor(indices_to_keep).to(device),
             )
 
             self.multi_weight[r] = tensors_to_keep.to(device)
