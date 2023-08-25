@@ -2,12 +2,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Read in the CSV file
-df = pd.read_csv("results/hashmap_encoding_arena_comparison.csv")
+df = pd.read_csv("results/iterative_add_adapt.csv")
 var = "Method"
 acc = "Accuracy"
 
 methods_order = [
-    "add",
+    #"add",
     "add_adapt",
     "add_online",
     "add_adjust",
@@ -89,6 +89,27 @@ print(latex_table)
 df_mean = df.groupby([var, "Name"])["Time"].mean().to_frame()
 print(df_mean)
 df_pivot = df_mean.reset_index().pivot(index="Name", columns=var, values="Time")
+df_pivot.loc["mean"] = df_pivot.mean(axis=0)
+df_pivot = df_pivot[methods_order].round(3)
+# Print the new DataFrame to the console
+
+
+# print the resulting counts
+# print(max_counts)
+# display the results
+
+df_pivot = df_pivot.apply(
+    lambda row: row.replace(row.min(), "bof(" + str(row.min()) + ")"), axis=1
+)
+latex_table = df_pivot.to_latex(index=True)
+
+# Print the LaTeX table to the console
+print(latex_table)
+
+
+df_mean = df.groupby([var, "Name"])["Iterations"].mean().to_frame()
+print(df_mean)
+df_pivot = df_mean.reset_index().pivot(index="Name", columns=var, values="Iterations")
 df_pivot.loc["mean"] = df_pivot.mean(axis=0)
 df_pivot = df_pivot[methods_order].round(3)
 # Print the new DataFrame to the console

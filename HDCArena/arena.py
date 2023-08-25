@@ -20,8 +20,7 @@ from Iterative import sparseHD as sparseHDiterative
 from Iterative import neuralHD as neuralHDiterative
 from Iterative import distHD as distHDiterative
 
-
-pd.set_option("display.max_columns", None)
+pd.set_option('display.max_columns', None)
 from collections import deque
 
 
@@ -44,24 +43,24 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
         self.encoding = encoding
         if self.encoding == "bundle":
-            if name == "EuropeanLanguages":
+            if name == 'EuropeanLanguages':
                 self.embed = embeddings.Random(size, dimensions, padding_idx=0)
             else:
                 self.embed = embeddings.Random(size, dimensions)
         if self.encoding == "hashmap":
             levels = 100
-            if name == "EuropeanLanguages":
+            if name == 'EuropeanLanguages':
                 self.keys = embeddings.Random(size, dimensions, padding_idx=0)
             else:
                 self.keys = embeddings.Random(size, dimensions)
             self.embed = embeddings.Level(levels, dimensions)
         if self.encoding == "ngram":
-            if name == "EuropeanLanguages":
+            if name == 'EuropeanLanguages':
                 self.embed = embeddings.Random(size, dimensions, padding_idx=0)
             else:
                 self.embed = embeddings.Random(size, dimensions)
         if self.encoding == "sequence":
-            if name == "EuropeanLanguages":
+            if name == 'EuropeanLanguages':
                 self.embed = embeddings.Random(size, dimensions, padding_idx=0)
             else:
                 self.embed = embeddings.Random(size, dimensions)
@@ -101,7 +100,7 @@ class Encoder(nn.Module):
 
 
 # Get an instance of the UCI benchmark
-benchmark = UCIClassificationBenchmark("../data", download=True)
+
 # Perform evaluation
 results_file = "results/results" + str(time.time()) + ".csv"
 
@@ -122,13 +121,13 @@ with open(results_file, "w", newline="") as file:
 
 
 def exec_arena(
-    method="add",
-    encoding="density",
-    iterations=1,
-    dimensions=10,
-    repeats=1,
-    batch_size=1,
-    lr=5,
+        method="add",
+        encoding="density",
+        iterations=1,
+        dimensions=10,
+        repeats=1,
+        batch_size=1,
+        lr=5,
 ):
     for dataset in benchmark.datasets():
         for r in range(repeats):
@@ -172,9 +171,7 @@ def exec_arena(
                     "../data", train=False, transform=transform, download=True
                 )
                 num_classes = len(train_ds.classes)
-                train_loader = data.DataLoader(
-                    train_ds, batch_size=batch_size, shuffle=True
-                )
+                train_loader = data.DataLoader(train_ds, batch_size=batch_size, shuffle=True)
                 test_loader = data.DataLoader(test_ds, batch_size=batch_size)
             elif dataset.name in ["PAMAP", "EMGHandGestures"]:
                 if dataset.name == "EMGHandGestures":
@@ -200,9 +197,7 @@ def exec_arena(
                 train_ds, test_ds = data.random_split(
                     dataset.train, [train_size, test_size]
                 )
-                train_loader = data.DataLoader(
-                    train_ds, batch_size=batch_size, shuffle=True
-                )
+                train_loader = data.DataLoader(train_ds, batch_size=batch_size, shuffle=True)
                 test_loader = data.DataLoader(test_ds, batch_size=batch_size)
             else:
                 # Number of features in the dataset.
@@ -228,11 +223,9 @@ def exec_arena(
                     dataset.train.transform = transform
                     dataset.test.transform = transform
 
-                    # Set up data loaders
-                    train_loader = data.DataLoader(
-                        dataset.train, batch_size=batch_size, shuffle=True
-                    )
-                    test_loader = data.DataLoader(dataset.test, batch_size=batch_size)
+                # Set up data loaders
+                train_loader = data.DataLoader(dataset.train, batch_size=batch_size, shuffle=True)
+                test_loader = data.DataLoader(dataset.test, batch_size=batch_size)
 
             encode = Encoder(num_feat, dimensions, encoding, dataset.name)
             encode = encode.to(device)
@@ -242,146 +235,87 @@ def exec_arena(
 
             # TRAIN #
             t = time.time()
-            if method == "add":
+            if method == 'add':
                 vanillaHD.train_vanillaHD(train_loader, device, encode, model)
                 iterations_executed = 1
-            elif method == "adapt":
+            elif method == 'adapt':
                 adaptHD.train_adaptHD(train_loader, device, encode, model)
                 iterations_executed = 1
-            elif method == "online":
+            elif method == 'online':
                 onlineHD.train_onlineHD(train_loader, device, encode, model)
                 iterations_executed = 1
-            elif method == "adapt_iterative":
-                iterations_executed = adaptHDiterative.train_adaptHD(
-                    train_loader, device, encode, model, iterations, num_classes, lr
-                )
-            elif method == "online_iterative":
-                iterations_executed = onlineHDiterative.train_onlineHD(
-                    train_loader, device, encode, model, iterations, num_classes, lr
-                )
-            elif method == "quant_iterative":
+            elif method == 'adapt_iterative':
+                iterations_executed = adaptHDiterative.train_adaptHD(train_loader, device, encode, model, iterations,
+                                                                     num_classes, lr)
+            elif method == 'online_iterative':
+                iterations_executed = onlineHDiterative.train_onlineHD(train_loader, device, encode, model, iterations,
+                                                                       num_classes, lr)
+            elif method == 'quant_iterative':
                 # Suggested lr in the paper
                 lr = 1
                 iterations = 30
                 epsilon = 0.01
-                model_quantize = "ternary"
-                iterations_executed = quantHDiterative.train_quantHD(
-                    train_loader,
-                    device,
-                    encode,
-                    model,
-                    model_quantize,
-                    iterations,
-                    num_classes,
-                    lr,
-                    epsilon,
-                )
-            elif method == "sparse_iterative":
+                model_quantize = 'ternary'
+                iterations_executed = quantHDiterative.train_quantHD(train_loader, device, encode, model,
+                                                                     model_quantize, iterations, num_classes, lr,
+                                                                     epsilon)
+            elif method == 'sparse_iterative':
                 # Suggested lr in the paper
                 lr = 1
                 iterations = 30
                 epsilon = 0.01
-                model_sparse = "class"
-                iterations_executed = sparseHDiterative.train_sparseHD(
-                    train_loader,
-                    device,
-                    encode,
-                    model,
-                    model_sparse,
-                    iterations,
-                    num_classes,
-                    lr,
-                    epsilon,
-                    dimensions=dimensions,
-                )
-            elif method == "neural_iterative":
+                model_sparse = 'class'
+                iterations_executed = sparseHDiterative.train_sparseHD(train_loader, device, encode, model,
+                                                                       model_sparse, iterations, num_classes, lr,
+                                                                       epsilon, dimensions=dimensions)
+            elif method == 'neural_iterative':
                 # Suggested lr in the paper
                 lr = 1
                 iterations = 30
-                model_neural = "reset"
-                iterations_executed = neuralHDiterative.train_neuralHD(
-                    train_loader,
-                    device,
-                    encode,
-                    model,
-                    iterations,
-                    model_neural,
-                    lr,
-                    dimensions=dimensions,
-                )
-            elif method == "dist_iterative":
+                model_neural = 'reset'
+                iterations_executed = neuralHDiterative.train_neuralHD(train_loader, device, encode, model,
+                                                                       iterations, model_neural, lr,
+                                                                       dimensions=dimensions)
+            elif method == 'dist_iterative':
                 # Suggested lr in the paper
                 lr = 1
                 iterations = 30
-                iterations_executed = distHDiterative.train_distHD(
-                    train_loader,
-                    device,
-                    encode,
-                    model,
-                    iterations,
-                    lr=1,
-                    r=0.05,
-                    alpha=4,
-                    beta=2,
-                    theta=1,
-                    dimensions=dimensions,
-                )
-            elif method == "multicentroid":
+                iterations_executed = distHDiterative.train_distHD(train_loader, device, encode, model, iterations,
+                                                                   lr=1, r=0.05, alpha=4, beta=2, theta=1,
+                                                                   dimensions=dimensions)
+            elif method == 'multicentroid':
                 iterations_executed = 1
-                reduce_subclasses = "drop"
+                reduce_subclasses = 'drop'
                 threshold = 0.03
-                multiCentroidHD.train_multicentroidHD(
-                    train_loader,
-                    device,
-                    encode,
-                    model,
-                    num_classes,
-                    reduce_subclasses=reduce_subclasses,
-                    threshold=threshold,
-                )
+                multiCentroidHD.train_multicentroidHD(train_loader, device, encode, model, num_classes,
+                                                      reduce_subclasses=reduce_subclasses, threshold=threshold)
 
             train_time = time.time() - t
 
             # TEST #
 
-            accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(
-                device
-            )
+            accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(device)
             t = time.time()
-            if method == "add":
+            if method == 'add':
                 vanillaHD.test_vanillaHD(test_loader, device, encode, model, accuracy)
-            elif method == "adapt":
+            elif method == 'adapt':
                 adaptHD.test_adaptHD(test_loader, device, encode, model, accuracy)
-            elif method == "online":
+            elif method == 'online':
                 onlineHD.test_onlineHD(test_loader, device, encode, model, accuracy)
-            elif method == "adapt_iterative":
-                adaptHDiterative.test_adaptHD(
-                    test_loader, device, encode, model, accuracy
-                )
-            elif method == "online_iterative":
-                onlineHDiterative.test_onlineHD(
-                    test_loader, device, encode, model, accuracy
-                )
-            elif method == "quant_iterative":
-                quantHDiterative.test_quantHD(
-                    test_loader, device, encode, model, accuracy, model_quantize
-                )
-            elif method == "sparse_iterative":
-                sparseHDiterative.test_sparseHD(
-                    test_loader, device, encode, model, accuracy
-                )
-            elif method == "neural_iterative":
-                neuralHDiterative.test_neuralHD(
-                    test_loader, device, encode, model, accuracy
-                )
-            elif method == "dist_iterative":
-                distHDiterative.test_distHD(
-                    test_loader, device, encode, model, accuracy
-                )
-            elif method == "multicentroid":
-                multiCentroidHD.test_multicentroidHD(
-                    test_loader, device, encode, model, accuracy
-                )
+            elif method == 'adapt_iterative':
+                adaptHDiterative.test_adaptHD(test_loader, device, encode, model, accuracy)
+            elif method == 'online_iterative':
+                onlineHDiterative.test_onlineHD(test_loader, device, encode, model, accuracy)
+            elif method == 'quant_iterative':
+                quantHDiterative.test_quantHD(test_loader, device, encode, model, accuracy, model_quantize)
+            elif method == 'sparse_iterative':
+                sparseHDiterative.test_sparseHD(test_loader, device, encode, model, accuracy)
+            elif method == 'neural_iterative':
+                neuralHDiterative.test_neuralHD(test_loader, device, encode, model, accuracy)
+            elif method == 'dist_iterative':
+                distHDiterative.test_distHD(test_loader, device, encode, model, accuracy)
+            elif method == 'multicentroid':
+                multiCentroidHD.test_multicentroidHD(test_loader, device, encode, model, accuracy)
             test_time = time.time() - t
 
             benchmark.report(dataset, accuracy.compute().item())
@@ -402,25 +336,36 @@ def exec_arena(
 
 
 BATCH_SIZE = 1
-REPEATS = 3
-DIMENSIONS = [64]
+REPEATS = 1
+DIMENSIONS = [10000]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
     "hashmap",
-    # "flocet",
-    # "sinusoid",
 ]
-# ENCODINGS = ["sinusoid"]
-# METHODS = ["add"]
+# METHODS = ["add",
+# "adapt",
+# "online",
+# "adapt_iterative",
+# "online_iterative",
+# "quant_iterative",
+# "sparse_iterative",
+# "neural_iterative",
+# "dist_iterative",
+# "multicentroid"]
 METHODS = [
-    "multicentroid",
-    # "adapt_iterative",
-    # "add_online",
-    # "add_adjust",
+    'add',
 ]
 
-ITERATIONS = 5
+ITERATIONS = 30
+arena = True
+
+if arena:
+    benchmark = HDCArena("../data", download=True)
+
+else:
+    benchmark = UCIClassificationBenchmark("../data", download=True)
+
 print(benchmark.datasets())
 
 for i in DIMENSIONS:
@@ -434,17 +379,3 @@ for i in DIMENSIONS:
                 batch_size=BATCH_SIZE,
                 iterations=ITERATIONS,
             )
-
-import pandas as pd
-
-df = pd.read_csv(results_file)
-var = "Method"
-acc = "Accuracy"
-methods_order = METHODS
-df_mean = df.groupby([var, "Name"])[acc].mean().to_frame()
-df_pivot = df_mean.reset_index().pivot(index="Name", columns=var, values=acc)
-df_pivot.loc["mean"] = df_pivot.mean(axis=0)
-df_pivot = df_pivot[methods_order].round(3)
-# Print the new DataFrame to the console
-
-print(df_pivot)
