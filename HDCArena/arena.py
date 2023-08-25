@@ -419,7 +419,11 @@ ENCODINGS = [
 # "dist_iterative",
 # "multicentroid"]
 METHODS = [
-    "add",
+    "quant_iterative",
+    "sparse_iterative",
+    "neural_iterative",
+    "dist_iterative",
+    "multicentroid",
 ]
 
 ITERATIONS = 30
