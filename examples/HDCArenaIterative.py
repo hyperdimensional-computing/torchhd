@@ -255,6 +255,7 @@ def exec_arena(
                     "multiclass", num_classes=num_classes
                 ).to(device)
                 iter_completed += 1
+
                 for samples, labels in tqdm(
                     train_loader, desc="Training", disable=False
                 ):
