@@ -264,11 +264,11 @@ def exec_arena(
                     if method == "add":
                         model.add(samples_hv, labels)
                     elif method == "add_online":
-                        model.add_online(samples_hv, labels)
+                        model.add_online(samples_hv, labels, lr)
                     elif method == "add_adapt":
                         model.add_adapt(samples_hv, labels, lr)
                     elif method == "add_adjust":
-                        model.add_adjust(samples_hv, labels)
+                        model.add_adjust(samples_hv, labels, lr)
                     elif method == "add_adjust_2":
                         model.add_adjust_2(samples_hv, labels)
                     elif method == "add_adjust_3":
