@@ -14,7 +14,8 @@ import time
 import csv
 import torch.nn.functional as F
 import pandas as pd
-pd.set_option('display.max_columns', None)
+
+pd.set_option("display.max_columns", None)
 
 
 # Function for performing min-max normalization of the input data samples
@@ -81,9 +82,15 @@ class Encoder(nn.Module):
 
 
 # Get an instance of the UCI benchmark
-benchmark = UCIClassificationBenchmark("/Users/verges/Documents/PhD/TorchHd/torchhd/examples/data", download=True)
+benchmark = UCIClassificationBenchmark(
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/examples/data", download=True
+)
 # Perform evaluation
-results_file = "/Users/verges/Documents/PhD/TorchHd/torchhd/examples/results/results" + str(time.time()) + ".csv"
+results_file = (
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/examples/results/results"
+    + str(time.time())
+    + ".csv"
+)
 
 with open(results_file, "w", newline="") as file:
     writer = csv.writer(file)
@@ -224,7 +231,7 @@ def exec_arena(
             encode = Encoder(num_feat, dimensions, encoding)
             encode = encode.to(device)
 
-            model = Centroid(dimensions, num_classes, num_train_samples*0.1)
+            model = Centroid(dimensions, num_classes, num_train_samples * 0.1)
             model = model.to(device)
 
             t = time.time()
@@ -338,16 +345,16 @@ DIMENSIONS = [10000]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
-    #"hashmap",
+    # "hashmap",
     "flocet",
-    #"sinusoid",
+    # "sinusoid",
 ]
 # ENCODINGS = ["sinusoid"]
 # METHODS = ["add"]
 METHODS = [
-    #"add",
-    #"add_adapt",
-    #"add_online",
+    # "add",
+    # "add_adapt",
+    # "add_online",
     "add_adjust_8",
 ]
 # METHODS = ["neural"]
@@ -369,3 +376,4 @@ for i in DIMENSIONS:
                 batch_size=BATCH_SIZE,
                 retrain=RETRAIN,
             )
+

@@ -294,6 +294,7 @@ class Centroid(nn.Module):
             self.weight.index_add_(0, target, input, alpha=lr*4)
             self.weight.index_add_(0, pred, -input, alpha=lr)
 
+
     @torch.no_grad()
     def normalize(self, eps=1e-12) -> None:
         """Transforms all the class prototype vectors into unit vectors.
@@ -714,6 +715,7 @@ class CentroidMiss(nn.Module):
 
         miss_predicted_counter = torch.empty((out_features, out_features, 1), **factory_kwargs)
         self.miss_predicted_counter = Parameter(miss_predicted_counter, requires_grad=requires_grad)
+
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
@@ -781,6 +783,7 @@ class CentroidMiss(nn.Module):
         self.miss_predicted_large[pred,target,:] += input
         self.miss_predicted_counter[pred,target,:] += 1
         #print(self.miss_predicted_large[pred,target,:], input)
+
 
     @torch.no_grad()
     def add_adapt(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
@@ -865,18 +868,20 @@ class CentroidMiss(nn.Module):
         self.error_similarity_sum += logit.max(1).values.item()
         self.miss_predicted.index_add_(0, target, input, alpha=lr)
 
-
         logit = logit[is_wrong]
         input = input[is_wrong]
         target = target[is_wrong]
         pred = pred[is_wrong]
 
         alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
-        #if self.count > self.warmup:
+        # if self.count > self.warmup:
         #    print(torchhd.cosine_similarity(self.weight[target], input))
-        if self.count > self.warmup and torchhd.cosine_similarity(self.weight[target], input) < val:
-            #print(torchhd.cosine_similarity(self.miss_predicted[target], input))
-            self.miss_predicted.index_add_(0, target, alpha1*input, alpha=lr)
+        if (
+            self.count > self.warmup
+            and torchhd.cosine_similarity(self.weight[target], input) < val
+        ):
+            # print(torchhd.cosine_similarity(self.miss_predicted[target], input))
+            self.miss_predicted.index_add_(0, target, alpha1 * input, alpha=lr)
 
         self.weight.index_add_(0, target, lr * alpha1 * input)
         alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
