@@ -16,22 +16,16 @@ methods_order = [
 ]
 
 methods_order = ["add", "add_adapt", "add_online", "add_adjust"]
+
 # Create the first plot
 fig, ax = plt.subplots(figsize=(10, 6))
-df.groupby(["Name", "Method"])["Accuracy"].mean().unstack().reindex(
-    methods_order, axis=1
-).plot(kind="bar", ax=ax, width=0.8)
+df.groupby(['Name', 'Method'])['Accuracy'].mean().unstack().reindex(methods_order, axis=1).plot(kind='bar', ax=ax, width=0.8)
 
-print(
-    df.groupby(["Name", "Method"])["Accuracy"]
-    .mean()
-    .unstack()
-    .reindex(methods_order, axis=1)
-)
-ax.set_xlabel("Method and Dataset Name")
-ax.set_ylabel("Accuracy")
-ax.legend(title="Dataset Name", loc="upper left")
-plt.title("Accuracy by Method and Dataset")
+print(df.groupby(['Name', 'Method'])['Accuracy'].mean().unstack().reindex(methods_order, axis=1))
+ax.set_xlabel('Method and Dataset Name')
+ax.set_ylabel('Accuracy')
+ax.legend(title='Dataset Name', loc='upper left')
+plt.title('Accuracy by Method and Dataset')
 
 # Create the second plot
 fig, ax = plt.subplots(figsize=(10, 6))

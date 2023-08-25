@@ -12,12 +12,13 @@ from torchhd import embeddings
 from torchhd.models import Centroid
 import time
 import csv
+import torch.nn.functional as F
 
 
 # Function for performing min-max normalization of the input data samples
 def create_min_max_normalize(min: Tensor, max: Tensor):
     def normalize(input: Tensor) -> Tensor:
-        return torch.nan_to_num((input - min) / (max - min))
+        return torch.nan_to_num((input.to(device) - min) / (max - min))
 
     return normalize
 
@@ -71,6 +72,10 @@ class Encoder(nn.Module):
         if self.encoding == "flocet":
             sample_hv = self.embed(x).sign()
         return torchhd.hard_quantize(sample_hv)
+
+    def neural_regeneration(self, idx):
+        nn.init.normal_(self.embed.weight[idx], 0, 1)
+        self.embed.weight[idx] = F.normalize(self.embed.weight)[idx]
 
 
 # Get an instance of the UCI benchmark
@@ -221,6 +226,13 @@ def exec_arena(
                         model.add(samples_hv, labels)
 
             for iter in range(iterations):
+
+                if method == "neural":
+                    model.normalize()
+                    idx = model.neural_regeneration(k=int(dimensions * 0.05))
+                    encode.neural_regeneration(idx)
+                    model.reset_parameters()
+
                 for samples, labels in tqdm(train_loader, desc="Training"):
                     samples = samples.to(device)
                     labels = labels.to(device)
@@ -233,6 +245,12 @@ def exec_arena(
                     elif method == "add_adapt":
                         model.add_adapt(samples_hv, labels)
                     elif method == "add_adjust":
+                        model.add_adjust(samples_hv, labels)
+                    elif method == "add_adjust_2":
+                        model.add_adjust_2(samples_hv, labels)
+                    elif method == "add_adjust_3":
+                        model.add_adjust_3(samples_hv, labels)
+                    elif method == "neural":
                         model.add_adapt(samples_hv, labels)
 
                 if iter in [5,10,15]:
@@ -294,33 +312,21 @@ def exec_arena(
     # print(benchmark_accuracy)
 
 
-BATCH_SIZE = 16
+BATCH_SIZE = 1
 # Specifies how many random initializations of the model to evaluate for each dataset in the collection.
 REPEATS = 3
 # DIMENSIONS = [64, 128, 256, 512, 1024, 2048, 4096, 8192, 10000]
 DIMENSIONS = [10000]
 
-ENCODINGS = [
-    "bundle",
-    "sequence",
-    "ngram",
-    "hashmap",
-    "flocet",
-    "density",
-    "random",
-    "sinusoid",
-]
-# ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid"]
-# ENCODINGS = ["hashmap"]
-METHODS = ["add"]
-# METHODS = ["add_adapt","add_online","add_adjust"]
-RETRAIN = False
-
+#ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
+ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid"]
+#ENCODINGS = ["sinusoid"]
 #METHODS = ["add"]
-METHODS = ["add","add_adapt","add_online","add_adjust"]
-#METHODS = ["add_adapt"]
+METHODS = ["add","add_adapt","add_online","add_adjust","add_adjust_2","add_adjust_3"]
+#METHODS = ["neural"]
 RETRAIN = [True,False]
 ITERATIONS = 21
+
 print(benchmark.datasets())
 
 for i in DIMENSIONS:
