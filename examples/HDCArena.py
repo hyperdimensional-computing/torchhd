@@ -83,8 +83,14 @@ with open(results_file, "w", newline="") as file:
     writer.writerow(["Name", "Accuracy", "Time", "Dimensions", "Method", "Encoding","Iterations","Retrain"])
 
 
-def exec_arena(method="add", encoding='density', iterations=1, retrain=False, dimensions=10, repeats=1, batch_size=1):
-    iterations -= 1
+def exec_arena(
+    method="add",
+    encoding="density",
+    retrain=False,
+    dimensions=10,
+    repeats=1,
+    batch_size=1,
+):
     for dataset in benchmark.datasets():
         for r in range(repeats):
             print(dataset.name)
@@ -129,12 +135,16 @@ def exec_arena(method="add", encoding='density', iterations=1, retrain=False, di
                 test_ds = Languages(
                     "../data", train=False, transform=transform, download=True
                 )
-                test_loader = data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
+                test_loader = data.DataLoader(
+                    test_ds, batch_size=BATCH_SIZE, shuffle=False
+                )
                 num_classes = len(train_ds.classes)
 
             elif dataset.name in ["PAMAP", "EMGHandGestures"]:
                 if dataset.name == "EMGHandGestures":
-                    num_feat = dataset.train[0][0].size(-1) * dataset.train[0][0].size(-2)
+                    num_feat = dataset.train[0][0].size(-1) * dataset.train[0][0].size(
+                        -2
+                    )
                 else:
                     num_feat = dataset.train[0][0].size(-1)
 
@@ -155,7 +165,9 @@ def exec_arena(method="add", encoding='density', iterations=1, retrain=False, di
                     dataset.train, [train_size, test_size]
                 )
 
-                train_loader = data.DataLoader(train_ds, batch_size=batch_size, shuffle=True)
+                train_loader = data.DataLoader(
+                    train_ds, batch_size=batch_size, shuffle=True
+                )
                 test_loader = data.DataLoader(test_ds, batch_size=batch_size)
             else:
                 # Number of features in the dataset.
@@ -163,9 +175,9 @@ def exec_arena(method="add", encoding='density', iterations=1, retrain=False, di
                     num_feat = dataset.train[0][0].size(-1)
                 else:
                     if dataset.name == "MNIST":
-                        num_feat = dataset.train[0][0].size(-1) * dataset.train[0][0].size(
-                            -1
-                        )
+                        num_feat = dataset.train[0][0].size(-1) * dataset.train[0][
+                            0
+                        ].size(-1)
                     elif dataset.name == "CIFAR10":
                         num_feat = 3072
                 # Number of classes in the dataset.
@@ -182,7 +194,9 @@ def exec_arena(method="add", encoding='density', iterations=1, retrain=False, di
                     dataset.test.transform = transform
 
                 # Set up data loaders
-                train_loader = data.DataLoader(dataset.train, batch_size=batch_size, shuffle=True)
+                train_loader = data.DataLoader(
+                    dataset.train, batch_size=batch_size, shuffle=True
+                )
                 test_loader = data.DataLoader(dataset.test, batch_size=batch_size)
 
             # Run for the requested number of simulations
@@ -212,13 +226,13 @@ def exec_arena(method="add", encoding='density', iterations=1, retrain=False, di
                     labels = labels.to(device)
 
                     samples_hv = encode(samples)
-                    if method == 'add':
+                    if method == "add":
                         model.add(samples_hv, labels)
-                    elif method == 'add_online':
+                    elif method == "add_online":
                         model.add_online(samples_hv, labels)
-                    elif method == 'add_adapt':
+                    elif method == "add_adapt":
                         model.add_adapt(samples_hv, labels)
-                    elif method == 'add_adjust':
+                    elif method == "add_adjust":
                         model.add_adapt(samples_hv, labels)
 
                 if iter in [5,10,15]:
@@ -268,10 +282,8 @@ def exec_arena(method="add", encoding='density', iterations=1, retrain=False, di
                         accuracy.compute().item(),
                         time.time() - t,
                         dimensions,
-                        method,
+                        "retrain" + method if retrain else method,
                         encoding,
-                        iterations,
-                        retrain
                     ]
                 )
             # print(f"{dataset.name} accuracy: {(accuracy.compute().item() * 100):.2f}%")
@@ -288,9 +300,21 @@ REPEATS = 3
 # DIMENSIONS = [64, 128, 256, 512, 1024, 2048, 4096, 8192, 10000]
 DIMENSIONS = [10000]
 
-ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
-#ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid"]
-#ENCODINGS = ["hashmap"]
+ENCODINGS = [
+    "bundle",
+    "sequence",
+    "ngram",
+    "hashmap",
+    "flocet",
+    "density",
+    "random",
+    "sinusoid",
+]
+# ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid"]
+# ENCODINGS = ["hashmap"]
+METHODS = ["add"]
+# METHODS = ["add_adapt","add_online","add_adjust"]
+RETRAIN = False
 
 #METHODS = ["add"]
 METHODS = ["add","add_adapt","add_online","add_adjust"]
@@ -302,5 +326,11 @@ print(benchmark.datasets())
 for i in DIMENSIONS:
     for j in ENCODINGS:
         for k in METHODS:
-            for r in RETRAIN:
-                exec_arena(encoding=j, method=k, dimensions=i, repeats=REPEATS, retrain=r, batch_size=BATCH_SIZE, iterations=ITERATIONS)
+            exec_arena(
+                encoding=j,
+                method=k,
+                dimensions=i,
+                repeats=REPEATS,
+                batch_size=BATCH_SIZE,
+                retrain=RETRAIN,
+            )
