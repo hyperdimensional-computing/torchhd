@@ -82,15 +82,9 @@ class Encoder(nn.Module):
 
 
 # Get an instance of the UCI benchmark
-benchmark = HDCArena(
-    "../data", download=True
-)
+benchmark = HDCArena("../data", download=True)
 # Perform evaluation
-results_file = (
-    "results/results"
-    + str(time.time())
-    + ".csv"
-)
+results_file = "results/results" + str(time.time()) + ".csv"
 
 with open(results_file, "w", newline="") as file:
     writer = csv.writer(file)
