@@ -12,7 +12,7 @@ import time
 import csv
 import torch.nn.functional as F
 import pandas as pd
-from SinglePass import vanillaHD, adaptHD, onlineHD, multiCentroidHD, intRVFL
+from SinglePass import vanillaHD, highHD, adaptHD, onlineHD, multiCentroidHD, intRVFL
 from Iterative import adaptHD as adaptHDiterative
 from Iterative import onlineHD as onlineHDiterative
 from Iterative import quantHD as quantHDiterative
@@ -200,6 +200,10 @@ class Encoder(nn.Module):
             levels = 100
             self.keys = embeddings.Random(size, dimensions)
             self.embed = embeddings.Level(levels, dimensions)
+        if self.encoding == "hashmapGen":
+            levels = 100
+            self.keys = embeddings.Sinusoid(size, dimensions)
+            self.embed = embeddings.Level(levels, dimensions)
         self.flatten = torch.nn.Flatten()
 
     def forward(self, x):
@@ -222,6 +226,8 @@ class Encoder(nn.Module):
             sample_hv = self.embed(x).sign()
         if self.encoding == "generic":
             sample_hv = torchhd.functional.generic(self.keys.weight.to(device), self.embed(x).to(device), 3, device).to(device)
+        if self.encoding == "hashmapGen":
+            sample_hv = torchhd.hash_table(self.keys(x).sign(), self.embed(x).to(device))
         return torchhd.hard_quantize(sample_hv)
 
     def neural_regeneration(self, idx):
@@ -376,6 +382,9 @@ def exec_arena(
             if method == "add":
                 vanillaHD.train_vanillaHD(train_loader, device, encode, model)
                 iterations_executed = 1
+            elif method == "add_high":
+                highHD.train_highHD(train_loader, device, encode, model)
+                iterations_executed = 1
             elif method == "adapt":
                 adaptHD.train_adaptHD(train_loader, device, encode, model)
                 iterations_executed = 1
@@ -491,6 +500,8 @@ def exec_arena(
             t = time.time()
             if method == "add":
                 vanillaHD.test_vanillaHD(test_loader, device, encode, model, accuracy)
+            elif method == "add_high":
+                highHD.test_highHD(test_loader, device, encode, model, accuracy)
             elif method == "adapt":
                 adaptHD.test_adaptHD(test_loader, device, encode, model, accuracy)
             elif method == "online":
@@ -542,6 +553,7 @@ def exec_arena(
                         iterations_executed,
                     ]
                 )
+            # print(accuracy.compute().item())
 
 
 BATCH_SIZE = 1
@@ -550,7 +562,7 @@ DIMENSIONS = [10000]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
-    "generic",
+    "hashmap",
 ]
 # METHODS = ["add",
 # "adapt",
@@ -563,13 +575,13 @@ ENCODINGS = [
 # "dist_iterative",
 # "multicentroid"]
 METHODS = [
-    "add"
+    # "add_high"
     # "quant_iterative",
     # "sparse_iterative",
     # "neural_iterative",
-    # "dist_iterative",
-    # "multicentroid",
-    # "rvfl",
+    "dist_iterative",
+    "multicentroid",
+    "rvfl",
 ]
 
 ITERATIONS = 30
