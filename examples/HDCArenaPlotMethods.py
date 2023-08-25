@@ -12,8 +12,8 @@ methods_order = [
     "add_online",
     "add_adjust",
     # "add_miss",
-    #"add_adjust_2",
-    #"add_adjust_3",
+    # "add_adjust_2",
+    # "add_adjust_3",
     # "add_adjust_8",
     # "add_adjust_9",
     # "bundle",
@@ -25,7 +25,7 @@ methods_order = [
     # "random",
     # "sinusoid",
 ]
-#df = df[df["Encoding"] == "hashmap"]
+# df = df[df["Encoding"] == "hashmap"]
 print(df)
 print(df.groupby(["Name", var]))
 # methods_order = ["add"]

@@ -46,13 +46,13 @@ class Encoder(nn.Module):
         if self.encoding == "random":
             self.embed = embeddings.Projection(size, dimensions)
         if self.encoding == "sinusoid":
-            self.embed = embeddings.Projection(size, size*2)
-            self.embedd = embeddings.Sinusoid(size*2, dimensions)
+            self.embed = embeddings.Projection(size, size * 2)
+            self.embedd = embeddings.Sinusoid(size * 2, dimensions)
         if self.encoding == "density":
             self.embed = embeddings.Density(size, dimensions)
         if self.encoding == "flocet":
-            self.embed = embeddings.Projection(size, size*2)
-            self.embed2 = embeddings.DensityFlocet(size*2, dimensions)
+            self.embed = embeddings.Projection(size, size * 2)
+            self.embed2 = embeddings.DensityFlocet(size * 2, dimensions)
         self.flatten = torch.nn.Flatten()
 
     def forward(self, x):
@@ -81,9 +81,15 @@ class Encoder(nn.Module):
 
 
 # Get an instance of the UCI benchmark
-benchmark = UCIClassificationBenchmark("/Users/verges/Documents/PhD/TorchHd/torchhd/examples/data", download=True)
+benchmark = UCIClassificationBenchmark(
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/examples/data", download=True
+)
 # Perform evaluation
-results_file = "/Users/verges/Documents/PhD/TorchHd/torchhd/examples/results/results" + str(time.time()) + ".csv"
+results_file = (
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/examples/results/results"
+    + str(time.time())
+    + ".csv"
+)
 
 with open(results_file, "w", newline="") as file:
     writer = csv.writer(file)
@@ -251,7 +257,9 @@ def exec_arena(
                     encode.neural_regeneration(idx)
                     model.reset_parameters()
 
-                for samples, labels in tqdm(train_loader, desc="Training", disable=True):
+                for samples, labels in tqdm(
+                    train_loader, desc="Training", disable=True
+                ):
                     samples = samples.to(device)
                     labels = labels.to(device)
 
@@ -299,7 +307,6 @@ def exec_arena(
                             ]
                         )
 
-
             with torch.no_grad():
                 model.normalize()
 
@@ -311,36 +318,45 @@ def exec_arena(
 
                     accuracy.update(outputs.cpu(), labels)
                     pred = torch.argmax(outputs)
-                    #print(model.miss_predicted_large[pred])
-                    outputs_large = torchhd.dot_similarity(samples_hv, model.miss_predicted_large[pred])
-                    #print(model.miss_predicted_large[pred])
-                    #print(labels, pred, torch.argmax(outputs_large))
-                    #print(torch.max(outputs), torch.max(outputs_large))
-                    #print(num_train_samples/num_classes, model.miss_predicted_counter[pred][torch.argmax(outputs_large).item()])
-                    #print(torch.argmax(outputs) != labels, torch.max(outputs), torchhd.dot_similarity(model.weight[torch.argmax(outputs_large)], samples_hv), torch.max(outputs_large))
+                    # print(model.miss_predicted_large[pred])
+                    outputs_large = torchhd.dot_similarity(
+                        samples_hv, model.miss_predicted_large[pred]
+                    )
+                    # print(model.miss_predicted_large[pred])
+                    # print(labels, pred, torch.argmax(outputs_large))
+                    # print(torch.max(outputs), torch.max(outputs_large))
+                    # print(num_train_samples/num_classes, model.miss_predicted_counter[pred][torch.argmax(outputs_large).item()])
+                    # print(torch.argmax(outputs) != labels, torch.max(outputs), torchhd.dot_similarity(model.weight[torch.argmax(outputs_large)], samples_hv), torch.max(outputs_large))
 
-                    if torch.max(outputs) < torch.max(outputs_large) and int(int(num_train_samples/num_classes)*0.2) < torch.sum(model.miss_predicted_counter[pred])\
-                            and model.miss_predicted_counter[pred][torch.argmax(outputs_large).item()] > torch.sum(model.miss_predicted_counter[pred])*0.35:
+                    if (
+                        torch.max(outputs) < torch.max(outputs_large)
+                        and int(int(num_train_samples / num_classes) * 0.2)
+                        < torch.sum(model.miss_predicted_counter[pred])
+                        and model.miss_predicted_counter[pred][
+                            torch.argmax(outputs_large).item()
+                        ]
+                        > torch.sum(model.miss_predicted_counter[pred]) * 0.35
+                    ):
                         pred = torch.argmax(outputs_large)
                     if pred == labels:
                         accuracy2 += 1
-                        #print('CORRECT', torch.max(outputs), torch.max(outputs_large), abs(torch.max(outputs) - torch.max(outputs_large)))
+                        # print('CORRECT', torch.max(outputs), torch.max(outputs_large), abs(torch.max(outputs) - torch.max(outputs_large)))
 
                     else:
-                        #print('INCORRECT',torch.max(outputs), torch.max(outputs_large), torch.argmax(outputs), torch.argmax(outputs), labels)
+                        # print('INCORRECT',torch.max(outputs), torch.max(outputs_large), torch.argmax(outputs), torch.argmax(outputs), labels)
                         error += abs(torch.max(outputs) - torch.max(outputs_large))
                         error_c += 1
-                    #print(labels, pred, pred == labels)
-                    #print()
+                    # print(labels, pred, pred == labels)
+                    # print()
 
-                    #if torch.max(outputs) > torchhd.dot_similarity(samples_hv,outputs_misspredict[torch.argmax(outputs)]):
+                    # if torch.max(outputs) > torchhd.dot_similarity(samples_hv,outputs_misspredict[torch.argmax(outputs)]):
                     #    accuracy2.update(outputs.cpu(), labels)
-                    #else:
+                    # else:
                     #    accuracy2.update(outputs_misspredict.cpu(), labels)
 
-                    #print(torch.max(outputs), torch.max(outputs_misspredict), torch.max(torchhd.dot_similarity(samples_hv, model.miss_predicted_large[torch.argmax(outputs)][0])))
+                    # print(torch.max(outputs), torch.max(outputs_misspredict), torch.max(torchhd.dot_similarity(samples_hv, model.miss_predicted_large[torch.argmax(outputs)][0])))
 
-            print(accuracy.compute().item(),accuracy2 / len(test_loader))
+            print(accuracy.compute().item(), accuracy2 / len(test_loader))
 
             benchmark.report(dataset, accuracy.compute().item())
             with open(results_file, "a", newline="") as file:
@@ -349,7 +365,7 @@ def exec_arena(
                     [
                         dataset.name,
                         accuracy.compute().item(),
-                        accuracy2/len(test_loader),
+                        accuracy2 / len(test_loader),
                         time.time() - t,
                         dimensions,
                         method,
@@ -378,11 +394,11 @@ ENCODINGS = ["flocet"]
 # METHODS = ["add"]
 METHODS = [
     "add",
-    #"add_adapt",
-    #"add_online",
-    #"add_adjust",
-    #"add_adjust_2",
-    #"add_adjust_3",
+    # "add_adapt",
+    # "add_online",
+    # "add_adjust",
+    # "add_adjust_2",
+    # "add_adjust_3",
 ]
 
 # METHODS = ["neural"]
@@ -406,6 +422,7 @@ for i in DIMENSIONS:
                     iterations=ITERATIONS,
                 )
 import pandas as pd
+
 df = pd.read_csv(results_file)
 var = "Method"
 acc = "Accuracy"
@@ -413,9 +430,7 @@ methods_order = [
     "add",
 ]
 df_mean = df.groupby([var, "Name"])[acc].mean().to_frame()
-df_pivot = df_mean.reset_index().pivot(
-    index="Name", columns=var, values=acc
-)
+df_pivot = df_mean.reset_index().pivot(index="Name", columns=var, values=acc)
 df_pivot.loc["mean"] = df_pivot.mean(axis=0)
 df_pivot = df_pivot[methods_order].round(3)
 # Print the new DataFrame to the console
@@ -427,9 +442,7 @@ methods_order = [
     "add",
 ]
 df_mean = df.groupby([var, "Name"])[acc].mean().to_frame()
-df_pivot = df_mean.reset_index().pivot(
-    index="Name", columns=var, values=acc
-)
+df_pivot = df_mean.reset_index().pivot(index="Name", columns=var, values=acc)
 df_pivot.loc["mean"] = df_pivot.mean(axis=0)
 df_pivot = df_pivot[methods_order].round(3)
 print(df_pivot)
