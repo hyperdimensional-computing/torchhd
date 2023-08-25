@@ -34,7 +34,7 @@ class Encoder(nn.Module):
     def __init__(self, out_features, size, levels):
         super(Encoder, self).__init__()
         self.flatten = torch.nn.Flatten()
-        self.position = embeddings.Random(28*28, out_features)
+        self.position = embeddings.Random(28 * 28, out_features)
         self.value = embeddings.Level(levels, out_features)
 
     def forward(self, x):

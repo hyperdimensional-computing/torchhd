@@ -29,10 +29,14 @@ class Encoder(nn.Module):
         return torchhd.hard_quantize(sample_hv)
 
 
-train_ds = ISOLET("/Users/verges/Documents/PhD/TorchHd/torchhd/data", train=True, download=True)
+train_ds = ISOLET(
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/data", train=True, download=True
+)
 train_ld = torch.utils.data.DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
 
-test_ds = ISOLET("/Users/verges/Documents/PhD/TorchHd/torchhd/data", train=False, download=True)
+test_ds = ISOLET(
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/data", train=False, download=True
+)
 test_ld = torch.utils.data.DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
 encode = Encoder(DIMENSIONS, train_ds[0][0].size(-1))
@@ -62,8 +66,8 @@ with torch.no_grad():
         samples_hv = encode(samples)
         outputs = model(samples_hv, dot=True)
         outputs_misspredict = model.forward_misspredicted(samples_hv, dot=True)
-        #print(outputs_misspredict)
-        #print(labels, torch.argmax(outputs), torch.max(outputs), torch.argmax(outputs_misspredict), torch.max(outputs_misspredict))
+        # print(outputs_misspredict)
+        # print(labels, torch.argmax(outputs), torch.max(outputs), torch.argmax(outputs_misspredict), torch.max(outputs_misspredict))
         accuracy.update(outputs.cpu(), labels)
         if torch.max(outputs) > torch.max(outputs_misspredict):
             accuracy2.update(outputs.cpu(), labels)

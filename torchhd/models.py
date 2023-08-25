@@ -38,12 +38,7 @@ import torchhd.datasets as datasets
 import torchhd.embeddings as embeddings
 
 
-__all__ = [
-    "Centroid",
-    "CentroidMiss",
-    "IntRVFL",
-    "PoolCentroid"
-]
+__all__ = ["Centroid", "CentroidMiss", "IntRVFL", "PoolCentroid"]
 
 
 class Centroid(nn.Module):
@@ -236,7 +231,6 @@ class Centroid(nn.Module):
         self.error_count += 1
         self.error_similarity_sum += logit.max(1).values.item()
 
-
         input = input[is_wrong]
         target = target[is_wrong]
         pred = pred[is_wrong]
@@ -244,8 +238,6 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, target, input)
         self.weight.index_add_(0, target, input)
         self.weight.index_add_(0, pred, -input)
-
-
 
     @torch.no_grad()
     def add_adjust_3(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
@@ -328,9 +320,8 @@ class Centroid(nn.Module):
     def neural_regeneration(self, k=100):
         variance = torch.var(self.weight, dim=0, keepdim=True)
         _, indices = torch.topk(variance, k, largest=False)
-        self.weight[:,indices] = torch.zeros(indices.shape)
+        self.weight[:, indices] = torch.zeros(indices.shape)
         return indices
-
 
     def add_orthogonality(self, input: Tensor, target: Tensor, lr: float = 1.0):
         logit = self(input)
@@ -339,13 +330,17 @@ class Centroid(nn.Module):
 
         # cancel update if all predictions were correct
         if is_wrong.sum().item() == 0:
-            sum_sim = torch.sum(torchhd.cosine_similarity(self.weight[target], self.weight))
+            sum_sim = torch.sum(
+                torchhd.cosine_similarity(self.weight[target], self.weight)
+            )
             if sum_sim != 0:
                 aux = self.weight.clone()
                 alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
 
                 aux[target] += alpha1 * input
-                new_sum_sim = torch.sum(torchhd.cosine_similarity(self.weight[target] + alpha1 * input, aux))
+                new_sum_sim = torch.sum(
+                    torchhd.cosine_similarity(self.weight[target] + alpha1 * input, aux)
+                )
                 if new_sum_sim < sum_sim:
                     self.weight.index_add_(0, target, lr * alpha1 * input)
             return
@@ -361,7 +356,6 @@ class Centroid(nn.Module):
 
         self.weight.index_add_(0, target, lr * alpha1 * input)
         self.weight.index_add_(0, pred, lr * alpha2 * -input)
-
 
     @torch.no_grad()
     def add_recal(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
@@ -390,7 +384,7 @@ class Centroid(nn.Module):
         else:
             val = self.error_similarity_sum / self.error_count
         if is_wrong_new.sum().item() == 0:
-            #if logit.max(1).values.item() < val:
+            # if logit.max(1).values.item() < val:
             #    self.new_weight.index_add_(0, target, input)
             return
 
@@ -407,11 +401,12 @@ class Centroid(nn.Module):
         self.new_weight.index_add_(0, target, lr * alpha1 * input)
         alpha2 = logit_new.gather(1, pred_new.unsqueeze(1)) - 1
         self.new_weight.index_add_(0, pred_new, lr * alpha2 * input)
-        #print(self.new_weight)
+        # print(self.new_weight)
 
     @torch.no_grad()
     def recalibrate_memory(self):
         self.weight.copy_(self.new_weight)
+
 
 class IntRVFL(nn.Module):
     r"""Class implementing integer random vector functional link network (intRVFL) model as described in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
@@ -526,7 +521,6 @@ class IntRVFL(nn.Module):
         self.weight.copy_(weights)
 
 
-
 class PoolCentroid(nn.Module):
     r"""Implements the centroid classification model using class prototypes.
 
@@ -584,9 +578,15 @@ class PoolCentroid(nn.Module):
         weight = torch.empty((pool_size, out_features, in_features), **factory_kwargs)
         self.weight = Parameter(weight, requires_grad=requires_grad)
 
-        self.correct_predictions = torch.empty((pool_size, out_features), **factory_kwargs)
-        self.incorrect_predictions = torch.empty((pool_size, out_features), **factory_kwargs)
-        self.miss_labeled_predictions = torch.empty((pool_size, out_features, out_features), **factory_kwargs)
+        self.correct_predictions = torch.empty(
+            (pool_size, out_features), **factory_kwargs
+        )
+        self.incorrect_predictions = torch.empty(
+            (pool_size, out_features), **factory_kwargs
+        )
+        self.miss_labeled_predictions = torch.empty(
+            (pool_size, out_features, out_features), **factory_kwargs
+        )
         self.reset_parameters()
 
     @torch.no_grad()
@@ -597,13 +597,11 @@ class PoolCentroid(nn.Module):
             logit = self(sample_hv, i)
             pred = logit.argmax(1)
             self.weight[i].index_add_(0, target, sample_hv, alpha=lr)
-            #print(target, logit.argmax(1))
+            # print(target, logit.argmax(1))
             if target == pred:
                 self.correct_predictions[i][target] += 1
             else:
                 self.incorrect_predictions[i][pred] += 1
-
-
 
     @torch.no_grad()
     def normalize(self, eps=1e-12) -> None:
@@ -677,7 +675,6 @@ class PoolCentroid(nn.Module):
 
                 self.weight[i].index_add_(0, target, sample_hv)
                 self.weight[i].index_add_(0, pred, -sample_hv)
-
 
     @torch.no_grad()
     def add_adapt2(self, input: list, target: Tensor, lr: float = 1.0) -> None:
@@ -898,7 +895,6 @@ class CentroidMiss(nn.Module):
         norms = self.miss_predicted.norm(dim=1, keepdim=True)
         norms.clamp_(min=eps)
         self.miss_predicted.div_(norms)
-
 
     @torch.no_grad()
     def add_adjust(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:

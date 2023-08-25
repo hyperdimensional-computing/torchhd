@@ -239,7 +239,6 @@ def exec_arena(
                         model.add(samples_hv, labels)
 
             for iter in range(iterations):
-
                 if method == "neural":
                     model.normalize()
                     idx = model.neural_regeneration(k=int(dimensions * 0.05))
@@ -333,7 +332,7 @@ REPEATS = 3
 # DIMENSIONS = [64, 128, 256, 512, 1024, 2048, 4096, 8192, 10000]
 DIMENSIONS = [10000]
 
-#ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
+# ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = ["hashmap", "flocet", "density", "random", "sinusoid"]
 #ENCODINGS = ["sinusoid"]
 #METHODS = ["add"]
@@ -342,6 +341,7 @@ METHODS = ["add_adjust_4"]
 RETRAIN = [True,False]
 
 ITERATIONS = 21
+
 
 print(benchmark.datasets())
 
