@@ -511,13 +511,15 @@ class Centroid(nn.Module):
             indices_to_keep = [
                 i for i in range(self.multi_weight[r].shape[0]) if i not in remove_ind
             ]
-            tensors_to_keep = torch.index_select(
-                self.multi_weight[r].to(device),
-                dim=0,
-                index=torch.tensor(indices_to_keep).to(device),
-            )
 
-            self.multi_weight[r] = tensors_to_keep.to(device)
+            if len(indices_to_keep) > 0:
+                tensors_to_keep = torch.index_select(
+                    self.multi_weight[r].to(device),
+                    dim=0,
+                    index=torch.tensor(indices_to_keep).to(device),
+                )
+
+                self.multi_weight[r] = tensors_to_keep.to(device)
             sorted_indices = sorted_indices[sorted_indices >= pos]
 
     def cluster_classes(self, drop, device):
@@ -613,6 +615,8 @@ class Centroid(nn.Module):
         norms = self.weight.norm(dim=1, keepdim=True)
         norms.clamp_(min=eps)
         self.weight.div_(norms)
+
+        self.multi_weight = [self.norm(i, eps) for i in self.multi_weight]
 
     def extra_repr(self) -> str:
         return "in_features={}, out_features={}".format(
