@@ -19,7 +19,7 @@ from SinglePass import (
     compHD,
     noiseHD,
     embeddingHD,
-    adaptiveStable
+    adaptiveStable,
 )
 
 from robustness import adaptHD, adjustHD, onlineHD, vanillaHD
@@ -261,7 +261,7 @@ with open(results_file, "w", newline="") as file:
             "Method",
             "Encoding",
             "Iterations",
-            "Failure"
+            "Failure",
         ]
     )
 
@@ -405,7 +405,7 @@ def exec_arena(
                 model = Centroid(dimensions, num_classes)
                 model = model.to(device)
 
-            failure = [1,2,5,10,15,20,30,40,50,60,70,80,90,100]
+            failure = [1, 2, 5, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
             # TRAIN #
             t = time.time()
@@ -570,9 +570,23 @@ def exec_arena(
             )
             t = time.time()
             if method == "add":
-                vanillaHD.test_vanillaHD(test_loader, device, encode, model, accuracy, dataset.name, results_file, dimensions, method, encoding, failure)
+                vanillaHD.test_vanillaHD(
+                    test_loader,
+                    device,
+                    encode,
+                    model,
+                    accuracy,
+                    dataset.name,
+                    results_file,
+                    dimensions,
+                    method,
+                    encoding,
+                    failure,
+                )
             if method == "stable":
-                adaptiveStable.test_vanillaHD(test_loader, device, encode, model, accuracy)
+                adaptiveStable.test_vanillaHD(
+                    test_loader, device, encode, model, accuracy
+                )
                 iterations_executed = 1
             if method == "embedding":
                 embeddingHD.test_embeddingHD(
@@ -628,9 +642,9 @@ def exec_arena(
                 intRVFL.test_rvfl(test_loader, device, encode, model, accuracy)
             test_time = time.time() - t
 
-            #benchmark.report(dataset, accuracy.compute().item())
+            # benchmark.report(dataset, accuracy.compute().item())
 
-            #print(accuracy.compute().item())
+            # print(accuracy.compute().item())
 
 
 BATCH_SIZE = 1
@@ -653,7 +667,7 @@ ENCODINGS = ["flocet"]
 #  "rvfl"]
 METHODS = [
     "add",
-    #"adjust"
+    # "adjust"
     # "noise"
     # "adapt",
     # "online",
