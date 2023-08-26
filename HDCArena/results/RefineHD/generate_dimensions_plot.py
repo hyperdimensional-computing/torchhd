@@ -47,7 +47,7 @@ x = df["dimensions"]
 
 # Increase the number of data points for smoother lines
 
-lab = ["Baseline", "AdaptHD", "OnlineHD", "RefineHD","AdaptHD", "OnlineHD", "RefineHD"]
+lab = ["Baseline", "AdaptHD", "OnlineHD", "RefineHD", "AdaptHD", "OnlineHD", "RefineHD"]
 for idx, method in enumerate(df["method"].unique()):
     print("m", method)
     l = df[df["method"] == method]
