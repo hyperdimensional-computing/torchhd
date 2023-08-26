@@ -125,6 +125,7 @@ def train_adjustHD(
             model.add_adjust(samples_hv, labels, lr=lr)
         if len(validation_ds) > 0:
 <<<<<<< HEAD
+<<<<<<< HEAD
             accuracies.append(
                 validate(validation_loader, device, encode, model, num_classes)
             )
@@ -132,6 +133,11 @@ def train_adjustHD(
             accuracies.append(validate(validation_loader, device, encode, model, num_classes))
             accuracies_test.append(validate(test_loader, device, encode, model, num_classes))
 >>>>>>> 66fb0df (New arena)
+=======
+            accuracies.append(
+                validate(validation_loader, device, encode, model, num_classes)
+            )
+>>>>>>> ee169fd ([github-action] formatting fixes)
         model.reset_parameters()
 
     print("acc",accuracies)
