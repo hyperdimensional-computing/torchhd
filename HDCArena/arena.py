@@ -572,7 +572,15 @@ DIMENSIONS = [10000]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
-     "hashmap"
+    "hashmap",
+    "bundle",
+    "sequence",
+    "ngram",
+    "hashmap",
+    "flocet",
+    "density",
+    "random",
+    "sinusoid",
 ]
 # METHODS = ["add",
 # "adapt",
