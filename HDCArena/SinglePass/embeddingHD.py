@@ -17,7 +17,7 @@ def validate(val_loader, encodings, device, model):
         labels = labels.to(device)
 
         for index, i in enumerate(encodings):
-            outputs = model.forward_index(i(samples), index)
+            outputs = model.forward_index(i(samples), index, device)
             acc[index].update(outputs.to(device), labels.to(device))
     for index, i in enumerate(encodings):
         acc[index] = acc[index].compute().item()
