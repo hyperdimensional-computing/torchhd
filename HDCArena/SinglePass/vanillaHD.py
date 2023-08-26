@@ -11,7 +11,6 @@ def train_vanillaHD(train_loader, device, encode, model):
             samples_hv = encode(samples)
             model.add(samples_hv, labels)
 
-
 def test_vanillaHD(test_loader, device, encode, model, accuracy):
     model.normalize()
     with torch.no_grad():

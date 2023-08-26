@@ -22,6 +22,7 @@ from SinglePass import (
     compHD,
     noiseHD,
     adjustHD,
+    embeddingHD
 )
 from Iterative import adaptHD as adaptHDiterative
 from Iterative import adjustHD as adjustHDiterative
@@ -373,6 +374,10 @@ def exec_arena(
                     max_val = torch.max(dataset.test.data, 0).values.to(device)
                     transform_test = create_min_max_normalize(min_val, max_val)
                     dataset.test.transform = transform_test
+                    t = int(len(dataset.train)*0.7)
+                    v = len(dataset.train) - t
+
+                    train_set, val_set = torch.utils.data.random_split(dataset.train, [t, v])
 
                 # Set up data loaders
                 train_loader = data.DataLoader(
@@ -402,6 +407,30 @@ def exec_arena(
             if method == "add":
                 vanillaHD.train_vanillaHD(train_loader, device, encode, model)
                 iterations_executed = 1
+            elif method == "embedding":
+                train_loader = data.DataLoader(
+                    train_set, batch_size=batch_size, shuffle=True
+                )
+                val_loader = data.DataLoader(
+                    val_set, batch_size=batch_size, shuffle=True
+                )
+                # ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid", "generic"]
+
+                e = ["sequence", "hashmap", "flocet", "sinusoid", "generic"]
+
+                model = Centroid(dimensions, num_classes, encodings=len(e))
+                model = model.to(device)
+
+                encodings = []
+                iterations_executed = 1
+
+                for i in ["sequence", "hashmap", "flocet", "sinusoid", "generic"]:
+                    encode = Encoder(num_feat, dimensions, i, dataset.name)
+                    encode = encode.to(device)
+                    encodings.append(encode)
+                encode, idx = embeddingHD.train_embeddingHD(train_loader, val_loader, device, encodings, model)
+                encoding = e[idx]
+
             elif method == "high":
                 highHD.train_highHD(train_loader, device, encode, model)
                 iterations_executed = 1
@@ -532,6 +561,8 @@ def exec_arena(
             t = time.time()
             if method == "add":
                 vanillaHD.test_vanillaHD(test_loader, device, encode, model, accuracy)
+            if method == "embedding":
+                embeddingHD.test_embeddingHD(test_loader, device, encode, model, accuracy)
             elif method == "high":
                 highHD.test_highHD(test_loader, device, encode, model, accuracy)
             elif method == "noise":
@@ -600,7 +631,7 @@ def exec_arena(
 
 BATCH_SIZE = 1
 REPEATS = 1
-DIMENSIONS = [30]
+DIMENSIONS = [10000]
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
@@ -628,7 +659,7 @@ ENCODINGS = [
 # "multicentroid",
 #  "rvfl"]
 METHODS = [
-    "adjust_iterative",
+    "embedding",
     # "noise"
     # "adapt",
     # "online",

@@ -78,6 +78,7 @@ class Centroid(nn.Module):
         self,
         in_features: int,
         out_features: int,
+        encodings=1,
         device=None,
         dtype=None,
         requires_grad=False,
@@ -116,6 +117,12 @@ class Centroid(nn.Module):
         multi_weight = [torch.empty(1, in_features) for i in range(out_features)]
         self.multi_weight = [Parameter(tensor) for tensor in multi_weight]
 
+        # embeddingHD
+        self.ww = []
+        for i in range(encodings):
+            w = torch.empty((out_features, in_features), **factory_kwargs)
+            self.ww.append(Parameter(w, requires_grad=requires_grad))
+
         # noiseHD
         self.noise = torch.zeros((1, in_features))
 
@@ -138,6 +145,14 @@ class Centroid(nn.Module):
     def add(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
         """Adds the input vectors scaled by the lr to the target prototype vectors."""
         self.weight.index_add_(0, target, input, alpha=lr)
+
+    @torch.no_grad()
+    def add_index(self, input: Tensor, target: Tensor, index, lr: float = 1.0) -> None:
+        """Adds the input vectors scaled by the lr to the target prototype vectors."""
+        self.ww[index].index_add_(0, target, input, alpha=lr)
+
+    def forward_index(self, input: Tensor, index):
+        return functional.cosine_similarity(input, self.ww[index])
 
     @torch.no_grad()
     def add_noise(
