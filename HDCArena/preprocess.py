@@ -4,6 +4,7 @@ import torch.utils.data as data
 from torchhd.datasets import EuropeanLanguages as Languages
 from torchvision import transforms
 import PIL
+from torch.utils.data import random_split, TensorDataset
 
 
 def create_min_max_normalize(min: Tensor, max: Tensor, device):
@@ -110,10 +111,7 @@ def preprocess(dataset, batch_size, device, partial_data, method):
         test_ds = dataset.test
 
     partial_data = int(partial_data * len(train_ds))
-    # train_ds = torch.utils.data.random_split(
-    #    train_ds, [partial_data, len(train_ds) - partial_data]
-    # )[0]
-
+    train_ds = train_ds[:partial_data]
     train_loader = data.DataLoader(train_ds, batch_size=batch_size, shuffle=True)
     test_loader = data.DataLoader(test_ds, batch_size=batch_size)
     return train_loader, test_loader, num_classes, num_feat, train_ds, test_ds

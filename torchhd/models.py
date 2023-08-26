@@ -868,10 +868,15 @@ class IntRVFL(nn.Module):
 
         return encodings
 
-    def forward(self, x):
+    def forward(self, x, dimensions=10000, f=None, device=None):
         # Make encodings for all data samples in the batch
         encodings = self.encode(x)
-
+        if f != None:
+            num_dim = int((f / 100) * dimensions)
+            f_mask = torch.randperm(dimensions - 0)[:num_dim]
+            encodings[0][f_mask] = encodings[0][f_mask] * -torch.ones(
+                num_dim
+            ).to(device)
         # Get similarity values for each class
         return functional.dot_similarity(encodings, self.weight)
 

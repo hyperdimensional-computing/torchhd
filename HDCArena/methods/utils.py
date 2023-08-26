@@ -138,7 +138,7 @@ def test_eval(
                             pred -= i.shape[0]
                     outputs = torch.tensor([row])
                 elif method == "rvfl":
-                    outputs = model(samples)
+                    outputs = model(samples, dimensions=dimensions, f=f, device=device)
                 else:
                     outputs = model(samples_hv, dot=False)
                 accuracy.update(outputs.to(device), labels.to(device))
