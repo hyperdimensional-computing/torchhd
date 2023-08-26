@@ -874,9 +874,9 @@ class IntRVFL(nn.Module):
         if f != None:
             num_dim = int((f / 100) * dimensions)
             f_mask = torch.randperm(dimensions - 0)[:num_dim]
-            encodings[0][f_mask] = encodings[0][f_mask] * -torch.ones(
-                num_dim
-            ).to(device)
+            encodings[0][f_mask] = encodings[0][f_mask] * -torch.ones(num_dim).to(
+                device
+            )
         # Get similarity values for each class
         return functional.dot_similarity(encodings, self.weight)
 
