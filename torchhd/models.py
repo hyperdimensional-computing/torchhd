@@ -145,12 +145,10 @@ class Centroid(nn.Module):
         logit = self(input)
         pred = logit.argmax(1)
         is_wrong = target != pred
-
         if is_wrong.sum().item() != 0:
             self.noise += torch.where(
                 input == self.weight[target], torch.tensor(1), torch.tensor(0)
             ).to(device)
-
         self.weight.index_add_(0, target, input, alpha=lr)
 
     @torch.no_grad()

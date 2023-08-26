@@ -512,7 +512,7 @@ class UCIClassificationBenchmark:
         "AudiologyStd",
         "BalanceScale",
         "Balloons",
-        ]
+    ]
 
     dataset_names_ = [
         "Arrhythmia",
