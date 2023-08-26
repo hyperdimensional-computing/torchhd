@@ -392,7 +392,6 @@ class Centroid(nn.Module):
 
         self.weight.data += self.weight_ad.data + self.weight_ad2.data
 
-
     @torch.no_grad()
     def add_adjust_ad2(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
         r"""Only updates the prototype vectors on wrongly predicted inputs.

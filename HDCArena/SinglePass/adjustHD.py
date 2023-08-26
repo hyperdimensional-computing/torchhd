@@ -9,6 +9,7 @@ def train_adjustHD(train_loader, device, encode, model):
             samples_hv = encode(samples)
             model.add_adjust(samples_hv, labels)
 
+
 def test_adjustHD(test_loader, device, encode, model, accuracy):
     model.normalize()
     with torch.no_grad():
