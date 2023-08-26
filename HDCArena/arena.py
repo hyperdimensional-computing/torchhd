@@ -208,11 +208,19 @@ class Encoder(nn.Module):
             levels = 100
             self.keys = embeddings.Random(size, dimensions)
             self.embed = embeddings.Level(levels, dimensions)
-        if self.encoding == "hashmapGen":
+        if self.encoding == "generic_e":
             levels = 100
-            self.keys = embeddings.Sinusoid(size, dimensions)
+            self.keys = embeddings.Random(size, dimensions)
             self.embed = embeddings.Level(levels, dimensions)
+            self.sinus = embeddings.Sinusoid(levels, dimensions)
         self.flatten = torch.nn.Flatten()
+
+    def double_forward(self, x):
+        sample_hv = torchhd.hash_table(
+            self.keys(x).sign(), self.embed(x).to(device)
+        )
+        sample_sinus = self.sinus(x).sign()
+        return sample_hv, sample_sinus
 
     def forward(self, x):
         x = self.flatten(x).float()
@@ -236,10 +244,7 @@ class Encoder(nn.Module):
             sample_hv = torchhd.functional.generic(
                 self.keys.weight.to(device), self.embed(x).to(device), 3, device
             ).to(device)
-        if self.encoding == "hashmapGen":
-            sample_hv = torchhd.hash_table(
-                self.keys(x).sign(), self.embed(x).to(device)
-            )
+
         return torchhd.hard_quantize(sample_hv)
 
     def neural_regeneration(self, idx):
@@ -499,15 +504,16 @@ def exec_arena(
                 )
             elif method == "rvfl":
                 if not arena:
-                    _, alpha, kappa = INT_RVFL_HYPER[dataset.train.name]
+                    d, alpha, kappa = INT_RVFL_HYPER[dataset.train.name]
                 else:
                     alpha = 1
                     kappa = 3
                 iterations_executed = 1
                 model = IntRVFL(
-                    num_feat, dimensions, num_classes, kappa=kappa, device=device
+                    num_feat, d, num_classes, kappa=kappa, device=device
                 )
                 intRVFL.train_rvfl(train_ds, encode, model, device, num_classes, alpha)
+
             train_time = time.time() - t
 
             # TEST #
@@ -606,7 +612,7 @@ ENCODINGS = [
 # "multicentroid",
 #  "rvfl"]
 METHODS = [
-    "rvfl",
+    "add_high",
     # "adapt",
     # "online",
     # "adapt_iterative",
