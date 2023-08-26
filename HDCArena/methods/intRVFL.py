@@ -172,7 +172,6 @@ def train_rvfl(
         train_ds, torch.tensor(dataset.train.targets), alpha=alpha
     )
 
-
     train_time = time.time()
 
     utils.test_eval(
