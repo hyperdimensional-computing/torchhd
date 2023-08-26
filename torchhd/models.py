@@ -29,6 +29,8 @@ import torch.nn as nn
 from torch import Tensor
 from torch.nn.parameter import Parameter
 import torch.nn.init as init
+import torch.nn.functional as F
+
 import torch.utils.data as data
 from tqdm import tqdm
 import torchmetrics
@@ -38,7 +40,7 @@ import torchhd.datasets as datasets
 import torchhd.embeddings as embeddings
 
 
-__all__ = ["Centroid", "IntRVFL"]
+__all__ = ["Centroid", "IntRVFL","BHDC"]
 
 
 class Centroid(nn.Module):
@@ -1493,7 +1495,6 @@ class CentroidIterative(nn.Module):
 
         weight = torch.empty((out_features, in_features), **factory_kwargs)
         self.weight = Parameter(weight, requires_grad=requires_grad)
-
         self.reset_parameters()
 
     def reset_parameters(self) -> None:

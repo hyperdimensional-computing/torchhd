@@ -7,6 +7,7 @@ sys.path.append("/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena")
 from encoder import Encoder
 from preprocess import preprocess
 import methods_selection
+from torchhd.models import BHDC
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -39,7 +40,12 @@ def exec_arena(
                 t = torch.complex64
             else:
                 t = None
-            model = Centroid(dimensions, num_classes, method=config["method"], dtype=t)
+
+            if config["method"] == 'lehdc':
+                dropout_rate = 0.5
+                model = BHDC(in_features=dimensions, out_features=num_classes, dropout_prob=config["dropout_rate"]).to(device)
+            else:
+                model = Centroid(dimensions, num_classes, method=config["method"], dtype=t)
             model = model.to(device)
 
             methods_selection.select_model(
@@ -73,15 +79,18 @@ def exec_arena(
                 model_neural="reset",
                 partial_data=partial_data,
                 robustness=robustness,
+                weight_decay=config["weight_decay"],
+                learning_rate=config["learning_rate"],
+                dropout_rate=config["dropout_rate"],
             )
 
 
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid","generic","fractional"]
-ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid","generic","fractional"]
+ENCODINGS = ["hashmap"]
 
 configurations = methods_selection.configs
 
-REPEATS = 5
+REPEATS = 1
 DIMENSIONS = [10000]
 ITERATIONS = 30
 # PARTIAL_DATA = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
@@ -89,7 +98,7 @@ PARTIAL_DATA = [1]
 # ROBUSTNESS = [0, 1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80]
 #
 ROBUSTNESS = [0]
-arena = True
+arena = False
 
 if arena:
     benchmark = HDCArena("../data", download=True)

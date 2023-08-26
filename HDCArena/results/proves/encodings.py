@@ -6,7 +6,7 @@ warnings.filterwarnings("ignore")
 latex = 1
 pand = 1
 train_time = 1
-test_time = 1
+test_time = 0
 
 embeddings_order = [
     "bundle",
@@ -18,6 +18,7 @@ embeddings_order = [
     "generic",
     "random",
     "sinusoid",
+    "fractional"
 ]
 embeddings_order = [0, 7, 5, 4, 1, 2, 3, 6, 8]
 
@@ -65,10 +66,10 @@ var_of_encoding_train_time = (
 
 
 mean_of_encoding_train_time = df.groupby(["encoding"])["train_time"]
-mean_of_encoding_train_time = mean_of_encoding_train_time.agg(["mean"]).reset_index()
+mean_of_encoding_train_time = mean_of_encoding_train_time.agg(["mean"]).round(3).reset_index().T
 
 var_of_encoding_train_time = df.groupby(["encoding"])["train_time"]
-var_of_encoding_train_time = var_of_encoding_train_time.agg(["std"]).reset_index()
+var_of_encoding_train_time = var_of_encoding_train_time.agg(["std"]).round(3).reset_index().T
 
 if pand:
     print(mean_of_encoding)

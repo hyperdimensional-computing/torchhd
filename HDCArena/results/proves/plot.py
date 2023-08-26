@@ -4,11 +4,11 @@ import warnings
 warnings.filterwarnings("ignore")
 
 df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/adaptive_methods"
+    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/semi_arena"
 )
 
 
-latex = 0
+latex = 1
 pand = 1
 
 mean_of_encoding = df.groupby(["method"])["accuracy"].mean().round(3).reset_index().T
@@ -40,12 +40,12 @@ if latex:
     print(latex_table)
     pd.options.display.float_format = None
 
-    latex_table = time_of_encoding.to_latex(
+    latex_table = mean_of_encoding_train_time.to_latex(
         index=False, caption="Encodings accuracy time mean"
     )
     print(latex_table)
 
-    latex_table = var_time_of_encoding.to_latex(
+    latex_table = var_of_encoding_train_time.to_latex(
         index=False, caption="Encodings accuracy time var"
     )
     print(latex_table)

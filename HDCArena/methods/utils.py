@@ -31,7 +31,11 @@ def write_results(
     failure,
     lazy_regeneration,
     model_neural,
+    weight_decay,
+    learning_rate,
+    dropout_rate,
 ):
+
     with open(results_file, "a", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(
@@ -60,6 +64,9 @@ def write_results(
                 model_neural,
                 amount_data,
                 failure,
+                weight_decay,
+                learning_rate,
+                dropout_rate,
             ]
         )
 
@@ -93,6 +100,9 @@ def test_eval(
     train_time,
     lazy_regeneration,
     model_neural,
+    weight_decay,
+    learning_rate,
+    dropout_rate,
 ):
     for f in robustness:
         accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(
@@ -170,5 +180,8 @@ def test_eval(
             f,
             lazy_regeneration,
             model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
         )
         accuracy.reset()

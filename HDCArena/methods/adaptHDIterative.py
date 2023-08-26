@@ -37,6 +37,9 @@ def train_adaptHD(
     robustness,
     lazy_regeneration,
     model_neural,
+    weight_decay,
+    learning_rate,
+    dropout_rate,
     results_file,
 ):
     train_time = time.time()
@@ -106,4 +109,7 @@ def train_adaptHD(
         train_time,
         lazy_regeneration,
         model_neural,
+        weight_decay,
+        learning_rate,
+        dropout_rate,
     )

@@ -18,6 +18,7 @@ from methods import neuralHDIterative
 from methods import distHDIterative
 from methods import intRVFL
 from methods import semiHDIterative
+from methods import LeHDC
 
 results_file = "results/results" + str(time.time()) + ".csv"
 
@@ -49,6 +50,9 @@ with open(results_file, "w", newline="") as file:
             "model_neural",
             "partial_data",
             "robustness_failed_dimensions",
+            "weight_decay",
+            "learning_rate",
+            "dropout_rate",
         ]
     )
 
@@ -84,6 +88,9 @@ def select_model(
     s=0.5,
     partial_data=False,
     robustness=[],
+    weight_decay=0,
+    learning_rate=0,
+    dropout_rate=0,
 ):
     if method == "add":
         vanillaHD.train_vanillaHD(
@@ -114,6 +121,9 @@ def select_model(
             robustness,
             lazy_regeneration,
             model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
             results_file,
         )
     elif method == "adjust":
@@ -146,6 +156,9 @@ def select_model(
             robustness,
             lazy_regeneration,
             model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
             results_file,
         )
     elif method == "adapt":
@@ -177,6 +190,9 @@ def select_model(
             robustness,
             lazy_regeneration,
             model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
             results_file,
         )
     elif method == "online":
@@ -208,6 +224,9 @@ def select_model(
             robustness,
             lazy_regeneration,
             model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
             results_file,
         )
     elif method == "comp":
@@ -239,6 +258,9 @@ def select_model(
             robustness,
             lazy_regeneration,
             model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
             results_file,
         )
     elif method == "multicentroid":
@@ -270,6 +292,9 @@ def select_model(
             robustness,
             lazy_regeneration,
             model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
             results_file,
         )
     elif method == "adapt_iterative":
@@ -301,6 +326,9 @@ def select_model(
             robustness,
             lazy_regeneration,
             model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
             results_file,
         )
     elif method == "online_iterative":
@@ -332,6 +360,9 @@ def select_model(
             robustness,
             lazy_regeneration,
             model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
             results_file,
         )
     elif method == "adjust_iterative":
@@ -363,6 +394,9 @@ def select_model(
             robustness,
             lazy_regeneration,
             model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
             results_file,
         )
     elif method == "quant_iterative":
@@ -394,6 +428,9 @@ def select_model(
             robustness,
             lazy_regeneration,
             model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
             results_file,
         )
     elif method == "sparse_iterative":
@@ -425,6 +462,9 @@ def select_model(
             robustness,
             lazy_regeneration,
             model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
             results_file,
         )
     elif method == "neural_iterative":
@@ -456,6 +496,9 @@ def select_model(
             robustness,
             lazy_regeneration,
             model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
             results_file,
         )
     elif method == "dist_iterative":
@@ -487,6 +530,9 @@ def select_model(
             robustness,
             lazy_regeneration,
             model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
             results_file,
         )
     elif method == "rvfl":
@@ -521,6 +567,9 @@ def select_model(
             robustness,
             lazy_regeneration,
             model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
             results_file,
         )
     elif method == "semi":
@@ -554,6 +603,46 @@ def select_model(
             robustness,
             lazy_regeneration,
             model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
+            results_file,
+        )
+
+    elif method == "lehdc":
+        LeHDC.train_LeHDC(
+            train_ds,
+            test_ds,
+            train_loader,
+            test_loader,
+            num_classes,
+            encode,
+            model,
+            device,
+            dataset.name,
+            method,
+            encoding,
+            iterations,
+            dimensions,
+            lr,
+            chunks,
+            threshold,
+            reduce_subclasses,
+            model_quantize,
+            epsilon,
+            model_sparse,
+            s,
+            alpha,
+            beta,
+            theta,
+            r,
+            partial_data,
+            robustness,
+            lazy_regeneration,
+            model_neural,
+            weight_decay,
+            learning_rate,
+            dropout_rate,
             results_file,
         )
 
@@ -576,6 +665,9 @@ configs = [
         "theta": None,
         "chunks": None,
         "s": None,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
     {
         "method": "adapt",
@@ -594,6 +686,9 @@ configs = [
         "theta": None,
         "chunks": None,
         "s": None,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
     {
         "method": "online",
@@ -612,6 +707,9 @@ configs = [
         "theta": None,
         "chunks": None,
         "s": None,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
     {
         "method": "adjust",
@@ -630,6 +728,9 @@ configs = [
         "theta": None,
         "chunks": None,
         "s": None,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
     {
         "method": "adapt_iterative",
@@ -648,6 +749,9 @@ configs = [
         "theta": None,
         "chunks": None,
         "s": None,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
     {
         "method": "online_iterative",
@@ -666,6 +770,9 @@ configs = [
         "theta": None,
         "chunks": None,
         "s": None,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
     {
         "method": "adjust_iterative",
@@ -684,6 +791,9 @@ configs = [
         "theta": None,
         "chunks": None,
         "s": None,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
     {
         "method": "quant_iterative",
@@ -702,6 +812,9 @@ configs = [
         "theta": None,
         "chunks": None,
         "s": None,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
     {
         "method": "sparse_iterative",
@@ -720,6 +833,9 @@ configs = [
         "theta": None,
         "chunks": None,
         "s": 0.5,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
     {
         "method": "comp",
@@ -738,6 +854,9 @@ configs = [
         "theta": None,
         "chunks": 2,
         "s": None,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
     {
         "method": "neural_iterative",
@@ -756,6 +875,9 @@ configs = [
         "theta": 1,
         "chunks": None,
         "s": None,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
     {
         "method": "dist_iterative",
@@ -774,6 +896,9 @@ configs = [
         "theta": 1,
         "chunks": None,
         "s": None,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
     {
         "method": "multicentroid",
@@ -792,6 +917,9 @@ configs = [
         "theta": None,
         "chunks": None,
         "s": None,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
     {
         "method": "rvfl",
@@ -810,6 +938,9 @@ configs = [
         "theta": None,
         "chunks": None,
         "s": None,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
     {
         "method": "semi",
@@ -828,12 +959,12 @@ configs = [
         "theta": None,
         "chunks": None,
         "s": 0.05,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
     },
-]
-
-configs = [
     {
-        "method": "add",
+        "method": "lehdc",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 1,
@@ -849,6 +980,33 @@ configs = [
         "theta": None,
         "chunks": None,
         "s": None,
+        "weight_decay": 5e-2,
+        "learning_rate": 1e-2,
+        "dropout_rate": 0.5,
+    },
+]
+
+configs = [
+    {
+        "method": "lehdc",
+        "multi_reduce_subclass": None,
+        "threshold": None,
+        "lr": 1,
+        "epsilon": None,
+        "model_quantize": None,
+        "model_sparse": None,
+        "sparsity": None,
+        "lazy_regeneration": None,
+        "model_neural": None,
+        "r": None,
+        "alpha": None,
+        "beta": None,
+        "theta": None,
+        "chunks": None,
+        "s": None,
+        "weight_decay": 5e-2,
+        "learning_rate": 1e-2,
+        "dropout_rate": 0.5,
     },
 ]
 
