@@ -5,11 +5,14 @@ from torchhd.datasets import EuropeanLanguages as Languages
 from torchvision import transforms
 import PIL
 
+
 def create_min_max_normalize(min: Tensor, max: Tensor, device):
     def normalize(input: Tensor) -> Tensor:
         if type(input) == PIL.Image.Image:
             convert_tensor = transforms.ToTensor()
-            return torch.nan_to_num((convert_tensor(input).view(32,32,3) - min) / (max - min))
+            return torch.nan_to_num(
+                (convert_tensor(input).view(32, 32, 3) - min) / (max - min)
+            )
         return torch.nan_to_num((torch.tensor(input) - min) / (max - min))
 
     return normalize
@@ -91,8 +94,12 @@ def preprocess(dataset, batch_size, device, partial_data, method):
                 train_ds = transform(dataset.train.data)
         else:
             if method == "rvfl":
-                min_val = torch.min(torch.tensor(dataset.train.data), 0).values.to(device)
-                max_val = torch.max(torch.tensor(dataset.train.data), 0).values.to(device)
+                min_val = torch.min(torch.tensor(dataset.train.data), 0).values.to(
+                    device
+                )
+                max_val = torch.max(torch.tensor(dataset.train.data), 0).values.to(
+                    device
+                )
                 transform = create_min_max_normalize(min_val, max_val, device)
                 dataset.train.transform = transform
                 dataset.test.transform = transform
@@ -103,9 +110,9 @@ def preprocess(dataset, batch_size, device, partial_data, method):
         test_ds = dataset.test
 
     partial_data = int(partial_data * len(train_ds))
-    #train_ds = torch.utils.data.random_split(
+    # train_ds = torch.utils.data.random_split(
     #    train_ds, [partial_data, len(train_ds) - partial_data]
-    #)[0]
+    # )[0]
 
     train_loader = data.DataLoader(train_ds, batch_size=batch_size, shuffle=True)
     test_loader = data.DataLoader(test_ds, batch_size=batch_size)

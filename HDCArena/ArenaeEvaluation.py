@@ -23,9 +23,14 @@ def exec_arena(
 ):
     for dataset in benchmark.datasets():
         for r in range(repeats):
-            train_loader, test_loader, num_classes, num_feat, train_ds, test_ds = preprocess(
-                dataset, batch_size, device, partial_data, config["method"]
-            )
+            (
+                train_loader,
+                test_loader,
+                num_classes,
+                num_feat,
+                train_ds,
+                test_ds,
+            ) = preprocess(dataset, batch_size, device, partial_data, config["method"])
 
             encode = Encoder(num_feat, dimensions, encoding, dataset.name)
             encode = encode.to(device)

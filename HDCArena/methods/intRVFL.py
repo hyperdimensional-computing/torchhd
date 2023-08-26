@@ -129,10 +129,11 @@ INT_RVFL_HYPER = {
     "zoo": (400, 8, 7),
 }
 
+
 def train_rvfl(
-        dataset,
-        train_ds,
-        test_ds,
+    dataset,
+    train_ds,
+    test_ds,
     train_loader,
     test_loader,
     num_classes,
@@ -162,7 +163,7 @@ def train_rvfl(
     model_neural,
     results_file,
 ):
-    #dims, alpha, kappa = INT_RVFL_HYPER[dataset.train.name]
+    # dims, alpha, kappa = INT_RVFL_HYPER[dataset.train.name]
     alpha = 1
     model = IntRVFL(dataset.train[0][0].size(-1), dimensions, num_classes, kappa=3, device=device)
     model.fit_ridge_regression(train_ds, torch.tensor(dataset.train.targets), alpha=alpha)
