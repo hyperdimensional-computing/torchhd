@@ -557,6 +557,7 @@ def select_model(
             results_file,
         )
 
+
 configs = [
     {
         "method": "add",
@@ -813,7 +814,7 @@ configs = [
 ]
 
 configs = [
-{
+    {
         "method": "semi",
         "multi_reduce_subclass": None,
         "threshold": None,

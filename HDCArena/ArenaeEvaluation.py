@@ -35,7 +35,7 @@ def exec_arena(
             encode = Encoder(num_feat, dimensions, encoding, dataset.name)
             encode = encode.to(device)
 
-            if encoding == 'fractional':
+            if encoding == "fractional":
                 t = torch.complex64
             else:
                 t = None
@@ -84,9 +84,9 @@ configurations = methods_selection.configs
 REPEATS = 1
 DIMENSIONS = [10000]
 ITERATIONS = 30
-#PARTIAL_DATA = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+# PARTIAL_DATA = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
 PARTIAL_DATA = [1]
-#ROBUSTNESS = [0, 1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80]
+# ROBUSTNESS = [0, 1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80]
 ROBUSTNESS = [0]
 arena = False
 

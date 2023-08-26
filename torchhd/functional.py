@@ -73,7 +73,7 @@ __all__ = [
     "value_to_index",
     "index_to_value",
     "generic",
-    "FractionalPowerEncoding"
+    "FractionalPowerEncoding",
 ]
 
 
@@ -1807,6 +1807,7 @@ def generic(id, level, ngram):
         levels = torch.stack(levels)
         return torchhd.multiset(torchhd.bind(id[:-ngram], levels)).unsqueeze(0)
     return torchhd.multiset(torchhd.bind(id, level))
+
 
 class FractionalPowerEncoding:
     """Class for fractional power encoding (FPE) method that forms hypervectors for given values, kernel shape, bandwidth, and dimensionality. Implements similarity-preserving hypervectors approximating desired kernel shape as described in `Computing on Functions Using Randomized Vector Representations <https://arxiv.org/abs/2109.03429>`_.

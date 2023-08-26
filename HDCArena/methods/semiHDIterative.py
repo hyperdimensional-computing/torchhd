@@ -24,6 +24,7 @@ class CustomDataset(Dataset):
         # Return the total number of samples in the dataset
         return len(self.data)
 
+
 def train_semiHD(
     train_ds,
     test_ds,
@@ -56,9 +57,8 @@ def train_semiHD(
     model_neural,
     results_file,
 ):
-
     train_ds, unlabeled_ds = torch.utils.data.random_split(
-        train_ds, [int(0.1*len(train_ds)), len(train_ds)-int(0.1*len(train_ds))]
+        train_ds, [int(0.1 * len(train_ds)), len(train_ds) - int(0.1 * len(train_ds))]
     )
 
     train_loader = data.DataLoader(train_ds, batch_size=1, shuffle=True)
@@ -88,9 +88,9 @@ def train_semiHD(
 
                 samples_hv = encode(samples)
                 outputs = torch.topk(model.forward(samples_hv, dot=False), k=2)[1][0]
-                diff.append(outputs[0]-outputs[1])
+                diff.append(outputs[0] - outputs[1])
 
-            top_amount = int(len(diff)*s)
+            top_amount = int(len(diff) * s)
             top_data = torch.topk(torch.tensor(diff), k=top_amount)
             new_data = []
             new_labels = []
