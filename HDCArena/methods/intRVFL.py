@@ -184,7 +184,7 @@ def train_rvfl(
         method,
         encoding,
         iterations,
-        dims,
+        dimensions,
         lr,
         chunks,
         threshold,
