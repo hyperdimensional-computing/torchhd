@@ -643,6 +643,7 @@ class Centroid(nn.Module):
     def forward_comp(self, enc, device):
         return functional.dot_similarity(enc.to(device), self.comp_weight.to(device)).to(device)
 
+
 class IntRVFL(nn.Module):
     r"""Class implementing integer random vector functional link network (intRVFL) model as described in `Density Encoding Enables Resource-Efficient Randomly Connected Neural Networks <https://doi.org/10.1109/TNNLS.2020.3015971>`_.
 

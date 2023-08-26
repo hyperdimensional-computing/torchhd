@@ -12,6 +12,7 @@ def train_compHD(train_loader, device, encode, model, chunks):
             model.add(samples_hv, labels)
     model.comp_compress(chunks, device)
 
+
 def test_compHD(test_loader, device, encode, model, accuracy, chunks):
     model.normalize()
     with torch.no_grad():

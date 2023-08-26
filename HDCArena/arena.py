@@ -12,7 +12,15 @@ import time
 import csv
 import torch.nn.functional as F
 import pandas as pd
-from SinglePass import vanillaHD, highHD, adaptHD, onlineHD, multiCentroidHD, intRVFL, compHD
+from SinglePass import (
+    vanillaHD,
+    highHD,
+    adaptHD,
+    onlineHD,
+    multiCentroidHD,
+    intRVFL,
+    compHD,
+)
 from Iterative import adaptHD as adaptHDiterative
 from Iterative import onlineHD as onlineHDiterative
 from Iterative import quantHD as quantHDiterative
@@ -584,6 +592,7 @@ ENCODINGS = [
     "random",
     "sinusoid",
 ]
+
 # METHODS = ["add",
 # "adapt",
 # "online",
