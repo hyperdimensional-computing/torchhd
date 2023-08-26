@@ -360,8 +360,7 @@ class Centroid(nn.Module):
             val = self.error_similarity_sum / self.error_count
         if is_wrong.sum().item() == 0:
             if logit.max(1).values.item() < val:
-                alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
-                self.weight.index_add_(0, target, lr * alpha1 * input)
+                self.weight.index_add_(0, target, lr * alpha * input)
                 # self.weight.index_add_(0, target, input)
             # print("RIGHT", 1 / (predx[0][0][0] - predx[0][0][1]))
 

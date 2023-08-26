@@ -15,7 +15,7 @@ x = df["dimensions"]
 x_smooth = np.linspace(x.min(), x.max(), 300)
 fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
 
-lab = ["Baseline", "AdaptHD", "OnlineHD", "RefineHD"]
+lab = ["Baseline", "AdaptHD", "OnlineHD", "RefineHD", "AdaptHD Iterative", "OnlineHD Iterative", "RefineHD Iterative"]
 for idx, method in enumerate(range(len(lab))):
     a = df["method"].unique()
     method = a[idx]
@@ -37,7 +37,7 @@ for idx, method in enumerate(range(len(lab))):
     # plt.fill_between(x_smooth, lower_smooth, upper_smooth, alpha=0.3)
 
     axes[0].plot(x_smooth, y_smooth, label=lab[idx])
-    axes[0].fill_between(x_smooth, lower_smooth, upper_smooth, alpha=0.25)
+    # axes[0].fill_between(x_smooth, lower_smooth, upper_smooth, alpha=0.25)
 
 file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/uci_dimensions"
 
@@ -75,9 +75,9 @@ axes[0].set_xlabel("Dimensions")
 axes[1].set_xlabel("Dimensions")
 axes[0].set_ylabel("Accuracy")
 axes[1].set_ylabel("Accuracy")
-fig.suptitle("Accuracy comparison of adaptive models, using different dimensions")
+fig.suptitle("Accuracy comparison of Adaptive models, using different dimensions")
 plt.tight_layout()
-axes[0].legend(loc="upper left")
+axes[0].legend(loc="lower right")
 
 # Show the plot
 plt.show()

@@ -4,13 +4,13 @@ import numpy as np
 
 warnings.filterwarnings("ignore")
 
-file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/online_iter_dimensions"
+file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/adapt_iterative_dimensions_arena"
 # file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/final_results/adjust"
 # file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/final_results/dimensions_arenaaa.csv"
 
 df = pd.read_csv(file)
 
-df = df[df["dimensions"] == 5000]
+df = df[df["dimensions"] == 10000]
 
 print(df.groupby(["method", "name"])["accuracy"].mean())
 latex = 1

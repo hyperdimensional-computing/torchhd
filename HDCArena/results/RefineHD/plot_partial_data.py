@@ -1,6 +1,6 @@
 import pandas as pd
 
-file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/refine_robust_partial_arena"
+file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/refine_iterative_robust_partial_arena"
 
 df = pd.read_csv(file)
 

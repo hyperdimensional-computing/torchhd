@@ -15,7 +15,7 @@ x = list(map(int, df.columns[1:]))
 x_smooth = np.linspace(min(x), max(x), 200)
 fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
 
-lab = ["Baseline", "AdaptHD", "OnlineHD", "RefineHD"]
+lab = ["Baseline", "AdaptHD", "OnlineHD", "RefineHD", "AdaptHD Iterative", "OnlineHD Iterative", "RefineHD Iterative"]
 for i, (_, row) in enumerate(df.iterrows()):
     l = row["method"]
     row = row.drop("method")
@@ -37,11 +37,12 @@ x_smooth = np.linspace(min(x), max(x), 200)
 # Increase the number of data points for smoother lines
 
 for i, (_, row) in enumerate(df.iterrows()):
-    l = row["method"]
-    row = row.drop("method")
-    y2_smooth = make_interp_spline(x, row, k=1)(x_smooth)
+    if i < len(lab):
+        l = row["method"]
+        row = row.drop("method")
+        y2_smooth = make_interp_spline(x, row, k=1)(x_smooth)
 
-    axes[1].plot(x_smooth, y2_smooth, label=lab[i])
+        axes[1].plot(x_smooth, y2_smooth, label=lab[i])
 
 axes[0].title.set_text("HDC Benchmark")
 axes[1].title.set_text("UCI Benchmark")
@@ -52,7 +53,7 @@ axes[0].set_ylabel("Accuracy")
 axes[1].set_ylabel("Accuracy")
 fig.suptitle("Partial data accuracy evaluation over all methods")
 plt.tight_layout()
-axes[0].legend(loc="lower left")
+axes[0].legend(loc="lower right")
 
 # Show the plot
 plt.show()
