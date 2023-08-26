@@ -340,7 +340,7 @@ DIMENSIONS = [10000]
 # ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid"]
 ENCODINGS = [
     "hashmap",
-    #"flocet",
+    # "flocet",
     # "sinusoid",
 ]
 # ENCODINGS = ["sinusoid"]
