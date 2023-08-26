@@ -40,7 +40,7 @@ import torchhd.datasets as datasets
 import torchhd.embeddings as embeddings
 
 
-__all__ = ["Centroid", "IntRVFL","BHDC"]
+__all__ = ["Centroid", "IntRVFL", "BHDC"]
 
 
 class Centroid(nn.Module):
@@ -932,6 +932,7 @@ class IntRVFL(nn.Module):
         self.weight.copy_(weights)
 
 
+<<<<<<< HEAD
 class PoolCentroid(nn.Module):
     r"""Implements the centroid classification model using class prototypes.
 
@@ -976,10 +977,22 @@ class PoolCentroid(nn.Module):
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
         super(PoolCentroid, self).__init__()
+=======
+class BinaryLinear(nn.Module):
+    def __init__(self, in_features: int, out_features: int, kernel_size: int = 3):
+        super(BinaryLinear, self).__init__()
+>>>>>>> bb90e2b ([github-action] formatting fixes)
 
         self.pool_size = pool_size
         self.in_features = in_features
         self.out_features = out_features
+<<<<<<< HEAD
+=======
+        self.weight = torch.nn.Parameter(
+            (torch.rand((out_features, in_features)) * 2 - 1) * 0.001,
+            requires_grad=True,
+        )
+>>>>>>> bb90e2b ([github-action] formatting fixes)
 
         self.similarity_sum = torch.empty((pool_size), **factory_kwargs)
         self.count = 0
@@ -1170,7 +1183,6 @@ class CentroidMiss(nn.Module):
             :math:`(n, d)`. The values are initialized as all zeros.
 
     Examples::
-
         >>> m = Centroid(20, 30)
         >>> input = torch.randn(128, 20)
         >>> output = m(input)
@@ -1217,7 +1229,6 @@ class CentroidMiss(nn.Module):
         self.miss_predicted_large = Parameter(
             miss_predicted_large, requires_grad=requires_grad
         )
-
         miss_predicted_counter = torch.empty((out_features, out_features, 1), **factory_kwargs)
         self.miss_predicted_counter = Parameter(miss_predicted_counter, requires_grad=requires_grad)
 

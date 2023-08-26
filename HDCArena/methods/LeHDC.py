@@ -7,10 +7,9 @@ import time
 import utils
 import torchmetrics
 
+
 def test(num_classes, device, test_loader, encode, model):
-    accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(
-        device
-    )
+    accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(device)
     with torch.no_grad():
         for samples, labels in tqdm(test_loader, desc="Testing"):
             samples = samples.to(device)
@@ -19,46 +18,47 @@ def test(num_classes, device, test_loader, encode, model):
             accuracy.update(outputs.to(device), labels.to(device))
 
 
-
 def train_LeHDC(
-        train_ds,
-        test_ds,
-        train_loader,
-        test_loader,
-        num_classes,
-        encode,
-        model,
-        device,
-        name,
-        method,
-        encoding,
-        iterations,
-        dimensions,
-        lr,
-        chunks,
-        threshold,
-        reduce_subclasses,
-        model_quantize,
-        epsilon,
-        model_sparse,
-        s,
-        alpha,
-        beta,
-        theta,
-        r,
-        partial_data,
-        robustness,
-        lazy_regeneration,
-        model_neural,
-        weight_decay,
-        learning_rate,
-        dropout_rate,
-        results_file,
+    train_ds,
+    test_ds,
+    train_loader,
+    test_loader,
+    num_classes,
+    encode,
+    model,
+    device,
+    name,
+    method,
+    encoding,
+    iterations,
+    dimensions,
+    lr,
+    chunks,
+    threshold,
+    reduce_subclasses,
+    model_quantize,
+    epsilon,
+    model_sparse,
+    s,
+    alpha,
+    beta,
+    theta,
+    r,
+    partial_data,
+    robustness,
+    lazy_regeneration,
+    model_neural,
+    weight_decay,
+    learning_rate,
+    dropout_rate,
+    results_file,
 ):
     train_time = time.time()
 
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), weight_decay=weight_decay, lr=learning_rate)
+    optimizer = torch.optim.Adam(
+        model.parameters(), weight_decay=weight_decay, lr=learning_rate
+    )
 
     loss_accum = 0
     loss_log = 0
@@ -79,10 +79,9 @@ def train_LeHDC(
             optimizer.step()
         if i % 1 == 0 or i == iterations - 1:
             if loss_accum > loss_log:
-                optimizer.param_groups[0]['lr'] *= 0.5
+                optimizer.param_groups[0]["lr"] *= 0.5
             loss_log = loss_accum
             loss_accum = 0
-
 
     train_time = time.time() - train_time
 

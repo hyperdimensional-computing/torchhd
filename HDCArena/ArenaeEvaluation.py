@@ -41,11 +41,17 @@ def exec_arena(
             else:
                 t = None
 
-            if config["method"] == 'lehdc':
+            if config["method"] == "lehdc":
                 dropout_rate = 0.5
-                model = BHDC(in_features=dimensions, out_features=num_classes, dropout_prob=config["dropout_rate"]).to(device)
+                model = BHDC(
+                    in_features=dimensions,
+                    out_features=num_classes,
+                    dropout_prob=config["dropout_rate"],
+                ).to(device)
             else:
-                model = Centroid(dimensions, num_classes, method=config["method"], dtype=t)
+                model = Centroid(
+                    dimensions, num_classes, method=config["method"], dtype=t
+                )
             model = model.to(device)
 
             methods_selection.select_model(

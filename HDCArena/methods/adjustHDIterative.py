@@ -41,7 +41,6 @@ def train_adjustHD(
     learning_rate,
     dropout_rate,
     results_file,
-
 ):
     train_time = time.time()
 

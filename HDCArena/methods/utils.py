@@ -35,7 +35,6 @@ def write_results(
     learning_rate,
     dropout_rate,
 ):
-
     with open(results_file, "a", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(
