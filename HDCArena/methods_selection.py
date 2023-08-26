@@ -53,7 +53,7 @@ with open(results_file, "w", newline="") as file:
 
 
 def select_model(
-        train_ds,
+    train_ds,
     train_loader,
     test_loader,
     num_classes,
@@ -708,7 +708,8 @@ configs = [
     },
 ]
 
-configs = [    {
+configs = [
+    {
         "method": "adjust",
         "multi_reduce_subclass": None,
         "threshold": None,
@@ -725,7 +726,8 @@ configs = [    {
         "theta": None,
         "chunks": None,
         "s": None,
-    },]
+    },
+]
 
 # METHODS = ["add","adapt","online","adjust","comp","adapt_iterative","online_iterative","adjust_iterative",
 # "quant_iterative","sparse_iterative","neural_iterative","dist_iterative","multicentroid","rvfl"]

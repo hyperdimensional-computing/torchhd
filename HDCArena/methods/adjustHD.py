@@ -13,6 +13,7 @@ import torch
 from torch.utils.data import random_split
 import random
 
+
 def make_class_balanced_splits(dataset, num_classes, num_samples_per_split, num_splits):
     num_samples_per_class = num_samples_per_split // num_classes
 
@@ -46,10 +47,9 @@ def make_class_balanced_splits(dataset, num_classes, num_samples_per_split, num_
 
     return dataset_splits
 
-def validate(test_loader,device, encode, model, num_classes):
-    accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(
-        device
-    )
+
+def validate(test_loader, device, encode, model, num_classes):
+    accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(device)
     for samples, labels in tqdm(test_loader, desc="Testing"):
         samples = samples.to(device)
         samples_hv = encode(samples)
@@ -57,19 +57,19 @@ def validate(test_loader,device, encode, model, num_classes):
         accuracy.update(outputs.to(device), labels.to(device))
     return accuracy.compute().item()
 
-def test(test_loader,device, encode, model, num_classes):
-    accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(
-        device
-    )
+
+def test(test_loader, device, encode, model, num_classes):
+    accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(device)
     for samples, labels in tqdm(test_loader, desc="Testing"):
         samples = samples.to(device)
         samples_hv = encode(samples)
         outputs = model(samples_hv, dot=False)
         accuracy.update(outputs.to(device), labels.to(device))
     return accuracy.compute().item()
+
 
 def train_adjustHD(
-        train_ds,
+    train_ds,
     train_loader,
     test_loader,
     num_classes,
@@ -99,20 +99,31 @@ def train_adjustHD(
     model_neural,
     results_file,
 ):
+<<<<<<< HEAD
     validation_ds, _ = data.random_split(train_ds, [int(len(train_ds)*0.1),len(train_ds)-int(len(train_ds)*0.1)])
     if len(validation_ds) > 0:
         validation_loader = data.DataLoader(validation_ds, shuffle=True)
     num_samples_per_split = num_classes*3
+=======
+    validation_ds, _ = data.random_split(
+        train_ds, [int(len(train_ds) * 0.1), len(train_ds) - int(len(train_ds) * 0.1)]
+    )
+    validation_loader = data.DataLoader(validation_ds, shuffle=True)
+    num_samples_per_split = num_classes * 3
+>>>>>>> a15f0fb ([github-action] formatting fixes)
     num_splits = 4
-    while num_splits*num_samples_per_split > len(train_ds):
+    while num_splits * num_samples_per_split > len(train_ds):
         num_splits -= 1
-    splits = make_class_balanced_splits(train_ds, num_classes, num_samples_per_split, num_splits)
-
+    splits = make_class_balanced_splits(
+        train_ds, num_classes, num_samples_per_split, num_splits
+    )
 
     accuracies = []
     accuracies_test = []
     for i in range(num_splits):
-        for samples, labels in tqdm(data.DataLoader(splits[i], shuffle=True), desc="Training"):
+        for samples, labels in tqdm(
+            data.DataLoader(splits[i], shuffle=True), desc="Training"
+        ):
             samples = samples.to(device)
             labels = labels.to(device)
 
