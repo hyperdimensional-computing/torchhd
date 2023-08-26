@@ -21,7 +21,7 @@ from methods import intRVFL
 from methods import semiHDIterative
 from methods import LeHDC
 
-results_file = "scrap/results" + str(time.time()) + ".csv"
+results_file = "adjust/results" + str(time.time()) + ".csv"
 
 with open(results_file, "w", newline="") as file:
     writer = csv.writer(file)
@@ -1044,10 +1044,10 @@ configs = [
 
 configs = [
     {
-        "method": "rvfl",
+        "method": "adjust_iterative",
         "multi_reduce_subclass": None,
         "threshold": None,
-        "lr": 1,
+        "lr": 5,
         "epsilon": None,
         "model_quantize": None,
         "model_sparse": None,
