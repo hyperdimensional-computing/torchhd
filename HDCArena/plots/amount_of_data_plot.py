@@ -4,7 +4,7 @@ import seaborn as sns
 import numpy as np
 
 # Read in the CSV file
-df = pd.read_csv("../results/final_results/amount_of_data_arena")
+df = pd.read_csv("../results/final_results/amount_of_data")
 var = "Method"
 import seaborn as sns
 
@@ -131,7 +131,7 @@ for i in mean_accuracy_by_dimension_and_method:
         value for index, value in mean_accuracy_by_dimension_and_method[i].items()
     ]
     index_list = [
-        str(int(index * 100)) + "%"
+        int(index * 100)
         for index, value in mean_accuracy_by_dimension_and_method[i].items()
     ]
 
@@ -147,7 +147,18 @@ for i in mean_accuracy_by_dimension_and_method:
     elif i == "adjust":
         l = "OUR"
     print(index_list)
-    sns.lineplot(x=index_list, y=values_list, label=l)
+
+    from scipy.interpolate import interp1d
+
+
+
+    f = interp1d(index_list, values_list, kind='quadratic')
+    x_interp = np.linspace(min(index_list), max(index_list), num=1000)
+    y_interp = f(x_interp)
+
+    # Create line plot with interpolated data
+    sns.lineplot(x=x_interp, y=y_interp, label=l)
+    #sns.lineplot(x=index_list, y=values_list, label=l)
     # if i == 'adjust' or i == 'online':
     #    plt.fill_between(index_list, np.array(values_list) - np.array(var_list), np.array(values_list) + np.array(var_list), alpha=0.3)
 
@@ -155,7 +166,7 @@ for i in mean_accuracy_by_dimension_and_method:
     # plt.plot(index_list, values_list, label=i)
 
 plt.ylabel("Accuracy")
-plt.xlabel("Partial train data")
+plt.xlabel("Partial train data %")
 plt.title("Partial data accuracy evaluation over all methods")
 plt.legend()
 plt.show()

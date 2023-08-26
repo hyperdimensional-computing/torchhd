@@ -509,7 +509,7 @@ class UCIClassificationBenchmark:
         "Balloons",
     ]
 
-    dataset_names_ = [
+    dataset_names = [
         "Abalone",
     ]
 

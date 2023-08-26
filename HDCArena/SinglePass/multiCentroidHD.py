@@ -22,16 +22,8 @@ def train_multicentroidHD(
             samples_hv = encode(samples)
             pred = model.add_multi(samples_hv, labels, device)
             accuracy.update(pred.to(device), labels)
-        model.reduce_subclasses(
-            train_loader,
-            device,
-            encode,
-            model,
-            num_classes,
-            accuracy.compute().item(),
-            reduce_subclasses=reduce_subclasses,
-            threshold=threshold,
-        )
+        model.reduce_subclasses(train_loader,device,encode,model,num_classes,accuracy.compute().item(),
+            reduce_subclasses=reduce_subclasses,threshold=threshold)
 
 
 def test_multicentroidHD(test_loader, device, encode, model, accuracy):

@@ -38,7 +38,7 @@ import torchhd.datasets as datasets
 import torchhd.embeddings as embeddings
 
 
-__all__ = ["Centroid", "CentroidMiss", "CentroidIterative", "IntRVFL", "PoolCentroid"]
+__all__ = ["Centroid", "IntRVFL"]
 
 
 class Centroid(nn.Module):
@@ -78,7 +78,7 @@ class Centroid(nn.Module):
         self,
         in_features: int,
         out_features: int,
-        encodings=1,
+        method=None,
         device=None,
         dtype=None,
         requires_grad=False,
@@ -87,97 +87,56 @@ class Centroid(nn.Module):
         super(Centroid, self).__init__()
 
         self.in_features = in_features  # dimensions
-
+        self.method = method
         self.out_features = out_features
         self.similarity_sum = 0
         self.count = 0
         self.error_similarity_sum = 0
         self.error_count = 0
 
-        self.similarity_sum_ad = 0
-        self.count_ad = 0
-        self.error_similarity_sum_ad = 0
-        self.error_count_ad = 0
-
-        self.similarity_sum_ad2 = 0
-        self.count_ad2 = 0
-        self.error_similarity_sum_ad2 = 0
-        self.error_count_ad2 = 0
-
-        weight_err = torch.empty((out_features, in_features), **factory_kwargs)
-        self.weight_err = Parameter(weight_err, requires_grad=requires_grad)
-
         weight = torch.empty((out_features, in_features), **factory_kwargs)
         self.weight = Parameter(weight, requires_grad=requires_grad)
-        weight_ad = torch.empty((out_features, in_features), **factory_kwargs)
-        self.weight_ad = Parameter(weight_ad, requires_grad=requires_grad)
-        weight_ad2 = torch.empty((out_features, in_features), **factory_kwargs)
-        self.weight_ad2 = Parameter(weight_ad2, requires_grad=requires_grad)
+
         # QuantHD
-        weight_quant = torch.empty((out_features, in_features), **factory_kwargs)
-        self.weight_quant = Parameter(weight_quant, requires_grad=requires_grad)
+        if method == "quant_iterative":
+            weight_quant = torch.empty((out_features, in_features), **factory_kwargs)
+            self.weight_quant = Parameter(weight_quant, requires_grad=requires_grad)
 
         # SparseHD
-        weight_sparse = torch.empty((out_features, in_features), **factory_kwargs)
-        self.weight_sparse = Parameter(weight_sparse, requires_grad=requires_grad)
+        if method == "sparse_iterative":
+            weight_sparse = torch.empty((out_features, in_features), **factory_kwargs)
+            self.weight_sparse = Parameter(weight_sparse, requires_grad=requires_grad)
 
         # DistHD
-        self.n_disthd = torch.empty((0, in_features))
-        self.m_disthd = torch.empty((0, in_features))
+        if method == "dist_iterative":
+            self.n_disthd = torch.empty((0, in_features))
+            self.m_disthd = torch.empty((0, in_features))
 
         # CompHD
-        self.comp_weight = None
-        self.position_vectors = None
+        if method == "comp":
+            self.comp_weight = None
+            self.position_vectors = None
 
         # MultiCentroidHD
-        multi_weight = [torch.empty(1, in_features) for i in range(out_features)]
-        self.multi_weight = [Parameter(tensor) for tensor in multi_weight]
-
-        # embeddingHD
-        self.ww = []
-        self.similarity_sum_w = []
-        self.count_w = []
-        self.error_similarity_sum_w = []
-        self.error_count_w = []
-        self.confidence = []
-        for i in range(encodings):
-            w = torch.empty((out_features, in_features), **factory_kwargs)
-            self.ww.append(Parameter(w, requires_grad=requires_grad))
-            self.similarity_sum_w.append(torch.tensor(0.0))
-            self.count_w.append(torch.tensor(0.0))
-            self.error_similarity_sum_w.append(torch.tensor(0.0))
-            self.error_count_w.append(torch.tensor(0.0))
-            self.confidence.append(torch.tensor(0.0))
-
-        self.ww = torch.stack(self.ww).to(device)
-        self.similarity_sum_w = torch.stack(self.similarity_sum_w).to(device)
-        self.count_w = torch.stack(self.count_w).to(device)
-        self.error_similarity_sum_w = torch.stack(self.error_similarity_sum_w).to(
-            device
-        )
-        self.error_count_w = torch.stack(self.error_count_w).to(device)
-        self.confidence = torch.stack(self.confidence).to(device)
-
-        # noiseHD
-        self.noise = torch.zeros((1, in_features))
+        if method == "multicentroid":
+            multi_weight = [torch.empty(1, in_features) for i in range(out_features)]
+            self.multi_weight = [Parameter(tensor) for tensor in multi_weight]
 
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
         init.zeros_(self.weight)
-        init.zeros_(self.weight_ad)
-        init.zeros_(self.weight_quant)
-        init.zeros_(self.weight_sparse)
-        init.zeros_(self.weight_err)
-        for i in self.multi_weight:
-            init.zeros_(i)
-        for i in self.ww:
-            init.zeros_(i)
+        if self.method == "quant_iterative":
+            init.zeros_(self.weight_quant)
+        if self.method == "sparse_iterative":
+            init.zeros_(self.weight_sparse)
+        if self.method == "multicentroid":
+            for i in self.multi_weight:
+                init.zeros_(i)
 
     def forward(self, input: Tensor, dot: bool = False) -> Tensor:
         if dot:
             return functional.dot_similarity(input, self.weight)
-
         return functional.cosine_similarity(input, self.weight)
 
     @torch.no_grad()
@@ -315,34 +274,6 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, pred, -input * lr)
 
     @torch.no_grad()
-    def add_adj(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
-        """Adds the input vectors scaled by the lr to the target prototype vectors."""
-        logit = self(input)
-        pred = logit.argmax(1)
-        is_wrong = target != pred
-
-        # cancel update if all predictions were correct
-        if is_wrong.sum().item() == 0:
-            mask = torch.eq(torch.sign(self.weight[pred]), input)
-            input[mask] = torch.zeros(len(mask))
-            self.weight.index_add_(0, target, input)
-            return
-
-        input = input[is_wrong]
-        target = target[is_wrong]
-        pred = pred[is_wrong]
-
-        self.weight.index_add_(0, target, 2 * input)
-        # print(torch.sign(self.weight[pred]))
-        # print(self.weight[pred])
-        # print(torch.sign(input))
-        # print(input)
-        # print(torch.eq(torch.sign(self.weight[pred]), input))
-        mask = torch.ne(torch.sign(self.weight[pred]), input)
-        input[mask] = torch.zeros(len(mask))
-        self.weight.index_add_(0, pred, -input)
-
-    @torch.no_grad()
     def add_online(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
         r"""Only updates the prototype vectors on wrongly predicted inputs.
 
@@ -414,110 +345,13 @@ class Centroid(nn.Module):
         alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
         self.weight.index_add_(0, pred, lr * alpha2 * input)
 
-    def merge_adjust(self, eps=1e-12):
-        norms = self.weight.norm(dim=1, keepdim=True)
-        norms.clamp_(min=eps)
-        self.weight.div_(norms)
-
-        norms = self.weight_ad2.norm(dim=1, keepdim=True)
-        norms.clamp_(min=eps)
-        self.weight_ad2.div_(norms)
-
-        norms = self.weight_ad.norm(dim=1, keepdim=True)
-        norms.clamp_(min=eps)
-        self.weight_ad.div_(norms)
-
-        self.weight.data += self.weight_ad.data + self.weight_ad2.data
-
-    @torch.no_grad()
-    def add_adjust_ad2(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
-        r"""Only updates the prototype vectors on wrongly predicted inputs.
-
-        Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
-
-        Adds the input to the mispredicted class prototype scaled by :math:`\epsilon - 1`
-        and adds the input to the target prototype scaled by :math:`1 - \delta`,
-        where :math:`\epsilon` is the cosine similarity of the input with the mispredicted class prototype
-        and :math:`\delta` is the cosine similarity of the input with the target class prototype.
-        """
-        # Adapted from: https://gitlab.com/biaslab/onlinehd/-/blob/master/onlinehd/onlinehd.py
-        logit = self(input)
-        pred = logit.argmax(1)
-        is_wrong = target != pred
-
-        self.similarity_sum_ad2 += logit.max(1).values.item()
-        self.count_ad2 += 1
-        if self.error_count_ad2 == 0:
-            val = self.similarity_sum_ad2 / self.count_ad2
-        else:
-            val = self.error_similarity_sum_ad2 / self.error_count_ad2
-        if is_wrong.sum().item() == 0:
-            if logit.max(1).values.item() < val:
-                self.weight_ad2.index_add_(0, target, input)
-            return
-
-        self.error_count_ad2 += 1
-        self.error_similarity_sum_ad2 += logit.max(1).values.item()
-
-        logit = logit[is_wrong]
-        input = input[is_wrong]
-        target = target[is_wrong]
-        pred = pred[is_wrong]
-
-        alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
-        self.weight_ad2.index_add_(0, target, lr * alpha1 * input)
-        alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
-        self.weight_ad2.index_add_(0, pred, lr * alpha2 * input)
-
-    @torch.no_grad()
-    def add_adjust_ad(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
-        r"""Only updates the prototype vectors on wrongly predicted inputs.
-
-        Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
-
-        Adds the input to the mispredicted class prototype scaled by :math:`\epsilon - 1`
-        and adds the input to the target prototype scaled by :math:`1 - \delta`,
-        where :math:`\epsilon` is the cosine similarity of the input with the mispredicted class prototype
-        and :math:`\delta` is the cosine similarity of the input with the target class prototype.
-        """
-        # Adapted from: https://gitlab.com/biaslab/onlinehd/-/blob/master/onlinehd/onlinehd.py
-        logit = self(input)
-        pred = logit.argmax(1)
-        is_wrong = target != pred
-
-        self.similarity_sum_ad += logit.max(1).values.item()
-        self.count_ad += 1
-        if self.error_count_ad == 0:
-            val = self.similarity_sum_ad / self.count_ad
-        else:
-            val = self.error_similarity_sum_ad / self.error_count_ad
-        if is_wrong.sum().item() == 0:
-            if logit.max(1).values.item() < val:
-                self.weight_ad.index_add_(0, target, input)
-            return
-
-        self.error_count_ad += 1
-        self.error_similarity_sum_ad += logit.max(1).values.item()
-
-        logit = logit[is_wrong]
-        input = input[is_wrong]
-        target = target[is_wrong]
-        pred = pred[is_wrong]
-
-        alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
-        self.weight_ad.index_add_(0, target, lr * alpha1 * input)
-        alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
-        self.weight_ad.index_add_(0, pred, lr * alpha2 * input)
-
     def quantized_similarity(self, input, model):
         if model == "binary":
             return functional.hamming_similarity(input, self.weight_quant).float()
         elif model == "ternary":
             return functional.dot_similarity(input, self.weight_quant)
 
-    def add_quantize(
-        self, input: Tensor, target: Tensor, lr: float = 1.0, model="binary"
-    ) -> None:
+    def add_quantize(self, input: Tensor, target: Tensor, lr: float = 1.0, model="binary") -> None:
         logit = self.quantized_similarity(input, model)
         pred = logit.argmax(1)
         is_wrong = target != pred
@@ -545,9 +379,7 @@ class Centroid(nn.Module):
                 ).to(device),
             )
 
-    def add_sparse(
-        self, input: Tensor, target: Tensor, lr: float = 1.0, iter=0
-    ) -> None:
+    def add_sparse(self, input: Tensor, target: Tensor, lr: float = 1.0, iter=0) -> None:
         if iter == 0:
             logit = self(input)
         else:
@@ -589,6 +421,7 @@ class Centroid(nn.Module):
             self.weight_sparse.data[:, dropped_indices] = 0
         if model == "class":
             if iter == 0:
+                print(s)
                 _, dropped_indices = torch.topk(
                     self.weight.abs(), k=s, dim=1, largest=False, sorted=True
                 )
@@ -627,9 +460,18 @@ class Centroid(nn.Module):
             torch.randn(self.weight.size(0)).unsqueeze(1).to(device)
         )
 
-        encode.embed.weight[:, dropped_indices] = (
-            torch.randn(encode.embed.weight.size(0)).unsqueeze(1).to(device)
-        )
+        if hasattr(encode.embed, 'flocet_encoding'):
+            encode.embed.flocet_encoding.weight[:, dropped_indices] = (
+                torch.randn(encode.embed.flocet_encoding.weight.size(0)).unsqueeze(1).to(device)
+            )
+        elif hasattr(encode.embed, 'density_encoding'):
+            encode.embed.density_encoding.weight[:, dropped_indices] = (
+                torch.randn(encode.embed.density_encoding.weight.size(0)).unsqueeze(1).to(device)
+            )
+        else:
+            encode.embed.weight[:, dropped_indices] = (
+                torch.randn(encode.embed.weight.size(0)).unsqueeze(1).to(device)
+            )
 
     @torch.no_grad()
     def add_dist(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
@@ -664,16 +506,7 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, pred, lr * alpha2 * -input)
 
     @torch.no_grad()
-    def eval_dist(
-        self,
-        input: Tensor,
-        target: Tensor,
-        device,
-        lr: float = 1.0,
-        alpha=1.0,
-        beta=1.0,
-        theta=1.0,
-    ) -> None:
+    def eval_dist(self,input: Tensor,target: Tensor,device,lr: float = 1.0,alpha=1.0,beta=1.0,theta=1.0,) -> None:
         r"""Only updates the prototype vectors on wrongly predicted inputs.
 
         Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
@@ -733,12 +566,24 @@ class Centroid(nn.Module):
         # convert intersect back to a tensor
         dimensions_regenerated = torch.tensor(intersect).long().to(device)
 
+
         self.weight.data[:, dimensions_regenerated] = (
             torch.randn(self.weight.size(0)).unsqueeze(1).to(device)
         )
-        encode.embed.weight[:, dimensions_regenerated] = (
-            torch.randn(encode.embed.weight.size(0)).unsqueeze(1).to(device)
-        )
+
+        if hasattr(encode.embed, 'flocet_encoding'):
+            encode.embed.flocet_encoding.weight[:, dimensions_regenerated] = (
+                torch.randn(encode.embed.flocet_encoding.weight.size(0)).unsqueeze(1).to(device)
+            )
+        elif hasattr(encode.embed, 'density_encoding'):
+            encode.embed.density_encoding.weight[:, dimensions_regenerated] = (
+                torch.randn(encode.embed.density_encoding.weight.size(0)).unsqueeze(1).to(device)
+            )
+        else:
+            encode.embed.weight[:, dimensions_regenerated] = (
+                torch.randn(encode.embed.weight.size(0)).unsqueeze(1).to(device)
+            )
+
         self.reset_n_m()
 
     def multi_similarity(self, input, device):
@@ -844,17 +689,7 @@ class Centroid(nn.Module):
             sub_classes += i.shape[0]
         return sub_classes
 
-    def reduce_subclasses(
-        self,
-        train_loader,
-        device,
-        encode,
-        model,
-        classes,
-        accuracy_full,
-        reduce_subclasses="drop",
-        threshold=0.03,
-    ) -> None:
+    def reduce_subclasses(self,train_loader,device,encode,model,classes,accuracy_full,reduce_subclasses="drop",threshold=0.03,) -> None:
         for i in range(10):
             accuracy = torchmetrics.Accuracy("multiclass", num_classes=classes).to(
                 device
@@ -867,7 +702,7 @@ class Centroid(nn.Module):
                 self.cluster_classes(drop_classes)
 
             with torch.no_grad():
-                for samples, labels in tqdm(train_loader, desc="Training"):
+                for samples, labels in tqdm(train_loader, desc="Reduce subclass"):
                     samples = samples.to(device)
                     labels = labels.to(device)
                     samples_hv = encode(samples)
@@ -897,8 +732,8 @@ class Centroid(nn.Module):
         norms = self.weight.norm(dim=1, keepdim=True)
         norms.clamp_(min=eps)
         self.weight.div_(norms)
-
-        self.multi_weight = [self.norm(i, eps) for i in self.multi_weight]
+        if self.method == "multicentroid":
+            self.multi_weight = [self.norm(i, eps) for i in self.multi_weight]
 
     def extra_repr(self) -> str:
         return "in_features={}, out_features={}".format(

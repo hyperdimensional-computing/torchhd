@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 
 # Read in the CSV file
-df = pd.read_csv("../results/final_results/compare_embeddings_singlepass")
+df = pd.read_csv("../results/final_results/compare_embeddings_singlepass_arena")
 var = "Encoding"
 df = df[df["Method"] == "adjust"]
 embeddings_order = ["add", "adapt", "online", "adjust"]
@@ -50,6 +50,8 @@ df_var = df.groupby([var, "Name"])["Accuracy"].var().to_frame()
 
 df_pivot = df_mean.reset_index().pivot(index="Name", columns=var, values="Accuracy")
 df_pivot.loc["Var"] = df_pivot.var(axis=0)
+
+print("VARAINCE", df_pivot)
 
 df_pivot.loc["Mean"] = df_pivot.mean(axis=0)
 df_pivot = df_pivot[embeddings_order].round(3)
@@ -103,7 +105,6 @@ print(latex_table)
 var_accuracy_by_dimension_and_method = (
     df.groupby(["Dimensions", "Method"])["Accuracy"].var().round(5)
 )
-
 print(var_accuracy_by_dimension_and_method)
 order = ["add", "adapt", "online", "adjust"]
 var_accuracy_by_dimension_and_method = var_accuracy_by_dimension_and_method.unstack(
