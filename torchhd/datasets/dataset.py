@@ -511,7 +511,6 @@ class UCIClassificationBenchmark:
 
     dataset_names_ = [
         "Abalone",
-
     ]
 
     # Specify namedtuple format
