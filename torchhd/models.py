@@ -98,6 +98,7 @@ class Centroid(nn.Module):
 
         self.sim = 0
         self.sim_count = 0
+        self.aux = 0
 
         weight = torch.empty((out_features, in_features), **factory_kwargs)
         self.weight = Parameter(weight, requires_grad=requires_grad)
@@ -343,10 +344,11 @@ class Centroid(nn.Module):
         and :math:`\delta` is the cosine similarity of the input with the target class prototype.
         """
         logit = self(input)
-        pred = logit.argmax(1)
+        #pred = logit.argmax(1)
+        predx = torch.topk(logit, 2)
+        pred = predx[0][0][0]
         is_wrong = target != pred
 
-        predx = torch.topk(logit, 2)
         alpha = 1 - (abs(predx[0][0][0]) - abs(predx[0][0][1]))
 
         self.similarity_sum += logit.max(1).values.item()

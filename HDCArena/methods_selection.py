@@ -1044,10 +1044,10 @@ configs = [
 
 configs = [
     {
-        "method": "online_iterative",
+        "method": "online",
         "multi_reduce_subclass": None,
         "threshold": None,
-        "lr": 5,
+        "lr": 1,
         "epsilon": None,
         "model_quantize": None,
         "model_sparse": None,

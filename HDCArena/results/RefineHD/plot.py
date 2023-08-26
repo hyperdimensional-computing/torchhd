@@ -58,6 +58,6 @@ if latex:
     print(latex_table)
 
 mean_of_encoding = (
-    df.groupby(["method", "name"])["accuracy"].mean().round(3).reset_index().T
+    df.groupby(["method", "dimensions"])["accuracy"].mean().round(3).reset_index().T
 )
 print(mean_of_encoding)
