@@ -23,7 +23,7 @@ from SinglePass import (
     noiseHD,
     adjustHD,
     embeddingHD,
-    adaptiveStable
+    adaptiveStable,
 )
 from Iterative import adaptHD as adaptHDiterative
 from Iterative import adjustHD as adjustHDiterative
@@ -570,7 +570,9 @@ def exec_arena(
             if method == "add":
                 vanillaHD.test_vanillaHD(test_loader, device, encode, model, accuracy)
             if method == "stable":
-                adaptiveStable.test_vanillaHD(test_loader, device, encode, model, accuracy)
+                adaptiveStable.test_vanillaHD(
+                    test_loader, device, encode, model, accuracy
+                )
                 iterations_executed = 1
             if method == "embedding":
                 embeddingHD.test_embeddingHD(
@@ -676,7 +678,7 @@ ENCODINGS = [
 METHODS = [
     "add",
     "stable",
-    #"adjust"
+    # "adjust"
     # "noise"
     # "adapt",
     # "online",

@@ -26,6 +26,7 @@ def train_vanillaHD(train_loader, device, encode, model):
         model.weight.data[i][m] = torch.zeros(len(m))
     #model.weight.data -= model.weight_err.data
 
+
 def test_vanillaHD(test_loader, device, encode, model, accuracy):
     model.normalize()
 
