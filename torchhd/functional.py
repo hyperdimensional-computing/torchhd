@@ -33,6 +33,8 @@ from torchhd.tensors.bsc import BSCTensor
 from torchhd.tensors.map import MAPTensor
 from torchhd.tensors.hrr import HRRTensor
 from torchhd.tensors.fhrr import FHRRTensor
+from torchhd.tensors.bsbc import BSBCTensor
+from torchhd.tensors.vtb import VTBTensor
 from torchhd.types import VSAOptions
 
 
@@ -86,6 +88,10 @@ def get_vsa_tensor_class(vsa: VSAOptions) -> Type[VSATensor]:
         return HRRTensor
     elif vsa == "FHRR":
         return FHRRTensor
+    elif vsa == "BSBC":
+        return BSBCTensor
+    elif vsa == "VTB":
+        return VTBTensor
 
     raise ValueError(f"Provided VSA model is not supported, specified: {vsa}")
 
@@ -352,7 +358,10 @@ def level(
         dimensions,
         dtype=span_hv.dtype,
         device=span_hv.device,
-    )
+    ).as_subclass(vsa_tensor)
+
+    if vsa == "BSBC":
+        hv.block_size = span_hv.block_size
 
     for i in range(num_vectors):
         span_idx = int(i // levels_per_span)
@@ -373,7 +382,7 @@ def level(
             hv[i] = torch.where(threshold_v[span_idx] < t, span_start_hv, span_end_hv)
 
     hv.requires_grad = requires_grad
-    return hv.as_subclass(vsa_tensor)
+    return hv
 
 
 def thermometer(
@@ -462,7 +471,7 @@ def thermometer(
             device=rand_hv.device,
         )
     else:
-        raise ValueError(f"{vsa_tensor} HD/VSA model is not defined.")
+        raise ValueError(f"{vsa_tensor} HD/VSA model is not (yet) supported.")
 
     # Create hypervectors using the obtained step
     for i in range(1, num_vectors):
@@ -629,9 +638,9 @@ def circular(
     """
     vsa_tensor = get_vsa_tensor_class(vsa)
 
-    if vsa_tensor == HRRTensor:
+    if vsa == "HRR" or vsa == "VTB":
         raise ValueError(
-            "The circular hypervectors don't currently work with the HRR model. We are not sure why, if you have any insight that could help please share it at: https://github.com/hyperdimensional-computing/torchhd/issues/108."
+            "The circular hypervectors do currently not work with the HRR and VTB models. We are not sure why, if you have any insight that could help please share it at: https://github.com/hyperdimensional-computing/torchhd/issues/108."
         )
 
     # convert from normalized "randomness" variable r to
@@ -661,7 +670,10 @@ def circular(
         dimensions,
         dtype=span_hv.dtype,
         device=span_hv.device,
-    )
+    ).as_subclass(vsa_tensor)
+
+    if vsa == "BSBC":
+        hv.block_size = span_hv.block_size
 
     mutation_history = deque()
 
@@ -704,7 +716,7 @@ def circular(
             hv[i // 2] = mutation_hv
 
     hv.requires_grad = requires_grad
-    return hv.as_subclass(vsa_tensor)
+    return hv
 
 
 def bind(input: VSATensor, other: VSATensor) -> VSATensor:

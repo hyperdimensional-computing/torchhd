@@ -84,24 +84,7 @@ def supported_dtype(
     if not issubclass(vsa_tensor, torchhd.VSATensor):
         raise ValueError("Must provide a VSATensor class")
 
-    if vsa_tensor == torchhd.BSCTensor:
-        return dtype not in {
-            torch.complex64,
-            torch.complex128,
-            torch.float16,
-            torch.bfloat16,
-        }
-
-    elif vsa_tensor == torchhd.MAPTensor:
-        return dtype not in {torch.uint8, torch.bool, torch.float16, torch.bfloat16}
-
-    elif vsa_tensor == torchhd.HRRTensor:
-        return dtype in {torch.float32, torch.float64}
-
-    elif vsa_tensor == torchhd.FHRRTensor:
-        return dtype in {torch.complex64, torch.complex128}
-
-    return False
+    return dtype in vsa_tensor.supported_dtypes
 
 
 vsa_tensors = [
@@ -109,4 +92,6 @@ vsa_tensors = [
     "MAP",
     "HRR",
     "FHRR",
+    "BSBC",
+    "VTB",
 ]

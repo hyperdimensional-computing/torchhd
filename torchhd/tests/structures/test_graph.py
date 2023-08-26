@@ -114,7 +114,6 @@ class TestGraph:
             e1, torch.tensor([-1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0])
         )
         e2 = GD.encode_edge(hv[2], hv[3])
-        print(e2)
         assert torch.allclose(
             e2, torch.tensor([1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0])
         )

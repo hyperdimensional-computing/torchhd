@@ -49,23 +49,53 @@ class TestDotSimilarity:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.random(
+                2, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.dot_similarity(hv[0], hv[1])
         assert similarity.shape == ()
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.random(
+                2, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.dot_similarity(hv[0], hv)
         assert similarity.shape == (2,)
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
-        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.random(
+                2, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv2 = functional.random(
+                4, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.dot_similarity(hv, hv2)
         assert similarity.shape == (2, 4)
 
-        hv1 = functional.random(6, 100, vsa, generator=generator, dtype=dtype).view(
-            2, 3, 100
-        )
-        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv1 = functional.random(
+                6, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            ).view(2, 3, 100)
+        else:
+            hv1 = functional.random(6, 100, vsa, generator=generator, dtype=dtype).view(
+                2, 3, 100
+            )
+        if vsa == "BSBC":
+            hv2 = functional.random(
+                4, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.dot_similarity(hv1, hv2)
         assert similarity.shape == (2, 3, 4)
 
@@ -149,7 +179,12 @@ class TestDotSimilarity:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.random(
+                3, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
 
         similarity = functional.dot_similarity(hv, hv)
 
@@ -158,7 +193,7 @@ class TestDotSimilarity:
                 assert similarity.dtype == torch.float
             elif dtype == torch.complex128:
                 assert similarity.dtype == torch.double
-        elif vsa == "HRR":
+        elif vsa == "HRR" or vsa == "VTB":
             assert similarity.dtype == dtype
         else:
             assert similarity.dtype == torch.get_default_dtype()
@@ -173,9 +208,20 @@ class TestDotSimilarity:
         generator = torch.Generator(device)
         generator.manual_seed(seed)
 
-        hv = functional.random(
-            3, 100, vsa, generator=generator, dtype=dtype, device=device
-        )
+        if vsa == "BSBC":
+            hv = functional.random(
+                3,
+                100,
+                vsa,
+                generator=generator,
+                dtype=dtype,
+                device=device,
+                block_size=1024,
+            )
+        else:
+            hv = functional.random(
+                3, 100, vsa, generator=generator, dtype=dtype, device=device
+            )
 
         similarity = functional.dot_similarity(hv, hv)
 
@@ -192,23 +238,54 @@ class TestCosSimilarity:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.random(
+                2, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.cosine_similarity(hv[0], hv[1])
         assert similarity.shape == ()
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.random(
+                2, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.cosine_similarity(hv[0], hv)
         assert similarity.shape == (2,)
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
-        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.random(
+                2, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv2 = functional.random(
+                4, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.cosine_similarity(hv, hv2)
         assert similarity.shape == (2, 4)
 
-        hv1 = functional.random(6, 100, vsa, generator=generator, dtype=dtype).view(
-            2, 3, 100
-        )
-        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv1 = functional.random(
+                6, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            ).view(2, 3, 100)
+        else:
+            hv1 = functional.random(6, 100, vsa, generator=generator, dtype=dtype).view(
+                2, 3, 100
+            )
+
+        if vsa == "BSBC":
+            hv2 = functional.random(
+                4, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.cosine_similarity(hv1, hv2)
         assert similarity.shape == (2, 3, 4)
 
@@ -292,7 +369,12 @@ class TestCosSimilarity:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.random(
+                3, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
 
         similarity = functional.cosine_similarity(hv, hv)
 
@@ -301,7 +383,7 @@ class TestCosSimilarity:
                 assert similarity.dtype == torch.float
             elif dtype == torch.complex128:
                 assert similarity.dtype == torch.double
-        elif vsa == "HRR":
+        elif vsa == "HRR" or vsa == "VTB":
             assert similarity.dtype == dtype
         else:
             assert similarity.dtype == torch.get_default_dtype()
@@ -316,9 +398,20 @@ class TestCosSimilarity:
         generator = torch.Generator(device)
         generator.manual_seed(seed)
 
-        hv = functional.random(
-            3, 100, vsa, generator=generator, dtype=dtype, device=device
-        )
+        if vsa == "BSBC":
+            hv = functional.random(
+                3,
+                100,
+                vsa,
+                generator=generator,
+                dtype=dtype,
+                device=device,
+                block_size=1024,
+            )
+        else:
+            hv = functional.random(
+                3, 100, vsa, generator=generator, dtype=dtype, device=device
+            )
 
         similarity = functional.cosine_similarity(hv, hv)
 
@@ -335,23 +428,54 @@ class TestHammingSimilarity:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.random(
+                2, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.hamming_similarity(hv[0], hv[1])
         assert similarity.shape == ()
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.random(
+                2, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.hamming_similarity(hv[0], hv)
         assert similarity.shape == (2,)
 
-        hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
-        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.random(
+                2, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv = functional.random(2, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv2 = functional.random(
+                4, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.hamming_similarity(hv, hv2)
         assert similarity.shape == (2, 4)
 
-        hv1 = functional.random(6, 100, vsa, generator=generator, dtype=dtype).view(
-            2, 3, 100
-        )
-        hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv1 = functional.random(
+                6, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            ).view(2, 3, 100)
+        else:
+            hv1 = functional.random(6, 100, vsa, generator=generator, dtype=dtype).view(
+                2, 3, 100
+            )
+
+        if vsa == "BSBC":
+            hv2 = functional.random(
+                4, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv2 = functional.random(4, 100, vsa, generator=generator, dtype=dtype)
         similarity = functional.hamming_similarity(hv1, hv2)
         assert similarity.shape == (2, 3, 4)
 
@@ -434,7 +558,12 @@ class TestHammingSimilarity:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
+        if vsa == "BSBC":
+            hv = functional.random(
+                3, 100, vsa, generator=generator, dtype=dtype, block_size=1024
+            )
+        else:
+            hv = functional.random(3, 100, vsa, generator=generator, dtype=dtype)
 
         similarity = functional.hamming_similarity(hv, hv)
 
@@ -450,9 +579,20 @@ class TestHammingSimilarity:
         generator = torch.Generator(device)
         generator.manual_seed(seed)
 
-        hv = functional.random(
-            3, 100, vsa, generator=generator, dtype=dtype, device=device
-        )
+        if vsa == "BSBC":
+            hv = functional.random(
+                3,
+                100,
+                vsa,
+                generator=generator,
+                dtype=dtype,
+                device=device,
+                block_size=1024,
+            )
+        else:
+            hv = functional.random(
+                3, 100, vsa, generator=generator, dtype=dtype, device=device
+            )
 
         similarity = functional.hamming_similarity(hv, hv)
 
