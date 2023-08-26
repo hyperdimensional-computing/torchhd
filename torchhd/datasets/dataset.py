@@ -67,11 +67,11 @@ class HDCArena:
 
     # All datasets included in the collection
     dataset_names = [
-        #"CIFAR10",
-        #"MNIST",
-        #"EuropeanLanguages",
-        #"EMGHandGestures",
-        #"PAMAP",
+        # "CIFAR10",
+        # "MNIST",
+        # "EuropeanLanguages",
+        # "EMGHandGestures",
+        # "PAMAP",
         "ISOLET",
         # "UCIHAR",
     ]
