@@ -102,7 +102,6 @@ with open(results_file, "w", newline="") as file:
     )
 
 
-
 def exec_arena(
     method="add",
     encoding="density",
@@ -367,4 +366,3 @@ for i in DIMENSIONS:
                 batch_size=BATCH_SIZE,
                 retrain=RETRAIN,
             )
-

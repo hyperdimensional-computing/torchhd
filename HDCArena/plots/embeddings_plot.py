@@ -5,12 +5,7 @@ import matplotlib.pyplot as plt
 df = pd.read_csv("../results/final_results/embeddings_comparison_uci.csv")
 var = "Encoding"
 
-embeddings_order = [
-    "add",
-    "adapt",
-    "online",
-    "adjust"
-]
+embeddings_order = ["add", "adapt", "online", "adjust"]
 
 df_mean = df.groupby([var, "Name"])["TrainTime"].mean().to_frame()
 df_pivot = df_mean.reset_index().pivot(index="Name", columns=var, values="TrainTime")

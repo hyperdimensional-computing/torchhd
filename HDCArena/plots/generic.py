@@ -6,7 +6,6 @@ df = pd.read_csv("../results/final_results/generic.csv")
 
 methods_order = [
     "generic",
-
 ]
 var = "Encoding"
 # methods_order = ["add"]
@@ -29,9 +28,9 @@ plt.title("Accuracy by " + var + " and Dataset")
 
 # Create the second plot
 fig, ax = plt.subplots(figsize=(10, 6))
-df.groupby(["Name", var])["TrainTime"].mean().unstack().reindex(methods_order, axis=1).plot(
-    kind="bar", ax=ax, width=0.8
-)
+df.groupby(["Name", var])["TrainTime"].mean().unstack().reindex(
+    methods_order, axis=1
+).plot(kind="bar", ax=ax, width=0.8)
 ax.set_xlabel(var + " and Dataset Name")
 ax.set_ylabel("TrainTime")
 ax.legend(title="Dataset Name", loc="upper right")

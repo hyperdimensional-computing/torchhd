@@ -5,9 +5,7 @@ import matplotlib.pyplot as plt
 df = pd.read_csv("../results/proves/embeddings.csv")
 var = "Encoding"
 
-embeddings_order = [
-"sequence","hashmap", "flocet","sinusoid","generic","embed"
-]
+embeddings_order = ["sequence", "hashmap", "flocet", "sinusoid", "generic", "embed"]
 
 df_mean = df.groupby([var, "Name"])["TrainTime"].mean().to_frame()
 df_pivot = df_mean.reset_index().pivot(index="Name", columns=var, values="TrainTime")

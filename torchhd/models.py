@@ -234,10 +234,8 @@ class Centroid(nn.Module):
         self.ww[index].index_add_(0, pred, lr * alpha2 * input)
         """
 
-
     def forward_index(self, input: Tensor, index):
         return functional.cosine_similarity(input, self.ww[index])
-
 
     @torch.no_grad()
     def add_noise(
@@ -833,7 +831,6 @@ class Centroid(nn.Module):
             if accuracy_full - new_acc > threshold:
                 return
 
-
     @torch.no_grad()
     def normalize(self, eps=1e-12) -> None:
         """Transforms all the class prototype vectors into unit vectors.
@@ -879,7 +876,6 @@ class Centroid(nn.Module):
         return functional.dot_similarity(
             enc.to(device), self.comp_weight.to(device)
         ).to(device)
-
 
 
 class IntRVFL(nn.Module):
@@ -1286,8 +1282,12 @@ class CentroidMiss(nn.Module):
         self.miss_predicted_large = Parameter(
             miss_predicted_large, requires_grad=requires_grad
         )
-        miss_predicted_counter = torch.empty((out_features, out_features, 1), **factory_kwargs)
-        self.miss_predicted_counter = Parameter(miss_predicted_counter, requires_grad=requires_grad)
+        miss_predicted_counter = torch.empty(
+            (out_features, out_features, 1), **factory_kwargs
+        )
+        self.miss_predicted_counter = Parameter(
+            miss_predicted_counter, requires_grad=requires_grad
+        )
 
         self.reset_parameters()
 
@@ -1355,7 +1355,6 @@ class CentroidMiss(nn.Module):
         self.miss_predicted_large[pred, target, :] += input
         self.miss_predicted_counter[pred, target, :] += 1
         # print(self.miss_predicted_large[pred,target,:], input)
-
 
     @torch.no_grad()
     def add_adapt(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
