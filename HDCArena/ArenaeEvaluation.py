@@ -23,8 +23,8 @@ def exec_arena(
 ):
     for dataset in benchmark.datasets():
         for r in range(repeats):
-            train_loader, test_loader, num_classes, num_feat, train_ds = preprocess(
-                dataset, batch_size, device, partial_data
+            train_loader, test_loader, num_classes, num_feat, train_ds, test_ds = preprocess(
+                dataset, batch_size, device, partial_data, config["method"]
             )
 
             encode = Encoder(num_feat, dimensions, encoding, dataset.name)
@@ -35,6 +35,7 @@ def exec_arena(
 
             methods_selection.select_model(
                 train_ds,
+                test_ds,
                 train_loader,
                 test_loader,
                 num_classes,
@@ -71,13 +72,13 @@ ENCODINGS = ["density"]
 configurations = methods_selection.configs
 
 REPEATS = 1
-DIMENSIONS = [10000]
+DIMENSIONS = [100]
 ITERATIONS = 30
 # PARTIAL_DATA = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
 PARTIAL_DATA = [1]
 # ROBUSTNESS = [1,2,5,10,15,20,25,30,40,50,60,70]
 ROBUSTNESS = [0]
-arena = False
+arena = True
 
 if arena:
     benchmark = HDCArena("../data", download=True)

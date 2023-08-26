@@ -2,16 +2,20 @@ import torch
 from torch import Tensor
 import torch.utils.data as data
 from torchhd.datasets import EuropeanLanguages as Languages
-
+from torchvision import transforms
+import PIL
 
 def create_min_max_normalize(min: Tensor, max: Tensor, device):
     def normalize(input: Tensor) -> Tensor:
-        return torch.nan_to_num((input.to(device) - min) / (max - min))
+        if type(input) == PIL.Image.Image:
+            convert_tensor = transforms.ToTensor()
+            return torch.nan_to_num((convert_tensor(input).view(32,32,3) - min) / (max - min))
+        return torch.nan_to_num((torch.tensor(input) - min) / (max - min))
 
     return normalize
 
 
-def preprocess(dataset, batch_size, device, partial_data):
+def preprocess(dataset, batch_size, device, partial_data, method):
     if dataset.name == "EuropeanLanguages":
         MAX_INPUT_SIZE = 128
         PADDING_IDX = 0
@@ -78,14 +82,31 @@ def preprocess(dataset, batch_size, device, partial_data):
             transform_test = create_min_max_normalize(min_val, max_val, device)
             dataset.test.transform = transform_test
 
-        train_ds = dataset.train
+            if method == "rvfl":
+                min_val = torch.min(dataset.train.data, 0).values.to(device)
+                max_val = torch.max(dataset.train.data, 0).values.to(device)
+                transform = create_min_max_normalize(min_val, max_val, device)
+                dataset.train.transform = transform
+                dataset.test.transform = transform
+                train_ds = transform(dataset.train.data)
+        else:
+            if method == "rvfl":
+                min_val = torch.min(torch.tensor(dataset.train.data), 0).values.to(device)
+                max_val = torch.max(torch.tensor(dataset.train.data), 0).values.to(device)
+                transform = create_min_max_normalize(min_val, max_val, device)
+                dataset.train.transform = transform
+                dataset.test.transform = transform
+                train_ds = transform(dataset.train.data)
+            else:
+                train_ds = dataset.train
+
         test_ds = dataset.test
 
     partial_data = int(partial_data * len(train_ds))
-    train_ds = torch.utils.data.random_split(
-        train_ds, [partial_data, len(train_ds) - partial_data]
-    )[0]
+    #train_ds = torch.utils.data.random_split(
+    #    train_ds, [partial_data, len(train_ds) - partial_data]
+    #)[0]
 
     train_loader = data.DataLoader(train_ds, batch_size=batch_size, shuffle=True)
     test_loader = data.DataLoader(test_ds, batch_size=batch_size)
-    return train_loader, test_loader, num_classes, num_feat, train_ds
+    return train_loader, test_loader, num_classes, num_feat, train_ds, test_ds

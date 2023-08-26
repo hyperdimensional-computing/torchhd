@@ -16,7 +16,7 @@ from methods import quantHDIterative
 from methods import sparseHDIterative
 from methods import neuralHDIterative
 from methods import distHDIterative
-
+from methods import intRVFL
 
 results_file = "results/results" + str(time.time()) + ".csv"
 
@@ -54,6 +54,7 @@ with open(results_file, "w", newline="") as file:
 
 def select_model(
     train_ds,
+    test_ds,
     train_loader,
     test_loader,
     num_classes,
@@ -487,7 +488,40 @@ def select_model(
             model_neural,
             results_file,
         )
-
+    elif method == "rvfl":
+        intRVFL.train_rvfl(
+            dataset,
+            train_ds,
+            test_ds,
+            train_loader,
+            test_loader,
+            num_classes,
+            encode,
+            model,
+            device,
+            dataset.name,
+            method,
+            encoding,
+            iterations,
+            dimensions,
+            lr,
+            chunks,
+            threshold,
+            reduce_subclasses,
+            model_quantize,
+            epsilon,
+            model_sparse,
+            s,
+            alpha,
+            beta,
+            theta,
+            r,
+            partial_data,
+            robustness,
+            lazy_regeneration,
+            model_neural,
+            results_file,
+        )
 
 configs = [
     {
@@ -710,7 +744,7 @@ configs = [
 
 configs = [
     {
-        "method": "adjust",
+        "method": "rvfl",
         "multi_reduce_subclass": None,
         "threshold": None,
         "lr": 1,
