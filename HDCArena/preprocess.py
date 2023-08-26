@@ -13,7 +13,7 @@ def create_min_max_normalize(min: Tensor, max: Tensor, device):
             return torch.nan_to_num(
                 (convert_tensor(input).view(32, 32, 3) - min) / (max - min)
             )
-        return torch.nan_to_num((torch.tensor(input) - min) / (max - min))
+        return torch.nan_to_num((torch.tensor(input).to(device) - min) / (max - min))
 
     return normalize
 
