@@ -167,7 +167,9 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, target, input, alpha=lr)
 
     @torch.no_grad()
-    def add_index(self, input: Tensor, target: Tensor, index, lr: float = 1.0, device=None) -> None:
+    def add_index(
+        self, input: Tensor, target: Tensor, index, lr: float = 1.0, device=None
+    ) -> None:
         """Adds the input vectors scaled by the lr to the target prototype vectors."""
         logit = self.forward_index(input, index)
         conf = torch.topk(logit, 2)
@@ -207,6 +209,7 @@ class Centroid(nn.Module):
         alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
         self.ww[index].index_add_(0, pred, lr * alpha2 * input)
         '''
+
 
     def forward_index(self, input: Tensor, index):
         return functional.cosine_similarity(input, self.ww[index])
