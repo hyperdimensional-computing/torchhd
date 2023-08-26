@@ -1001,7 +1001,6 @@ class IntRVFL(nn.Module):
         self.weight.copy_(weights)
 
 
-<<<<<<< HEAD
 class PoolCentroid(nn.Module):
     r"""Implements the centroid classification model using class prototypes.
 
@@ -1046,23 +1045,10 @@ class PoolCentroid(nn.Module):
     ) -> None:
         factory_kwargs = {"device": device, "dtype": dtype}
         super(PoolCentroid, self).__init__()
-=======
-class BinaryLinear(nn.Module):
-    def __init__(self, in_features: int, out_features: int, kernel_size: int = 3):
-        super(BinaryLinear, self).__init__()
->>>>>>> bb90e2b ([github-action] formatting fixes)
 
         self.pool_size = pool_size
         self.in_features = in_features
         self.out_features = out_features
-<<<<<<< HEAD
-=======
-        self.weight = torch.nn.Parameter(
-            (torch.rand((out_features, in_features)) * 2 - 1) * 0.001,
-            requires_grad=True,
-        )
->>>>>>> bb90e2b ([github-action] formatting fixes)
-
         self.similarity_sum = torch.empty((pool_size), **factory_kwargs)
         self.count = 0
         self.error_similarity_sum = torch.empty((pool_size), **factory_kwargs)
