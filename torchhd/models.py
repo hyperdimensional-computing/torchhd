@@ -119,9 +119,26 @@ class Centroid(nn.Module):
 
         # embeddingHD
         self.ww = []
+        self.similarity_sum_w = []
+        self.count_w = []
+        self.error_similarity_sum_w = []
+        self.error_count_w = []
+        self.confidence = []
         for i in range(encodings):
             w = torch.empty((out_features, in_features), **factory_kwargs)
             self.ww.append(Parameter(w, requires_grad=requires_grad))
+            self.similarity_sum_w.append(torch.tensor(0.))
+            self.count_w.append(torch.tensor(0.))
+            self.error_similarity_sum_w.append(torch.tensor(0.))
+            self.error_count_w.append(torch.tensor(0.))
+            self.confidence.append(torch.tensor(0.))
+
+        self.ww = torch.stack(self.ww).to(device)
+        self.similarity_sum_w = torch.stack(self.similarity_sum_w).to(device)
+        self.count_w = torch.stack(self.count_w).to(device)
+        self.error_similarity_sum_w = torch.stack(self.error_similarity_sum_w).to(device)
+        self.error_count_w = torch.stack(self.error_count_w).to(device)
+        self.confidence = torch.stack(self.confidence).to(device)
 
         # noiseHD
         self.noise = torch.zeros((1, in_features))
@@ -134,6 +151,8 @@ class Centroid(nn.Module):
         init.zeros_(self.weight_sparse)
         for i in self.multi_weight:
             init.zeros_(i)
+        for i in self.ww:
+            init.zeros_(i)
 
     def forward(self, input: Tensor, dot: bool = False) -> Tensor:
         if dot:
@@ -144,12 +163,50 @@ class Centroid(nn.Module):
     @torch.no_grad()
     def add(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
         """Adds the input vectors scaled by the lr to the target prototype vectors."""
+
         self.weight.index_add_(0, target, input, alpha=lr)
 
     @torch.no_grad()
     def add_index(self, input: Tensor, target: Tensor, index, lr: float = 1.0, device=None) -> None:
         """Adds the input vectors scaled by the lr to the target prototype vectors."""
+        logit = self.forward_index(input, index)
+        conf = torch.topk(logit, 2)
+
+        #print(target, conf.indices[0][0])
+        if target != conf.values[0][0]:
+            self.count_w[index] += 1
+
+            self.confidence[index] += conf.values[0][0].item()-conf.values[0][1].item()
         self.ww[index].index_add_(0, target.to(device), input.to(device), alpha=lr).to(device)
+        '''
+        logit = self.forward_index(input, index)
+        pred = logit.argmax(1)
+        is_wrong = target != pred
+
+        self.similarity_sum_w[index] += logit.max(1).values.item()
+        self.count_w[index] += 1
+        if self.error_count_w[index] == 0:
+            val = self.similarity_sum_w[index] / self.count_w[index]
+        else:
+            val = self.error_similarity_sum_w[index] / self.error_count_w[index]
+        if is_wrong.sum().item() == 0:
+            if logit.max(1).values.item() < val:
+                self.ww[index].index_add_(0, target, input)
+            return
+
+        self.error_count_w[index] += 1
+        self.error_similarity_sum_w[index] += logit.max(1).values.item()
+
+        logit = logit[is_wrong]
+        input = input[is_wrong]
+        target = target[is_wrong]
+        pred = pred[is_wrong]
+
+        alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
+        self.ww[index].index_add_(0, target, lr * alpha1 * input)
+        alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
+        self.ww[index].index_add_(0, pred, lr * alpha2 * input)
+        '''
 
     def forward_index(self, input: Tensor, index):
         return functional.cosine_similarity(input, self.ww[index])
