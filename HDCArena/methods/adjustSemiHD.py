@@ -40,7 +40,6 @@ def train_adjustSemiHD(
     dropout_rate,
     results_file,
 ):
-
     train_time = time.time()
 
     with torch.no_grad():

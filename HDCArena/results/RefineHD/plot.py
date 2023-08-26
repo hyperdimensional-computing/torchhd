@@ -3,9 +3,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-file = (
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/refine_dimensions_uci"
-)
+file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/RefineHD/refine_dimensions_uci"
 # file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/final_results/adjust"
 # file = "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/final_results/dimensions_arenaaa.csv"
 
