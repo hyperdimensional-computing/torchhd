@@ -10,9 +10,9 @@ def create_min_max_normalize(min: Tensor, max: Tensor, device):
 
     return normalize
 
+
 def preprocess(dataset, batch_size, device, partial_data):
     if dataset.name == "EuropeanLanguages":
-
         MAX_INPUT_SIZE = 128
         PADDING_IDX = 0
 
@@ -56,18 +56,14 @@ def preprocess(dataset, batch_size, device, partial_data):
 
         train_size = int(len(dataset.train) * 0.7)
         test_size = len(dataset.train) - train_size
-        train_ds, test_ds = data.random_split(
-            dataset.train, [train_size, test_size]
-        )
+        train_ds, test_ds = data.random_split(dataset.train, [train_size, test_size])
     else:
         # Number of features in the dataset.
         if dataset.name not in ["MNIST", "CIFAR10"]:
             num_feat = dataset.train[0][0].size(-1)
         else:
             if dataset.name == "MNIST":
-                num_feat = dataset.train[0][0].size(-1) * dataset.train[0][
-                    0
-                ].size(-1)
+                num_feat = dataset.train[0][0].size(-1) * dataset.train[0][0].size(-1)
             elif dataset.name == "CIFAR10":
                 num_feat = 3072
         num_classes = len(dataset.train.classes)
@@ -85,9 +81,10 @@ def preprocess(dataset, batch_size, device, partial_data):
         train_ds = dataset.train
         test_ds = dataset.test
 
-
-    partial_data = int(partial_data*len(train_ds))
-    train_ds = torch.utils.data.random_split(train_ds, [partial_data, len(train_ds) - partial_data])[0]
+    partial_data = int(partial_data * len(train_ds))
+    train_ds = torch.utils.data.random_split(
+        train_ds, [partial_data, len(train_ds) - partial_data]
+    )[0]
 
     train_loader = data.DataLoader(train_ds, batch_size=batch_size, shuffle=True)
     test_loader = data.DataLoader(test_ds, batch_size=batch_size)

@@ -150,15 +150,13 @@ for i in mean_accuracy_by_dimension_and_method:
 
     from scipy.interpolate import interp1d
 
-
-
-    f = interp1d(index_list, values_list, kind='quadratic')
+    f = interp1d(index_list, values_list, kind="quadratic")
     x_interp = np.linspace(min(index_list), max(index_list), num=1000)
     y_interp = f(x_interp)
 
     # Create line plot with interpolated data
     sns.lineplot(x=x_interp, y=y_interp, label=l)
-    #sns.lineplot(x=index_list, y=values_list, label=l)
+    # sns.lineplot(x=index_list, y=values_list, label=l)
     # if i == 'adjust' or i == 'online':
     #    plt.fill_between(index_list, np.array(values_list) - np.array(var_list), np.array(values_list) + np.array(var_list), alpha=0.3)
 

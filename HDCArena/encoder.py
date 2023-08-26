@@ -63,7 +63,5 @@ class Encoder(nn.Module):
         if self.encoding == "flocet":
             sample_hv = self.embed(x).sign()
         if self.encoding == "generic":
-            sample_hv = torchhd.functional.generic(
-                self.keys.weight, self.embed(x), 3
-            )
+            sample_hv = torchhd.functional.generic(self.keys.weight, self.embed(x), 3)
         return torchhd.hard_quantize(sample_hv)

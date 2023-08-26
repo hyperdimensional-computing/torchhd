@@ -1,5 +1,6 @@
 import sys
-sys.path.append('methods')
+
+sys.path.append("methods")
 from tqdm import tqdm
 import time
 import utils
@@ -7,12 +8,41 @@ import torchmetrics
 import math
 
 
-def train_sparseHD(train_loader, test_loader, num_classes, encode, model, device, name, method, encoding,
-                  iterations, dimensions, lr, chunks, threshold, reduce_subclasses, model_quantize, epsilon,
-                   model_sparse, s, alpha, beta, theta, r, partial_data, robustness, lazy_regeneration, model_neural, results_file):
+def train_sparseHD(
+    train_loader,
+    test_loader,
+    num_classes,
+    encode,
+    model,
+    device,
+    name,
+    method,
+    encoding,
+    iterations,
+    dimensions,
+    lr,
+    chunks,
+    threshold,
+    reduce_subclasses,
+    model_quantize,
+    epsilon,
+    model_sparse,
+    s,
+    alpha,
+    beta,
+    theta,
+    r,
+    partial_data,
+    robustness,
+    lazy_regeneration,
+    model_neural,
+    results_file,
+):
     train_len = len(train_loader)
     validation_set = train_len - math.ceil(len(train_loader) * 0.05)
-    accuracy_validation = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(device)
+    accuracy_validation = torchmetrics.Accuracy(
+        "multiclass", num_classes=num_classes
+    ).to(device)
 
     train_time = time.time()
 
@@ -20,9 +50,7 @@ def train_sparseHD(train_loader, test_loader, num_classes, encode, model, device
         accuracy_validation_sparse = torchmetrics.Accuracy(
             "multiclass", num_classes=num_classes
         ).to(device)
-        for idx, (samples, labels) in enumerate(
-                tqdm(train_loader, desc="Training")
-        ):
+        for idx, (samples, labels) in enumerate(tqdm(train_loader, desc="Training")):
             samples = samples.to(device)
             labels = labels.to(device)
             samples_hv = encode(samples)
@@ -49,7 +77,33 @@ def train_sparseHD(train_loader, test_loader, num_classes, encode, model, device
 
     model.normalize()
 
-    utils.test_eval(test_loader, num_classes, encode, model, device, name, method, encoding, iterations, dimensions,
-                    lr, chunks, threshold, reduce_subclasses, model_quantize, epsilon, model_sparse, s, alpha, beta, theta, r,
-                    partial_data, robustness, results_file, train_time, lazy_regeneration, model_neural)
-
+    utils.test_eval(
+        test_loader,
+        num_classes,
+        encode,
+        model,
+        device,
+        name,
+        method,
+        encoding,
+        iterations,
+        dimensions,
+        lr,
+        chunks,
+        threshold,
+        reduce_subclasses,
+        model_quantize,
+        epsilon,
+        model_sparse,
+        s,
+        alpha,
+        beta,
+        theta,
+        r,
+        partial_data,
+        robustness,
+        results_file,
+        train_time,
+        lazy_regeneration,
+        model_neural,
+    )

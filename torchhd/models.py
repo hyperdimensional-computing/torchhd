@@ -351,7 +351,9 @@ class Centroid(nn.Module):
         elif model == "ternary":
             return functional.dot_similarity(input, self.weight_quant)
 
-    def add_quantize(self, input: Tensor, target: Tensor, lr: float = 1.0, model="binary") -> None:
+    def add_quantize(
+        self, input: Tensor, target: Tensor, lr: float = 1.0, model="binary"
+    ) -> None:
         logit = self.quantized_similarity(input, model)
         pred = logit.argmax(1)
         is_wrong = target != pred
@@ -379,7 +381,9 @@ class Centroid(nn.Module):
                 ).to(device),
             )
 
-    def add_sparse(self, input: Tensor, target: Tensor, lr: float = 1.0, iter=0) -> None:
+    def add_sparse(
+        self, input: Tensor, target: Tensor, lr: float = 1.0, iter=0
+    ) -> None:
         if iter == 0:
             logit = self(input)
         else:
@@ -460,13 +464,17 @@ class Centroid(nn.Module):
             torch.randn(self.weight.size(0)).unsqueeze(1).to(device)
         )
 
-        if hasattr(encode.embed, 'flocet_encoding'):
+        if hasattr(encode.embed, "flocet_encoding"):
             encode.embed.flocet_encoding.weight[:, dropped_indices] = (
-                torch.randn(encode.embed.flocet_encoding.weight.size(0)).unsqueeze(1).to(device)
+                torch.randn(encode.embed.flocet_encoding.weight.size(0))
+                .unsqueeze(1)
+                .to(device)
             )
-        elif hasattr(encode.embed, 'density_encoding'):
+        elif hasattr(encode.embed, "density_encoding"):
             encode.embed.density_encoding.weight[:, dropped_indices] = (
-                torch.randn(encode.embed.density_encoding.weight.size(0)).unsqueeze(1).to(device)
+                torch.randn(encode.embed.density_encoding.weight.size(0))
+                .unsqueeze(1)
+                .to(device)
             )
         else:
             encode.embed.weight[:, dropped_indices] = (
@@ -506,7 +514,16 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, pred, lr * alpha2 * -input)
 
     @torch.no_grad()
-    def eval_dist(self,input: Tensor,target: Tensor,device,lr: float = 1.0,alpha=1.0,beta=1.0,theta=1.0,) -> None:
+    def eval_dist(
+        self,
+        input: Tensor,
+        target: Tensor,
+        device,
+        lr: float = 1.0,
+        alpha=1.0,
+        beta=1.0,
+        theta=1.0,
+    ) -> None:
         r"""Only updates the prototype vectors on wrongly predicted inputs.
 
         Implements the iterative training method as described in `OnlineHD: Robust, Efficient, and Single-Pass Online Learning Using Hyperdimensional System <https://ieeexplore.ieee.org/abstract/document/9474107>`_.
@@ -566,18 +583,21 @@ class Centroid(nn.Module):
         # convert intersect back to a tensor
         dimensions_regenerated = torch.tensor(intersect).long().to(device)
 
-
         self.weight.data[:, dimensions_regenerated] = (
             torch.randn(self.weight.size(0)).unsqueeze(1).to(device)
         )
 
-        if hasattr(encode.embed, 'flocet_encoding'):
+        if hasattr(encode.embed, "flocet_encoding"):
             encode.embed.flocet_encoding.weight[:, dimensions_regenerated] = (
-                torch.randn(encode.embed.flocet_encoding.weight.size(0)).unsqueeze(1).to(device)
+                torch.randn(encode.embed.flocet_encoding.weight.size(0))
+                .unsqueeze(1)
+                .to(device)
             )
-        elif hasattr(encode.embed, 'density_encoding'):
+        elif hasattr(encode.embed, "density_encoding"):
             encode.embed.density_encoding.weight[:, dimensions_regenerated] = (
-                torch.randn(encode.embed.density_encoding.weight.size(0)).unsqueeze(1).to(device)
+                torch.randn(encode.embed.density_encoding.weight.size(0))
+                .unsqueeze(1)
+                .to(device)
             )
         else:
             encode.embed.weight[:, dimensions_regenerated] = (
@@ -689,7 +709,17 @@ class Centroid(nn.Module):
             sub_classes += i.shape[0]
         return sub_classes
 
-    def reduce_subclasses(self,train_loader,device,encode,model,classes,accuracy_full,reduce_subclasses="drop",threshold=0.03,) -> None:
+    def reduce_subclasses(
+        self,
+        train_loader,
+        device,
+        encode,
+        model,
+        classes,
+        accuracy_full,
+        reduce_subclasses="drop",
+        threshold=0.03,
+    ) -> None:
         for i in range(10):
             accuracy = torchmetrics.Accuracy("multiclass", num_classes=classes).to(
                 device
