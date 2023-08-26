@@ -99,20 +99,13 @@ def train_adjustHD(
     model_neural,
     results_file,
 ):
-<<<<<<< HEAD
     validation_ds, _ = data.random_split(train_ds, [int(len(train_ds)*0.1),len(train_ds)-int(len(train_ds)*0.1)])
     if len(validation_ds) > 0:
         validation_loader = data.DataLoader(validation_ds, shuffle=True)
     num_samples_per_split = num_classes*3
-=======
-    validation_ds, _ = data.random_split(
-        train_ds, [int(len(train_ds) * 0.1), len(train_ds) - int(len(train_ds) * 0.1)]
-    )
-    validation_loader = data.DataLoader(validation_ds, shuffle=True)
-    num_samples_per_split = num_classes * 3
->>>>>>> a15f0fb ([github-action] formatting fixes)
     num_splits = 4
     while num_splits * num_samples_per_split > len(train_ds):
+
         num_splits -= 1
     splits = make_class_balanced_splits(
         train_ds, num_classes, num_samples_per_split, num_splits
