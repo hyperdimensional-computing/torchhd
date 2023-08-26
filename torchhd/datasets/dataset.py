@@ -73,7 +73,7 @@ class HDCArena:
         #"EMGHandGestures",
         #"PAMAP",
         "ISOLET",
-        #"UCIHAR",
+        # "UCIHAR",
     ]
 
     # Specify namedtuple format
