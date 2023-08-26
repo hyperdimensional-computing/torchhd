@@ -431,7 +431,7 @@ def exec_arena(
                     encode = encode.to(device)
                     encodings.append(encode)
                 encode, idx = embeddingHD.train_embeddingHD(
-                    train_loader, val_loader, device, encodings, e, model
+                    train_loader, val_loader, test_loader, device, encodings, e, model
                 )
                 encoding = e[idx]
 
@@ -667,7 +667,7 @@ ENCODINGS = [
 # "multicentroid",
 #  "rvfl"]
 METHODS = [
-    "embedding",
+    "adjust",
     # "noise"
     # "adapt",
     # "online",

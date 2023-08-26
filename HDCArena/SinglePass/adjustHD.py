@@ -9,7 +9,7 @@ def train_adjustHD(train_loader, device, encode, model):
             labels = labels.to(device)
 
             samples_hv = encode(samples)
-            model.add_adjust(samples_hv, labels)
+            model.add_adj(samples_hv, labels)
 
 
 def test_adjustHD(test_loader, device, encode, model, accuracy):

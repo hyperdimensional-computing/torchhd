@@ -502,18 +502,14 @@ class UCIClassificationBenchmark:
         "Yeast",
         "Zoo",
     ]
-    dataset_names_ = [
-        "Abalone",
-        "AcuteInflammation",
-        "AcuteNephritis",
-        "Annealing",
+    dataset_names = [
         "Arrhythmia",
         "AudiologyStd",
         "BalanceScale",
         "Balloons",
     ]
 
-    dataset_names_ = [
+    dataset_names = [
         "Arrhythmia",
     ]
 

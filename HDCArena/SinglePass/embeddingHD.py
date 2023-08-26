@@ -22,14 +22,15 @@ def validate(val_loader, encodings, device, model):
     for index, i in enumerate(encodings):
         acc[index] = acc[index].compute().item()
 
+    print(acc)
     conf = model.confidence / model.count_w
-    encode_idx = torch.argmax(torch.tensor(acc) * conf)
+    encode_idx = torch.argmax(torch.tensor(acc))
     model.weight.data = model.ww[encode_idx]
     return encode_idx
 
 
-def train_embeddingHD(train_loader, val_loader, device, encodings, e, model):
-    warmup = int(len(train_loader) * 0.99)
+def train_embeddingHD(train_loader, val_loader, test_loader, device, encodings, e, model):
+    warmup = int(len(train_loader) * 0.3)
     with torch.no_grad():
         for idx, (samples, labels) in enumerate(tqdm(train_loader, desc="Training")):
             samples = samples.to(device)
@@ -41,6 +42,7 @@ def train_embeddingHD(train_loader, val_loader, device, encodings, e, model):
                     model.add_index(samples_hv, labels, index, device=device)
             else:
                 if idx == warmup:
+                    encode_idx = validate(test_loader, encodings, device, model)
                     encode_idx = validate(val_loader, encodings, device, model)
                 samples_hv = encodings[encode_idx](samples).to(device)
                 model.add(samples_hv, labels)
