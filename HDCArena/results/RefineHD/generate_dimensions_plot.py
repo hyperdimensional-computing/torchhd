@@ -16,7 +16,9 @@ x_smooth = np.linspace(x.min(), x.max(), 300)
 fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
 
 lab = ["Baseline", "AdaptHD", "OnlineHD", "RefineHD"]
-for idx, method in enumerate(df["method"].unique()):
+for idx, method in enumerate(range(len(lab))):
+    a = df["method"].unique()
+    method = a[idx]
     print("m", method)
     l = df[df["method"] == method]
     x = l["dimensions"]
@@ -45,7 +47,7 @@ x = df["dimensions"]
 
 # Increase the number of data points for smoother lines
 
-lab = ["Baseline", "AdaptHD", "OnlineHD", "RefineHD"]
+lab = ["Baseline", "AdaptHD", "OnlineHD", "RefineHD","AdaptHD", "OnlineHD", "RefineHD"]
 for idx, method in enumerate(df["method"].unique()):
     print("m", method)
     l = df[df["method"] == method]
