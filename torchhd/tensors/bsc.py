@@ -426,10 +426,11 @@ class BSCTensor(VSATensor):
         """
         return super().roll(shifts=shifts, dims=-1)
 
-    def dot_similarity(self, others: "BSCTensor") -> Tensor:
+    def dot_similarity(self, others: "BSCTensor", *, dtype=None) -> Tensor:
         """Inner product with other hypervectors."""
-        dtype = torch.get_default_dtype()
         device = self.device
+        if dtype is None:
+            dtype = torch.get_default_dtype()
 
         min_one = torch.tensor(-1.0, dtype=dtype, device=device)
         plus_one = torch.tensor(1.0, dtype=dtype, device=device)
@@ -441,7 +442,7 @@ class BSCTensor(VSATensor):
             others_as_bipolar = others_as_bipolar.transpose(-2, -1)
         return torch.matmul(self_as_bipolar, others_as_bipolar)
 
-    def cosine_similarity(self, others: "BSCTensor") -> Tensor:
+    def cosine_similarity(self, others: "BSCTensor", *, dtype=None) -> Tensor:
         """Cosine similarity with other hypervectors."""
         d = self.size(-1)
-        return self.dot_similarity(others) / d
+        return self.dot_similarity(others, dtype=dtype) / d

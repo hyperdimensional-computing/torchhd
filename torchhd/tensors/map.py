@@ -340,16 +340,22 @@ class MAPTensor(VSATensor):
 
         return torch.clamp(self, min=-kappa, max=kappa)
 
-    def dot_similarity(self, others: "MAPTensor") -> Tensor:
+    def dot_similarity(self, others: "MAPTensor", *, dtype=None) -> Tensor:
         """Inner product with other hypervectors"""
-        dtype = torch.get_default_dtype()
+        if dtype is None:
+            dtype = torch.get_default_dtype()
+
         if others.dim() >= 2:
             others = others.transpose(-2, -1)
+
         return torch.matmul(self.to(dtype), others.to(dtype))
 
-    def cosine_similarity(self, others: "MAPTensor", *, eps=1e-08) -> Tensor:
+    def cosine_similarity(
+        self, others: "MAPTensor", *, dtype=None, eps=1e-08
+    ) -> Tensor:
         """Cosine similarity with other hypervectors"""
-        dtype = torch.get_default_dtype()
+        if dtype is None:
+            dtype = torch.get_default_dtype()
 
         self_dot = torch.sum(self * self, dim=-1, dtype=dtype)
         self_mag = torch.sqrt(self_dot)
@@ -363,4 +369,4 @@ class MAPTensor(VSATensor):
             magnitude = self_mag * others_mag
 
         magnitude = torch.clamp(magnitude, min=eps)
-        return self.dot_similarity(others) / magnitude
+        return self.dot_similarity(others, dtype=dtype) / magnitude

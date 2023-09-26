@@ -366,6 +366,7 @@ class HRRTensor(VSATensor):
         """Inner product with other hypervectors"""
         if others.dim() >= 2:
             others = others.transpose(-2, -1)
+
         return torch.matmul(self, others)
 
     def cosine_similarity(self, others: "HRRTensor", *, eps=1e-08) -> Tensor:

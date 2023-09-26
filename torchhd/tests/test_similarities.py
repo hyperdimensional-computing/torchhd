@@ -198,6 +198,37 @@ class TestDotSimilarity:
         else:
             assert similarity.dtype == torch.get_default_dtype()
 
+    def test_custom_dtype(self):
+        hv = functional.random(3, 100, "BSBC", block_size=1024)
+        similarity = functional.dot_similarity(hv, hv)
+        assert similarity.dtype == torch.get_default_dtype()
+
+        similarity = functional.dot_similarity(hv, hv, dtype=torch.float64)
+        assert similarity.dtype == torch.float64
+
+        similarity = functional.dot_similarity(hv, hv, dtype=torch.int16)
+        assert similarity.dtype == torch.int16
+
+        hv = functional.random(3, 100, "MAP")
+        similarity = functional.dot_similarity(hv, hv)
+        assert similarity.dtype == torch.get_default_dtype()
+
+        similarity = functional.dot_similarity(hv, hv, dtype=torch.float64)
+        assert similarity.dtype == torch.float64
+
+        similarity = functional.dot_similarity(hv, hv, dtype=torch.int16)
+        assert similarity.dtype == torch.int16
+
+        hv = functional.random(3, 100, "BSC")
+        similarity = functional.dot_similarity(hv, hv)
+        assert similarity.dtype == torch.get_default_dtype()
+
+        similarity = functional.dot_similarity(hv, hv, dtype=torch.float64)
+        assert similarity.dtype == torch.float64
+
+        similarity = functional.dot_similarity(hv, hv, dtype=torch.int16)
+        assert similarity.dtype == torch.int16
+
     @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_device(self, vsa, dtype):

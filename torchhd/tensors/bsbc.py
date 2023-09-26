@@ -334,9 +334,10 @@ class BSBCTensor(VSATensor):
         """
         return torch.roll(self, shifts=shifts, dims=-1)
 
-    def dot_similarity(self, others: "BSBCTensor") -> Tensor:
+    def dot_similarity(self, others: "BSBCTensor", *, dtype=None) -> Tensor:
         """Inner product with other hypervectors"""
-        dtype = torch.get_default_dtype()
+        if dtype is None:
+            dtype = torch.get_default_dtype()
 
         if self.dim() > 1 and others.dim() > 1:
             equals = self.unsqueeze(-2) == others.unsqueeze(-3)
@@ -344,10 +345,10 @@ class BSBCTensor(VSATensor):
 
         return torch.sum(self == others, dim=-1, dtype=dtype)
 
-    def cosine_similarity(self, others: "BSBCTensor") -> Tensor:
+    def cosine_similarity(self, others: "BSBCTensor", *, dtype=None) -> Tensor:
         """Cosine similarity with other hypervectors"""
         magnitude = self.size(-1)
-        return self.dot_similarity(others) / magnitude
+        return self.dot_similarity(others, dtype=dtype) / magnitude
 
     @classmethod
     def __torch_function__(cls, func, types, args=(), kwargs=None):
