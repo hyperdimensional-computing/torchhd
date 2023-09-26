@@ -229,7 +229,6 @@ class TestDotSimilarity:
         similarity = functional.dot_similarity(hv, hv, dtype=torch.int16)
         assert similarity.dtype == torch.int16
 
-
     @pytest.mark.parametrize("vsa", vsa_tensors)
     @pytest.mark.parametrize("dtype", torch_dtypes)
     def test_device(self, vsa, dtype):

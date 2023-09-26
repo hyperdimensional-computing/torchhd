@@ -347,10 +347,12 @@ class MAPTensor(VSATensor):
 
         if others.dim() >= 2:
             others = others.transpose(-2, -1)
-        
+
         return torch.matmul(self.to(dtype), others.to(dtype))
 
-    def cosine_similarity(self, others: "MAPTensor", *, dtype=None, eps=1e-08) -> Tensor:
+    def cosine_similarity(
+        self, others: "MAPTensor", *, dtype=None, eps=1e-08
+    ) -> Tensor:
         """Cosine similarity with other hypervectors"""
         if dtype is None:
             dtype = torch.get_default_dtype()
