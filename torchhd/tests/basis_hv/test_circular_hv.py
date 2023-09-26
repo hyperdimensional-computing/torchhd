@@ -114,7 +114,9 @@ class Testcircular:
 
         elif vsa == "FHRR":
             mag = hv.abs()
-            assert torch.allclose(mag, torch.tensor(1.0, dtype=mag.dtype), rtol=0.0001, atol=0.0001)
+            assert torch.allclose(
+                mag, torch.tensor(1.0, dtype=mag.dtype), rtol=0.0001, atol=0.0001
+            )
 
         elif vsa == "BSBC":
             assert torch.all((hv >= 0) | (hv < 1024)).item()
