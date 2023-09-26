@@ -1018,6 +1018,9 @@ def hamming_similarity(input: VSATensor, others: VSATensor) -> LongTensor:
                 [5, 3, 6]])
 
     """
+    input = ensure_vsa_tensor(input)
+    others = ensure_vsa_tensor(others)
+
     if input.dim() > 1 and others.dim() > 1:
         equals = input.unsqueeze(-2) == others.unsqueeze(-3)
         return torch.sum(equals, dim=-1, dtype=torch.long)
