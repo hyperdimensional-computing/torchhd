@@ -1,25 +1,7 @@
 import pandas as pd
 
-"""
-VANILLA
-ADAPT
-ONLINE
-ADAPT_ITER
-ONLINE_ITER
-NERUAL
-DIST
-SPARES
-QUANT
-COMP
-SEMI
-MULTI
-RVFL
-LEHDC
-"""
-
-
 df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/lehdc_robust_partial_arena"
+    "survey_results/lehdc_robust_partial_arena"
 )
 latex = 1
 pand = 1

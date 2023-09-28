@@ -17,11 +17,9 @@ class CustomDataset(Dataset):
         self.labels = labels
 
     def __getitem__(self, index):
-        # Return data and label at the given index
         return self.data[index], self.labels[index]
 
     def __len__(self):
-        # Return the total number of samples in the dataset
         return len(self.data)
 
 

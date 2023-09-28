@@ -7,7 +7,6 @@ from methods import vanillaHD
 from methods import adaptHD
 from methods import onlineHD
 from methods import adjustHD
-from methods import adjustSemiHD
 from methods import compHD
 from methods import multiCentroidHD
 from methods import adaptHDIterative
@@ -22,7 +21,7 @@ from methods import semiHDIterative
 from methods import LeHDC
 from methods import randomForest
 
-results_file = "results/results" + str(time.time()) + ".csv"
+results_file = "results/results_dir/results" + str(time.time()) + ".csv"
 
 with open(results_file, "w", newline="") as file:
     writer = csv.writer(file)
@@ -130,7 +129,7 @@ def select_model(
             dropout_rate,
             results_file,
         )
-    if method == "add":
+    elif method == "add":
         vanillaHD.train_vanillaHD(
             train_loader,
             test_loader,
@@ -167,40 +166,6 @@ def select_model(
     elif method == "adjust":
         adjustHD.train_adjustHD(
             train_ds,
-            train_loader,
-            test_loader,
-            num_classes,
-            encode,
-            model,
-            device,
-            dataset.name,
-            method,
-            encoding,
-            iterations,
-            dimensions,
-            lr,
-            chunks,
-            threshold,
-            reduce_subclasses,
-            model_quantize,
-            epsilon,
-            model_sparse,
-            s,
-            alpha,
-            beta,
-            theta,
-            r,
-            partial_data,
-            robustness,
-            lazy_regeneration,
-            model_neural,
-            weight_decay,
-            learning_rate,
-            dropout_rate,
-            results_file,
-        )
-    elif method == "adjust_semi":
-        adjustSemiHD.train_adjustSemiHD(
             train_loader,
             test_loader,
             num_classes,
@@ -680,7 +645,6 @@ def select_model(
             dropout_rate,
             results_file,
         )
-
     elif method == "lehdc":
         LeHDC.train_LeHDC(
             train_ds,
@@ -1077,9 +1041,30 @@ configs = [
         "learning_rate": None,
         "dropout_rate": None,
     },
+    {
+        "method": "random_forest",
+        "multi_reduce_subclass": None,
+        "threshold": None,
+        "lr": 5,
+        "epsilon": None,
+        "model_quantize": None,
+        "model_sparse": None,
+        "sparsity": None,
+        "lazy_regeneration": None,
+        "model_neural": None,
+        "r": None,
+        "alpha": None,
+        "beta": None,
+        "theta": None,
+        "chunks": None,
+        "s": None,
+        "weight_decay": None,
+        "learning_rate": None,
+        "dropout_rate": None,
+    },
 ]
 
-configs = [
+configs_ = [
     {
         "method": "random_forest",
         "multi_reduce_subclass": None,

@@ -8,16 +8,6 @@ import utils
 import torchmetrics
 
 
-def test(num_classes, device, test_loader, encode, model):
-    accuracy = torchmetrics.Accuracy("multiclass", num_classes=num_classes).to(device)
-    with torch.no_grad():
-        for samples, labels in tqdm(test_loader, desc="Testing"):
-            samples = samples.to(device)
-            samples_hv = encode(samples, device)
-            outputs = model(samples_hv, dot=False)
-            accuracy.update(outputs.to(device), labels.to(device))
-
-
 def train_LeHDC(
     train_ds,
     test_ds,

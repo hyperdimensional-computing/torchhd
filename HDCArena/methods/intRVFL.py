@@ -166,7 +166,8 @@ def train_rvfl(
     dropout_rate,
     results_file,
 ):
-    # dims, alpha, kappa = INT_RVFL_HYPER[dataset.train.name]
+    train_time = time.time()
+
     alpha = 1
     model = IntRVFL(
         dataset.train[0][0].size(-1), dimensions, num_classes, kappa=3, device=device

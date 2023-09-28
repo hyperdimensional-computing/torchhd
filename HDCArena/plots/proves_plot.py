@@ -2,13 +2,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Read in the CSV file
-df = pd.read_csv("../results/proves/embeddings.csv")
-var = "Encoding"
+df = pd.read_csv("../results/survey_results/encodings_arena")
+var = "encoding"
 
-embeddings_order = ["sequence", "hashmap", "flocet", "sinusoid", "generic", "embed"]
+embeddings_order = ["sequence", "hashmap", "flocet", "sinusoid", "generic"
+                    ]
 
-df_mean = df.groupby([var, "Name"])["TrainTime"].mean().to_frame()
-df_pivot = df_mean.reset_index().pivot(index="Name", columns=var, values="TrainTime")
+df_mean = df.groupby([var, "name"])["train_time"].mean().to_frame()
+df_pivot = df_mean.reset_index().pivot(index="name", columns=var, values="train_time")
 df_pivot.loc["mean"] = df_pivot.mean(axis=0)
 df_pivot = df_pivot[embeddings_order].round(3)
 
@@ -18,8 +19,8 @@ print(df_pivot)
 print()
 print()
 
-df_mean = df.groupby([var, "Name"])["TestTime"].mean().to_frame()
-df_pivot = df_mean.reset_index().pivot(index="Name", columns=var, values="TestTime")
+df_mean = df.groupby([var, "name"])["test_time"].mean().to_frame()
+df_pivot = df_mean.reset_index().pivot(index="name", columns=var, values="test_time")
 df_pivot.loc["mean"] = df_pivot.mean(axis=0)
 df_pivot = df_pivot[embeddings_order].round(3)
 
@@ -29,9 +30,9 @@ print(df_pivot)
 print()
 print()
 
-df_mean = df.groupby([var, "Name"])["Accuracy"].mean().to_frame()
-df_pivot = df_mean.reset_index().pivot(index="Name", columns=var, values="Accuracy")
-df_pivot.loc["Mean"] = df_pivot.mean(axis=0)
+df_mean = df.groupby([var, "name"])["accuracy"].mean().to_frame()
+df_pivot = df_mean.reset_index().pivot(index="name", columns=var, values="accuracy")
+df_pivot.loc["mean"] = df_pivot.mean(axis=0)
 df_pivot = df_pivot[embeddings_order].round(3)
 
 

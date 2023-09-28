@@ -7,26 +7,6 @@ import time
 import utils
 import torchmetrics
 from collections import deque
-from torchhd import functional
-
-t = True
-
-
-def orthogonality(tensor_of_tensors, classes, name):
-    dot_products = torch.zeros(classes, classes)
-
-    for i in range(classes):
-        for j in range(i + 1, classes):
-            dot_product = functional.cos(tensor_of_tensors[i], tensor_of_tensors[j])
-            dot_products[i, j] = dot_product
-            dot_products[j, i] = dot_product
-
-    # Print the result
-    # print(torch.sum(dot_products)/((classes*classes-classes)/2))
-    orthogonalit = torch.sum(dot_products / ((classes * classes - classes)))
-    # print(orthogonalit, classes, name)
-    return orthogonalit
-
 
 def train_adjustHD(
     train_loader,
@@ -70,7 +50,7 @@ def train_adjustHD(
                 "multiclass", num_classes=num_classes
             ).to(device)
 
-            for samples, labels in tqdm(train_loader, desc="Training", disable=t):
+            for samples, labels in tqdm(train_loader, desc="Training"):
                 samples = samples.to(device)
                 labels = labels.to(device)
 
@@ -90,7 +70,6 @@ def train_adjustHD(
             accuracy_train.reset()
     train_time = time.time() - train_time
 
-    # model.normalize()
 
     utils.test_eval(
         test_loader,

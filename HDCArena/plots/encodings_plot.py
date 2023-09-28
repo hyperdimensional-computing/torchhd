@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Read in the CSV file
-df = pd.read_csv("../results/final_results/encodings_comparison_uci")
+df = pd.read_csv("../results/survey_results/adaptive_methods_arena")
 var = "Method"
 
 methods_order = [

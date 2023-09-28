@@ -3,11 +3,10 @@ from torchhd.datasets import HDCArena, UCIClassificationBenchmark
 from torchhd.models import Centroid
 import sys
 
-sys.path.append("/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena")
 from encoder import Encoder
 from preprocess import preprocess
 import methods_selection
-from torchhd.models import BHDC
+# from torchhd.models import BHDC
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -43,11 +42,14 @@ def exec_arena(
 
             if config["method"] == "lehdc":
                 dropout_rate = 0.5
+                '''
                 model = BHDC(
                     in_features=dimensions,
                     out_features=num_classes,
                     dropout_prob=config["dropout_rate"],
                 ).to(device)
+                '''
+                continue
             else:
                 model = Centroid(
                     dimensions, num_classes, method=config["method"], dtype=t
@@ -90,22 +92,17 @@ def exec_arena(
             )
 
 
-# ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid","generic","fractional"]
-ENCODINGS = ["flocet"]
+ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid","generic","fractional"]
 
 configurations = methods_selection.configs
 
-REPEATS = 5
-DIMENSIONS = [10000]
-ITERATIONS = 30
-# PARTIAL_DATA = [0.2, 0.4, 0.6, 0.8, 1]
-# , 0.6, 0.7, 0.8, 0.9, 1]
-PARTIAL_DATA = [0.4, 0.5, 0.6]
+REPEATS = 1
+ITERATIONS = 2
 
-# PARTIAL_DATA = [1]
+DIMENSIONS = [10]
+PARTIAL_DATA = [1]
+ROBUSTNESS = [0]
 
-ROBUSTNESS = [0, 1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80]
-# ROBUSTNESS = [0]
 arena = False
 
 if arena:

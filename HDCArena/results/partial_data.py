@@ -18,7 +18,7 @@ LEHDC
 """
 
 df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/proves/vanilla_arena_robust_partial"
+    "survey_results/vanilla_arena_robust_partial"
 )
 latex = 1
 pand = 0

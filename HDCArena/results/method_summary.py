@@ -4,12 +4,11 @@ import pandas as pd
 # colors: ['333436', '005CAB', 'E31B23', '78468E', '1BA13D', 'EA8810', '898b8c', '69A7DD', 'F87272', 'B186D1', '7EC095', 'F4BF70']
 
 df = pd.read_csv(
-    "/Users/verges/Documents/PhD/TorchHd/torchhd/HDCArena/results/results1692677926.3237498.csv"
+    "survey_results/semi_uci"
 )
-print(df.head())
 
 for i in df["method"].unique():
-    print(i)
+    print("Method name: " + i)
     mean_accuracy_by_dimension_and_method = (
         df[df["method"] == i].groupby(["name", "method"])["accuracy"].mean()
     )
@@ -35,18 +34,21 @@ for i in df["method"].unique():
     )
 
     print(
+        "Accuracy",
         i,
         mean_accuracy_by_dimension_and_method.mean(),
         variance_accuracy_by_dimension_and_method.mean(),
     )
 
     print(
+        "Train time",
         i,
         mean_train_by_dimension_and_method.mean(),
         variance_train_by_dimension_and_method.mean(),
     )
 
     print(
+        "Test time",
         i,
         mean_test_by_dimension_and_method.mean(),
         variance_test_by_dimension_and_method.mean(),
