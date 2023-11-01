@@ -85,7 +85,7 @@ class Encoder(nn.Module):
     def __init__(self, out_features, size):
         super(Encoder, self).__init__()
         self.out_features = out_features
-        self.node_ids = embeddings.Random(size, out_features)
+        self.node_ids = embeddings.Level(size, out_features, randomness=0.05)
 
     def forward(self, x):
         pr = pagerank(x)
