@@ -15,7 +15,8 @@ from torchhd.models import Centroid
 import csv
 
 import time
-csv_file = 'experiment_1/result'+str(time.time())+'.csv'
+
+csv_file = "experiment_1/result" + str(time.time()) + ".csv"
 
 
 def experiment(randomness=0, dataset="MUTAG"):
@@ -32,7 +33,6 @@ def experiment(randomness=0, dataset="MUTAG"):
     test_size = len(graphs) - train_size
     train_ld, test_ld = torch.utils.data.random_split(graphs, [train_size, test_size])
 
-
     def sparse_stochastic_graph(G):
         """
         Returns a sparse adjacency matrix of the graph G.
@@ -45,7 +45,6 @@ def experiment(randomness=0, dataset="MUTAG"):
         values_per_node = values_per_column[columns]
         size = (G.num_nodes, G.num_nodes)
         return torch.sparse_coo_tensor(G.edge_index, values_per_node, size)
-
 
     def pagerank(G, alpha=0.85, max_iter=100, tol=1e-06):
         N = G.num_nodes
@@ -61,7 +60,6 @@ def experiment(randomness=0, dataset="MUTAG"):
                 return v
         return v
 
-
     def to_undirected(edge_index):
         """
         Returns the undirected edge_index
@@ -70,7 +68,6 @@ def experiment(randomness=0, dataset="MUTAG"):
         edge_index = edge_index.sort(dim=0)[0]
         edge_index = torch.unique(edge_index, dim=1)
         return edge_index
-
 
     def min_max_graph_size(graph_dataset):
         if len(graph_dataset) == 0:
@@ -86,7 +83,6 @@ def experiment(randomness=0, dataset="MUTAG"):
 
         return min_num_nodes, max_num_nodes
 
-
     class Encoder(nn.Module):
         def __init__(self, out_features, size):
             super(Encoder, self).__init__()
@@ -94,7 +90,9 @@ def experiment(randomness=0, dataset="MUTAG"):
             if randomness == 100:
                 self.node_ids = embeddings.Random(size, out_features)
             else:
-                self.node_ids = embeddings.Level(size, out_features, randomness=randomness)
+                self.node_ids = embeddings.Level(
+                    size, out_features, randomness=randomness
+                )
 
         def forward(self, x):
             pr = pagerank(x)
@@ -107,7 +105,6 @@ def experiment(randomness=0, dataset="MUTAG"):
 
             hvs = torchhd.bind(node_id_hvs[row], node_id_hvs[col])
             return torchhd.multiset(hvs)
-
 
     min_graph_size, max_graph_size = min_max_graph_size(graphs)
     encode = Encoder(DIMENSIONS, max_graph_size)
@@ -125,8 +122,10 @@ def experiment(randomness=0, dataset="MUTAG"):
             model.add(samples_hv, samples.y)
 
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
-    f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
-    #f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
+    f1 = torchmetrics.F1Score(
+        num_classes=graphs.num_classes, average="macro", multiclass=True
+    )
+    # f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
 
     with torch.no_grad():
         model.normalize()
@@ -139,14 +138,14 @@ def experiment(randomness=0, dataset="MUTAG"):
             accuracy.update(outputs.cpu(), samples.y)
             f1.update(outputs.cpu(), samples.y)
 
-    acc = (accuracy.compute().item() * 100)
-    f = (f1.compute().item() * 100)
+    acc = accuracy.compute().item() * 100
+    f = f1.compute().item() * 100
     return acc, f
 
 
 REPETITIONS = 100
-RANDOMNESS = [0,0.00001,0.0001,0.001,0.01,0.05,0.1,0.15,0.2,0.4,0.6,0.8,1]
-DATASET = ['MUTAG', 'ENZYMES', 'PROTEINS']
+RANDOMNESS = [0, 0.00001, 0.0001, 0.001, 0.01, 0.05, 0.1, 0.15, 0.2, 0.4, 0.6, 0.8, 1]
+DATASET = ["MUTAG", "ENZYMES", "PROTEINS"]
 
 for d in DATASET:
     acc_final = []
@@ -159,10 +158,10 @@ for d in DATASET:
             acc, f1 = experiment(i, d)
             acc_aux.append(acc)
             f1_aux.append(f1)
-        acc_final.append(round(sum(acc_aux)/REPETITIONS, 2))
-        f1_final.append(round(sum(f1_aux)/REPETITIONS,2))
+        acc_final.append(round(sum(acc_aux) / REPETITIONS, 2))
+        f1_final.append(round(sum(f1_aux) / REPETITIONS, 2))
 
-    with open(csv_file, mode='a', newline='') as file:
+    with open(csv_file, mode="a", newline="") as file:
         writer = csv.writer(file)
         writer.writerow([d] + RANDOMNESS)
         writer.writerows([acc_final])
@@ -179,13 +178,11 @@ for d in DATASET:
         acc, f1 = experiment(100, d)
         acc_aux.append(acc)
         f1_aux.append(f1)
-    acc_final.append(round(sum(acc_aux)/REPETITIONS, 2))
-    f1_final.append(round(sum(f1_aux)/REPETITIONS,2))
+    acc_final.append(round(sum(acc_aux) / REPETITIONS, 2))
+    f1_final.append(round(sum(f1_aux) / REPETITIONS, 2))
 
-    with open(csv_file, mode='a', newline='') as file:
+    with open(csv_file, mode="a", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow([d] +['RANDOM'])
+        writer.writerow([d] + ["RANDOM"])
         writer.writerows([acc_final])
         writer.writerows([f1_final])
-
-
