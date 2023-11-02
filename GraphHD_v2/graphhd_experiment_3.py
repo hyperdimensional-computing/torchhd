@@ -15,8 +15,7 @@ from torchhd.models import Centroid
 import csv
 
 import time
-csv_file = 'experiment_1/result'+str(time.time())+'.csv'
-
+csv_file = 'experiment_3/result'+str(time.time())+'.csv'
 
 def experiment(randomness=0, dataset="MUTAG"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -87,6 +86,8 @@ def experiment(randomness=0, dataset="MUTAG"):
         return min_num_nodes, max_num_nodes
 
 
+
+
     class Encoder(nn.Module):
         def __init__(self, out_features, size):
             super(Encoder, self).__init__()
@@ -97,15 +98,25 @@ def experiment(randomness=0, dataset="MUTAG"):
                 self.node_ids = embeddings.Level(size, out_features, randomness=randomness)
 
         def forward(self, x):
-            pr = pagerank(x)
-            pr_sort, pr_argsort = pr.sort()
-
+            nodes, _ = x.edge_index
+            nodes = list(set(nodes))
             node_id_hvs = torch.zeros((x.num_nodes, self.out_features), device=device)
-            node_id_hvs[pr_argsort] = self.node_ids.weight[: x.num_nodes]
+            for i in nodes:
+                adjacent_nodes = x.edge_index[1][x.edge_index[0] == i]
+                node_id_hvs[i] = self.node_ids.weight[i]
+                for j in adjacent_nodes:
+                    node_id_hvs[i] += torchhd.permute(self.node_ids.weight[j])
+
+            node_id_hvs_2 = torch.zeros((x.num_nodes, self.out_features), device=device)
+
+            for i in nodes:
+                adjacent_nodes = x.edge_index[1][x.edge_index[0] == i]
+                node_id_hvs_2[i] = node_id_hvs[i]
+                for j in adjacent_nodes:
+                    node_id_hvs_2[i] += torchhd.permute(node_id_hvs[j])
 
             row, col = to_undirected(x.edge_index)
-
-            hvs = torchhd.bind(node_id_hvs[row], node_id_hvs[col])
+            hvs = torchhd.bind(node_id_hvs_2[row], node_id_hvs_2[col])
             return torchhd.multiset(hvs)
 
 
@@ -144,8 +155,10 @@ def experiment(randomness=0, dataset="MUTAG"):
     return acc, f
 
 
+
 REPETITIONS = 100
 RANDOMNESS = [0,0.00001,0.0001,0.001,0.01,0.05,0.1,0.15,0.2,0.4,0.6,0.8,1]
+#RANDOMNESS = [0]
 DATASET = ['MUTAG', 'ENZYMES', 'PROTEINS']
 
 for d in DATASET:
