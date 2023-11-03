@@ -92,10 +92,7 @@ def experiment(randomness=0, dataset="MUTAG"):
         def __init__(self, out_features, size):
             super(Encoder, self).__init__()
             self.out_features = out_features
-            if randomness == 100:
-                self.node_ids = embeddings.Random(size, out_features)
-            else:
-                self.node_ids = embeddings.Level(size, out_features, randomness=randomness)
+            self.node_ids = embeddings.Random(size, out_features)
 
         def forward(self, x):
             nodes, _ = x.edge_index
@@ -128,8 +125,8 @@ def experiment(randomness=0, dataset="MUTAG"):
             model.add(samples_hv, samples.y)
 
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
-    f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
-    #f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
+    #f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
+    f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
 
     with torch.no_grad():
         model.normalize()
@@ -148,32 +145,8 @@ def experiment(randomness=0, dataset="MUTAG"):
 
 
 
-REPETITIONS = 100
-#RANDOMNESS = [0]
-RANDOMNESS = [0,0.00001,0.0001,0.001,0.01,0.05,0.1,0.15,0.2,0.4,0.6,0.8,1]
+REPETITIONS = 10
 DATASET = ['MUTAG', 'ENZYMES', 'PROTEINS']
-
-for d in DATASET:
-    acc_final = []
-    f1_final = []
-
-    for i in RANDOMNESS:
-        acc_aux = []
-        f1_aux = []
-        for j in range(REPETITIONS):
-            acc, f1 = experiment(i, d)
-            acc_aux.append(acc)
-            f1_aux.append(f1)
-        acc_final.append(round(sum(acc_aux)/REPETITIONS, 2))
-        f1_final.append(round(sum(f1_aux)/REPETITIONS,2))
-
-    with open(csv_file, mode='a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow([d] + RANDOMNESS)
-        writer.writerows([acc_final])
-        writer.writerows([f1_final])
-
-# Random
 
 for d in DATASET:
     acc_final = []
