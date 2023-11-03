@@ -161,8 +161,8 @@ def experiment(randomness=0, dataset="MUTAG"):
             model.add(samples_hv, samples.y)
 
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
-    #f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
-    f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
+    f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
+    #f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
 
     with torch.no_grad():
         model.normalize()
