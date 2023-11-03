@@ -15,10 +15,11 @@ from torchhd.models import Centroid
 import csv
 
 import time
-csv_file = 'experiment_1/result'+str(time.time())+'.csv'
+
+csv_file = "experiment_1/result" + str(time.time()) + ".csv"
 
 
-def experiment(randomness=0, embed='random', dataset="MUTAG"):
+def experiment(randomness=0, embed="random", dataset="MUTAG"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Using {} device".format(device))
 
@@ -32,7 +33,6 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
     test_size = len(graphs) - train_size
     train_ld, test_ld = torch.utils.data.random_split(graphs, [train_size, test_size])
 
-
     def sparse_stochastic_graph(G):
         """
         Returns a sparse adjacency matrix of the graph G.
@@ -45,7 +45,6 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
         values_per_node = values_per_column[columns]
         size = (G.num_nodes, G.num_nodes)
         return torch.sparse_coo_tensor(G.edge_index, values_per_node, size)
-
 
     def pagerank(G, alpha=0.85, max_iter=100, tol=1e-06):
         N = G.num_nodes
@@ -61,7 +60,6 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
                 return v
         return v
 
-
     def to_undirected(edge_index):
         """
         Returns the undirected edge_index
@@ -70,7 +68,6 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
         edge_index = edge_index.sort(dim=0)[0]
         edge_index = torch.unique(edge_index, dim=1)
         return edge_index
-
 
     def min_max_graph_size(graph_dataset):
         if len(graph_dataset) == 0:
@@ -86,23 +83,23 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
 
         return min_num_nodes, max_num_nodes
 
-
     class Encoder(nn.Module):
         def __init__(self, out_features, size):
             super(Encoder, self).__init__()
             self.out_features = out_features
-            if embed == 'thermometer':
+            if embed == "thermometer":
                 self.node_ids = embeddings.Thermometer(size, out_features)
-            elif embed == 'circular':
+            elif embed == "circular":
                 self.node_ids = embeddings.Circular(size, out_features)
-            elif embed == 'projection':
+            elif embed == "projection":
                 self.node_ids = embeddings.Projection(size, out_features)
-            elif embed == 'sinusoid':
+            elif embed == "sinusoid":
                 self.node_ids = embeddings.Sinusoid(size, out_features)
-            elif embed == 'density':
+            elif embed == "density":
                 self.node_ids = embeddings.Density(size, out_features)
             else:
                 self.node_ids = embeddings.Random(size, out_features)
+
         def forward(self, x):
             pr = pagerank(x)
             pr_sort, pr_argsort = pr.sort()
@@ -114,7 +111,6 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
 
             hvs = torchhd.bind(node_id_hvs[row], node_id_hvs[col])
             return torchhd.multiset(hvs)
-
 
     min_graph_size, max_graph_size = min_max_graph_size(graphs)
     encode = Encoder(DIMENSIONS, max_graph_size)
@@ -132,8 +128,10 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
             model.add(samples_hv, samples.y)
 
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
-    f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
-    #f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
+    f1 = torchmetrics.F1Score(
+        num_classes=graphs.num_classes, average="macro", multiclass=True
+    )
+    # f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
 
     with torch.no_grad():
         model.normalize()
@@ -146,14 +144,14 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
             accuracy.update(outputs.cpu(), samples.y)
             f1.update(outputs.cpu(), samples.y)
 
-    acc = (accuracy.compute().item() * 100)
-    f = (f1.compute().item() * 100)
+    acc = accuracy.compute().item() * 100
+    f = f1.compute().item() * 100
     return acc, f
 
 
 REPETITIONS = 10
-RANDOMNESS = ['thermometer','circular','random']
-DATASET = ['MUTAG', 'ENZYMES', 'PROTEINS']
+RANDOMNESS = ["thermometer", "circular", "random"]
+DATASET = ["MUTAG", "ENZYMES", "PROTEINS"]
 
 for d in DATASET:
     acc_final = []
@@ -166,12 +164,11 @@ for d in DATASET:
             acc, f1 = experiment(1, i, d)
             acc_aux.append(acc)
             f1_aux.append(f1)
-        acc_final.append(round(sum(acc_aux)/REPETITIONS, 2))
-        f1_final.append(round(sum(f1_aux)/REPETITIONS,2))
+        acc_final.append(round(sum(acc_aux) / REPETITIONS, 2))
+        f1_final.append(round(sum(f1_aux) / REPETITIONS, 2))
 
-    with open(csv_file, mode='a', newline='') as file:
+    with open(csv_file, mode="a", newline="") as file:
         writer = csv.writer(file)
         writer.writerow([d] + RANDOMNESS)
         writer.writerows([acc_final])
         writer.writerows([f1_final])
-
