@@ -86,10 +86,16 @@ def experiment(randomness=0, dataset="MUTAG"):
         return min_num_nodes, max_num_nodes
 
     class Encoder(nn.Module):
-        def __init__(self, out_features, size):
+        def __init__(self, out_features, size, node_features):
             super(Encoder, self).__init__()
             self.out_features = out_features
+
+
             self.node_ids = embeddings.Random(size, out_features)
+            self.node_attr = embeddings.Density(node_features, out_features)
+
+
+
             self.levels = embeddings.Circular(size, out_features)
 
         def local_centrality(self, x):
@@ -97,12 +103,14 @@ def experiment(randomness=0, dataset="MUTAG"):
             nodes = list(set(nodes))
             node_id_hvs = torch.zeros((x.num_nodes, self.out_features), device=device)
 
-            for i in nodes:
-                adjacent_nodes = x.edge_index[1][x.edge_index[0] == i]
-                node_id_hvs[i] = torchhd.bind(self.node_ids.weight[i], self.levels.weight[len(adjacent_nodes)])
+            #for i in nodes:
+            #    node_id_hvs[i] = torchhd.bind(self.node_ids.weight[i], self.node_attr(x.x[i]))
+
+            node_id_hvs = torchhd.bind(self.node_ids.weight, self.node_attr(x.x))
 
             row, col = to_undirected(x.edge_index)
             hvs = torchhd.bind(node_id_hvs[row], node_id_hvs[col])
+
             return torchhd.multiset(hvs)
 
         def semi_local_centrality(self, x):
@@ -121,7 +129,7 @@ def experiment(randomness=0, dataset="MUTAG"):
             return torchhd.multiset(hvs)
 
         def forward(self, x):
-            return self.semi_local_centrality(x)
+            return self.local_centrality(x)
             '''
             nodes, _ = x.edge_index
             nodes = list(set(nodes))
@@ -146,7 +154,7 @@ def experiment(randomness=0, dataset="MUTAG"):
             '''
 
     min_graph_size, max_graph_size = min_max_graph_size(graphs)
-    encode = Encoder(DIMENSIONS, max_graph_size)
+    encode = Encoder(DIMENSIONS, max_graph_size,len(graphs.x[0]))
     encode = encode.to(device)
 
     model = Centroid(DIMENSIONS, graphs.num_classes)
@@ -161,8 +169,8 @@ def experiment(randomness=0, dataset="MUTAG"):
             model.add(samples_hv, samples.y)
 
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
-    f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
-    #f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
+    #f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
+    f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
 
     with torch.no_grad():
         model.normalize()
@@ -181,7 +189,7 @@ def experiment(randomness=0, dataset="MUTAG"):
 
 
 
-REPETITIONS = 100
+REPETITIONS = 1
 DATASET = ['MUTAG', 'ENZYMES', 'PROTEINS']
 
 for d in DATASET:

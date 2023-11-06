@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch_geometric.utils
 from tqdm import tqdm
 
 # Note: this example requires the torch_geometric library: https://pytorch-geometric.readthedocs.io
@@ -17,13 +16,12 @@ import csv
 
 import time
 csv_file = 'experiment_3/result'+str(time.time())+'.csv'
-DIM = 10000
 
-def experiment(randomness=0, embed='random', dataset="MUTAG"):
+def experiment(randomness=0, dataset="MUTAG"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Using {} device".format(device))
 
-    DIMENSIONS = DIM # hypervectors dimension
+    DIMENSIONS = 10000  # hypervectors dimension
 
     # for other available datasets see: https://pytorch-geometric.readthedocs.io/en/latest/notes/data_cheatsheet.html?highlight=tudatasets
     # dataset = "MUTAG"
@@ -88,14 +86,15 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
         return min_num_nodes, max_num_nodes
 
 
+
+
     class Encoder(nn.Module):
         def __init__(self, out_features, size):
             super(Encoder, self).__init__()
             self.out_features = out_features
-            self.levels = embeddings.Level(size, out_features)
             self.node_ids = embeddings.Random(size, out_features)
 
-        def local_centrality2(self, x):
+        def forward(self, x):
             nodes, _ = x.edge_index
             nodes = list(set(nodes))
             node_id_hvs = torch.zeros((x.num_nodes, self.out_features), device=device)
@@ -105,45 +104,18 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
                 for j in adjacent_nodes:
                     node_id_hvs[i] += torchhd.permute(self.node_ids.weight[j])
 
-            row, col = to_undirected(x.edge_index)
-            hvs = torchhd.bind(node_id_hvs[row], node_id_hvs[col])
-            return torchhd.multiset(hvs)
-
-        def local_centrality(self, x):
-            nodes, _ = x.edge_index
-            indexs = list(map(int, torch_geometric.utils.degree(nodes)))
-            #print(len(indexs), len(list(range(x.num_nodes))))
-            #nodes = list(set(nodes))
-            node_id_hvs = torch.zeros((x.num_nodes, self.out_features), device=device)
-            try:
-                node_id_hvs = torchhd.bind(self.node_ids.weight[list(range(x.num_nodes))], self.levels.weight[indexs])
-            except:
-                print('err')
-            #for i in nodes:
-            #    adjacent_nodes = x.edge_index[1][x.edge_index[0] == i]
-            #    node_id_hvs[i] = torchhd.bind(self.node_ids.weight[i], self.levels.weight[indexs])
-
-            row, col = to_undirected(x.edge_index)
-            hvs = torchhd.bind(node_id_hvs[row], node_id_hvs[col])
-            return torchhd.multiset(hvs)
-
-        def semi_local_centrality(self, x):
-            nodes, _ = x.edge_index
-            nodes = list(set(nodes))
-            node_id_hvs = torch.zeros((x.num_nodes, self.out_features), device=device)
+            node_id_hvs_2 = torch.zeros((x.num_nodes, self.out_features), device=device)
 
             for i in nodes:
                 adjacent_nodes = x.edge_index[1][x.edge_index[0] == i]
+                node_id_hvs_2[i] = node_id_hvs[i]
                 for j in adjacent_nodes:
-                    node_id_hvs[i] = torchhd.bundle(self.levels.weight[len(x.edge_index[1][x.edge_index[0] == j])], node_id_hvs[i])
-                node_id_hvs[i] = torchhd.bind(node_id_hvs[i], (self.node_ids.weight[i]))
+                    node_id_hvs_2[i] += torchhd.permute(node_id_hvs[j])
 
             row, col = to_undirected(x.edge_index)
-            hvs = torchhd.bundle(node_id_hvs[row], node_id_hvs[col])
+            hvs = torchhd.bind(node_id_hvs_2[row], node_id_hvs_2[col])
             return torchhd.multiset(hvs)
 
-        def forward(self, x):
-            return self.local_centrality(x)
 
     min_graph_size, max_graph_size = min_max_graph_size(graphs)
     encode = Encoder(DIMENSIONS, max_graph_size)
@@ -152,8 +124,6 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
     model = Centroid(DIMENSIONS, graphs.num_classes)
     model = model.to(device)
 
-
-    train_t = time.time()
     with torch.no_grad():
         for samples in tqdm(train_ld, desc="Training"):
             samples.edge_index = samples.edge_index.to(device)
@@ -161,13 +131,11 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
 
             samples_hv = encode(samples).unsqueeze(0)
             model.add(samples_hv, samples.y)
-    train_t = time.time() - train_t
+
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
     f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
     #f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
 
-
-    test_t = time.time()
     with torch.no_grad():
         model.normalize()
 
@@ -178,40 +146,32 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
             outputs = model(samples_hv, dot=True)
             accuracy.update(outputs.cpu(), samples.y)
             f1.update(outputs.cpu(), samples.y)
-    test_t = time.time() - test_t
+
     acc = (accuracy.compute().item() * 100)
     f = (f1.compute().item() * 100)
-    return acc, f, train_t, test_t
+    return acc, f
 
 
-REPETITIONS = 50
-RANDOMNESS = ['random']
-DATASET = ['PTC_FM','MUTAG','NCI1','ENZYMES','PROTEINS','DD']
+
+REPETITIONS = 5
+DATASET = ['MUTAG', 'ENZYMES', 'PROTEINS']
 
 for d in DATASET:
     acc_final = []
     f1_final = []
-    train_final = []
-    test_final = []
-
-    for i in RANDOMNESS:
-        acc_aux = []
-        f1_aux = []
-        train_aux = []
-        test_aux = []
-        for j in range(REPETITIONS):
-            acc, f1, train_t, test_t = experiment(1, i, d)
-            acc_aux.append(acc)
-            f1_aux.append(f1)
-            train_aux.append(train_t)
-            test_aux.append(test_t)
-        acc_final.append(round(sum(acc_aux)/REPETITIONS, 2))
-        f1_final.append(round(sum(f1_aux)/REPETITIONS,2))
-        train_final.append(round(sum(train_aux)/REPETITIONS,2))
-        test_final.append(round(sum(test_aux)/REPETITIONS,2))
+    acc_aux = []
+    f1_aux = []
+    for j in range(REPETITIONS):
+        acc, f1 = experiment(100, d)
+        acc_aux.append(acc)
+        f1_aux.append(f1)
+    acc_final.append(round(sum(acc_aux)/REPETITIONS, 2))
+    f1_final.append(round(sum(f1_aux)/REPETITIONS,2))
 
     with open(csv_file, mode='a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['dataset','dimensions','train_time','test_time','accuracy','f1'])
-        writer.writerows([[d,DIM,train_final[0],test_final[0],acc_final[0],f1_final[0]]])
+        writer.writerow([d] +['RANDOM'])
+        writer.writerows([acc_final])
+        writer.writerows([f1_final])
+
 

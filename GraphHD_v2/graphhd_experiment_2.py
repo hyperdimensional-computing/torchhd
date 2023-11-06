@@ -16,12 +16,13 @@ import csv
 
 import time
 csv_file = 'experiment_2/result'+str(time.time())+'.csv'
+DIM = 10000
 
-def experiment(randomness=0, dataset="MUTAG"):
+def experiment(randomness=0, embed='random', dataset="MUTAG"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Using {} device".format(device))
 
-    DIMENSIONS = 10000  # hypervectors dimension
+    DIMENSIONS = DIM # hypervectors dimension
 
     # for other available datasets see: https://pytorch-geometric.readthedocs.io/en/latest/notes/data_cheatsheet.html?highlight=tudatasets
     # dataset = "MUTAG"
@@ -86,13 +87,22 @@ def experiment(randomness=0, dataset="MUTAG"):
         return min_num_nodes, max_num_nodes
 
 
-
-
     class Encoder(nn.Module):
         def __init__(self, out_features, size):
             super(Encoder, self).__init__()
             self.out_features = out_features
-            self.node_ids = embeddings.Random(size, out_features)
+            if embed == 'thermometer':
+                self.node_ids = embeddings.Thermometer(size, out_features)
+            elif embed == 'circular':
+                self.node_ids = embeddings.Circular(size, out_features)
+            elif embed == 'projection':
+                self.node_ids = embeddings.Projection(size, out_features)
+            elif embed == 'sinusoid':
+                self.node_ids = embeddings.Sinusoid(size, out_features)
+            elif embed == 'density':
+                self.node_ids = embeddings.Density(size, out_features)
+            else:
+                self.node_ids = embeddings.Random(size, out_features)
 
         def forward(self, x):
             nodes, _ = x.edge_index
@@ -108,7 +118,6 @@ def experiment(randomness=0, dataset="MUTAG"):
             hvs = torchhd.bind(node_id_hvs[row], node_id_hvs[col])
             return torchhd.multiset(hvs)
 
-
     min_graph_size, max_graph_size = min_max_graph_size(graphs)
     encode = Encoder(DIMENSIONS, max_graph_size)
     encode = encode.to(device)
@@ -116,6 +125,8 @@ def experiment(randomness=0, dataset="MUTAG"):
     model = Centroid(DIMENSIONS, graphs.num_classes)
     model = model.to(device)
 
+
+    train_t = time.time()
     with torch.no_grad():
         for samples in tqdm(train_ld, desc="Training"):
             samples.edge_index = samples.edge_index.to(device)
@@ -123,11 +134,13 @@ def experiment(randomness=0, dataset="MUTAG"):
 
             samples_hv = encode(samples).unsqueeze(0)
             model.add(samples_hv, samples.y)
-
+    train_t = time.time() - train_t
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
     f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
     #f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
 
+
+    test_t = time.time()
     with torch.no_grad():
         model.normalize()
 
@@ -138,33 +151,40 @@ def experiment(randomness=0, dataset="MUTAG"):
             outputs = model(samples_hv, dot=True)
             accuracy.update(outputs.cpu(), samples.y)
             f1.update(outputs.cpu(), samples.y)
-
+    test_t = time.time() - test_t
     acc = (accuracy.compute().item() * 100)
     f = (f1.compute().item() * 100)
-    return acc, f
+    return acc, f, train_t, test_t
 
 
-
-REPETITIONS = 10
-DATASET = ['MUTAG', 'ENZYMES', 'PROTEINS']
+REPETITIONS = 50
+RANDOMNESS = ['random']
+DATASET = ['PTC_FM','MUTAG','NCI1','ENZYMES','PROTEINS','DD']
 
 for d in DATASET:
     acc_final = []
     f1_final = []
-    acc_aux = []
-    f1_aux = []
-    for j in range(REPETITIONS):
-        acc, f1 = experiment(100, d)
-        acc_aux.append(acc)
-        f1_aux.append(f1)
-    acc_final.append(round(sum(acc_aux)/REPETITIONS, 2))
-    f1_final.append(round(sum(f1_aux)/REPETITIONS,2))
+    train_final = []
+    test_final = []
+
+    for i in RANDOMNESS:
+        acc_aux = []
+        f1_aux = []
+        train_aux = []
+        test_aux = []
+        for j in range(REPETITIONS):
+            acc, f1, train_t, test_t = experiment(1, i, d)
+            acc_aux.append(acc)
+            f1_aux.append(f1)
+            train_aux.append(train_t)
+            test_aux.append(test_t)
+        acc_final.append(round(sum(acc_aux)/REPETITIONS, 2))
+        f1_final.append(round(sum(f1_aux)/REPETITIONS,2))
+        train_final.append(round(sum(train_aux)/REPETITIONS,2))
+        test_final.append(round(sum(test_aux)/REPETITIONS,2))
 
     with open(csv_file, mode='a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow([d] +['RANDOM'])
-        writer.writerows([acc_final])
-        writer.writerows([f1_final])
-
-
+        writer.writerow(['dataset','dimensions','train_time','test_time','accuracy','f1'])
+        writer.writerows([[d,DIM,train_final[0],test_final[0],acc_final[0],f1_final[0]]])
 

@@ -92,6 +92,20 @@ def experiment(randomness=0, dataset="MUTAG"):
             self.node_ids = embeddings.Random(size, out_features)
             self.levels = embeddings.Circular(size, out_features)
 
+        def local_centrality2(self, x):
+            nodes, _ = x.edge_index
+            nodes = list(set(nodes))
+            node_id_hvs = torch.zeros((x.num_nodes, self.out_features), device=device)
+            for i in nodes:
+                adjacent_nodes = x.edge_index[1][x.edge_index[0] == i]
+                node_id_hvs[i] = self.node_ids.weight[i]
+                for j in adjacent_nodes:
+                    node_id_hvs[i] += torchhd.permute(self.node_ids.weight[j])
+
+            row, col = to_undirected(x.edge_index)
+            hvs = torchhd.bind(node_id_hvs[row], node_id_hvs[col])
+            return torchhd.multiset(hvs)
+
         def local_centrality(self, x):
             nodes, _ = x.edge_index
             nodes = list(set(nodes))
@@ -161,8 +175,8 @@ def experiment(randomness=0, dataset="MUTAG"):
             model.add(samples_hv, samples.y)
 
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
-    f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
-    #f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
+    #f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
+    f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
 
     with torch.no_grad():
         model.normalize()
@@ -181,8 +195,8 @@ def experiment(randomness=0, dataset="MUTAG"):
 
 
 
-REPETITIONS = 100
-DATASET = ['MUTAG', 'ENZYMES', 'PROTEINS']
+REPETITIONS = 1
+DATASET = ['MUTAG']
 
 for d in DATASET:
     acc_final = []
