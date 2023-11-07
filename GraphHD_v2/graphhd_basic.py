@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch_geometric.utils
 from tqdm import tqdm
 
 # Note: this example requires the torch_geometric library: https://pytorch-geometric.readthedocs.io
@@ -16,9 +15,9 @@ from torchhd.models import Centroid
 import csv
 
 import time
-csv_file = 'experiment_3/result'+str(time.time())+'.csv'
+csv_file = 'basic/result'+str(time.time())+'.csv'
 DIM = 10000
-VSA = "HRR"
+
 
 def experiment(randomness=0, embed='random', dataset="MUTAG"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -93,55 +92,31 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
         def __init__(self, out_features, size):
             super(Encoder, self).__init__()
             self.out_features = out_features
-            self.levels = embeddings.Level(size, out_features, vsa=VSA)
-            self.node_ids = embeddings.Random(size, out_features, vsa=VSA)
-
-        def local_centrality2(self, x):
-            nodes, _ = x.edge_index
-            nodes = list(set(nodes))
-            node_id_hvs = torch.zeros((x.num_nodes, self.out_features), device=device)
-            for i in nodes:
-                adjacent_nodes = x.edge_index[1][x.edge_index[0] == i]
-                node_id_hvs[i] = self.node_ids.weight[i]
-                for j in adjacent_nodes:
-                    node_id_hvs[i] += torchhd.permute(self.node_ids.weight[j])
-
-            row, col = to_undirected(x.edge_index)
-            hvs = torchhd.bind(node_id_hvs[row], node_id_hvs[col])
-            return torchhd.multiset(hvs)
-
-        def local_centrality(self, x):
-            nodes, _ = x.edge_index
-            indexs = list(map(int, torch_geometric.utils.degree(nodes)))
-
-            node_id_hvs = torchhd.empty(x.num_nodes, self.out_features, VSA)
-            try:
-                node_id_hvs = torchhd.bind(self.node_ids.weight[list(range(x.num_nodes))], self.levels.weight[indexs])
-            except:
-                print('err')
-
-            row, col = to_undirected(x.edge_index)
-            hvs = torchhd.bind(node_id_hvs[row], node_id_hvs[col])
-            return torchhd.multiset(hvs)
-
-
-        def semi_local_centrality(self, x):
-            nodes, _ = x.edge_index
-            nodes = list(set(nodes))
-            node_id_hvs = torch.zeros((x.num_nodes, self.out_features), device=device)
-
-            for i in nodes:
-                adjacent_nodes = x.edge_index[1][x.edge_index[0] == i]
-                for j in adjacent_nodes:
-                    node_id_hvs[i] = torchhd.bundle(self.levels.weight[len(x.edge_index[1][x.edge_index[0] == j])], node_id_hvs[i])
-                node_id_hvs[i] = torchhd.bind(node_id_hvs[i], (self.node_ids.weight[i]))
-
-            row, col = to_undirected(x.edge_index)
-            hvs = torchhd.bundle(node_id_hvs[row], node_id_hvs[col])
-            return torchhd.multiset(hvs)
+            if embed == 'thermometer':
+                self.node_ids = embeddings.Thermometer(size, out_features, vsa=VSA)
+            elif embed == 'circular':
+                self.node_ids = embeddings.Circular(size, out_features, vsa=VSA)
+            elif embed == 'projection':
+                self.node_ids = embeddings.Projection(size, out_features, vsa=VSA)
+            elif embed == 'sinusoid':
+                self.node_ids = embeddings.Sinusoid(size, out_features, vsa=VSA)
+            elif embed == 'density':
+                self.node_ids = embeddings.Density(size, out_features, vsa=VSA)
+            else:
+                self.node_ids = embeddings.Random(size, out_features, vsa=VSA)
 
         def forward(self, x):
-            return self.local_centrality(x)
+            pr = pagerank(x)
+            pr_sort, pr_argsort = pr.sort()
+
+            node_id_hvs = torchhd.empty(x.num_nodes, self.out_features, VSA)
+            node_id_hvs[pr_argsort] = self.node_ids.weight[: x.num_nodes]
+
+            row, col = to_undirected(x.edge_index)
+
+            hvs = torchhd.bind(node_id_hvs[row], node_id_hvs[col])
+            return torchhd.multiset(hvs)
+
 
     min_graph_size, max_graph_size = min_max_graph_size(graphs)
     encode = Encoder(DIMENSIONS, max_graph_size)
@@ -167,7 +142,8 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
 
     test_t = time.time()
     with torch.no_grad():
-        model.normalize()
+        if VSA != 'BSC':
+            model.normalize()
 
         for samples in tqdm(test_ld, desc="Testing"):
             samples.edge_index = samples.edge_index.to(device)
@@ -182,34 +158,37 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
     return acc, f, train_t, test_t
 
 
-REPETITIONS = 1
+REPETITIONS = 100
 RANDOMNESS = ['random']
-DATASET = ['PTC_FR','MUTAG','NCI1','ENZYMES','PROTEINS','DD']
+DATASET = ['PTC_FM','MUTAG','NCI1','ENZYMES','PROTEINS','DD']
+VSAS = ['BSC','MAP','HRR','FHRR']
 
-for d in DATASET:
-    acc_final = []
-    f1_final = []
-    train_final = []
-    test_final = []
 
-    for i in RANDOMNESS:
-        acc_aux = []
-        f1_aux = []
-        train_aux = []
-        test_aux = []
-        for j in range(REPETITIONS):
-            acc, f1, train_t, test_t = experiment(1, i, d)
-            acc_aux.append(acc)
-            f1_aux.append(f1)
-            train_aux.append(train_t)
-            test_aux.append(test_t)
-        acc_final.append(round(sum(acc_aux)/REPETITIONS, 2))
-        f1_final.append(round(sum(f1_aux)/REPETITIONS,2))
-        train_final.append(round(sum(train_aux)/REPETITIONS,2))
-        test_final.append(round(sum(test_aux)/REPETITIONS,2))
+for VSA in VSAS:
+    for d in DATASET:
+        acc_final = []
+        f1_final = []
+        train_final = []
+        test_final = []
 
-    with open(csv_file, mode='a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['dataset','dimensions','train_time','test_time','accuracy','f1'])
-        writer.writerows([[d,DIM,train_final[0],test_final[0],acc_final[0],f1_final[0]]])
+        for i in RANDOMNESS:
+            acc_aux = []
+            f1_aux = []
+            train_aux = []
+            test_aux = []
+            for j in range(REPETITIONS):
+                acc, f1, train_t, test_t = experiment(1, i, d)
+                acc_aux.append(acc)
+                f1_aux.append(f1)
+                train_aux.append(train_t)
+                test_aux.append(test_t)
+            acc_final.append(round(sum(acc_aux)/REPETITIONS, 2))
+            f1_final.append(round(sum(f1_aux)/REPETITIONS,2))
+            train_final.append(round(sum(train_aux)/REPETITIONS,2))
+            test_final.append(round(sum(test_aux)/REPETITIONS,2))
+
+        with open(csv_file, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['dataset','dimensions','train_time','test_time','accuracy','f1','VSA'])
+            writer.writerows([[d,DIM,train_final[0],test_final[0],acc_final[0],f1_final[0],VSA]])
 

@@ -16,9 +16,9 @@ from torchhd.models import Centroid
 import csv
 
 import time
-csv_file = 'experiment_3/result'+str(time.time())+'.csv'
+csv_file = 'experiment_aux/result'+str(time.time())+'.csv'
 DIM = 10000
-VSA = "HRR"
+VSA = "FHRR"
 
 def experiment(randomness=0, embed='random', dataset="MUTAG"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -73,6 +73,24 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
         edge_index = torch.unique(edge_index, dim=1)
         return edge_index
 
+    def to_undirected_attr(edge_index, edge_attr):
+        """
+        Returns the undirected edge_index
+        [[0, 1], [1, 0]] will result in [[0], [1]]
+        """
+
+        unique_elements, inverse_indices = torch.unique(edge_index, dim=1, return_inverse=True)
+
+        unique_lists = [inverse_indices == i for i in range(len(unique_elements.t()))]
+        first_indices = [indices.nonzero(as_tuple=False)[0, 0].item() for indices in unique_lists]
+
+        if edge_attr is not None:
+            attr_edge = edge_attr[first_indices]
+        else:
+            attr_edge = None
+
+        return edge_index[0][first_indices], edge_index[1][first_indices], attr_edge
+
 
     def min_max_graph_size(graph_dataset):
         if len(graph_dataset) == 0:
@@ -90,61 +108,43 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
 
 
     class Encoder(nn.Module):
-        def __init__(self, out_features, size):
+        def __init__(self, out_features, size, edge_features, node_features):
             super(Encoder, self).__init__()
             self.out_features = out_features
             self.levels = embeddings.Level(size, out_features, vsa=VSA)
             self.node_ids = embeddings.Random(size, out_features, vsa=VSA)
-
-        def local_centrality2(self, x):
-            nodes, _ = x.edge_index
-            nodes = list(set(nodes))
-            node_id_hvs = torch.zeros((x.num_nodes, self.out_features), device=device)
-            for i in nodes:
-                adjacent_nodes = x.edge_index[1][x.edge_index[0] == i]
-                node_id_hvs[i] = self.node_ids.weight[i]
-                for j in adjacent_nodes:
-                    node_id_hvs[i] += torchhd.permute(self.node_ids.weight[j])
-
-            row, col = to_undirected(x.edge_index)
-            hvs = torchhd.bind(node_id_hvs[row], node_id_hvs[col])
-            return torchhd.multiset(hvs)
+            self.edge_attr = embeddings.Random(edge_features, out_features, vsa=VSA)
+            self.edge_attr2 = embeddings.Density(edge_features, out_features, vsa=VSA)
+            self.node_attr = embeddings.Random(node_features, out_features, vsa=VSA)
+            self.node_attr2 = embeddings.Density(node_features, out_features, vsa=VSA)
 
         def local_centrality(self, x):
             nodes, _ = x.edge_index
+            node_id_hvs = torch.zeros((x.num_nodes, self.out_features), device=device)
             indexs = list(map(int, torch_geometric.utils.degree(nodes)))
 
-            node_id_hvs = torchhd.empty(x.num_nodes, self.out_features, VSA)
+            row, col, edge_attr = to_undirected_attr(x.edge_index, x.edge_attr)
+
             try:
                 node_id_hvs = torchhd.bind(self.node_ids.weight[list(range(x.num_nodes))], self.levels.weight[indexs])
+                #node_id_hvs = torchhd.bind(node_id_hvs, self.node_attr.weight[x.x.argmax().item()])
+                node_id_hvs = torchhd.bind(node_id_hvs, self.node_attr2(x.x))
             except:
                 print('err')
 
-            row, col = to_undirected(x.edge_index)
             hvs = torchhd.bind(node_id_hvs[row], node_id_hvs[col])
+            if edge_attr is not None:
+                #hvs = torchhd.bind(hvs, self.edge_attr.weight[edge_attr.argmax().item()])
+                hvs = torchhd.bind(hvs, self.edge_attr2(edge_attr))
             return torchhd.multiset(hvs)
 
-
-        def semi_local_centrality(self, x):
-            nodes, _ = x.edge_index
-            nodes = list(set(nodes))
-            node_id_hvs = torch.zeros((x.num_nodes, self.out_features), device=device)
-
-            for i in nodes:
-                adjacent_nodes = x.edge_index[1][x.edge_index[0] == i]
-                for j in adjacent_nodes:
-                    node_id_hvs[i] = torchhd.bundle(self.levels.weight[len(x.edge_index[1][x.edge_index[0] == j])], node_id_hvs[i])
-                node_id_hvs[i] = torchhd.bind(node_id_hvs[i], (self.node_ids.weight[i]))
-
-            row, col = to_undirected(x.edge_index)
-            hvs = torchhd.bundle(node_id_hvs[row], node_id_hvs[col])
-            return torchhd.multiset(hvs)
 
         def forward(self, x):
             return self.local_centrality(x)
 
     min_graph_size, max_graph_size = min_max_graph_size(graphs)
-    encode = Encoder(DIMENSIONS, max_graph_size)
+
+    encode = Encoder(DIMENSIONS, max_graph_size,graphs.num_edge_labels, graphs.num_node_labels)
     encode = encode.to(device)
 
     model = Centroid(DIMENSIONS, graphs.num_classes, VSA)
@@ -159,6 +159,7 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
 
             samples_hv = encode(samples).unsqueeze(0)
             model.add(samples_hv, samples.y)
+
     train_t = time.time() - train_t
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
     #f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
@@ -171,9 +172,9 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
 
         for samples in tqdm(test_ld, desc="Testing"):
             samples.edge_index = samples.edge_index.to(device)
-
             samples_hv = encode(samples).unsqueeze(0)
             outputs = model(samples_hv, dot=True)
+
             accuracy.update(outputs.cpu(), samples.y)
             f1.update(outputs.cpu(), samples.y)
     test_t = time.time() - test_t

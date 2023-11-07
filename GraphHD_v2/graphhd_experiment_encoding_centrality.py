@@ -16,9 +16,8 @@ from torchhd.models import Centroid
 import csv
 
 import time
-csv_file = 'experiment_3/result'+str(time.time())+'.csv'
+csv_file = 'encoding_centrality/result'+str(time.time())+'.csv'
 DIM = 10000
-VSA = "HRR"
 
 def experiment(randomness=0, embed='random', dataset="MUTAG"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -167,7 +166,8 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
 
     test_t = time.time()
     with torch.no_grad():
-        model.normalize()
+        if VSA != 'BSC':
+            model.normalize()
 
         for samples in tqdm(test_ld, desc="Testing"):
             samples.edge_index = samples.edge_index.to(device)
@@ -182,34 +182,37 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
     return acc, f, train_t, test_t
 
 
-REPETITIONS = 1
+REPETITIONS = 100
 RANDOMNESS = ['random']
-DATASET = ['PTC_FR','MUTAG','NCI1','ENZYMES','PROTEINS','DD']
+DATASET = ['PTC_FM','MUTAG','NCI1','ENZYMES','PROTEINS','DD']
+VSAS = ['BSC','MAP','HRR','FHRR']
 
-for d in DATASET:
-    acc_final = []
-    f1_final = []
-    train_final = []
-    test_final = []
 
-    for i in RANDOMNESS:
-        acc_aux = []
-        f1_aux = []
-        train_aux = []
-        test_aux = []
-        for j in range(REPETITIONS):
-            acc, f1, train_t, test_t = experiment(1, i, d)
-            acc_aux.append(acc)
-            f1_aux.append(f1)
-            train_aux.append(train_t)
-            test_aux.append(test_t)
-        acc_final.append(round(sum(acc_aux)/REPETITIONS, 2))
-        f1_final.append(round(sum(f1_aux)/REPETITIONS,2))
-        train_final.append(round(sum(train_aux)/REPETITIONS,2))
-        test_final.append(round(sum(test_aux)/REPETITIONS,2))
+for VSA in VSAS:
+    for d in DATASET:
+        acc_final = []
+        f1_final = []
+        train_final = []
+        test_final = []
 
-    with open(csv_file, mode='a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['dataset','dimensions','train_time','test_time','accuracy','f1'])
-        writer.writerows([[d,DIM,train_final[0],test_final[0],acc_final[0],f1_final[0]]])
+        for i in RANDOMNESS:
+            acc_aux = []
+            f1_aux = []
+            train_aux = []
+            test_aux = []
+            for j in range(REPETITIONS):
+                acc, f1, train_t, test_t = experiment(1, i, d)
+                acc_aux.append(acc)
+                f1_aux.append(f1)
+                train_aux.append(train_t)
+                test_aux.append(test_t)
+            acc_final.append(round(sum(acc_aux)/REPETITIONS, 2))
+            f1_final.append(round(sum(f1_aux)/REPETITIONS,2))
+            train_final.append(round(sum(train_aux)/REPETITIONS,2))
+            test_final.append(round(sum(test_aux)/REPETITIONS,2))
+
+        with open(csv_file, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['dataset','dimensions','train_time','test_time','accuracy','f1','VSA'])
+            writer.writerows([[d,DIM,train_final[0],test_final[0],acc_final[0],f1_final[0],VSA]])
 

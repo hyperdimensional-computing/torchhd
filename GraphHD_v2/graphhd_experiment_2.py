@@ -17,6 +17,7 @@ import csv
 import time
 csv_file = 'experiment_2/result'+str(time.time())+'.csv'
 DIM = 10000
+VSA = "FHRR"
 
 def experiment(randomness=0, embed='random', dataset="MUTAG"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -92,22 +93,22 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
             super(Encoder, self).__init__()
             self.out_features = out_features
             if embed == 'thermometer':
-                self.node_ids = embeddings.Thermometer(size, out_features)
+                self.node_ids = embeddings.Thermometer(size, out_features, vsa=VSA)
             elif embed == 'circular':
-                self.node_ids = embeddings.Circular(size, out_features)
+                self.node_ids = embeddings.Circular(size, out_features, vsa=VSA)
             elif embed == 'projection':
-                self.node_ids = embeddings.Projection(size, out_features)
+                self.node_ids = embeddings.Projection(size, out_features, vsa=VSA)
             elif embed == 'sinusoid':
-                self.node_ids = embeddings.Sinusoid(size, out_features)
+                self.node_ids = embeddings.Sinusoid(size, out_features, vsa=VSA)
             elif embed == 'density':
-                self.node_ids = embeddings.Density(size, out_features)
+                self.node_ids = embeddings.Density(size, out_features, vsa=VSA)
             else:
-                self.node_ids = embeddings.Random(size, out_features)
+                self.node_ids = embeddings.Random(size, out_features, vsa=VSA)
 
         def forward(self, x):
             nodes, _ = x.edge_index
             nodes = list(set(nodes))
-            node_id_hvs = torch.zeros((x.num_nodes, self.out_features), device=device)
+            node_id_hvs = torchhd.empty(x.num_nodes, self.out_features, VSA)
             for i in nodes:
                 adjacent_nodes = x.edge_index[1][x.edge_index[0] == i]
                 node_id_hvs[i] = self.node_ids.weight[i]
@@ -122,7 +123,7 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
     encode = Encoder(DIMENSIONS, max_graph_size)
     encode = encode.to(device)
 
-    model = Centroid(DIMENSIONS, graphs.num_classes)
+    model = Centroid(DIMENSIONS, graphs.num_classes, VSA)
     model = model.to(device)
 
 
@@ -136,8 +137,8 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
             model.add(samples_hv, samples.y)
     train_t = time.time() - train_t
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
-    f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
-    #f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
+    #f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
+    f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
 
 
     test_t = time.time()
@@ -157,9 +158,9 @@ def experiment(randomness=0, embed='random', dataset="MUTAG"):
     return acc, f, train_t, test_t
 
 
-REPETITIONS = 50
+REPETITIONS = 1
 RANDOMNESS = ['random']
-DATASET = ['PTC_FM','MUTAG','NCI1','ENZYMES','PROTEINS','DD']
+DATASET = ['PTC_FR','MUTAG','NCI1','ENZYMES','PROTEINS','DD']
 
 for d in DATASET:
     acc_final = []
