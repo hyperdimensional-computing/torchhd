@@ -56,7 +56,9 @@ def experiment(randomness=0, embed="random", dataset="MUTAG", metric="page_rank"
 
     def centrality(data):
         degree_centrality = data.edge_index[0].bincount(minlength=data.num_nodes)
-        degree_ranked_nodes = sorted(range(data.num_nodes), key=lambda node: degree_centrality[node])
+        degree_ranked_nodes = sorted(
+            range(data.num_nodes), key=lambda node: degree_centrality[node]
+        )
 
     def semi_local_centrality(data):
         G = nx.Graph()
@@ -69,14 +71,18 @@ def experiment(randomness=0, embed="random", dataset="MUTAG", metric="page_rank"
         semi_local_centrality = []
 
         for node in G.nodes():
-            ego_graph = nx.ego_graph(G, node, radius=2)  # Adjust the radius (2 in this case)
+            ego_graph = nx.ego_graph(
+                G, node, radius=2
+            )  # Adjust the radius (2 in this case)
             semi_local_centrality.append(len(ego_graph))
 
         # Store the semi-local centrality scores in the PyTorch Geometric Data object
         data.semi_local_centrality = torch.tensor(semi_local_centrality)
 
         # Rank nodes based on semi-local centrality
-        semi_local_ranked_nodes = sorted(G.nodes(), key=lambda node: semi_local_centrality[node])
+        semi_local_ranked_nodes = sorted(
+            G.nodes(), key=lambda node: semi_local_centrality[node]
+        )
         return semi_local_ranked_nodes
 
     def degree_centrality(data):
@@ -162,7 +168,6 @@ def experiment(randomness=0, embed="random", dataset="MUTAG", metric="page_rank"
         scores_nodes = sorted(G.nodes(), key=lambda node: scores[node])
 
         return scores_nodes
-
 
     def edge_current_flow_betweeness_centrality(data):
         G = to_networkx(data)
@@ -401,7 +406,6 @@ def experiment(randomness=0, embed="random", dataset="MUTAG", metric="page_rank"
                 pr = pagerank(x)
                 pr_sort, order = pr.sort()
 
-
             node_id_hvs = torchhd.empty(x.num_nodes, self.out_features, VSA)
             node_id_hvs[order] = self.node_ids.weight[: x.num_nodes]
 
@@ -447,13 +451,21 @@ def experiment(randomness=0, embed="random", dataset="MUTAG", metric="page_rank"
     f = f1.compute().item() * 100
     return acc, f, train_t, test_t
 
+
 REPETITIONS = 50
 RANDOMNESS = ["random"]
 # DATASET = ["PTC_FM", "MUTAG", "NCI1", "ENZYMES", "PROTEINS", "DD"]
-METRICS = ["none","page_rank","degree_centrality",
-          "closeness_centrality",
-          "betweenness_centrality", "load_centrality", "subgraph_centrality",
-          "subgraph_centrality_exp", "harmonic_centrality"]
+METRICS = [
+    "none",
+    "page_rank",
+    "degree_centrality",
+    "closeness_centrality",
+    "betweenness_centrality",
+    "load_centrality",
+    "subgraph_centrality",
+    "subgraph_centrality_exp",
+    "harmonic_centrality",
+]
 DATASET = ["PTC_FM", "MUTAG", "NCI1", "ENZYMES", "PROTEINS", "DD"]
 # VSAS = ["BSC", "MAP", "HRR", "FHRR"]
 VSAS = ["FHRR"]
@@ -493,7 +505,7 @@ for VSA in VSAS:
                         "accuracy",
                         "f1",
                         "VSA",
-                        "metric"
+                        "metric",
                     ]
                 )
                 writer.writerows(
@@ -506,7 +518,7 @@ for VSA in VSAS:
                             acc_final[0],
                             f1_final[0],
                             VSA,
-                            METRIC
+                            METRIC,
                         ]
                     ]
                 )
