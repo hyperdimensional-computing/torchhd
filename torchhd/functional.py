@@ -1104,7 +1104,7 @@ def randsel(
     other = ensure_vsa_tensor(other)
 
     select = torch.empty_like(input, dtype=torch.bool)
-    select.bernoulli_(1 - p, generator=generator)
+    select.bernoulli_(p, generator=generator)
     return input.where(select, other)
 
 
