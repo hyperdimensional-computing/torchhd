@@ -272,7 +272,7 @@ class TestRandsel:
         else:
             a, b = functional.random(2, 1024, vsa, dtype=dtype, generator=generator)
         res = functional.randsel(a, b, p=0, generator=generator)
-        assert torch.all(a == res)
+        assert torch.all(b == res)
 
         if vsa == "BSBC":
             a, b = functional.random(
@@ -281,7 +281,7 @@ class TestRandsel:
         else:
             a, b = functional.random(2, 1024, vsa, dtype=dtype, generator=generator)
         res = functional.randsel(a, b, p=1, generator=generator)
-        assert torch.all(b == res)
+        assert torch.all(a == res)
 
         if vsa == "BSBC":
             a, b = functional.random(
