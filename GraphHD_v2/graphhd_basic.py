@@ -71,7 +71,6 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
 
         return scores_nodes
 
-
     def to_undirected(edge_index):
         """
         Returns the undirected edge_index
@@ -164,12 +163,47 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
 
 REPETITIONS = 25
 RANDOMNESS = ["random"]
-DATASET = [ 'AIDS','BZR',
-            'BZR_MD','COX2','COX2_MD','DHFR','DHFR_MD','ER_MD','FRANKENSTEIN','MCF-7','MCF-7H','MOLT-4','MOLT-4H','Mutagenicity','MUTAG',
-            'NCI1','NCI109','NCI-H23','NCI-H23H','OVCAR-8','OVCAR-8H','P388','P388H','PC-3','PC-3H','PTC_FM',
-            'PTC_FR','PTC_MM','PTC_MR','SF-295','SF-295H','SN12C','SN12CH',
-           'SW-620','SW-620H','UACC257','UACC257H','Yeast','YeastH'
-           ]
+DATASET = [
+    "AIDS",
+    "BZR",
+    "BZR_MD",
+    "COX2",
+    "COX2_MD",
+    "DHFR",
+    "DHFR_MD",
+    "ER_MD",
+    "FRANKENSTEIN",
+    "MCF-7",
+    "MCF-7H",
+    "MOLT-4",
+    "MOLT-4H",
+    "Mutagenicity",
+    "MUTAG",
+    "NCI1",
+    "NCI109",
+    "NCI-H23",
+    "NCI-H23H",
+    "OVCAR-8",
+    "OVCAR-8H",
+    "P388",
+    "P388H",
+    "PC-3",
+    "PC-3H",
+    "PTC_FM",
+    "PTC_FR",
+    "PTC_MM",
+    "PTC_MR",
+    "SF-295",
+    "SF-295H",
+    "SN12C",
+    "SN12CH",
+    "SW-620",
+    "SW-620H",
+    "UACC257",
+    "UACC257H",
+    "Yeast",
+    "YeastH",
+]
 VSAS = ["FHRR"]
 
 
