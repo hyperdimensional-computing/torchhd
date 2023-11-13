@@ -16,7 +16,7 @@ import csv
 
 import time
 
-csv_file = "basic/result" + str(time.time()) + ".csv"
+csv_file = "list_rank_node/result" + str(time.time()) + ".csv"
 DIM = 10000
 import networkx as nx
 from torch_geometric.utils import to_networkx
@@ -69,7 +69,10 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
         scores = nx.degree_centrality(G)
         scores_nodes = sorted(G.nodes(), key=lambda node: scores[node])
 
-        return scores_nodes
+        return scores, scores_nodes
+
+
+
 
 
     def to_undirected(edge_index):
@@ -96,36 +99,99 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
         return min_num_nodes, max_num_nodes
 
     class Encoder(nn.Module):
-        def __init__(self, out_features, size):
+        def __init__(self, out_features, size, num_node_attr):
             super(Encoder, self).__init__()
             self.out_features = out_features
-            if embed == "thermometer":
-                self.node_ids = embeddings.Thermometer(size, out_features, vsa=VSA)
-            elif embed == "circular":
-                self.node_ids = embeddings.Circular(size, out_features, vsa=VSA)
-            elif embed == "projection":
-                self.node_ids = embeddings.Projection(size, out_features, vsa=VSA)
-            elif embed == "sinusoid":
-                self.node_ids = embeddings.Sinusoid(size, out_features, vsa=VSA)
-            elif embed == "density":
-                self.node_ids = embeddings.Density(size, out_features, vsa=VSA)
-            else:
-                self.node_ids = embeddings.Random(size, out_features, vsa=VSA)
+            self.node_ids = embeddings.Random(size, out_features, vsa=VSA)
+            self.levels = embeddings.Level(size, out_features, vsa=VSA)
+            self.node_attr = embeddings.Random(num_node_attr, out_features, vsa=VSA)
 
         def forward(self, x):
+            # node_id_hvs = self.node_ids.weight[: x.num_nodes]
             pr = pagerank(x)
             pr_sort, pr_argsort = pr.sort()
 
             node_id_hvs = torchhd.empty(x.num_nodes, self.out_features, VSA)
             node_id_hvs[pr_argsort] = self.node_ids.weight[: x.num_nodes]
 
-            row, col = to_undirected(x.edge_index)
+            def index_value(inner_tensor):
+                return torch.argmax(inner_tensor)
 
-            hvs = torchhd.bind(node_id_hvs[row], node_id_hvs[col])
-            return torchhd.multiset(hvs)
+            indices_tensor = torch.stack([index_value(inner_tensor) for inner_tensor in x.x.unbind()])
+            node_attr = self.node_attr.weight[indices_tensor]
+            node_id_hvs = torchhd.bind(node_id_hvs, node_attr)
+
+
+            row, col = to_undirected(x.edge_index)
+            prev = row[0]
+
+            final_hv = torchhd.empty(1, self.out_features, VSA)
+            aux_hv = torchhd.identity(1, self.out_features, VSA)
+
+            for idx in range(len(x.edge_index[0])):
+                i = x.edge_index[0][idx]
+                j = x.edge_index[1][idx]
+                if prev == i:
+                    aux_hv = torchhd.bind(aux_hv, torchhd.bind(node_id_hvs[i], node_id_hvs[j]))
+                else:
+                    prev = i
+                    final_hv = torchhd.bundle(final_hv, aux_hv)
+                    aux_hv = torchhd.identity(1, self.out_features, VSA)
+
+            return final_hv[0]
+
+        def forward_hashmap_label_random(self, x):
+            node_id_hvs = self.node_ids.weight[: x.num_nodes]
+
+            def index_value(inner_tensor):
+                return torch.argmax(inner_tensor)
+
+            indices_tensor = torch.stack([index_value(inner_tensor) for inner_tensor in x.x.unbind()])
+            node_attr = self.node_attr.weight[indices_tensor]
+            node_id_hvs = torchhd.bind(node_id_hvs, node_attr)
+
+
+            row, col = to_undirected(x.edge_index)
+            prev = row[0]
+
+            final_hv = torchhd.empty(1, self.out_features, VSA)
+            aux_hv = torchhd.identity(1, self.out_features, VSA)
+
+            for idx in range(len(x.edge_index[0])):
+                i = x.edge_index[0][idx]
+                j = x.edge_index[1][idx]
+                if prev == i:
+                    aux_hv = torchhd.bind(aux_hv, torchhd.bind(node_id_hvs[i], node_id_hvs[j]))
+                else:
+                    prev = i
+                    final_hv = torchhd.bundle(final_hv, aux_hv)
+                    aux_hv = torchhd.identity(1, self.out_features, VSA)
+
+            return final_hv[0]
+
+        def forward1(self, x):
+            node_id_hvs = self.node_ids.weight[: x.num_nodes]
+
+            row, col = to_undirected(x.edge_index)
+            prev = row[0]
+
+            final_hv = torchhd.empty(1, self.out_features, VSA)
+            aux_hv = torchhd.identity(1, self.out_features, VSA)
+
+            for idx in range(len(x.edge_index[0])):
+                i = x.edge_index[0][idx]
+                j = x.edge_index[1][idx]
+                if prev == i:
+                    aux_hv = torchhd.bind(aux_hv, torchhd.bind(node_id_hvs[i], node_id_hvs[j]))
+                else:
+                    prev = i
+                    final_hv = torchhd.bundle(final_hv, aux_hv)
+                    aux_hv = torchhd.identity(1, self.out_features, VSA)
+
+            return final_hv[0]
 
     min_graph_size, max_graph_size = min_max_graph_size(graphs)
-    encode = Encoder(DIMENSIONS, max_graph_size)
+    encode = Encoder(DIMENSIONS, max_graph_size, graphs.num_node_features)
     encode = encode.to(device)
 
     model = Centroid(DIMENSIONS, graphs.num_classes, VSA)
@@ -133,16 +199,20 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
 
     train_t = time.time()
     with torch.no_grad():
-        for samples in tqdm(train_ld, desc="Training"):
+        for i, samples in enumerate(tqdm(train_ld, desc="Training")):
             samples.edge_index = samples.edge_index.to(device)
             samples.y = samples.y.to(device)
 
             samples_hv = encode(samples).unsqueeze(0)
+
             model.add(samples_hv, samples.y)
+            # break
+
+
     train_t = time.time() - train_t
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
-    # f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
-    f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
+    f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
+    # f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
 
     test_t = time.time()
     with torch.no_grad():
@@ -150,12 +220,15 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
             model.normalize()
 
         for samples in tqdm(test_ld, desc="Testing"):
+            # break
             samples.edge_index = samples.edge_index.to(device)
 
             samples_hv = encode(samples).unsqueeze(0)
-            outputs = model(samples_hv, dot=True)
+            outputs = model(samples_hv, dot=False)
+
             accuracy.update(outputs.cpu(), samples.y)
             f1.update(outputs.cpu(), samples.y)
+
     test_t = time.time() - test_t
     acc = accuracy.compute().item() * 100
     f = f1.compute().item() * 100
@@ -169,7 +242,7 @@ DATASET = [ 'AIDS','BZR',
             'NCI1','NCI109','NCI-H23','NCI-H23H','OVCAR-8','OVCAR-8H','P388','P388H','PC-3','PC-3H','PTC_FM',
             'PTC_FR','PTC_MM','PTC_MR','SF-295','SF-295H','SN12C','SN12CH',
            'SW-620','SW-620H','UACC257','UACC257H','Yeast','YeastH'
-           ]
+           ]# ,'BZR_MD','COX2','COX2_MD','DHFR','DHFR_MD','ER_MD', 'FRANKENSTEIN', 'NCI109','KKI','OHSU','Peking_1','PROTEINS','AIDS']
 VSAS = ["FHRR"]
 
 
