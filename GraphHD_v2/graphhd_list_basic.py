@@ -115,7 +115,9 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
                 i = x.edge_index[0][idx]
                 j = x.edge_index[1][idx]
                 if prev == i:
-                    aux_hv = torchhd.bind(aux_hv, torchhd.bind(node_id_hvs[i], node_id_hvs[j]))
+                    aux_hv = torchhd.bind(
+                        aux_hv, torchhd.bind(node_id_hvs[i], node_id_hvs[j])
+                    )
                 else:
                     prev = i
                     final_hv = torchhd.bundle(final_hv, aux_hv)
@@ -139,10 +141,11 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
             samples_hv = encode(samples).unsqueeze(0)
             model.add(samples_hv, samples.y)
 
-
     train_t = time.time() - train_t
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
-    f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
+    f1 = torchmetrics.F1Score(
+        num_classes=graphs.num_classes, average="macro", multiclass=True
+    )
     # f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
 
     test_t = time.time()
@@ -167,13 +170,47 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
 
 REPETITIONS = 10
 RANDOMNESS = ["random"]
-DATASET = [ 'AIDS','BZR',
-            'BZR_MD','COX2','COX2_MD','DHFR','DHFR_MD','ER_MD','FRANKENSTEIN','MCF-7','MCF-7H','MOLT-4','MOLT-4H','Mutagenicity','MUTAG',
-            'NCI1','NCI109','NCI-H23','NCI-H23H','OVCAR-8','OVCAR-8H','P388','P388H','PC-3','PC-3H','PTC_FM',
-            'PTC_FR','PTC_MM','PTC_MR','SF-295','SF-295H','SN12C','SN12CH',
-           'SW-620','SW-620H','UACC257','UACC257H','Yeast','YeastH'
-           ]
-
+DATASET = [
+    "AIDS",
+    "BZR",
+    "BZR_MD",
+    "COX2",
+    "COX2_MD",
+    "DHFR",
+    "DHFR_MD",
+    "ER_MD",
+    "FRANKENSTEIN",
+    "MCF-7",
+    "MCF-7H",
+    "MOLT-4",
+    "MOLT-4H",
+    "Mutagenicity",
+    "MUTAG",
+    "NCI1",
+    "NCI109",
+    "NCI-H23",
+    "NCI-H23H",
+    "OVCAR-8",
+    "OVCAR-8H",
+    "P388",
+    "P388H",
+    "PC-3",
+    "PC-3H",
+    "PTC_FM",
+    "PTC_FR",
+    "PTC_MM",
+    "PTC_MR",
+    "SF-295",
+    "SF-295H",
+    "SN12C",
+    "SN12CH",
+    "SW-620",
+    "SW-620H",
+    "UACC257",
+    "UACC257H",
+    "Yeast",
+    "YeastH",
+]
 
 
 # ,'BZR_MD','COX2','COX2_MD','DHFR','DHFR_MD','ER_MD', 'FRANKENSTEIN', 'NCI109','KKI','OHSU','Peking_1','PROTEINS','AIDS']

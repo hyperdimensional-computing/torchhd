@@ -112,8 +112,12 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
             node_id_hvs[pr_argsort] = self.node_ids.weight[: x.num_nodes]
 
             if len(x.x[0]) > 0:
-                indices_tensor = torch.stack([index_value(inner_tensor) for inner_tensor in x.x.unbind()])
-                node_id_hvs = torchhd.bind(node_id_hvs, self.node_attr.weight[indices_tensor])
+                indices_tensor = torch.stack(
+                    [index_value(inner_tensor) for inner_tensor in x.x.unbind()]
+                )
+                node_id_hvs = torchhd.bind(
+                    node_id_hvs, self.node_attr.weight[indices_tensor]
+                )
 
             row, col = to_undirected(x.edge_index)
 
@@ -138,7 +142,9 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
             break
     train_t = time.time() - train_t
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
-    f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
+    f1 = torchmetrics.F1Score(
+        num_classes=graphs.num_classes, average="macro", multiclass=True
+    )
     # f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
 
     test_t = time.time()
@@ -161,12 +167,47 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
 
 REPETITIONS = 10
 RANDOMNESS = ["random"]
-DATASET = [ 'AIDS','BZR',
-            'BZR_MD','COX2','COX2_MD','DHFR','DHFR_MD','ER_MD','FRANKENSTEIN','MCF-7','MCF-7H','MOLT-4','MOLT-4H','Mutagenicity','MUTAG',
-            'NCI1','NCI109','NCI-H23','NCI-H23H','OVCAR-8','OVCAR-8H','P388','P388H','PC-3','PC-3H','PTC_FM',
-            'PTC_FR','PTC_MM','PTC_MR','SF-295','SF-295H','SN12C','SN12CH',
-           'SW-620','SW-620H','UACC257','UACC257H','Yeast','YeastH'
-           ]
+DATASET = [
+    "AIDS",
+    "BZR",
+    "BZR_MD",
+    "COX2",
+    "COX2_MD",
+    "DHFR",
+    "DHFR_MD",
+    "ER_MD",
+    "FRANKENSTEIN",
+    "MCF-7",
+    "MCF-7H",
+    "MOLT-4",
+    "MOLT-4H",
+    "Mutagenicity",
+    "MUTAG",
+    "NCI1",
+    "NCI109",
+    "NCI-H23",
+    "NCI-H23H",
+    "OVCAR-8",
+    "OVCAR-8H",
+    "P388",
+    "P388H",
+    "PC-3",
+    "PC-3H",
+    "PTC_FM",
+    "PTC_FR",
+    "PTC_MM",
+    "PTC_MR",
+    "SF-295",
+    "SF-295H",
+    "SN12C",
+    "SN12CH",
+    "SW-620",
+    "SW-620H",
+    "UACC257",
+    "UACC257H",
+    "Yeast",
+    "YeastH",
+]
 VSAS = ["FHRR"]
 
 with open(csv_file, mode="a", newline="") as file:
