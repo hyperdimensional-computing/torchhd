@@ -71,10 +71,6 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
 
         return scores, scores_nodes
 
-
-
-
-
     def to_undirected(edge_index):
         """
         Returns the undirected edge_index
@@ -117,10 +113,11 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
             def index_value(inner_tensor):
                 return torch.argmax(inner_tensor)
 
-            indices_tensor = torch.stack([index_value(inner_tensor) for inner_tensor in x.x.unbind()])
+            indices_tensor = torch.stack(
+                [index_value(inner_tensor) for inner_tensor in x.x.unbind()]
+            )
             node_attr = self.node_attr.weight[indices_tensor]
             node_id_hvs = torchhd.bind(node_id_hvs, node_attr)
-
 
             row, col = to_undirected(x.edge_index)
             prev = row[0]
@@ -132,7 +129,9 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
                 i = x.edge_index[0][idx]
                 j = x.edge_index[1][idx]
                 if prev == i:
-                    aux_hv = torchhd.bind(aux_hv, torchhd.bind(node_id_hvs[i], node_id_hvs[j]))
+                    aux_hv = torchhd.bind(
+                        aux_hv, torchhd.bind(node_id_hvs[i], node_id_hvs[j])
+                    )
                 else:
                     prev = i
                     final_hv = torchhd.bundle(final_hv, aux_hv)
@@ -147,7 +146,9 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
                 return torch.argmax(inner_tensor)
 
             if len(x.x[0]) > 0:
-                indices_tensor = torch.stack([index_value(inner_tensor) for inner_tensor in x.x.unbind()])
+                indices_tensor = torch.stack(
+                    [index_value(inner_tensor) for inner_tensor in x.x.unbind()]
+                )
                 node_attr = self.node_attr.weight[indices_tensor]
                 node_id_hvs = torchhd.bind(node_id_hvs, torchhd.permute(node_attr))
 
@@ -161,14 +162,15 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
                 i = x.edge_index[0][idx]
                 j = x.edge_index[1][idx]
                 if prev == i:
-                    aux_hv = torchhd.bind(aux_hv, torchhd.bind(node_id_hvs[i], node_id_hvs[j]))
+                    aux_hv = torchhd.bind(
+                        aux_hv, torchhd.bind(node_id_hvs[i], node_id_hvs[j])
+                    )
                 else:
                     prev = i
                     final_hv = torchhd.bundle(final_hv, aux_hv)
                     aux_hv = torchhd.identity(1, self.out_features, VSA)
 
             return final_hv[0]
-
 
     min_graph_size, max_graph_size = min_max_graph_size(graphs)
     encode = Encoder(DIMENSIONS, max_graph_size, graphs.num_node_features)
@@ -188,10 +190,11 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
             model.add(samples_hv, samples.y)
             # break
 
-
     train_t = time.time() - train_t
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
-    f1 = torchmetrics.F1Score(num_classes=graphs.num_classes, average='macro', multiclass=True)
+    f1 = torchmetrics.F1Score(
+        num_classes=graphs.num_classes, average="macro", multiclass=True
+    )
     # f1 = torchmetrics.F1Score("multiclass", num_classes=graphs.num_classes)
 
     test_t = time.time()
@@ -217,12 +220,47 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
 
 REPETITIONS = 10
 RANDOMNESS = ["random"]
-DATASET = [ 'AIDS','BZR',
-            'BZR_MD','COX2','COX2_MD','DHFR','DHFR_MD','ER_MD','FRANKENSTEIN','MCF-7','MCF-7H','MOLT-4','MOLT-4H','Mutagenicity','MUTAG',
-            'NCI1','NCI109','NCI-H23','NCI-H23H','OVCAR-8','OVCAR-8H','P388','P388H','PC-3','PC-3H','PTC_FM',
-            'PTC_FR','PTC_MM','PTC_MR','SF-295','SF-295H','SN12C','SN12CH',
-           'SW-620','SW-620H','UACC257','UACC257H','Yeast','YeastH'
-           ]# ,'BZR_MD','COX2','COX2_MD','DHFR','DHFR_MD','ER_MD', 'FRANKENSTEIN', 'NCI109','KKI','OHSU','Peking_1','PROTEINS','AIDS']
+DATASET = [
+    "AIDS",
+    "BZR",
+    "BZR_MD",
+    "COX2",
+    "COX2_MD",
+    "DHFR",
+    "DHFR_MD",
+    "ER_MD",
+    "FRANKENSTEIN",
+    "MCF-7",
+    "MCF-7H",
+    "MOLT-4",
+    "MOLT-4H",
+    "Mutagenicity",
+    "MUTAG",
+    "NCI1",
+    "NCI109",
+    "NCI-H23",
+    "NCI-H23H",
+    "OVCAR-8",
+    "OVCAR-8H",
+    "P388",
+    "P388H",
+    "PC-3",
+    "PC-3H",
+    "PTC_FM",
+    "PTC_FR",
+    "PTC_MM",
+    "PTC_MR",
+    "SF-295",
+    "SF-295H",
+    "SN12C",
+    "SN12CH",
+    "SW-620",
+    "SW-620H",
+    "UACC257",
+    "UACC257H",
+    "Yeast",
+    "YeastH",
+]  # ,'BZR_MD','COX2','COX2_MD','DHFR','DHFR_MD','ER_MD', 'FRANKENSTEIN', 'NCI109','KKI','OHSU','Peking_1','PROTEINS','AIDS']
 VSAS = ["FHRR"]
 
 
