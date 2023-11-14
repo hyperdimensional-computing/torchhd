@@ -153,24 +153,25 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
                 node_id_hvs = torchhd.bind(node_id_hvs, node_attr)
 
             row, col = to_undirected(x.edge_index)
-            prev = row[0]
+            if len(row) > 0:
+                prev = row[0]
 
-            final_hv = torchhd.empty(1, self.out_features, VSA)
-            aux_hv = torchhd.identity(1, self.out_features, VSA)
+                final_hv = torchhd.empty(1, self.out_features, VSA)
+                aux_hv = torchhd.identity(1, self.out_features, VSA)
 
-            for idx in range(len(x.edge_index[0])):
-                i = x.edge_index[0][idx]
-                j = x.edge_index[1][idx]
-                if prev == i:
-                    aux_hv = torchhd.bind(
-                        aux_hv, torchhd.bind(node_id_hvs[i], node_id_hvs[j])
-                    )
-                else:
-                    prev = i
-                    final_hv = torchhd.bundle(final_hv, aux_hv)
-                    aux_hv = torchhd.identity(1, self.out_features, VSA)
+                for idx in range(len(x.edge_index[0])):
+                    i = x.edge_index[0][idx]
+                    j = x.edge_index[1][idx]
+                    if prev == i:
+                        aux_hv = torchhd.bind(aux_hv, torchhd.bind(node_id_hvs[i], node_id_hvs[j]))
+                    else:
+                        prev = i
+                        final_hv = torchhd.bundle(final_hv, aux_hv)
+                        aux_hv = torchhd.bind(node_id_hvs[i], node_id_hvs[j])
+                return final_hv[0]
 
-            return final_hv[0]
+            else:
+                return torchhd.empty(1, self.out_features, VSA)[0]
 
     min_graph_size, max_graph_size = min_max_graph_size(graphs)
     encode = Encoder(DIMENSIONS, max_graph_size, graphs.num_node_features)
