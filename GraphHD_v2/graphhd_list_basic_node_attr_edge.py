@@ -71,10 +71,6 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
 
         return scores, scores_nodes
 
-
-
-
-
     def to_undirected(edge_index):
         """
         Returns the undirected edge_index
@@ -114,13 +110,17 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
                 return torch.argmax(inner_tensor)
 
             if len(x.x[0]) > 0:
-                indices_tensor = torch.stack([index_value(inner_tensor) for inner_tensor in x.x.unbind()])
+                indices_tensor = torch.stack(
+                    [index_value(inner_tensor) for inner_tensor in x.x.unbind()]
+                )
                 node_attr = self.node_attr.weight[indices_tensor]
                 node_id_hvs = torchhd.bind(node_id_hvs, node_attr)
 
             has_attr = x.edge_attr != None
             if has_attr:
-                edges_tensor = torch.stack([index_value(inner_tensor) for inner_tensor in x.edge_attr.unbind()])
+                edges_tensor = torch.stack(
+                    [index_value(inner_tensor) for inner_tensor in x.edge_attr.unbind()]
+                )
                 edge_attr = self.edge_attr.weight[edges_tensor]
 
             row, col = to_undirected(x.edge_index)
@@ -134,20 +134,28 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
                 j = x.edge_index[1][idx]
                 if prev == i:
                     if has_attr:
-                        aux_hv = torchhd.bind(aux_hv, torchhd.bind(torchhd.bind(node_id_hvs[i], node_id_hvs[j]), edge_attr[idx]))
+                        aux_hv = torchhd.bind(
+                            aux_hv,
+                            torchhd.bind(
+                                torchhd.bind(node_id_hvs[i], node_id_hvs[j]),
+                                edge_attr[idx],
+                            ),
+                        )
                     else:
-                        aux_hv = torchhd.bind(aux_hv, torchhd.bind(node_id_hvs[i], node_id_hvs[j]))
+                        aux_hv = torchhd.bind(
+                            aux_hv, torchhd.bind(node_id_hvs[i], node_id_hvs[j])
+                        )
                 else:
                     prev = i
                     final_hv = torchhd.bundle(final_hv, aux_hv)
                     if has_attr:
-                        aux_hv = torchhd.bind(torchhd.bind(node_id_hvs[i], node_id_hvs[j]), edge_attr[idx])
+                        aux_hv = torchhd.bind(
+                            torchhd.bind(node_id_hvs[i], node_id_hvs[j]), edge_attr[idx]
+                        )
                     else:
                         aux_hv = torchhd.bind(node_id_hvs[i], node_id_hvs[j])
 
             return final_hv[0]
-
-
 
     min_graph_size, max_graph_size = min_max_graph_size(graphs)
     encode = Encoder(DIMENSIONS, max_graph_size, graphs.num_node_features)
@@ -165,7 +173,6 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
             samples_hv = encode(samples).unsqueeze(0)
 
             model.add(samples_hv, samples.y)
-
 
     train_t = time.time() - train_t
     accuracy = torchmetrics.Accuracy("multiclass", num_classes=graphs.num_classes)
@@ -194,7 +201,7 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
 
 REPETITIONS = 1
 RANDOMNESS = ["random"]
-DATASET = ['AIDS','BZR','COX2','DHFR','FRANKENSTEIN']
+DATASET = ["AIDS", "BZR", "COX2", "DHFR", "FRANKENSTEIN"]
 
 # ,'BZR_MD','COX2','COX2_MD','DHFR','DHFR_MD','ER_MD', 'FRANKENSTEIN', 'NCI109','KKI','OHSU','Peking_1','PROTEINS','AIDS']
 VSAS = ["FHRR"]
