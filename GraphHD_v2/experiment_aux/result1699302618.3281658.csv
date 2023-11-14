@@ -1,0 +1,4 @@
+dataset,dimensions,train_time,test_time,accuracy,f1
+PTC_FR,10000,0.41,0.19,54.72,54.72
+dataset,dimensions,train_time,test_time,accuracy,f1
+MUTAG,10000,0.19,0.07,91.23,91.23

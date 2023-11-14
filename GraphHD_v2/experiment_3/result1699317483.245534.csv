@@ -1,0 +1,12 @@
+dataset,dimensions,train_time,test_time,accuracy,f1
+PTC_FR,10000,0.38,0.19,46.23,46.23
+dataset,dimensions,train_time,test_time,accuracy,f1
+MUTAG,10000,0.23,0.11,91.23,91.23
+dataset,dimensions,train_time,test_time,accuracy,f1
+NCI1,10000,10.44,3.74,64.72,64.72
+dataset,dimensions,train_time,test_time,accuracy,f1
+ENZYMES,10000,1.37,0.61,21.11,21.11
+dataset,dimensions,train_time,test_time,accuracy,f1
+PROTEINS,10000,2.74,1.49,64.07,64.07
+dataset,dimensions,train_time,test_time,accuracy,f1
+DD,10000,18.49,8.59,71.75,71.75

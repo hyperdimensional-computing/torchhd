@@ -1,0 +1,8 @@
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA,metric
+DD,10000,15.83,6.09,74.01,74.01,FHRR,page_rank
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA,metric
+DD,10000,15.83,6.09,74.01,74.01,FHRR,degree_centrality
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA,metric
+DD,10000,15.83,6.09,74.01,74.01,FHRR,closeness_centrality
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA,metric
+DD,10000,15.83,6.09,74.01,74.01,FHRR,betweenness_centrality

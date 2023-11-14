@@ -1,0 +1,2 @@
+dataset,dimensions,train_time,test_time,accuracy,f1
+PROTEINS,10000,1.24,0.58,66.77,66.77

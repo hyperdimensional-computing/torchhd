@@ -1,0 +1,8 @@
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+PTC_FM,10000,0.36,0.17,64.76,64.76,BSC
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+PTC_FM,10000,0.21,0.12,63.81,63.81,MAP
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+PTC_FM,10000,0.51,0.23,63.81,63.81,HRR
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+PTC_FM,10000,0.3,0.14,63.81,63.81,FHRR

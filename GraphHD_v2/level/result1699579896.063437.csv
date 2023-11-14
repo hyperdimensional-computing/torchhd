@@ -1,0 +1,12 @@
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+PTC_FM,10000,0.33,0.18,53.33,53.33,FHRR
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+MUTAG,10000,0.26,0.1,61.4,61.4,FHRR
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+NCI1,10000,6.5,3.45,53.04,53.04,FHRR
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+ENZYMES,10000,1.34,0.6,13.33,13.33,FHRR
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+PROTEINS,10000,2.45,1.01,52.99,52.99,FHRR
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+DD,10000,20.37,7.08,53.95,53.95,FHRR

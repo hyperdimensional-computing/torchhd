@@ -1,0 +1,2 @@
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+ENZYMES,10000,1.03,0.47,32.78,32.78,FHRR

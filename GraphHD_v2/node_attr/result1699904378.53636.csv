@@ -1,0 +1,2 @@
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+AIDS,10000,3.18,1.09,74.67,74.67,FHRR

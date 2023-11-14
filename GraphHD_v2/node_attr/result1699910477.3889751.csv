@@ -1,0 +1,10 @@
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+AIDS,10000,3.38,1.63,93.5,93.5,FHRR
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+BZR,10000,0.99,0.48,81.97,81.97,FHRR
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+COX2,10000,1.27,0.6,64.54,64.54,FHRR
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+DHFR,10000,2.27,1.05,74.01,74.01,FHRR
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+FRANKENSTEIN,10000,7.22,4.32,62.37,62.37,FHRR

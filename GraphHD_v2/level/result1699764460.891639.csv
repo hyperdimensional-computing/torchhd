@@ -1,0 +1,2 @@
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+BZR,10000,0.89,0.42,80.25,80.25,FHRR

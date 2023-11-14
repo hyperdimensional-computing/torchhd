@@ -1,0 +1,12 @@
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+BZR,10000,0.52,0.28,73.2,73.2,FHRR
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+BZR_MD,10000,0.98,0.45,61.96,61.96,FHRR
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+COX2,10000,0.64,0.31,62.73,62.73,FHRR
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+COX2_MD,10000,1.41,0.62,49.51,49.51,FHRR
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+DHFR,10000,1.08,0.52,67.25,67.25,FHRR
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+DHFR_MD,10000,1.55,0.71,59.24,59.24,FHRR

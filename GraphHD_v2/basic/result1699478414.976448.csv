@@ -1,0 +1,4 @@
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+PTC_FM,10000,0.0,0.0,0.0,0.0,BSC
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+MUTAG,10000,0.0,0.0,0.0,0.0,BSC

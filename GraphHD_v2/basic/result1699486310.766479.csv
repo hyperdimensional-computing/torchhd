@@ -1,0 +1,12 @@
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA,metric
+ENZYMES,10000,0.87,0.38,34.44,34.44,FHRR,none
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA,metric
+ENZYMES,10000,0.87,0.38,34.44,34.44,FHRR,page_rank
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA,metric
+ENZYMES,10000,0.87,0.38,34.44,34.44,FHRR,degree_centrality
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA,metric
+ENZYMES,10000,0.87,0.38,34.44,34.44,FHRR,closeness_centrality
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA,metric
+ENZYMES,10000,0.87,0.38,34.44,34.44,FHRR,betweenness_centrality
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA,metric
+ENZYMES,10000,0.87,0.38,34.44,34.44,FHRR,load_centrality

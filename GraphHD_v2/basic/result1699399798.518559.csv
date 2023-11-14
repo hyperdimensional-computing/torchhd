@@ -1,0 +1,8 @@
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+PTC_FM,10000,0.51,0.2,59.05,59.05,BSC
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+MUTAG,10000,0.24,0.11,36.84,36.84,BSC
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+NCI1,10000,7.05,3.48,50.53,50.53,BSC
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+ENZYMES,10000,1.06,0.59,12.22,12.22,BSC

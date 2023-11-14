@@ -1,0 +1,10 @@
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA,metric
+NCI1,10000,5.02,2.41,60.91,60.91,FHRR,page_rank
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA,metric
+NCI1,10000,5.02,2.41,60.91,60.91,FHRR,degree_centrality
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA,metric
+NCI1,10000,5.02,2.41,60.91,60.91,FHRR,katz_centrality
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA,metric
+NCI1,10000,5.02,2.41,60.91,60.91,FHRR,closeness_centrality
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA,metric
+NCI1,10000,5.02,2.41,60.91,60.91,FHRR,betweenness_centrality

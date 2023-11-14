@@ -1,0 +1,2 @@
+dataset,dimensions,train_time,test_time,accuracy,f1
+ENZYMES,10000,0.03,0.0,0.0,0.0

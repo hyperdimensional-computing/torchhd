@@ -1,0 +1,2 @@
+dataset,dimensions,train_time,test_time,accuracy,f1,VSA
+FRANKENSTEIN,10000,4.39,2.19,61.9,61.9,FHRR

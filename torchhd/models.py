@@ -109,6 +109,39 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, target, input, alpha=lr)
 
     @torch.no_grad()
+    def add_refine(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
+        logit = self(input)
+        predx = torch.topk(logit, 2)
+        pred = torch.tensor([predx.indices[0][0]])
+        is_wrong = target != pred
+
+        alpha = 1 - (abs(predx[0][0][0]) - abs(predx[0][0][1]))
+
+        self.similarity_sum += logit.max(1).values.item()
+        self.count += 1
+        if self.error_count == 0:
+            val = self.similarity_sum / self.count
+        else:
+            val = self.error_similarity_sum / self.error_count
+        if is_wrong.sum().item() == 0:
+            if logit.max(1).values.item() < val:
+                self.weight.index_add_(0, target, lr * alpha * input)
+            return
+
+        self.error_count += 1
+        self.error_similarity_sum += logit.max(1).values.item()
+
+        logit = logit[is_wrong]
+        input = input[is_wrong]
+        target = target[is_wrong]
+        pred = pred[is_wrong]
+        alpha1 = 1.0 - logit.gather(1, target.unsqueeze(1))
+        alpha2 = logit.gather(1, pred.unsqueeze(1)) - 1
+
+        self.weight.index_add_(0, target, lr * alpha1 * alpha * input)
+        self.weight.index_add_(0, pred, lr * alpha2 * alpha * input)
+
+    @torch.no_grad()
     def add_online(self, input: Tensor, target: Tensor, lr: float = 1.0) -> None:
         r"""Only updates the prototype vectors on wrongly predicted inputs.
 

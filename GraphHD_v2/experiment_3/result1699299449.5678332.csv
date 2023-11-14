@@ -1,0 +1,4 @@
+dataset,dimensions,train_time,test_time,accuracy,f1
+OHSU,10000,0.28,0.13,54.17,54.17
+dataset,dimensions,train_time,test_time,accuracy,f1
+KKI,10000,0.07,0.03,44.0,44.0

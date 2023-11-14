@@ -365,7 +365,7 @@ def experiment(randomness=0, embed="random", dataset="MUTAG", metric="page_rank"
             elif embed == "density":
                 self.node_ids = embeddings.Density(size, out_features, vsa=VSA)
             else:
-                self.node_ids = embeddings.Level(size, out_features, vsa=VSA)
+                self.node_ids = embeddings.Random(size, out_features, vsa=VSA)
 
         def forward(self, x):
             if metric == "degree_centrality":
@@ -452,7 +452,7 @@ def experiment(randomness=0, embed="random", dataset="MUTAG", metric="page_rank"
     return acc, f, train_t, test_t
 
 
-REPETITIONS = 50
+REPETITIONS = 1
 RANDOMNESS = ["random"]
 # DATASET = ["PTC_FM", "MUTAG", "NCI1", "ENZYMES", "PROTEINS", "DD"]
 METRICS = [
