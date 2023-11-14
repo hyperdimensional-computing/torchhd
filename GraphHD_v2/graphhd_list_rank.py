@@ -120,7 +120,9 @@ def experiment(randomness=0, embed="random", dataset="MUTAG"):
                     i = x.edge_index[0][idx]
                     j = x.edge_index[1][idx]
                     if prev == i:
-                        aux_hv = torchhd.bind(aux_hv, torchhd.bind(node_id_hvs[i], node_id_hvs[j]))
+                        aux_hv = torchhd.bind(
+                            aux_hv, torchhd.bind(node_id_hvs[i], node_id_hvs[j])
+                        )
                     else:
                         prev = i
                         final_hv = torchhd.bundle(final_hv, aux_hv)
