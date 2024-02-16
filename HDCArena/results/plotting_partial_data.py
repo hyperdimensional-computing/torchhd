@@ -4,9 +4,7 @@ from scipy.interpolate import make_interp_spline
 import pandas as pd
 from matplotlib import cm
 
-df = pd.read_csv(
-    "survey_results/partial_data_arena_results"
-)
+df = pd.read_csv("survey_results/partial_data_arena_results")
 
 x = list(map(int, df.columns[1:]))
 # Generate more data points for smooth curves

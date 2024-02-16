@@ -8,6 +8,7 @@ import utils
 import torchmetrics
 from collections import deque
 
+
 def train_adjustHD(
     train_loader,
     test_loader,
@@ -69,7 +70,6 @@ def train_adjustHD(
                 q.append(accuracy_train.compute().item())
             accuracy_train.reset()
     train_time = time.time() - train_time
-
 
     utils.test_eval(
         test_loader,

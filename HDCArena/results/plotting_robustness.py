@@ -4,9 +4,7 @@ from scipy.interpolate import make_interp_spline
 import pandas as pd
 from matplotlib import cm
 
-df = pd.read_csv(
-    "/HDCArena/results/files/robustness_results"
-)
+df = pd.read_csv("/HDCArena/results/files/robustness_results")
 
 print(df)
 x = list(map(int, df.columns[1:]))

@@ -1,8 +1,6 @@
 import pandas as pd
 
-df = pd.read_csv(
-    "survey_results/lehdc_robust_partial_arena"
-)
+df = pd.read_csv("survey_results/lehdc_robust_partial_arena")
 latex = 1
 pand = 1
 df = df[df["partial_data"] == 1]

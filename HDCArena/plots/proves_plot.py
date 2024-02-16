@@ -5,8 +5,7 @@ import matplotlib.pyplot as plt
 df = pd.read_csv("../results/survey_results/encodings_arena")
 var = "encoding"
 
-embeddings_order = ["sequence", "hashmap", "flocet", "sinusoid", "generic"
-                    ]
+embeddings_order = ["sequence", "hashmap", "flocet", "sinusoid", "generic"]
 
 df_mean = df.groupby([var, "name"])["train_time"].mean().to_frame()
 df_pivot = df_mean.reset_index().pivot(index="name", columns=var, values="train_time")

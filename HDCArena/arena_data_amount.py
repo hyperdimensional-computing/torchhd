@@ -688,7 +688,7 @@ METHODS = [
     "add",
     "adapt",
     "online",
-    "adjust"
+    "adjust",
     # "online",
     # "adapt_iterative",
     # "online_iterative",

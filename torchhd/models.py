@@ -65,6 +65,7 @@ class Centroid(nn.Module):
         >>> output.size()
         torch.Size([128, 30])
     """
+
     __constants__ = ["in_features", "out_features"]
     in_features: int
     out_features: int
@@ -234,7 +235,9 @@ class Centroid(nn.Module):
         self.error_count = 0
 
     @torch.no_grad()
-    def add_quantize(self, input: Tensor, target: Tensor, lr: float = 1.0, model="binary") -> None:
+    def add_quantize(
+        self, input: Tensor, target: Tensor, lr: float = 1.0, model="binary"
+    ) -> None:
         logit = self.quantized_similarity(input, model)
         pred = logit.argmax(1)
         is_wrong = target != pred
@@ -268,7 +271,9 @@ class Centroid(nn.Module):
             )
 
     @torch.no_grad()
-    def add_sparse(self, input: Tensor, target: Tensor, lr: float = 1.0, iter=0) -> None:
+    def add_sparse(
+        self, input: Tensor, target: Tensor, lr: float = 1.0, iter=0
+    ) -> None:
         if iter == 0:
             logit = self(input)
         else:

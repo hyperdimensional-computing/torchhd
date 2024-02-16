@@ -6,6 +6,7 @@ import sys
 from encoder import Encoder
 from preprocess import preprocess
 import methods_selection
+
 # from torchhd.models import BHDC
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -42,13 +43,13 @@ def exec_arena(
 
             if config["method"] == "lehdc":
                 dropout_rate = 0.5
-                '''
+                """
                 model = BHDC(
                     in_features=dimensions,
                     out_features=num_classes,
                     dropout_prob=config["dropout_rate"],
                 ).to(device)
-                '''
+                """
                 continue
             else:
                 model = Centroid(
@@ -92,7 +93,18 @@ def exec_arena(
             )
 
 
-ENCODINGS = ["bundle", "sequence", "ngram", "hashmap", "flocet", "density", "random", "sinusoid","generic","fractional"]
+ENCODINGS = [
+    "bundle",
+    "sequence",
+    "ngram",
+    "hashmap",
+    "flocet",
+    "density",
+    "random",
+    "sinusoid",
+    "generic",
+    "fractional",
+]
 
 configurations = methods_selection.configs
 

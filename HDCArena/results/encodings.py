@@ -21,9 +21,7 @@ embeddings_order = [
     "fractional",
 ]
 
-df = pd.read_csv(
-    "survey_results/encodings_uci"
-)
+df = pd.read_csv("survey_results/encodings_uci")
 
 for i in df["encoding"].unique():
     variance_accuracy_by_dimension_and_method = (
@@ -40,5 +38,3 @@ pivot_df = pivot_df.reindex(columns=embeddings_order)
 latex_table = pivot_df.to_latex()
 
 print(latex_table)
-
-

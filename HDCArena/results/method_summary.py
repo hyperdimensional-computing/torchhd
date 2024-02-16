@@ -3,9 +3,7 @@ import pandas as pd
 
 # colors: ['333436', '005CAB', 'E31B23', '78468E', '1BA13D', 'EA8810', '898b8c', '69A7DD', 'F87272', 'B186D1', '7EC095', 'F4BF70']
 
-df = pd.read_csv(
-    "survey_results/semi_uci"
-)
+df = pd.read_csv("survey_results/semi_uci")
 
 for i in df["method"].unique():
     print("Method name: " + i)

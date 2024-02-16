@@ -379,7 +379,6 @@ class UCIClassificationBenchmark:
         "Zoo",
     ]
 
-
     # Specify namedtuple format
     class DatasetEntry(NamedTuple):
         name: str

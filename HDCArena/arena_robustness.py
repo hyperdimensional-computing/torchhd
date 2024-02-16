@@ -705,7 +705,7 @@ METHODS = [
     "add",
     "adapt",
     "online",
-    "adjust"
+    "adjust",
     # "adapt_iterative",
     # "online_iterative",
     # "quant_iterative",

@@ -17,9 +17,7 @@ RVFL
 LEHDC
 """
 
-df = pd.read_csv(
-    "survey_results/vanilla_arena_robust_partial"
-)
+df = pd.read_csv("survey_results/vanilla_arena_robust_partial")
 latex = 1
 pand = 0
 # print(df)
