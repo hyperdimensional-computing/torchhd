@@ -414,7 +414,9 @@ class VTBTensor(VSATensor):
         if torch.isclose(magnitude, torch.zeros_like(magnitude), equal_nan=True).any():
             import warnings
 
-            warnings.warn("The norm of a vector is nearly zero, this could indicate a bug.")
+            warnings.warn(
+                "The norm of a vector is nearly zero, this could indicate a bug."
+            )
 
         magnitude = torch.clamp(magnitude, min=eps)
         return self.dot_similarity(others) / magnitude

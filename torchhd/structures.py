@@ -186,12 +186,10 @@ class Multiset:
     @overload
     def __init__(
         self, dimensions: int, vsa: VSAOptions = "MAP", *, device=None, dtype=None
-    ):
-        ...
+    ): ...
 
     @overload
-    def __init__(self, input: VSATensor, *, size=0):
-        ...
+    def __init__(self, input: VSATensor, *, size=0): ...
 
     def __init__(self, dim_or_input: Any, vsa: VSAOptions = "MAP", **kwargs):
         self.size = kwargs.get("size", 0)
@@ -334,12 +332,10 @@ class HashTable:
     @overload
     def __init__(
         self, dimensions: int, vsa: VSAOptions = "MAP", *, device=None, dtype=None
-    ):
-        ...
+    ): ...
 
     @overload
-    def __init__(self, input: VSATensor, *, size=0):
-        ...
+    def __init__(self, input: VSATensor, *, size=0): ...
 
     def __init__(self, dim_or_input: int, vsa: VSAOptions = "MAP", **kwargs):
         self.size = kwargs.get("size", 0)
@@ -501,12 +497,10 @@ class BundleSequence:
     @overload
     def __init__(
         self, dimensions: int, vsa: VSAOptions = "MAP", *, device=None, dtype=None
-    ):
-        ...
+    ): ...
 
     @overload
-    def __init__(self, input: VSATensor, *, size=0):
-        ...
+    def __init__(self, input: VSATensor, *, size=0): ...
 
     def __init__(self, dim_or_input: int, vsa: VSAOptions = "MAP", **kwargs):
         self.size = kwargs.get("size", 0)
@@ -693,12 +687,10 @@ class BindSequence:
     @overload
     def __init__(
         self, dimensions: int, vsa: VSAOptions = "MAP", *, device=None, dtype=None
-    ):
-        ...
+    ): ...
 
     @overload
-    def __init__(self, input: VSATensor, *, size=0):
-        ...
+    def __init__(self, input: VSATensor, *, size=0): ...
 
     def __init__(self, dim_or_input: int, vsa: VSAOptions = "MAP", **kwargs):
         self.size = kwargs.get("size", 0)
@@ -861,12 +853,10 @@ class Graph:
         directed=False,
         device=None,
         dtype=None
-    ):
-        ...
+    ): ...
 
     @overload
-    def __init__(self, input: VSATensor, *, directed=False):
-        ...
+    def __init__(self, input: VSATensor, *, directed=False): ...
 
     def __init__(self, dim_or_input: int, vsa: VSAOptions = "MAP", **kwargs):
         self.is_directed = kwargs.get("directed", False)
