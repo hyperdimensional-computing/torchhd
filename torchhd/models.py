@@ -161,7 +161,6 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, target, alpha1 * input, alpha=lr)
         self.weight.index_add_(0, pred, alpha2 * input, alpha=lr)
 
-    @torch.no_grad()
     def normalize(self, eps=1e-12) -> None:
         """Transforms all the class prototype vectors into unit vectors.
 

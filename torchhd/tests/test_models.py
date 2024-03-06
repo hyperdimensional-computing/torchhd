@@ -82,6 +82,16 @@ class TestCentroid:
         logits = model(samples)
         assert logits.shape == (10, 3)
 
+    def test_add_adapt(self):
+        samples = torch.randn(10, 12)
+        targets = torch.randint(0, 3, (10,))
+
+        model = models.Centroid(12, 3)
+        model.add_adapt(samples, targets)
+
+        logits = model(samples)
+        assert logits.shape == (10, 3)
+
 
 class TestIntRVFL:
     @pytest.mark.parametrize("dtype", torch_dtypes)
