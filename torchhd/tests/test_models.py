@@ -82,6 +82,16 @@ class TestCentroid:
         logits = model(samples)
         assert logits.shape == (10, 3)
 
+    def test_add_adapt(self):
+        samples = torch.randn(10, 12)
+        targets = torch.randint(0, 3, (10,))
+
+        model = models.Centroid(12, 3)
+        model.add_adapt(samples, targets)
+
+        logits = model(samples)
+        assert logits.shape == (10, 3)
+
 
 class TestIntRVFL:
     @pytest.mark.parametrize("dtype", torch_dtypes)
@@ -103,7 +113,9 @@ class TestIntRVFL:
         assert model.weight.device.type == device.type
 
     def test_fit_ridge_regression(self):
-        samples = torch.eye(10, 12)
+        a = torch.randn(10)
+        b = torch.randn(12)
+        samples = torch.outer(a, b)
         targets = torch.arange(10)
 
         model = models.IntRVFL(12, 1245, 10)

@@ -118,7 +118,7 @@ class TestDotSimilarity:
             ).as_subclass(BSCTensor)
 
             res = functional.dot_similarity(hv, hv)
-            exp = torch.tensor([[10, 4], [4, 10]], dtype=torch.long)
+            exp = torch.tensor([[10, 4], [4, 10]], dtype=res.dtype)
             assert torch.all(res == exp).item()
 
         elif vsa == "FHRR":
@@ -339,7 +339,7 @@ class TestCosSimilarity:
             ).as_subclass(BSCTensor)
 
             res = functional.cosine_similarity(hv, hv)
-            exp = torch.tensor([[1, 0.4], [0.4, 1]], dtype=torch.float)
+            exp = torch.tensor([[1, 0.4], [0.4, 1]], dtype=res.dtype)
             assert torch.allclose(res, exp)
 
         elif vsa == "FHRR":
@@ -388,7 +388,7 @@ class TestCosSimilarity:
             ).as_subclass(MAPTensor)
 
             res = functional.cosine_similarity(hv, hv)
-            exp = torch.tensor([[1, -0.4], [-0.4, 1]], dtype=torch.float)
+            exp = torch.tensor([[1, -0.4], [-0.4, 1]], dtype=res.dtype)
             assert torch.allclose(res, exp)
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
@@ -529,7 +529,7 @@ class TestHammingSimilarity:
             ).as_subclass(BSCTensor)
 
             res = functional.hamming_similarity(hv, hv)
-            exp = torch.tensor([[10, 7], [7, 10]], dtype=torch.long)
+            exp = torch.tensor([[10, 7], [7, 10]], dtype=res.dtype)
             assert torch.all(res == exp).item()
 
         elif vsa == "FHRR":

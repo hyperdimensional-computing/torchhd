@@ -74,7 +74,7 @@ class TestEmpty:
         if vsa == "BSC":
             assert emb(idx).dtype == torch.bool
         elif vsa == "MAP" or vsa == "HRR":
-            assert emb(idx).dtype == torch.float
+            assert emb(idx).dtype == torch.get_default_dtype()
         elif vsa == "FHRR":
             assert (
                 emb(idx).dtype == torch.complex64 or emb(idx).dtype == torch.complex32
@@ -142,7 +142,7 @@ class TestIdentity:
         if vsa == "BSC":
             assert emb(idx).dtype == torch.bool
         elif vsa in {"MAP", "HRR", "VTB"}:
-            assert emb(idx).dtype == torch.float
+            assert emb(idx).dtype == torch.get_default_dtype()
         elif vsa == "FHRR":
             assert emb(idx).dtype in {torch.complex64, torch.complex32}
 
@@ -244,7 +244,7 @@ class TestRandom:
         if vsa == "BSC":
             assert emb(idx).dtype == torch.bool
         elif vsa in {"MAP", "HRR", "VTB"}:
-            assert emb(idx).dtype == torch.float
+            assert emb(idx).dtype == torch.get_default_dtype()
         elif vsa == "FHRR":
             assert emb(idx).dtype in {torch.complex64, torch.complex32}
 
@@ -295,7 +295,7 @@ class TestLevel:
         if vsa == "BSC":
             assert emb(idx).dtype == torch.bool
         elif vsa in {"MAP", "HRR", "VTB"}:
-            assert emb(idx).dtype == torch.float
+            assert emb(idx).dtype == torch.get_default_dtype()
         elif vsa == "FHRR":
             assert emb(idx).dtype in {torch.complex64, torch.complex32}
 
@@ -365,7 +365,7 @@ class TestCircular:
         if vsa == "BSC":
             assert emb(angle).dtype == torch.bool
         elif vsa == "MAP":
-            assert emb(angle).dtype == torch.float
+            assert emb(angle).dtype == torch.get_default_dtype()
         elif vsa == "FHRR":
             assert (
                 emb(angle).dtype == torch.complex64
@@ -441,7 +441,7 @@ class TestThermometer:
         if vsa == "BSC":
             assert emb(angle).dtype == torch.bool
         elif vsa == "MAP":
-            assert emb(angle).dtype == torch.float
+            assert emb(angle).dtype == torch.get_default_dtype()
         elif vsa == "FHRR":
             assert (
                 emb(angle).dtype == torch.complex64
@@ -504,7 +504,7 @@ class TestProjection:
         emb = embeddings.Projection(in_features, out_features, vsa=vsa)
         x = torch.randn(1, in_features)
         if vsa == "MAP" or vsa == "HRR":
-            assert emb(x).dtype == torch.float
+            assert emb(x).dtype == torch.get_default_dtype()
         else:
             return
 
@@ -549,7 +549,7 @@ class TestSinusoid:
         emb = embeddings.Sinusoid(in_features, out_features, vsa=vsa)
         x = torch.randn(1, in_features)
         if vsa == "MAP" or vsa == "HRR":
-            assert emb(x).dtype == torch.float
+            assert emb(x).dtype == torch.get_default_dtype()
         else:
             return
 
@@ -611,7 +611,7 @@ class TestDensity:
         if vsa == "BSC":
             assert emb(x).dtype == torch.bool
         elif vsa == "MAP":
-            assert emb(x).dtype == torch.float
+            assert emb(x).dtype == torch.get_default_dtype()
         elif vsa == "FHRR":
             assert emb(x).dtype == torch.complex64 or emb(x).dtype == torch.complex32
         else:
@@ -664,9 +664,9 @@ class TestFractionalPower:
         assert y.shape == (2, dimensions)
 
         if vsa == "HRR":
-            assert y.dtype == torch.float32
+            assert y.dtype == torch.get_default_dtype()
         elif vsa == "FHRR":
-            assert y.dtype == torch.complex64
+            assert fhrr_type_conversion[y.dtype] == torch.get_default_dtype()
         else:
             return
 

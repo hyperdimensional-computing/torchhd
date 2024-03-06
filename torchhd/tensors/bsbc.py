@@ -36,6 +36,7 @@ class BSBCTensor(VSATensor):
 
     Because the vectors are sparse and have a fixed magnitude, we only represent the index of the non-zero value.
     """
+
     block_size: int
     supported_dtypes: Set[torch.dtype] = {
         torch.float32,
