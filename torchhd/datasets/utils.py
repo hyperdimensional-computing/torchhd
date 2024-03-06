@@ -35,8 +35,10 @@ def download_file_from_google_drive(file_id, destination):
     try:
         import gdown
     except ImportError:
-        raise ImportError("Downloading files from Google drive requires gdown to be installed, see: https://github.com/wkentaro/gdown")
-    
+        raise ImportError(
+            "Downloading files from Google drive requires gdown to be installed, see: https://github.com/wkentaro/gdown"
+        )
+
     url = f"https://drive.google.com/uc?id={file_id}"
     gdown.download(url, destination)
 
