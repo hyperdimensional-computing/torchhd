@@ -388,7 +388,7 @@ class TestCosSimilarity:
             ).as_subclass(MAPTensor)
 
             res = functional.cosine_similarity(hv, hv)
-            exp = torch.tensor([[1, -0.4], [-0.4, 1]], dtype=torch.float)
+            exp = torch.tensor([[1, -0.4], [-0.4, 1]], dtype=res.dtype)
             assert torch.allclose(res, exp)
 
     @pytest.mark.parametrize("vsa", vsa_tensors)
