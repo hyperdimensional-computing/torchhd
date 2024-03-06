@@ -113,7 +113,9 @@ class TestIntRVFL:
         assert model.weight.device.type == device.type
 
     def test_fit_ridge_regression(self):
-        samples = torch.eye(10, 12)
+        a = torch.randn(10)
+        b = torch.randn(12)
+        samples = torch.outer(a, b)
         targets = torch.arange(10)
 
         model = models.IntRVFL(12, 1245, 10)
