@@ -25,6 +25,7 @@ import torchhd.functional as functional
 import torchhd.embeddings as embeddings
 import torchhd.structures as structures
 import torchhd.models as models
+import torchhd.classify as classify
 import torchhd.memory as memory
 import torchhd.datasets as datasets
 import torchhd.utils as utils
@@ -92,6 +93,7 @@ __all__ = [
     "embeddings",
     "structures",
     "models",
+    "classify",
     "memory",
     "datasets",
     "utils",

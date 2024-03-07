@@ -29,7 +29,7 @@ setup(
         "openpyxl",
     ],
     packages=find_packages(exclude=["docs", "torchhd.tests", "examples"]),
-    python_requires=">=3.6, <4",
+    python_requires=">=3.8, <4",
     project_urls={
         "Source": "https://github.com/hyperdimensional-computing/torchhd",
         "Documentation": "https://torchhd.readthedocs.io",
