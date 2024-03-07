@@ -42,6 +42,7 @@ __all__ = [
     "Vanilla",
     "AdaptHD",
     "OnlineHD",
+    "NeuralHD",
     "DistHD",
 ]
 
