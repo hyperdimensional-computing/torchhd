@@ -241,7 +241,7 @@ class DistHD(Classifier):
         n_dimensions: int,
         n_classes: int,
         *,
-        n_regen:int = 20,
+        n_regen: int = 20,
         regen_rate: float = 0.04,
         alpha: float = 0.5,
         beta: float = 1,
@@ -269,7 +269,7 @@ class DistHD(Classifier):
         self.model = Centroid(n_dimensions, n_classes, device=device, dtype=dtype)
 
     def fit(self, samples: Tensor, labels: LongTensor) -> Self:
-        
+
         n_regen_dims = math.ceil(self.regen_rate * self.n_dimensions)
 
         loader = DataLoader(
@@ -285,13 +285,13 @@ class DistHD(Classifier):
             scores = 0
             for samples, labels in loader:
                 scores += self.regen_score(samples, labels)
-            
+
             regen_dims = torch.topk(scores, n_regen_dims, largest=False).indices
-            self.model.weight.data[ : , regen_dims].zero_()
+            self.model.weight.data[:, regen_dims].zero_()
             self.encoder.weight.data[regen_dims, :].normal_()
 
         return self
-    
+
     def regen_score(self, samples, labels):
         scores = self(samples)
         top2_preds = torch.topk(scores, k=2).indices
@@ -304,20 +304,27 @@ class DistHD(Classifier):
         pred1 = pred1[wrong]
 
         weight = F.normalize(self.model.weight, dim=1)
-        
+
         # partial correct
         partial = pred2 == labels
         dist2corr = torch.abs(weight[labels[partial]] - samples[partial])
         dist2incorr = torch.abs(weight[pred1[partial]] - samples[partial])
-        partial_dist = torch.sum((self.beta * dist2incorr - self.alpha * dist2corr), dim=0) 
-        
+        partial_dist = torch.sum(
+            (self.beta * dist2incorr - self.alpha * dist2corr), dim=0
+        )
+
         # completely incorrect
         complete = pred2 != labels
         dist2corr = torch.abs(weight[labels[complete]] - samples[complete])
         dist2incorr1 = torch.abs(weight[pred1[complete]] - samples[complete])
         dist2incorr2 = torch.abs(weight[pred2[complete]] - samples[complete])
-        complete_dist = torch.sum((self.beta * dist2incorr1 + self.theta * dist2incorr2 - self.alpha * dist2corr), dim=0)   
+        complete_dist = torch.sum(
+            (
+                self.beta * dist2incorr1
+                + self.theta * dist2incorr2
+                - self.alpha * dist2corr
+            ),
+            dim=0,
+        )
 
         return 0.5 * partial_dist + complete_dist
-
-
