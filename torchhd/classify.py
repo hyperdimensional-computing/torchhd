@@ -46,8 +46,7 @@ __all__ = [
     "DistHD",
     "CompHD",
     "SparseHD",
-    "QuantHD"
-    "LeHDC",
+    "QuantHD" "LeHDC",
 ]
 
 
@@ -56,13 +55,13 @@ class Classifier(nn.Module):
     model: Callable[[Tensor], Tensor]
 
     def __init__(
-            self,
-            n_features: int,
-            n_dimensions: int,
-            n_classes: int,
-            *,
-            device: torch.device = None,
-            dtype: torch.dtype = None
+        self,
+        n_features: int,
+        n_dimensions: int,
+        n_classes: int,
+        *,
+        device: torch.device = None,
+        dtype: torch.dtype = None
     ) -> None:
         super().__init__()
 
@@ -92,17 +91,17 @@ class Vanilla(Classifier):
     model: Centroid
 
     def __init__(
-            self,
-            n_features: int,
-            n_dimensions: int,
-            n_classes: int,
-            *,
-            n_levels: int = 100,
-            min_level: int = -1,
-            max_level: int = 1,
-            batch_size: Union[int, None] = 1024,
-            device: torch.device = None,
-            dtype: torch.dtype = None
+        self,
+        n_features: int,
+        n_dimensions: int,
+        n_classes: int,
+        *,
+        n_levels: int = 100,
+        min_level: int = -1,
+        max_level: int = 1,
+        batch_size: Union[int, None] = 1024,
+        device: torch.device = None,
+        dtype: torch.dtype = None
     ) -> None:
         super().__init__(
             n_features, n_dimensions, n_classes, device=device, dtype=dtype
@@ -143,19 +142,19 @@ class AdaptHD(Classifier):
     model: Centroid
 
     def __init__(
-            self,
-            n_features: int,
-            n_dimensions: int,
-            n_classes: int,
-            *,
-            n_levels: int = 100,
-            min_level: int = -1,
-            max_level: int = 1,
-            epochs: int = 120,
-            lr: float = 0.035,
-            batch_size: Union[int, None] = 1024,
-            device: torch.device = None,
-            dtype: torch.dtype = None
+        self,
+        n_features: int,
+        n_dimensions: int,
+        n_classes: int,
+        *,
+        n_levels: int = 100,
+        min_level: int = -1,
+        max_level: int = 1,
+        epochs: int = 120,
+        lr: float = 0.035,
+        batch_size: Union[int, None] = 1024,
+        device: torch.device = None,
+        dtype: torch.dtype = None
     ) -> None:
         super().__init__(
             n_features, n_dimensions, n_classes, device=device, dtype=dtype
@@ -203,16 +202,16 @@ class OnlineHD(Classifier):
     model: Centroid
 
     def __init__(
-            self,
-            n_features: int,
-            n_dimensions: int,
-            n_classes: int,
-            *,
-            epochs: int = 120,
-            lr: float = 0.035,
-            batch_size: Union[int, None] = 1024,
-            device: torch.device = None,
-            dtype: torch.dtype = None
+        self,
+        n_features: int,
+        n_dimensions: int,
+        n_classes: int,
+        *,
+        epochs: int = 120,
+        lr: float = 0.035,
+        batch_size: Union[int, None] = 1024,
+        device: torch.device = None,
+        dtype: torch.dtype = None
     ) -> None:
         super().__init__(
             n_features, n_dimensions, n_classes, device=device, dtype=dtype
@@ -248,16 +247,16 @@ class RefineHD(Classifier):
     model: Centroid
 
     def __init__(
-            self,
-            n_features: int,
-            n_dimensions: int,
-            n_classes: int,
-            *,
-            epochs: int = 120,
-            lr: float = 0.035,
-            batch_size: Union[int, None] = 1024,
-            device: torch.device = None,
-            dtype: torch.dtype = None
+        self,
+        n_features: int,
+        n_dimensions: int,
+        n_classes: int,
+        *,
+        epochs: int = 120,
+        lr: float = 0.035,
+        batch_size: Union[int, None] = 1024,
+        device: torch.device = None,
+        dtype: torch.dtype = None
     ) -> None:
         super().__init__(
             n_features, n_dimensions, n_classes, device=device, dtype=dtype
@@ -284,7 +283,15 @@ class RefineHD(Classifier):
         for _ in range(self.epochs):
             for samples, labels in data_loader:
                 encoded = self.encoder(samples)
-                self.model.add_adjust(encoded, labels, self.count, self.similarity_sum, self.error_count, self.error_similarity_sum, lr=self.lr)
+                self.model.add_adjust(
+                    encoded,
+                    labels,
+                    self.count,
+                    self.similarity_sum,
+                    self.error_count,
+                    self.error_similarity_sum,
+                    lr=self.lr,
+                )
         return self
 
 
@@ -296,18 +303,18 @@ class NeuralHD(Classifier):
     model: Centroid
 
     def __init__(
-            self,
-            n_features: int,
-            n_dimensions: int,
-            n_classes: int,
-            *,
-            regen_freq: int = 20,
-            regen_rate: float = 0.04,
-            epochs: int = 120,
-            lr: float = 0.37,
-            batch_size: Union[int, None] = 1024,
-            device: torch.device = None,
-            dtype: torch.dtype = None
+        self,
+        n_features: int,
+        n_dimensions: int,
+        n_classes: int,
+        *,
+        regen_freq: int = 20,
+        regen_rate: float = 0.04,
+        epochs: int = 120,
+        lr: float = 0.37,
+        batch_size: Union[int, None] = 1024,
+        device: torch.device = None,
+        dtype: torch.dtype = None
     ) -> None:
         super().__init__(
             n_features, n_dimensions, n_classes, device=device, dtype=dtype
@@ -365,21 +372,21 @@ class DistHD(Classifier):
     model: Centroid
 
     def __init__(
-            self,
-            n_features: int,
-            n_dimensions: int,
-            n_classes: int,
-            *,
-            regen_freq: int = 20,
-            regen_rate: float = 0.04,
-            alpha: float = 0.5,
-            beta: float = 1,
-            theta: float = 0.25,
-            epochs: int = 120,
-            lr: float = 0.05,
-            batch_size: Union[int, None] = 1024,
-            device: torch.device = None,
-            dtype: torch.dtype = None
+        self,
+        n_features: int,
+        n_dimensions: int,
+        n_classes: int,
+        *,
+        regen_freq: int = 20,
+        regen_rate: float = 0.04,
+        alpha: float = 0.5,
+        beta: float = 1,
+        theta: float = 0.25,
+        epochs: int = 120,
+        lr: float = 0.05,
+        batch_size: Union[int, None] = 1024,
+        device: torch.device = None,
+        dtype: torch.dtype = None
     ) -> None:
         super().__init__(
             n_features, n_dimensions, n_classes, device=device, dtype=dtype
@@ -455,9 +462,9 @@ class DistHD(Classifier):
         dist2incorr2 = torch.abs(weight[pred2[complete]] - samples[complete])
         complete_dist = torch.sum(
             (
-                    self.beta * dist2incorr1
-                    + self.theta * dist2incorr2
-                    - self.alpha * dist2corr
+                self.beta * dist2incorr1
+                + self.theta * dist2incorr2
+                - self.alpha * dist2corr
             ),
             dim=0,
         )
@@ -515,19 +522,15 @@ class LeHDC(Classifier):
         n_dimensions, n_classes, device=device, dtype=dtype, requires_grad=True
     )
 
-
     @property
     def device(self) -> torch.device:
         return self.model.weight.device
 
-
     def encoder(self, samples: Tensor) -> Tensor:
         return functional.hash_table(self.keys.weight, self.levels(samples)).sign()
 
-
     def forward(self, samples: Tensor) -> Tensor:
         return self.model(self.dropout(self.encoder(samples)))
-
 
     def fit(self, data_loader: DataLoader) -> Self:
         criterion = torch.nn.CrossEntropyLoss()
@@ -576,15 +579,16 @@ class CompHD(Classifier):
     model: Centroid
 
     def __init__(
-            self,
-            n_features: int,
-            n_dimensions: int,
-            n_classes: int,
-            *,
-            chunks=10,
-            batch_size: Union[int, None] = 1024,
-            device: torch.device = None,
-            dtype: torch.dtype = None):
+        self,
+        n_features: int,
+        n_dimensions: int,
+        n_classes: int,
+        *,
+        chunks=10,
+        batch_size: Union[int, None] = 1024,
+        device: torch.device = None,
+        dtype: torch.dtype = None
+    ):
         self.chunks = chunks
         self.batch_size = batch_size
 
@@ -592,7 +596,9 @@ class CompHD(Classifier):
 
         self.encoder = Sinusoid(n_features, n_dimensions, device=device, dtype=dtype)
         self.model = Centroid(n_dimensions, n_classes, device=device, dtype=dtype)
-        comp_weight = torch.empty((self.model.out_features, int(self.model.in_features / self.chunks)))
+        comp_weight = torch.empty(
+            (self.model.out_features, int(self.model.in_features / self.chunks))
+        )
         self.comp_weight = Parameter(comp_weight)
 
     def fit(self, data_loader: DataLoader) -> Self:
@@ -604,7 +610,12 @@ class CompHD(Classifier):
 
     def comp_compress(self):
         w_re = torch.reshape(
-            self.model.weight, (self.model.out_features, self.chunks, int(self.model.in_features / self.chunks))
+            self.model.weight,
+            (
+                self.model.out_features,
+                self.chunks,
+                int(self.model.in_features / self.chunks),
+            ),
         )
         self.position_vectors = Random(
             self.chunks, int(self.model.in_features / self.chunks)
@@ -623,12 +634,16 @@ class CompHD(Classifier):
         )
 
     def forward_comp(self, enc):
-        return functional.dot_similarity(
-            enc, self.comp_weight
-        )
+        return functional.dot_similarity(enc, self.comp_weight)
 
     def predict(self, samples: Tensor) -> LongTensor:
-        return torch.tensor([torch.argmax(self.forward_comp(self.compress_hv(self.encoder(samples))), dim=-1)])
+        return torch.tensor(
+            [
+                torch.argmax(
+                    self.forward_comp(self.compress_hv(self.encoder(samples))), dim=-1
+                )
+            ]
+        )
 
 
 class SparseHD(Classifier):
@@ -638,18 +653,18 @@ class SparseHD(Classifier):
     model: Centroid
 
     def __init__(
-            self,
-            n_features: int,
-            n_dimensions: int,
-            n_classes: int,
-            epochs: int,
-            lr: float,
-            sparsity: float = 0.1,
-            sparse_type: str = 'dimension',
-            *,
-            batch_size: Union[int, None] = 1024,
-            device: torch.device = None,
-            dtype: torch.dtype = None
+        self,
+        n_features: int,
+        n_dimensions: int,
+        n_classes: int,
+        epochs: int,
+        lr: float,
+        sparsity: float = 0.1,
+        sparse_type: str = "dimension",
+        *,
+        batch_size: Union[int, None] = 1024,
+        device: torch.device = None,
+        dtype: torch.dtype = None
     ) -> None:
         super().__init__(
             n_features, n_dimensions, n_classes, device=device, dtype=dtype
@@ -670,7 +685,9 @@ class SparseHD(Classifier):
         for epoch_idx in range(self.epochs):
             for samples, labels in data_loader:
                 samples_hv = encode(samples)
-                model.add_sparse(samples_hv, labels, self.weight_sparse, lr=lr, iter=iter)
+                model.add_sparse(
+                    samples_hv, labels, self.weight_sparse, lr=lr, iter=iter
+                )
             self.sparsify_model(epoch_idx)
         return self
 
@@ -702,7 +719,9 @@ class SparseHD(Classifier):
             self.weight_sparse.data[:, dropped_indices] = 0
 
     def predict(self, samples: Tensor) -> LongTensor:
-        return torch.argmax(functional.dot_similarity(samples, self.weight_sparse), dim=-1)
+        return torch.argmax(
+            functional.dot_similarity(samples, self.weight_sparse), dim=-1
+        )
 
 
 class QuantHD(Classifier):
@@ -712,18 +731,18 @@ class QuantHD(Classifier):
     model: Centroid
 
     def __init__(
-            self,
-            n_features: int,
-            n_dimensions: int,
-            n_classes: int,
-            epochs: int = 3,
-            epsilon: float = 0.01,
-            lr: float = 1,
-            quant_type: str = 'ternary',
-            *,
-            batch_size: Union[int, None] = 1024,
-            device: torch.device = None,
-            dtype: torch.dtype = None
+        self,
+        n_features: int,
+        n_dimensions: int,
+        n_classes: int,
+        epochs: int = 3,
+        epsilon: float = 0.01,
+        lr: float = 1,
+        quant_type: str = "ternary",
+        *,
+        batch_size: Union[int, None] = 1024,
+        device: torch.device = None,
+        dtype: torch.dtype = None
     ) -> None:
         super().__init__(
             n_features, n_dimensions, n_classes, device=device, dtype=dtype
@@ -769,7 +788,13 @@ class QuantHD(Classifier):
             for samples, labels in data_loader:
                 samples_hv = self.encoder(samples)
                 if epoch_idx < validation_set:
-                    self.model.add_quantize(samples_hv, labels, self.weight_quant, lr=self.lr, model=self.quant_type)
+                    self.model.add_quantize(
+                        samples_hv,
+                        labels,
+                        self.weight_quant,
+                        lr=self.lr,
+                        model=self.quant_type,
+                    )
                 else:
                     if epoch_idx == validation_set:
                         self.binarize_model(self.quant_type)
@@ -787,5 +812,9 @@ class QuantHD(Classifier):
         return self
 
     def predict(self, samples: Tensor) -> LongTensor:
-        return torch.argmax(self.model.quantized_similarity(self.encoder(samples), self.quant_type, self.weight_quant), dim=-1)
-
+        return torch.argmax(
+            self.model.quantized_similarity(
+                self.encoder(samples), self.quant_type, self.weight_quant
+            ),
+            dim=-1,
+        )

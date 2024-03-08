@@ -91,7 +91,6 @@ class Centroid(nn.Module):
         self.weight = Parameter(weight, requires_grad=requires_grad)
         self.reset_parameters()
 
-
     def reset_parameters(self) -> None:
         init.zeros_(self.weight)
 
@@ -163,7 +162,16 @@ class Centroid(nn.Module):
         self.weight.index_add_(0, pred, alpha2 * input, alpha=lr)
 
     @torch.no_grad()
-    def add_adjust(self, input: Tensor, target: Tensor, count: int, similarity_sum: float, error_count: int, error_similarity_sum: float, lr: float = 1.0) -> None:
+    def add_adjust(
+        self,
+        input: Tensor,
+        target: Tensor,
+        count: int,
+        similarity_sum: float,
+        error_count: int,
+        error_similarity_sum: float,
+        lr: float = 1.0,
+    ) -> None:
         logit = self(input)
         predx = torch.topk(logit, 2)
         pred = torch.tensor([predx.indices[0][0]])
@@ -227,7 +235,12 @@ class Centroid(nn.Module):
             return functional.dot_similarity(input, weight_quant)
 
     def add_quantize(
-        self, input: Tensor, target: Tensor, weight_quant, lr: float = 1.0, model="binary"
+        self,
+        input: Tensor,
+        target: Tensor,
+        weight_quant,
+        lr: float = 1.0,
+        model="binary",
     ) -> None:
         logit = self.quantized_similarity(input, model, weight_quant)
         pred = logit.argmax(1)
