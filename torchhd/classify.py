@@ -120,7 +120,7 @@ class Vanilla(Classifier):
     @property
     def device(self) -> torch.device:
         return self.model.weight.device
-    
+
     def encoder(self, samples: Tensor) -> Tensor:
         return functional.hash_table(self.keys.weight, self.levels(samples)).sign()
 
@@ -129,7 +129,7 @@ class Vanilla(Classifier):
         for samples, labels in data_loader:
             samples = samples.to(self.device)
             labels = labels.to(self.device)
-        
+
             encoded = self.encoder(samples)
             self.model.add(encoded, labels)
 
@@ -176,7 +176,7 @@ class AdaptHD(Classifier):
     @property
     def device(self) -> torch.device:
         return self.model.weight.device
-    
+
     def encoder(self, samples: Tensor) -> Tensor:
         return functional.hash_table(self.keys.weight, self.levels(samples)).sign()
 
@@ -186,7 +186,7 @@ class AdaptHD(Classifier):
             for samples, labels in data_loader:
                 samples = samples.to(self.device)
                 labels = labels.to(self.device)
-            
+
                 encoded = self.encoder(samples)
                 self.model.add_adapt(encoded, labels, lr=self.lr)
 
@@ -224,14 +224,14 @@ class OnlineHD(Classifier):
     @property
     def device(self) -> torch.device:
         return self.model.weight.device
-    
+
     def fit(self, data_loader: DataLoader) -> Self:
 
         for _ in range(self.epochs):
             for samples, labels in data_loader:
                 samples = samples.to(self.device)
                 labels = labels.to(self.device)
-            
+
                 encoded = self.encoder(samples)
                 self.model.add_online(encoded, labels, lr=self.lr)
 
@@ -273,7 +273,7 @@ class NeuralHD(Classifier):
     @property
     def device(self) -> torch.device:
         return self.model.weight.device
-    
+
     def fit(self, data_loader: DataLoader) -> Self:
 
         n_regen_dims = math.ceil(self.regen_rate * self.n_dimensions)
@@ -281,7 +281,7 @@ class NeuralHD(Classifier):
         for samples, labels in data_loader:
             samples = samples.to(self.device)
             labels = labels.to(self.device)
-        
+
             encoded = self.encoder(samples)
             self.model.add(encoded, labels)
 
@@ -289,7 +289,7 @@ class NeuralHD(Classifier):
             for samples, labels in data_loader:
                 samples = samples.to(self.device)
                 labels = labels.to(self.device)
-                
+
                 encoded = self.encoder(samples)
                 self.model.add_adapt(encoded, labels, lr=self.lr)
 
@@ -347,7 +347,7 @@ class DistHD(Classifier):
     @property
     def device(self) -> torch.device:
         return self.model.weight.device
-    
+
     def fit(self, data_loader: DataLoader) -> Self:
 
         n_regen_dims = math.ceil(self.regen_rate * self.n_dimensions)
@@ -356,7 +356,7 @@ class DistHD(Classifier):
             for samples, labels in data_loader:
                 samples = samples.to(self.device)
                 labels = labels.to(self.device)
-            
+
                 encoded = self.encoder(samples)
                 self.model.add_online(encoded, labels, lr=self.lr)
 
@@ -424,7 +424,7 @@ class LeHDC(Classifier):
         n_features: int,
         n_dimensions: int,
         n_classes: int,
-        *,        
+        *,
         n_levels: int = 100,
         min_level: int = -1,
         max_level: int = 1,
@@ -455,27 +455,31 @@ class LeHDC(Classifier):
         self.model = Centroid(n_dimensions, n_classes, device=device, dtype=dtype)
         self.dropout = torch.nn.Dropout(dropout_rate)
         # Gradient model accumulates gradients
-        self.grad_model = Centroid(n_dimensions, n_classes, device=device, dtype=dtype, requires_grad=True)
+        self.grad_model = Centroid(
+            n_dimensions, n_classes, device=device, dtype=dtype, requires_grad=True
+        )
         # Regular model is a binarized version of the gradient model
-        self.model = Centroid(n_dimensions, n_classes, device=device, dtype=dtype, requires_grad=True)
+        self.model = Centroid(
+            n_dimensions, n_classes, device=device, dtype=dtype, requires_grad=True
+        )
 
     @property
     def device(self) -> torch.device:
         return self.model.weight.device
-    
+
     def encoder(self, samples: Tensor) -> Tensor:
         return functional.hash_table(self.keys.weight, self.levels(samples)).sign()
 
     def forward(self, samples: Tensor) -> Tensor:
         return self.model(self.dropout(self.encoder(samples)))
-    
+
     def fit(self, data_loader: DataLoader) -> Self:
 
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(
-            self.grad_model.parameters(), 
+            self.grad_model.parameters(),
             lr=self.lr,
-            weight_decay=self.weight_decay, 
+            weight_decay=self.weight_decay,
         )
 
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=2)
@@ -494,13 +498,13 @@ class LeHDC(Classifier):
                 # Zero out all the gradients
                 self.grad_model.zero_grad()
                 self.model.zero_grad()
-                
+
                 loss.backward()
 
                 # The gradient model is updated using the gradients from the binarized model
                 self.grad_model.weight.grad = self.model.weight.grad
                 optimizer.step()
-                
+
                 # Quantize the weights
                 with torch.no_grad():
                     self.model.weight.data = self.grad_model.weight.sign()
@@ -508,4 +512,3 @@ class LeHDC(Classifier):
             scheduler.step(accumulated_loss)
 
         return self
-
