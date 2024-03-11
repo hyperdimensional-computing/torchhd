@@ -86,11 +86,11 @@ class Classifier(nn.Module):
 
     def forward(self, samples: Tensor) -> Tensor:
         """Evaluate the logits of the classifier for the given samples.
-        
+
         Args:
             samples (Tensor): Batch of samples to be classified.
 
-        Returns: 
+        Returns:
             Tensor: Logits of each samples for each class.
 
         """
@@ -98,11 +98,11 @@ class Classifier(nn.Module):
 
     def fit(self, data_loader: DataLoader):
         """Fits the classifier to the provided data.
-        
+
         Args:
             data_loader (DataLoader): Iterable of tuples containing a batch of samples and labels.
 
-        Returns: 
+        Returns:
             self
 
         """
@@ -110,11 +110,11 @@ class Classifier(nn.Module):
 
     def predict(self, samples: Tensor) -> LongTensor:
         """Predict the class of each given sample.
-        
+
         Args:
             samples (Tensor): Batch of samples to be classified.
 
-        Returns: 
+        Returns:
             LongTensor: Index of the predicted class for each sample.
 
         """
@@ -122,12 +122,12 @@ class Classifier(nn.Module):
 
     def accuracy(self, samples: Tensor, labels: LongTensor) -> float:
         """Accuracy in predicting the labels of the samples.
-        
+
         Args:
             samples (Tensor): Batch of samples to be classified.
             labels (LongTensor): Batch of true labels of the samples.
 
-        Returns: 
+        Returns:
             float: The accuracy of predicting the true labels.
 
         """
@@ -137,7 +137,7 @@ class Classifier(nn.Module):
 
 class Vanilla(Classifier):
     r"""Baseline centroid classifier.
-    
+
     Args:
         n_features (int): Size of each input sample.
         n_dimensions (int): The number of hidden dimensions to use.
@@ -149,6 +149,7 @@ class Vanilla(Classifier):
         dtype (``torch.dtype``, optional): the desired data type of the weights. Default: if ``None``, uses ``torch.get_default_dtype()``.
 
     """
+
     model: Centroid
 
     def __init__(
@@ -194,7 +195,7 @@ class Vanilla(Classifier):
 
 class AdaptHD(Classifier):
     r"""Implements `AdaptHD: Adaptive Efficient Training for Brain-Inspired Hyperdimensional Computing <https://ieeexplore.ieee.org/document/8918974>`_.
-    
+
     Args:
         n_features (int): Size of each input sample.
         n_dimensions (int): The number of hidden dimensions to use.
@@ -394,8 +395,12 @@ class RefineHD(Classifier):
                 alpha1 = 1.0 - logits.gather(1, labels.unsqueeze(1))
                 alpha2 = logits.gather(1, pred.unsqueeze(1)) - 1
 
-                self.model.weight.index_add_(0, labels, alpha1 * w * encoded, alpha=self.lr)
-                self.model.weight.index_add_(0, pred, alpha2 * w * encoded, alpha=self.lr)
+                self.model.weight.index_add_(
+                    0, labels, alpha1 * w * encoded, alpha=self.lr
+                )
+                self.model.weight.index_add_(
+                    0, pred, alpha2 * w * encoded, alpha=self.lr
+                )
 
         return self
 
@@ -403,7 +408,7 @@ class RefineHD(Classifier):
 # Adapted from: https://gitlab.com/biaslab/neuralhd
 class NeuralHD(Classifier):
     r"""Implements `Scalable edge-based hyperdimensional learning system with brain-like neural adaptation <https://dl.acm.org/doi/abs/10.1145/3458817.3480958>`_.
-        
+
     Args:
         n_features (int): Size of each input sample.
         n_dimensions (int): The number of hidden dimensions to use.
@@ -487,7 +492,7 @@ class DistHD(Classifier):
         n_classes (int): The number of classes.
         regen_freq (int): The frequency in epochs at which to regenerate hidden dimensions.
         regen_rate (int): The fraction of hidden dimensions to regenerate.
-        alpha (float): Parameter effecting the dimensions to regenerate, see paper for details. 
+        alpha (float): Parameter effecting the dimensions to regenerate, see paper for details.
         beta (float): Parameter effecting the dimensions to regenerate, see paper for details.
         theta (float): Parameter effecting the dimensions to regenerate, see paper for details.
         epochs (int): The number of iteration over the training data.
@@ -599,7 +604,7 @@ class DistHD(Classifier):
 class LeHDC(Classifier):
     r"""Implements `DistHD: A Learner-Aware Dynamic Encoding Method for Hyperdimensional Classification <https://ieeexplore.ieee.org/document/10247876>`_.
 
-        
+
     Args:
         n_features (int): Size of each input sample.
         n_dimensions (int): The number of hidden dimensions to use.
@@ -739,7 +744,7 @@ class CompHD(Classifier):
         *,
         n_levels: int = 100,
         min_level: int = -1,
-        max_level: int = 1,   
+        max_level: int = 1,
         chunks: int = 10,
         device: torch.device = None,
         dtype: torch.dtype = None
@@ -762,25 +767,27 @@ class CompHD(Classifier):
             device=device,
             dtype=dtype,
         )
-        
+
         self.model_count = Centroid(n_dimensions, n_classes, device=device, dtype=dtype)
-        self.model = Centroid(n_dimensions // chunks, n_classes, device=device, dtype=dtype)
+        self.model = Centroid(
+            n_dimensions // chunks, n_classes, device=device, dtype=dtype
+        )
 
         n_chunk_keys = max(self.n_dimensions // self.chunks, self.chunks)
         chunk_keys = torch.from_numpy(scipy.linalg.hadamard(n_chunk_keys))
         chunk_keys = chunk_keys.to(self.device)
-        self.chunk_keys = chunk_keys[:self.chunks, :self.n_dimensions // self.chunks]
+        self.chunk_keys = chunk_keys[: self.chunks, : self.n_dimensions // self.chunks]
 
     def encoder(self, samples: Tensor) -> Tensor:
         return functional.hash_table(self.feat_keys.weight, self.levels(samples)).sign()
-    
+
     def forward(self, samples: Tensor) -> Tensor:
         return self.model(self.compress(self.encoder(samples)))
 
     def compress(self, input):
         shape = (self.chunks, self.n_dimensions // self.chunks)
         return functional.hash_table(self.chunk_keys, torch.reshape(input, shape))
-    
+
     def fit(self, data_loader: DataLoader):
         for samples, labels in data_loader:
             samples = samples.to(self.device)
@@ -802,7 +809,7 @@ class CompHD(Classifier):
 
 class SparseHD(Classifier):
     r"""Implements `SparseHD: Algorithm-Hardware Co-optimization for Efficient High-Dimensional Computing <https://ieeexplore.ieee.org/document/8735551>`_.
-        
+
     Args:
         n_features (int): Size of each input sample.
         n_dimensions (int): The number of hidden dimensions to use.
@@ -829,7 +836,7 @@ class SparseHD(Classifier):
         *,
         n_levels: int = 100,
         min_level: int = -1,
-        max_level: int = 1,   
+        max_level: int = 1,
         epochs: int = 120,
         lr: float = 0.035,
         sparsity: float = 0.1,
@@ -869,9 +876,9 @@ class SparseHD(Classifier):
 
                 encoded = self.encoder(samples)
                 self.model.add_adapt(encoded, labels, lr=self.lr)
-            
+
             self.sparsify()
-        
+
         return self
 
     def sparsify(self) -> None:
@@ -881,18 +888,22 @@ class SparseHD(Classifier):
             max_vals, _ = torch.max(self.model.weight.data, dim=0)
             min_vals, _ = torch.min(self.model.weight.data, dim=0)
             variation = max_vals - min_vals
-            
+
             _, mask = torch.topk(variation, k=s, largest=False, sorted=False)
             self.model.weight.data[:, mask] = 0
-            
+
         if self.sparsity_type == "class":
-            _, mask = torch.topk(self.model.weight.abs(), k=s, dim=1, largest=False, sorted=False)
-            self.model.weight.data.scatter(1, mask, torch.zeros_like(self.model.weight.data))
+            _, mask = torch.topk(
+                self.model.weight.abs(), k=s, dim=1, largest=False, sorted=False
+            )
+            self.model.weight.data.scatter(
+                1, mask, torch.zeros_like(self.model.weight.data)
+            )
 
 
 class QuantHD(Classifier):
     r"""Implements `QuantHD: A Quantization Framework for Hyperdimensional Computing <https://ieeexplore.ieee.org/document/8906150>`_.
-        
+
     Args:
         n_features (int): Size of each input sample.
         n_dimensions (int): The number of hidden dimensions to use.
@@ -917,7 +928,7 @@ class QuantHD(Classifier):
         *,
         n_levels: int = 100,
         min_level: int = -1,
-        max_level: int = 1,   
+        max_level: int = 1,
         epochs: int = 120,
         lr: float = 0.035,
         device: torch.device = None,
@@ -951,8 +962,8 @@ class QuantHD(Classifier):
 
     def forward(self, samples: Tensor) -> Tensor:
         return self.model(self.encoder(samples), dot=True)
-    
-    def add_quantize(self,input: Tensor,target: Tensor) -> None:
+
+    def add_quantize(self, input: Tensor, target: Tensor) -> None:
         logit = self.model(input, dot=True)
         pred = logit.argmax(1)
         is_wrong = target != pred
@@ -972,10 +983,10 @@ class QuantHD(Classifier):
         for samples, labels in data_loader:
             samples = samples.to(self.device)
             labels = labels.to(self.device)
-            
+
             samples_hv = self.encoder(samples)
             self.model_count.add(samples_hv, labels)
-        
+
         self.binarize()
 
         for _ in range(1, self.epochs):
