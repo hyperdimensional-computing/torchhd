@@ -6,9 +6,10 @@ torchhd.classifiers
 .. currentmodule:: torchhd.classifiers
 
 .. autosummary::
+    :nosignatures:
     :toctree: generated/
-    :template: class.rst
-
+    :template: class_classifier.rst
+    
     Classifier
     Vanilla
     AdaptHD
@@ -16,7 +17,8 @@ torchhd.classifiers
     RefineHD
     NeuralHD
     DistHD
-    LeHDC
     CompHD
     SparseHD
     QuantHD
+    LeHDC
+    IntRVFL
