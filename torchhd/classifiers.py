@@ -140,7 +140,7 @@ class Classifier(nn.Module):
         for samples, labels in data_loader:
             samples = samples.to(self.device)
             labels = labels.to(self.device)
-            
+
             predictions = self.predict(samples)
             n_correct += torch.sum(predictions == labels, dtype=torch.long).item()
             n_total += predictions.numel()
@@ -323,7 +323,7 @@ class OnlineHD(Classifier):
                 self.model.add_online(encoded, labels, lr=self.lr)
 
         return self
-    
+
 
 # Adapted from: https://gitlab.com/biaslab/neuralhd
 class NeuralHD(Classifier):
@@ -503,7 +503,7 @@ class DistHD(Classifier):
 
         # Partial correct
         partial = pred2 == labels
-                
+
         dist2corr = torch.abs(weight[labels[partial]] - encoded[partial])
         dist2incorr = torch.abs(weight[pred1[partial]] - encoded[partial])
         partial_dist = torch.sum(

@@ -32,15 +32,16 @@ num_classes = len(train_ds.classes)
 
 std, mean = torch.std_mean(train_ds.data, dim=0, keepdim=False)
 
+
 def transform(sample):
     return (sample - mean) / std
+
 
 train_ds.transform = transform
 test_ds.transform = transform
 
 params = {
-    "Vanilla": {
-    },
+    "Vanilla": {},
     "AdaptHD": {
         "epochs": 10,
     },
@@ -55,8 +56,7 @@ params = {
         "epochs": 10,
         "regen_freq": 5,
     },
-    "CompHD": {
-    },
+    "CompHD": {},
     "SparseHD": {
         "epochs": 10,
     },
@@ -66,16 +66,17 @@ params = {
     "LeHDC": {
         "epochs": 10,
     },
-    "IntRVFL": {
-    },
+    "IntRVFL": {},
 }
 
 for classifier in classifiers:
     print()
     print(classifier)
-    
+
     model_cls = getattr(torchhd.classifiers, classifier)
-    model: torchhd.classifiers.Classifier = model_cls(num_features, DIMENSIONS, num_classes, device=device, **params[classifier])
+    model: torchhd.classifiers.Classifier = model_cls(
+        num_features, DIMENSIONS, num_classes, device=device, **params[classifier]
+    )
 
     model.fit(train_ld)
     accuracy = model.accuracy(test_ld)
