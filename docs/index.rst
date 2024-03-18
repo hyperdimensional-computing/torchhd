@@ -19,6 +19,7 @@ Torchhd is a Python library dedicated to *Hyperdimensional Computing* also known
    embeddings
    structures
    models
+   classifiers
    memory
    datasets
    utils
