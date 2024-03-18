@@ -95,7 +95,7 @@ class Classifier(nn.Module):
             samples (Tensor): Batch of samples to be classified.
 
         Returns:
-            Tensor: Logits of each samples for each class.
+            Tensor: Logits of each sample for each class.
 
         """
         return super().__call__(samples)
@@ -150,6 +150,8 @@ class Classifier(nn.Module):
 
 class Vanilla(Classifier):
     r"""Baseline centroid classifier.
+
+    This classifier uses level-hypervectors to encode the feature values which are then combined using a hash table with random keys.
 
     Args:
         n_features (int): Size of each input sample.
@@ -539,6 +541,7 @@ class LeHDC(Classifier):
         max_level (int, optional): The upper-bound of the range represented by the level-hypervectors.
         epochs (int, optional): The number of iteration over the training data.
         lr (float, optional): The learning rate.
+        patience (int, optional): Number of epochs with no improvement after which learning rate will be reduced.
         weight_decay (float, optional): The rate at which the weights of the model are decayed during training.
         dropout_rate (float, optional): The fraction of hidden dimensions to randomly zero-out.
         device (``torch.device``, optional):  the desired device of the weights. Default: if ``None``, uses the current device for the default tensor type (see ``torch.set_default_tensor_type()``). ``device`` will be the CPU for CPU tensor types and the current CUDA device for CUDA tensor types.
@@ -560,6 +563,7 @@ class LeHDC(Classifier):
         max_level: int = 1,
         epochs: int = 120,
         lr: float = 0.01,
+        patience: int = 2,
         weight_decay: float = 0.003,
         dropout_rate: float = 0.3,
         device: torch.device = None,
@@ -571,6 +575,7 @@ class LeHDC(Classifier):
 
         self.epochs = epochs
         self.lr = lr
+        self.patience = patience
         self.weight_decay = weight_decay
 
         self.keys = Random(n_features, n_dimensions, device=device, dtype=dtype)
@@ -611,7 +616,9 @@ class LeHDC(Classifier):
             weight_decay=self.weight_decay,
         )
 
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=2)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, patience=self.patience
+        )
 
         for _ in trange(self.epochs, desc="fit"):
             accumulated_loss = 0
@@ -711,7 +718,8 @@ class CompHD(Classifier):
 
     def compress(self, input):
         shape = (input.size(0), self.chunks, self.n_dimensions // self.chunks)
-        return functional.hash_table(self.chunk_keys, torch.reshape(input, shape))
+        keys = self.chunk_keys[None, ...].expand(input.size(0), -1, -1)
+        return functional.hash_table(keys, torch.reshape(input, shape))
 
     def fit(self, data_loader: DataLoader):
         for samples, labels in data_loader:
@@ -722,12 +730,7 @@ class CompHD(Classifier):
             self.model_count.add(encoded, labels)
 
         with torch.no_grad():
-            shape = (self.n_classes, self.chunks, self.n_dimensions // self.chunks)
-            weight_chunks = torch.reshape(self.model_count.weight, shape)
-
-            keys = self.chunk_keys[None, ...].expand(self.n_classes, -1, -1)
-            comp_weights = functional.hash_table(keys, weight_chunks)
-            self.model.weight.data = comp_weights
+            self.model.weight.data = self.compress(self.model_count.weight)
 
         return self
 

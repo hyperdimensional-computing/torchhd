@@ -14,7 +14,6 @@ torchhd.classifiers
     Vanilla
     AdaptHD
     OnlineHD
-    RefineHD
     NeuralHD
     DistHD
     CompHD
