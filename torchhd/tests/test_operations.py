@@ -220,11 +220,11 @@ class TestNormalize:
 
         if vsa == "hrr" or vsa == "vtb":
             norm = torch.norm(res, p=2, dim=-1)
-            assert torch.allclose(norm, torch.ones_like(norm)) 
+            assert torch.allclose(norm, torch.ones_like(norm))
 
         if vsa == "fhrr":
             norm = torch.norm(res, p=2, dim=-1)
-            assert torch.allclose(norm, torch.full_like(norm, math.sqrt(900))) 
+            assert torch.allclose(norm, torch.full_like(norm, math.sqrt(900)))
             assert torch.allclose(res.angle(), bundle.angle())
 
     def test_device(self):

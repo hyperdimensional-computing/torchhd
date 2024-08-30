@@ -425,7 +425,7 @@ class BSCTensor(VSATensor):
 
         """
         return super().roll(shifts=shifts, dims=-1)
-    
+
     def normalize(self) -> "BSCTensor":
         r"""Normalize the hypervector.
 

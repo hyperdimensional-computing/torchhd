@@ -389,11 +389,11 @@ class VTBTensor(VSATensor):
 
         """
         return torch.roll(self, shifts=shifts, dims=-1)
-        
+
     def normalize(self) -> "VTBTensor":
         r"""Normalize the hypervector.
 
-        The normalization preserves the direction of the hypervector but makes it unit norm. 
+        The normalization preserves the direction of the hypervector but makes it unit norm.
         This means that it is mapped to the closest point on the unit sphere.
 
         Shapes:

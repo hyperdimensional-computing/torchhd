@@ -374,7 +374,7 @@ class FHRRTensor(VSATensor):
 
         """
         return torch.roll(self, shifts=shifts, dims=-1)
-    
+
     def normalize(self) -> "FHRRTensor":
         r"""Normalize the hypervector.
 

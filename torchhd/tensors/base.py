@@ -130,11 +130,11 @@ class VSATensor(Tensor):
     def permute(self, shifts: int = 1) -> "VSATensor":
         """Permute the hypervector"""
         raise NotImplementedError
-    
+
     def normalize(self) -> "VSATensor":
         """Normalize the hypervector"""
         raise NotImplementedError
-    
+
     def dot_similarity(self, others: "VSATensor") -> Tensor:
         """Inner product with other hypervectors"""
         raise NotImplementedError

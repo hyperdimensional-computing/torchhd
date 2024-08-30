@@ -314,7 +314,7 @@ class MAPTensor(VSATensor):
 
         """
         return torch.roll(self, shifts=shifts, dims=-1)
-    
+
     def normalize(self) -> "MAPTensor":
         r"""Normalize the hypervector.
 
