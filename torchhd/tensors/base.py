@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-from typing import List, Set, Any
+from typing import List, Set
 import torch
 from torch import Tensor
 
@@ -130,7 +130,11 @@ class VSATensor(Tensor):
     def permute(self, shifts: int = 1) -> "VSATensor":
         """Permute the hypervector"""
         raise NotImplementedError
-
+    
+    def normalize(self) -> "VSATensor":
+        """Normalize the hypervector"""
+        raise NotImplementedError
+    
     def dot_similarity(self, others: "VSATensor") -> Tensor:
         """Inner product with other hypervectors"""
         raise NotImplementedError

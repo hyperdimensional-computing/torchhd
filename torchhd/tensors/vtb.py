@@ -24,7 +24,7 @@
 from typing import Set
 import torch
 from torch import Tensor
-from torch.fft import fft, ifft
+import torch.nn.functional as F
 import math
 
 from torchhd.tensors.base import VSATensor
@@ -171,7 +171,7 @@ class VTBTensor(VSATensor):
     ) -> "VTBTensor":
         """Creates a set of random independent hypervectors.
 
-        The resulting hypervectors are sampled at random from a normal with mean 0 and standard deviation 1/dimensions.
+        The resulting hypervectors are sampled uniformly at random from the (dimensions - 1)-unit sphere.
 
         Args:
             num_vectors (int): the number of hypervectors to generate.
@@ -208,9 +208,8 @@ class VTBTensor(VSATensor):
             raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
         size = (num_vectors, dimensions)
-        # Create random unit vector
         result = torch.randn(size, dtype=dtype, device=device, generator=generator)
-        result.div_(result.norm(dim=-1, keepdim=True))
+        result = F.normalize(result, p=2, dim=-1)
 
         result.requires_grad = requires_grad
         return result.as_subclass(cls)
@@ -390,6 +389,29 @@ class VTBTensor(VSATensor):
 
         """
         return torch.roll(self, shifts=shifts, dims=-1)
+        
+    def normalize(self) -> "VTBTensor":
+        r"""Normalize the hypervector.
+
+        The normalization preserves the direction of the hypervector but makes it unit norm. 
+        This means that it is mapped to the closest point on the unit sphere.
+
+        Shapes:
+            - Self: :math:`(*)`
+            - Output: :math:`(*)`
+
+        Examples::
+
+            >>> x = torchhd.VTBTensor.random(4, 9).multibundle()
+            >>> x
+            VTBTensor([-0.3706,  0.4308, -1.3276,  0.1773, -0.3008, -0.9385, -0.4677,
+            0.5111, -0.2048])
+            >>> x.normalize()
+            VTBTensor([-0.1950,  0.2267, -0.6987,  0.0933, -0.1583, -0.4939, -0.2462,
+            0.2690, -0.1078])
+
+        """
+        return F.normalize(self, p=2, dim=-1)
 
     def dot_similarity(self, others: "VTBTensor") -> Tensor:
         """Inner product with other hypervectors"""

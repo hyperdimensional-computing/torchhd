@@ -26,6 +26,7 @@ import math
 import torch
 from torch import LongTensor, FloatTensor, Tensor
 from collections import deque
+import warnings
 
 from torchhd.tensors.base import VSATensor
 from torchhd.tensors.bsc import BSCTensor
@@ -50,6 +51,7 @@ __all__ = [
     "permute",
     "inverse",
     "negative",
+    "normalize",
     "cleanup",
     "create_random_permute",
     "hard_quantize",
@@ -673,6 +675,11 @@ def bundle(input: VSATensor, other: VSATensor) -> VSATensor:
 
         \oplus: \mathcal{H} \times \mathcal{H} \to \mathcal{H}
 
+    .. note::
+
+        This operation does not normalize the resulting hypervectors.
+        Normalized hypervectors can be obtained with :func:`~torchhd.normalize`.
+
     Args:
         input (VSATensor): input hypervector
         other (VSATensor): other input hypervector
@@ -885,12 +892,47 @@ def hard_quantize(input: Tensor):
         tensor([ 1., -1., -1., -1.,  1., -1.])
 
     """
+    warnings.warn(
+        "torchhd.hard_quantize is deprecated, consider using torchhd.normalize instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
     # Make sure that the output tensor has the same dtype and device
     # as the input tensor.
     positive = torch.tensor(1.0, dtype=input.dtype, device=input.device)
     negative = torch.tensor(-1.0, dtype=input.dtype, device=input.device)
 
     return torch.where(input > 0, positive, negative)
+
+
+def normalize(input: VSATensor) -> VSATensor:
+    """Normalize the input hypervectors.
+
+    Args:
+        input (Tensor): input tensor
+
+    Shapes:
+        - Input: :math:`(*)`
+        - Output: :math:`(*)`
+
+    Examples::
+
+        >>> x = torchhd.random(4, 10, "MAP").multibundle()
+        >>> x
+        MAPTensor([ 0.,  0., -2., -2.,  2., -2.,  2.,  2.,  2.,  0.])
+        >>> torchhd.normalize(x)
+        MAPTensor([-1., -1., -1., -1.,  1., -1.,  1.,  1.,  1., -1.])
+
+        >>> x = torchhd.random(4, 10, "HRR").multibundle()
+        >>> x
+        HRRTensor([-0.2999,  0.4686,  0.1797, -0.4830,  0.2718, -0.3663,  0.3079, 0.2558, -1.5157, -0.5196])
+        >>> torchhd.normalize(x)
+        HRRTensor([-0.1601,  0.2501,  0.0959, -0.2578,  0.1451, -0.1955,  0.1643, 0.1365, -0.8089, -0.2773])
+
+    """
+    input = ensure_vsa_tensor(input)
+    return input.normalize()
 
 
 def dot_similarity(input: VSATensor, others: VSATensor, **kwargs) -> VSATensor:
@@ -1036,6 +1078,11 @@ def multiset(input: VSATensor) -> VSATensor:
     .. math::
 
         \bigoplus_{i=0}^{n-1} V_i
+
+    .. note::
+
+        This operation does not normalize the resulting or intermediate hypervectors.
+        Normalized hypervectors can be obtained with :func:`~torchhd.normalize`.
 
     Args:
         input (VSATensor): input hypervector tensor

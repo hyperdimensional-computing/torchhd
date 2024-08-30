@@ -34,6 +34,7 @@ Operations
     permute
     inverse
     negative
+    normalize
     cleanup
     randsel
     multirandsel

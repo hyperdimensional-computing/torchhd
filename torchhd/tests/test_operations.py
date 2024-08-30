@@ -22,6 +22,7 @@
 # SOFTWARE.
 #
 import pytest
+import math
 import torch
 import torchhd
 from torchhd import functional
@@ -187,6 +188,55 @@ class TestPermute:
         assert res.dim() == 1
         assert res.size(0) == 100
         assert torch.all((hv == -1) | (hv == 1)).item(), "values are either -1 or +1"
+        assert res.device.type == device.type
+
+
+class TestNormalize:
+    @pytest.mark.parametrize("vsa", vsa_tensors)
+    @pytest.mark.parametrize("dtype", torch_dtypes)
+    def test_value(self, vsa, dtype):
+        if not supported_dtype(dtype, vsa):
+            return
+
+        if vsa == "BSBC":
+            hv = functional.random(12, 900, vsa, dtype=dtype, block_size=1024)
+        else:
+            hv = functional.random(12, 900, vsa, dtype=dtype)
+
+        bundle = functional.multibundle(hv)
+        res = functional.normalize(bundle)
+
+        assert res.dtype == hv.dtype
+        assert res.dim() == 1
+        assert res.size(0) == 900
+
+        if vsa == "BSBC" or vsa == "BSC":
+            assert torch.all(bundle == res), "all elements must be the same"
+
+        if vsa == "MAP":
+            assert torch.all(
+                (res == -1) | (res == 1)
+            ).item(), "values are either -1 or +1"
+
+        if vsa == "hrr" or vsa == "vtb":
+            norm = torch.norm(res, p=2, dim=-1)
+            assert torch.allclose(norm, torch.ones_like(norm)) 
+
+        if vsa == "fhrr":
+            norm = torch.norm(res, p=2, dim=-1)
+            assert torch.allclose(norm, torch.full_like(norm, math.sqrt(900))) 
+            assert torch.allclose(res.angle(), bundle.angle())
+
+    def test_device(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        hv = functional.random(4, 100, device=device).multibundle()
+        res = functional.normalize(hv)
+
+        assert res.dtype == hv.dtype
+        assert res.dim() == 1
+        assert res.size(0) == 100
+        assert torch.all((res == -1) | (res == 1)).item(), "values are either -1 or +1"
         assert res.device.type == device.type
 
 

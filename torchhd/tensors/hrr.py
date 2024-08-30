@@ -25,6 +25,7 @@ from typing import Set
 import torch
 from torch import Tensor
 from torch.fft import fft, ifft
+import torch.nn.functional as F
 import math
 
 from torchhd.tensors.base import VSATensor
@@ -155,7 +156,7 @@ class HRRTensor(VSATensor):
     ) -> "HRRTensor":
         """Creates a set of random independent hypervectors.
 
-        The resulting hypervectors are sampled at random from a normal with mean 0 and standard deviation 1/dimensions.
+        The resulting hypervectors are sampled uniformly at random from the (dimensions - 1)-unit sphere.
 
         Args:
             num_vectors (int): the number of hypervectors to generate.
@@ -186,8 +187,8 @@ class HRRTensor(VSATensor):
             raise ValueError(f"{name} vectors must be one of dtype {options}.")
 
         size = (num_vectors, dimensions)
-        result = torch.empty(size, dtype=dtype, device=device)
-        result.normal_(0, 1.0 / math.sqrt(dimensions), generator=generator)
+        result = torch.randn(size, dtype=dtype, device=device, generator=generator)
+        result = F.normalize(result, p=2, dim=-1)
 
         result.requires_grad = requires_grad
         return result.as_subclass(cls)
@@ -361,6 +362,27 @@ class HRRTensor(VSATensor):
 
         """
         return torch.roll(self, shifts=shifts, dims=-1)
+    
+    def normalize(self) -> "HRRTensor":
+        r"""Normalize the hypervector.
+
+        The normalization preserves the direction of the hypervector but makes it unit norm. 
+        This means that it is mapped to the closest point on the unit sphere.
+
+        Shapes:
+            - Self: :math:`(*)`
+            - Output: :math:`(*)`
+
+        Examples::
+
+            >>> x = torchhd.HRRTensor.random(4, 6).multibundle()
+            >>> x
+            HRRTensor([-0.6150,  0.4260,  0.6975,  0.3110,  0.9387,  0.0696])
+            >>> x.normalize()
+            HRRTensor([-0.4317,  0.2990,  0.4897,  0.2184,  0.6590,  0.0489])
+
+        """
+        return F.normalize(self, p=2, dim=-1)
 
     def dot_similarity(self, others: "HRRTensor") -> Tensor:
         """Inner product with other hypervectors"""
