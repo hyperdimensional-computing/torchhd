@@ -121,13 +121,12 @@ class SparseDistributed(nn.Module):
 
         """
         # first dims from query, last dim from value
-        out_shape = (*query.shape[:-1], self.value_dim)
+        out_shape = tuple(query.shape[:-1]) + (self.value_dim,)
 
         if query.dim() == 1:
             query = query.unsqueeze(0)
 
-        # make sure to have at least two dimension for index_add_
-        intermediate_shape = (*query.shape[:-1], self.value_dim)
+        intermediate_shape = tuple(query.shape[:-1]) + (self.value_dim,)
 
         similarity = query @ self.keys.T
         is_active = similarity >= self.threshold
@@ -135,7 +134,7 @@ class SparseDistributed(nn.Module):
         # sparse matrix-vector multiplication
         r_indices, v_indices = is_active.nonzero().T
         read = query.new_zeros(intermediate_shape)
-        read.index_add_(0, r_indices, self.values[v_indices])
+        read = read.index_add(0, r_indices, self.values[v_indices])
         return read.view(out_shape)
 
     @torch.no_grad()
