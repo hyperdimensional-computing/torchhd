@@ -36,24 +36,24 @@ from .utils import (
 
 
 class TestSparseDistributed:
-    # def test_shape(self):
-    #     mem = memory.SparseDistributed(1000, 67, 123)
+    def test_shape(self):
+        mem = memory.SparseDistributed(1000, 67, 123)
 
-    #     keys = torchhd.random(1, 67).squeeze(0)
-    #     values = torchhd.random(1, 123).squeeze(0)
+        keys = torch.randn(1, 67).squeeze(0).sign()
+        values = torch.randn(1, 123).squeeze(0).sign()
 
-    #     mem.write(keys, values)
+        mem.write(keys, values)
 
-    #     read = mem.read(keys).sign()
+        read = mem.read(keys).sign()
 
-    #     assert read.shape == values.shape
+        assert read.shape == values.shape
 
-    #     if torch.allclose(read, values):
-    #         pass
-    #     elif torch.allclose(read, torch.zeros_like(values)):
-    #         pass
-    #     else:
-    #         assert False, "must be either the value or zero"
+        if torch.allclose(read, values):
+            pass
+        elif torch.allclose(read, torch.zeros_like(values)):
+            pass
+        else:
+            assert False, "must be either the value or zero"
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -61,8 +61,8 @@ class TestSparseDistributed:
         mem = memory.SparseDistributed(1000, 35, 74, kappa=3)
         mem = mem.to(device)
 
-        keys = torchhd.random(5, 35, device=device)
-        values = torchhd.random(5, 74, device=device)
+        keys = torch.randn(5, 35, device=device).sign()
+        values = torch.randn(5, 74, device=device).sign()
 
         mem.write(keys, values)
 
