@@ -134,13 +134,8 @@ class SparseDistributed(nn.Module):
         # Sparse matrix-vector multiplication.
         to_indices, from_indices = is_active.nonzero().T
 
-        # Try to fix heap memory error on Windows:
-        to_indices = to_indices.contiguous()
-        from_indices = from_indices.contiguous()
-        read_values = self.values[from_indices].contiguous()
-
         read = torch.zeros(intermediate_shape, dtype=query.dtype, device=query.device)
-        read.index_add_(0, to_indices, read_values)
+        read.index_add_(0, to_indices, self.values[from_indices])
         return read.view(out_shape).as_subclass(functional.MAPTensor)
 
     @torch.no_grad()
@@ -168,13 +163,7 @@ class SparseDistributed(nn.Module):
 
         # Sparse outer product and addition.
         from_indices, to_indices = is_active.nonzero().T
-
-        # Try to fix heap memory error on Windows:
-        from_indices = from_indices.contiguous()
-        to_indices = to_indices.contiguous()
-        write_values = values[from_indices].contiguous()
-
-        self.values.index_add_(0, to_indices, write_values)
+        self.values.index_add_(0, to_indices, values[from_indices])
 
         if self.kappa is not None:
             self.values.clamp_(-self.kappa, self.kappa)
