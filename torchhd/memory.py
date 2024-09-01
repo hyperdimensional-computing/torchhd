@@ -103,10 +103,12 @@ class SparseDistributed(nn.Module):
         self.threshold = key_dim - 2 * radius
         self.kappa = kappa
 
-        keys = functional.random(memory_size, key_dim, dtype=dtype, device=device)
+        # keys = functional.random(memory_size, key_dim, dtype=dtype, device=device)
+        keys = torch.randn(memory_size, key_dim, dtype=dtype, device=device).sign()
         self.keys = nn.Parameter(keys, requires_grad)
 
-        values = functional.empty(memory_size, value_dim, device=device, dtype=dtype)
+        # values = functional.empty(memory_size, value_dim, device=device, dtype=dtype)
+        values = torch.zeros(memory_size, value_dim, device=device, dtype=dtype)
         self.values = nn.Parameter(values, requires_grad)
 
     def read(self, query: Tensor) -> VSATensor:
