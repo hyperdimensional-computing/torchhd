@@ -132,10 +132,15 @@ class SparseDistributed(nn.Module):
         is_active = similarity >= self.threshold
 
         # sparse matrix-vector multiplication
-        # r_indices, v_indices = is_active.nonzero().T
-        # read = query.new_zeros(intermediate_shape)
-        read = torch.zeros(intermediate_shape, device=query.device, dtype=query.dtype)
-        # read.index_add_(0, r_indices, self.values[v_indices])
+        r_indices, v_indices = is_active.nonzero().T
+
+        # Try to fix heap memory error on Windows:
+        r_indices = r_indices.contiguous()
+        v_indices = v_indices.contiguous()
+        read_values = self.values[v_indices].contiguous()
+
+        read = query.new_zeros(intermediate_shape)
+        read.index_add_(0, r_indices, read_values)
         return read.view(out_shape)
 
     @torch.no_grad()
@@ -161,9 +166,15 @@ class SparseDistributed(nn.Module):
         similarity = keys @ self.keys.T
         is_active = similarity >= self.threshold
 
-        # sparse outer product and addition
-        # from_indices, to_indices = is_active.nonzero().T
-        # self.values.index_add_(0, to_indices, values[from_indices])
+        # Sparse outer product and addition.
+        from_indices, to_indices = is_active.nonzero().T
+        
+        # Try to fix heap memory error on Windows:
+        from_indices = from_indices.contiguous()
+        to_indices = to_indices.contiguous()
+        write_values = values[from_indices].contiguous()
+        
+        self.values.index_add_(0, to_indices, write_values)
 
         if self.kappa is not None:
             self.values.clamp_(-self.kappa, self.kappa)
