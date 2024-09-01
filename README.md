@@ -2,8 +2,8 @@
     <a href="https://github.com/hyperdimensional-computing/torchhd/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/badge/license-MIT-orange.svg?style=flat" /></a>
     <a href="https://pypi.org/project/torch-hd/"><img alt="pypi version" src="https://img.shields.io/pypi/v/torch-hd.svg?style=flat&color=orange" /></a>
     <a href="https://anaconda.org/torchhd/torchhd"><img alt="conda version" src="https://img.shields.io/conda/v/torchhd/torchhd?label=conda&style=flat&color=orange" /></a>
-    <a href="https://github.com/hyperdimensional-computing/torchhd/actions/workflows/test.yml?query=branch%3Amain"><img alt="tests status" src="https://img.shields.io/github/actions/workflow/status/hyperdimensional-computing/torchhd/test.yml?branch=main&label=tests&style=flat" />
-    </a><img alt="PRs Welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" />
+    <a href="https://github.com/hyperdimensional-computing/torchhd/actions/workflows/test.yml?query=branch%3Amain"><img alt="tests status" src="https://img.shields.io/github/actions/workflow/status/hyperdimensional-computing/torchhd/test.yml?branch=main&label=tests&style=flat" /></a>
+    <img alt="PRs Welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" />
 </p>
 
 <div align="center">
@@ -14,10 +14,10 @@
 
 # Torchhd
 
-Torchhd is a Python library for *Hyperdimensional Computing* (also known as *Vector Symbolic Architectures*).
+Torchhd is a Python library for _Hyperdimensional Computing_ (also known as _Vector Symbolic Architectures_).
 
-* **Easy-to-use:** Torchhd makes it painless to develop a wide range of Hyperdimensional Computing (HDC) applications and algorithms. For someone new to the field, we provide Pythonic abstractions and examples to get you started fast. For the experienced researchers, we made the library modular by design, giving you endless flexibility to prototype new ideas in no-time.
-* **Performant:** The library is build on top of the high-performance [PyTorch](https://pytorch.org/) library, giving you optimized tensor execution without the headaches. Moreover, PyTorch makes it effortless to accelerate your code on a GPU.
+- **Easy-to-use:** Torchhd makes it painless to develop a wide range of Hyperdimensional Computing (HDC) applications and algorithms. For someone new to the field, we provide Pythonic abstractions and examples to get you started fast. For the experienced researchers, we made the library modular by design, giving you endless flexibility to prototype new ideas in no-time.
+- **Performant:** The library is build on top of the high-performance [PyTorch](https://pytorch.org/) library, giving you optimized tensor execution without the headaches. Moreover, PyTorch makes it effortless to accelerate your code on a GPU.
 
 ## Installation
 
@@ -87,6 +87,7 @@ torchhd.cosine_similarity(usd_of_mex, memory)
 This example is from the paper [What We Mean When We Say "What's the Dollar of Mexico?": Prototypes and Mapping in Concept Space](https://redwood.berkeley.edu/wp-content/uploads/2020/05/kanerva2010what.pdf) by Kanerva. It first creates hypervectors for all the symbols that are used in the computation, i.e., the variables for `country`, `capital`, and `currency` and their values for both countries. These hypervectors are then combined to make a single hypervector for each country using a hash table structure. A hash table encodes key-value pairs as: `k1 * v1 + k2 * v2 + ... + kn * vn`. The hash tables are then bound together to form their combined representation which is finally queried by binding with the Dollar hypervector to obtain the approximate Mexican Peso hypervector. The similarity output shows that the Mexican Peso hypervector is indeed the most similar one.
 
 ## Supported HDC/VSA models
+
 Currently, the library supports the following HDC/VSA models:
 
 - [Multiply-Add-Permute (MAP)](https://torchhd.readthedocs.io/en/stable/generated/torchhd.MAPTensor.html)
@@ -109,8 +110,9 @@ We are always looking for people that want to contribute to the library. If you 
 ### Documentation
 
 To build the documentation locally do the following:
-1. Use `pip install -r docs/requirements.txt` to install the required packages. 
-2. Use `sphinx-build -b html docs build` to generate the html documentation in the `/build` directory. 
+
+1. Use `pip install -r docs/requirements.txt` to install the required packages.
+2. Use `sphinx-build -b html docs build` to generate the html documentation in the `/build` directory.
 
 To create a clean build, remove the `/build` and `/docs/generated` directories.
 
@@ -123,6 +125,7 @@ To create a clean build, remove the `/build` and `/docs/generated` directories.
 ### Running tests
 
 To run the unit tests located in [`torchhd/tests`](https://github.com/hyperdimensional-computing/torchhd/tree/main/torchhd/tests) do the following:
+
 1. Use `pip install -r dev-requirements.txt` to install the required development packages.
 2. Then run the tests using just `pytest`.
 
@@ -133,7 +136,6 @@ Optionally, to measure the code coverage use `coverage run -m --omit="torchhd/te
 This library is [MIT licensed](https://github.com/hyperdimensional-computing/torchhd/blob/main/LICENSE).
 
 To add the license to all source files, first install [`licenseheaders`](https://github.com/johann-petrak/licenseheaders) and then use `licenseheaders -t ./LICENSE -d ./torchhd`.
-
 
 ## Cite
 
