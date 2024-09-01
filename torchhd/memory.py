@@ -141,7 +141,7 @@ class SparseDistributed(nn.Module):
 
         read = torch.zeros(intermediate_shape, dtype=query.dtype, device=query.device)
         read.index_add_(0, to_indices, read_values)
-        return read.view(out_shape)
+        return read.view(out_shape).as_subclass(functional.MAPTensor)
 
     @torch.no_grad()
     def write(self, keys: Tensor, values: Tensor) -> None:
