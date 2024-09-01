@@ -46,14 +46,15 @@ class TestSparseDistributed:
 
         read = mem.read(keys).sign()
 
-        # assert read.shape == values.shape
+        assert read.shape == values.shape
+        assert isinstance(read, MAPTensor)
 
-        # if torch.allclose(read, values):
-        #     pass
-        # elif torch.allclose(read, torch.zeros_like(values)):
-        #     pass
-        # else:
-        #     assert False, "must be either the value or zero"
+        if torch.allclose(read, values):
+            pass
+        elif torch.allclose(read, torch.zeros_like(values)):
+            pass
+        else:
+            assert False, "must be either the value or zero"
 
     def test_device(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -68,8 +69,9 @@ class TestSparseDistributed:
 
         read = mem.read(keys).sign()
 
-        # assert read.device.type == device.type
-        # assert read.shape == values.shape
+        assert read.device.type == device.type
+        assert read.shape == values.shape
+        assert isinstance(read, MAPTensor)
 
 
 class TestHopfieldFn:
