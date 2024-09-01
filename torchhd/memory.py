@@ -168,12 +168,12 @@ class SparseDistributed(nn.Module):
 
         # Sparse outer product and addition.
         from_indices, to_indices = is_active.nonzero().T
-        
+
         # Try to fix heap memory error on Windows:
         from_indices = from_indices.contiguous()
         to_indices = to_indices.contiguous()
         write_values = values[from_indices].contiguous()
-        
+
         self.values.index_add_(0, to_indices, write_values)
 
         if self.kappa is not None:
