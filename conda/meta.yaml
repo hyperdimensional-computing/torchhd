@@ -5,8 +5,7 @@ package:
   version: {{ TORCHHD_VERSION }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ TORCHHD_VERSION }}.tar.gz
-  sha256: {{ TORCHHD_HASH }}
+  path: ../
 
 build:
   noarch: python
