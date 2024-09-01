@@ -133,7 +133,8 @@ class SparseDistributed(nn.Module):
 
         # sparse matrix-vector multiplication
         r_indices, v_indices = is_active.nonzero().T
-        read = query.new_zeros(intermediate_shape)
+        # read = query.new_zeros(intermediate_shape)
+        read = torch.zeros(intermediate_shape, device=query.device, dtype=query.dtype)
         # read.index_add_(0, r_indices, self.values[v_indices])
         return read.view(out_shape)
 
