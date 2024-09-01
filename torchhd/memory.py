@@ -132,7 +132,7 @@ class SparseDistributed(nn.Module):
         is_active = similarity >= self.threshold
 
         # sparse matrix-vector multiplication
-        r_indices, v_indices = is_active.nonzero().T
+        # r_indices, v_indices = is_active.nonzero().T
         # read = query.new_zeros(intermediate_shape)
         read = torch.zeros(intermediate_shape, device=query.device, dtype=query.dtype)
         # read.index_add_(0, r_indices, self.values[v_indices])
@@ -162,7 +162,7 @@ class SparseDistributed(nn.Module):
         is_active = similarity >= self.threshold
 
         # sparse outer product and addition
-        from_indices, to_indices = is_active.nonzero().T
+        # from_indices, to_indices = is_active.nonzero().T
         # self.values.index_add_(0, to_indices, values[from_indices])
 
         if self.kappa is not None:
