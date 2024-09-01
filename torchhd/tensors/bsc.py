@@ -426,6 +426,26 @@ class BSCTensor(VSATensor):
         """
         return super().roll(shifts=shifts, dims=-1)
 
+    def normalize(self) -> "BSCTensor":
+        r"""Normalize the hypervector.
+
+        Each operation on BSC hypervectors ensures it remains normalized, so this returns a copy of self.
+
+        Shapes:
+            - Self: :math:`(*)`
+            - Output: :math:`(*)`
+
+        Examples::
+
+            >>> x = torchhd.BSCTensor.random(4, 6).multibundle()
+            >>> x
+            BSCTensor([ True, False, False, False, False, False])
+            >>> x.normalize()
+            BSCTensor([ True, False, False, False, False, False])
+
+        """
+        return self.clone()
+
     def dot_similarity(self, others: "BSCTensor", *, dtype=None) -> Tensor:
         """Inner product with other hypervectors."""
         device = self.device

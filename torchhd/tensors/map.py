@@ -23,7 +23,6 @@
 #
 import torch
 from torch import Tensor
-import torch.nn.functional as F
 from typing import Set
 
 from torchhd.tensors.base import VSATensor
@@ -38,8 +37,6 @@ class MAPTensor(VSATensor):
     supported_dtypes: Set[torch.dtype] = {
         torch.float32,
         torch.float64,
-        torch.complex64,
-        torch.complex128,
         torch.int8,
         torch.int16,
         torch.int32,
@@ -317,6 +314,30 @@ class MAPTensor(VSATensor):
 
         """
         return torch.roll(self, shifts=shifts, dims=-1)
+
+    def normalize(self) -> "MAPTensor":
+        r"""Normalize the hypervector.
+
+        The normalization sets all positive entries to +1 and all other entries to -1.
+
+        Shapes:
+            - Self: :math:`(*)`
+            - Output: :math:`(*)`
+
+        Examples::
+
+            >>> x = torchhd.MAPTensor.random(4, 6).multibundle()
+            >>> x
+            MAPTensor([-2., -4.,  4.,  0.,  4., -2.])
+            >>> x.normalize()
+            MAPTensor([-1., -1.,  1., -1.,  1., -1.])
+
+        """
+        # Ensure that the output tensor has the same dtype and device as the self tensor.
+        positive = torch.tensor(1.0, dtype=self.dtype, device=self.device)
+        negative = torch.tensor(-1.0, dtype=self.dtype, device=self.device)
+
+        return torch.where(self > 0, positive, negative)
 
     def clipping(self, kappa) -> "MAPTensor":
         r"""Performs the clipping function that clips the lower and upper values.

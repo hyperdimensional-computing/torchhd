@@ -375,6 +375,29 @@ class FHRRTensor(VSATensor):
         """
         return torch.roll(self, shifts=shifts, dims=-1)
 
+    def normalize(self) -> "FHRRTensor":
+        r"""Normalize the hypervector.
+
+        The normalization preserves the element phase but sets the magnitude to one.
+
+        Shapes:
+            - Self: :math:`(*)`
+            - Output: :math:`(*)`
+
+        Examples::
+
+            >>> x = torchhd.FHRRTensor.random(4, 6).multibundle()
+            >>> x
+            FHRRTensor([ 1.0878+0.9382j,  2.0057-1.5603j, -2.2828-1.4410j,  1.9643-1.8269j,
+            -0.9710-0.0120j, -0.7432+0.6956j])
+            >>> x.normalize()
+            FHRRTensor([ 0.7572+0.6531j,  0.7893-0.6140j, -0.8456-0.5338j,  0.7322-0.6810j,
+            -0.9999-0.0124j, -0.7301+0.6833j])
+
+        """
+        angle = self.angle()
+        return torch.complex(angle.cos(), angle.sin())
+
     def dot_similarity(self, others: "FHRRTensor") -> Tensor:
         """Inner product with other hypervectors"""
         if others.dim() >= 2:

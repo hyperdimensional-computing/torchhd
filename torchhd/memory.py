@@ -121,22 +121,22 @@ class SparseDistributed(nn.Module):
 
         """
         # first dims from query, last dim from value
-        out_shape = (*query.shape[:-1], self.value_dim)
+        out_shape = tuple(query.shape[:-1]) + (self.value_dim,)
 
         if query.dim() == 1:
             query = query.unsqueeze(0)
 
-        # make sure to have at least two dimension for index_add_
-        intermediate_shape = (*query.shape[:-1], self.value_dim)
+        intermediate_shape = tuple(query.shape[:-1]) + (self.value_dim,)
 
         similarity = query @ self.keys.T
         is_active = similarity >= self.threshold
 
-        # sparse matrix-vector multiplication
-        r_indices, v_indices = is_active.nonzero().T
-        read = query.new_zeros(intermediate_shape)
-        read.index_add_(0, r_indices, self.values[v_indices])
-        return read.view(out_shape)
+        # Sparse matrix-vector multiplication.
+        to_indices, from_indices = is_active.nonzero().T
+
+        read = torch.zeros(intermediate_shape, dtype=query.dtype, device=query.device)
+        read.index_add_(0, to_indices, self.values[from_indices])
+        return read.view(out_shape).as_subclass(functional.MAPTensor)
 
     @torch.no_grad()
     def write(self, keys: Tensor, values: Tensor) -> None:
@@ -161,7 +161,7 @@ class SparseDistributed(nn.Module):
         similarity = keys @ self.keys.T
         is_active = similarity >= self.threshold
 
-        # sparse outer product and addition
+        # Sparse outer product and addition.
         from_indices, to_indices = is_active.nonzero().T
         self.values.index_add_(0, to_indices, values[from_indices])
 
