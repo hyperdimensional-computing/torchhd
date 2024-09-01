@@ -131,7 +131,7 @@ class SparseDistributed(nn.Module):
         similarity = query @ self.keys.T
         is_active = similarity >= self.threshold
 
-        # sparse matrix-vector multiplication
+        # Sparse matrix-vector multiplication.
         r_indices, v_indices = is_active.nonzero().T
 
         # Try to fix heap memory error on Windows:
@@ -139,7 +139,7 @@ class SparseDistributed(nn.Module):
         v_indices = v_indices.contiguous()
         read_values = self.values[v_indices].contiguous()
 
-        read = query.new_zeros(intermediate_shape)
+        read = torch.zeros(intermediate_shape, dtype=query.dtype, device=query.device)
         read.index_add_(0, r_indices, read_values)
         return read.view(out_shape)
 
