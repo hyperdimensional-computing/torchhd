@@ -35,6 +35,7 @@ from torchhd.tensors.hrr import HRRTensor
 from torchhd.tensors.fhrr import FHRRTensor
 from torchhd.tensors.bsbc import BSBCTensor
 from torchhd.tensors.vtb import VTBTensor
+from torchhd.tensors.mcr import MCRTensor
 from torchhd.types import VSAOptions
 
 
@@ -90,6 +91,8 @@ def get_vsa_tensor_class(vsa: VSAOptions) -> Type[VSATensor]:
         return BSBCTensor
     elif vsa == "VTB":
         return VTBTensor
+    elif vsa == "MCR":
+        return MCRTensor
 
     raise ValueError(f"Provided VSA model is not supported, specified: {vsa}")
 
@@ -358,7 +361,7 @@ def level(
         device=span_hv.device,
     ).as_subclass(vsa_tensor)
 
-    if vsa == "BSBC":
+    if vsa == "BSBC" or vsa == "MCR":
         hv.block_size = span_hv.block_size
 
     for i in range(num_vectors):
@@ -585,7 +588,7 @@ def circular(
         device=span_hv.device,
     ).as_subclass(vsa_tensor)
 
-    if vsa == "BSBC":
+    if vsa == "BSBC" or vsa == "MCR":
         hv.block_size = span_hv.block_size
 
     mutation_history = deque()

@@ -41,7 +41,7 @@ class Testrandom:
     @pytest.mark.parametrize("d", [84, 16])
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_shape(self, n, d, vsa):
-        if vsa == "BSBC":
+        if vsa == "BSBC" or vsa == "MCR":
             hv = functional.random(n, d, vsa, block_size=64)
 
         elif vsa == "VTB" and d == 84:
@@ -62,7 +62,7 @@ class Testrandom:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        if vsa == "BSBC":
+        if vsa == "BSBC" or vsa == "MCR":
             hv1 = functional.random(20, 10000, vsa, generator=generator, block_size=64)
         else:
             hv1 = functional.random(20, 10000, vsa, generator=generator)
@@ -70,7 +70,7 @@ class Testrandom:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        if vsa == "BSBC":
+        if vsa == "BSBC" or vsa == "MCR":
             hv2 = functional.random(20, 10000, vsa, generator=generator, block_size=64)
         else:
             hv2 = functional.random(20, 10000, vsa, generator=generator)
@@ -81,7 +81,7 @@ class Testrandom:
     def test_value(self, dtype, vsa):
         if not supported_dtype(dtype, vsa):
             with pytest.raises(ValueError):
-                if vsa == "BSBC":
+                if vsa == "BSBC" or vsa == "MCR":
                     functional.random(3, 25, vsa, dtype=dtype, block_size=64)
                 else:
                     functional.random(3, 25, vsa, dtype=dtype)
@@ -91,7 +91,7 @@ class Testrandom:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        if vsa == "BSBC":
+        if vsa == "BSBC" or vsa == "MCR":
             hv = functional.random(
                 8, 25921, vsa, dtype=dtype, generator=generator, block_size=64
             )
@@ -122,7 +122,7 @@ class Testrandom:
             mag = hv.abs()
             assert torch.allclose(mag, torch.tensor(1.0, dtype=mag.dtype))
 
-        elif vsa == "BSBC":
+        elif vsa == "BSBC" or vsa == "MCR":
             assert torch.all((hv < 64) & (hv >= 0))
 
     @pytest.mark.parametrize("sparsity", [0.0, 0.1, 0.756, 1.0])
@@ -155,7 +155,7 @@ class Testrandom:
         generator = torch.Generator()
         generator.manual_seed(seed)
 
-        if vsa == "BSBC":
+        if vsa == "BSBC" or vsa == "MCR":
             hv = functional.random(
                 100, 10000, vsa, dtype=dtype, generator=generator, block_size=1042
             )
@@ -174,7 +174,7 @@ class Testrandom:
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        if vsa == "BSBC":
+        if vsa == "BSBC" or vsa == "MCR":
             hv = functional.random(
                 3, 49, vsa, device=device, dtype=dtype, block_size=64
             )
