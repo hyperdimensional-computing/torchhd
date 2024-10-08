@@ -94,4 +94,5 @@ vsa_tensors = [
     "FHRR",
     "BSBC",
     "VTB",
+    "MCR",
 ]

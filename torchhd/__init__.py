@@ -37,6 +37,7 @@ from torchhd.tensors.hrr import HRRTensor
 from torchhd.tensors.fhrr import FHRRTensor
 from torchhd.tensors.bsbc import BSBCTensor
 from torchhd.tensors.vtb import VTBTensor
+from torchhd.tensors.mcr import MCRTensor
 
 from torchhd.functional import (
     ensure_vsa_tensor,
@@ -90,6 +91,7 @@ __all__ = [
     "FHRRTensor",
     "BSBCTensor",
     "VTBTensor",
+    "MCRTensor",
     "functional",
     "embeddings",
     "structures",

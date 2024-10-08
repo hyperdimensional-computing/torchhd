@@ -41,7 +41,7 @@ class Testempty:
     @pytest.mark.parametrize("d", [84, 16])
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_shape(self, n, d, vsa):
-        if vsa == "BSBC":
+        if vsa == "BSBC" or vsa == "MCR":
             hv = functional.empty(n, d, vsa, block_size=1024)
         elif vsa == "VTB" and d == 84:
             with pytest.raises(ValueError):
@@ -60,14 +60,14 @@ class Testempty:
     def test_value(self, dtype, vsa):
         if not supported_dtype(dtype, vsa):
             with pytest.raises(ValueError):
-                if vsa == "BSBC":
+                if vsa == "BSBC" or vsa == "MCR":
                     functional.empty(3, 25, vsa, dtype=dtype, block_size=1024)
                 else:
                     functional.empty(3, 25, vsa, dtype=dtype)
 
             return
 
-        if vsa == "BSBC":
+        if vsa == "BSBC" or vsa == "MCR":
             hv = functional.empty(8, 25, vsa, dtype=dtype, block_size=1024)
         else:
             hv = functional.empty(8, 25, vsa, dtype=dtype)
@@ -80,7 +80,7 @@ class Testempty:
         if vsa == "BSC":
             assert torch.all((hv == False) | (hv == True)).item()
 
-        elif vsa == "BSBC":
+        elif vsa == "BSBC" or vsa == "MCR":
             assert torch.all((hv >= 0) | (hv < 1024)).item()
 
         else:
@@ -94,7 +94,7 @@ class Testempty:
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        if vsa == "BSBC":
+        if vsa == "BSBC" or vsa == "MCR":
             hv = functional.empty(
                 3, 52, vsa, device=device, dtype=dtype, block_size=1024
             )
