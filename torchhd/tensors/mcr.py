@@ -216,9 +216,13 @@ class MCRTensor(VSATensor):
         result = result.as_subclass(cls)
         result.block_size = block_size
         return result
+    
+    def to_complex_unit(self):
+        angles = 2 * torch.pi * self / self.block_size
+        return torch.polar(torch.ones_like(self, dtype=angles.dtype), angles)
 
-    def bundle(self, other: "MCRTensor", *, generator=None) -> "MCRTensor":
-        r"""Bundle the hypervector with 2d vactor addition.
+    def bundle(self, other: "MCRTensor") -> "MCRTensor":
+        r"""Bundle the hypervector with normalized complex vector addition.
 
         This produces a hypervector maximally similar to both.
 
@@ -226,7 +230,6 @@ class MCRTensor(VSATensor):
 
         Args:
             other (MCR): other input hypervector
-            generator (``torch.Generator``, optional): a pseudorandom number generator for sampling.
 
         Shapes:
             - Self: :math:`(*)`
@@ -245,45 +248,42 @@ class MCRTensor(VSATensor):
 
         """
         assert self.block_size == other.block_size
+
+        self_phasor = self.to_complex_unit()
+        other_phasor = other.to_complex_unit()
         
-        # Building a search table to make the process of finding 
-        # the position of elements in 2d faster.
-        # This search table could be generated just one time (when instantiating the VSA)   
-        search_table = torch.Tensor([[torch.sin(torch.pi*2*i/self.block_size),
-                                      torch.cos(torch.pi*2*i/self.block_size)]
-                                            for i in torch.arange(0,self.block_size,1)])
-        search_table = (search_table*1000).round()/1000 # Round to the nearest thousandth
-        
-        # We changed types because the float numbers cannot be used for indexing. 
-        self_in_2d = search_table[torch.Tensor(self.type(torch.int64))].squeeze() 
-        other_in_2d = search_table[torch.Tensor(other.type(torch.int64))].squeeze()
-        
-        # Adding the vectors of each element and normalizing it 
-        sum_in_2d = self_in_2d + other_in_2d
-        normalized_sum_in_2d = sum_in_2d.swapaxes(-1,-2)/ sum_in_2d.norm(dim=-1) 
+        # Adding the vectors of each element
+        sum_of_phasors = self_phasor + other_phasor
         
         # To define the ultimate number that the summation will land on 
         # we first find the theta of summation then quantize it to block_size
-        angels = torch.arctan2(normalized_sum_in_2d[0],normalized_sum_in_2d[1])
-        result = self.block_size*(angels/(2*torch.pi))
-        
+        angels = torch.angle(sum_of_phasors)
+        result = self.block_size * (angels / (2 * torch.pi))
+
         # In cases where the two elements are inverse of each other
-        # the sum will be (0,0) and it makes the final result to be nan.
+        # the sum will be 0 + 0j and it makes the final result to be nan.
         # We return the average of two operands in such a case.
-        result = result.where(~result.isnan(),(self+other)/2).round()
+        is_zero = torch.isclose(sum_of_phasors, torch.zeros_like(sum_of_phasors))
+        result = torch.where(is_zero, (self + other) / 2, result).round()
         
         return torch.remainder(result, self.block_size).type(self.dtype)
 
     def multibundle(self) -> "MCRTensor":
         """Bundle multiple hypervectors"""
-        elements_in_2d = torch.Tensor([[torch.sin(torch.pi*2*i/self.block_size),torch.cos(torch.pi*2*i/self.block_size)]
-                                    for i in torch.arange(0,self.block_size,1)])
-        self_in_2d = elements_in_2d[torch.Tensor(self.type(torch.int64))]
-        sum_in_2d = self_in_2d.sum(-3)
-        normalized_sum_in_2d = sum_in_2d.swapaxes(-1,-2)/ sum_in_2d.norm(dim=-1) 
-        angels = torch.arctan(normalized_sum_in_2d[0]/normalized_sum_in_2d[1])
-        result = self.block_size*(angels/torch.pi)
-        result = result.where(~result.isnan(),self.sum(-2)/self.size(-2)).round()
+
+        self_phasor = self.to_complex_unit()
+        sum_of_phasors = torch.sum(self_phasor, dim=-2)
+
+        # To define the ultimate number that the summation will land on 
+        # we first find the theta of summation then quantize it to block_size
+        angels = torch.angle(sum_of_phasors)
+        result = self.block_size * (angels / (2 * torch.pi))
+
+        # In cases where the two elements are inverse of each other
+        # the sum will be 0 + 0j and it makes the final result to be nan.
+        # We return the average of two operands in such a case.
+        is_zero = torch.isclose(sum_of_phasors, torch.zeros_like(sum_of_phasors))
+        result = torch.where(is_zero, torch.mean(self, dim=-2, dtype=torch.float), result).round()
         
         return torch.remainder(result, self.block_size).type(self.dtype)
 
