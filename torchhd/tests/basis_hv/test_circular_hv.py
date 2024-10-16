@@ -127,15 +127,18 @@ class Testcircular:
             )
         else:
             hv = functional.circular(8, 1000000, vsa, generator=generator, dtype=dtype)
-        sims = functional.cosine_similarity(hv[0], hv)
-        sims_diff = sims[:-1] - sims[1:]
-        assert torch.all(
-            sims_diff.sign() == torch.tensor([1, 1, 1, 1, -1, -1, -1])
-        ), "second half must get more similar"
+        
+        for i in range(8-1):
+            sims = functional.cosine_similarity(hv[0], hv)
+            sims_diff = sims[:-1] - sims[1:]
+            assert torch.all(
+                sims_diff.sign() == torch.tensor([1, 1, 1, 1, -1, -1, -1])
+            ), f"element #{i}: second half must get more similar"
 
-        assert torch.allclose(
-            sims_diff.abs(), torch.tensor(0.25, dtype=sims_diff.dtype), atol=0.005
-        ), "similarity decreases linearly"
+            assert torch.allclose(
+                sims_diff.abs(), torch.tensor(0.25, dtype=sims_diff.dtype), atol=0.005
+            ), f"element #{i}: similarity decreases linearly"
+            hv = torch.roll(hv,1,0)
 
     @pytest.mark.parametrize("sparsity", [0.0, 0.1, 0.756, 1.0])
     @pytest.mark.parametrize("dtype", torch_dtypes)
