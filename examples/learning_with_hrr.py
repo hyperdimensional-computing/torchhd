@@ -16,6 +16,7 @@ import torchhd
 from torchhd import embeddings, HRRTensor
 import torchhd.tensors
 from scipy.sparse import  vstack, lil_matrix
+import numpy as np
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -36,7 +37,7 @@ def sparse_batch_collate(batch:list):
     data_batch, targets_batch = zip(*batch)
 
     data_batch = vstack(data_batch).tocoo()
-    data_batch = torch.sparse_coo_tensor(data_batch.nonzero(), data_batch.data, data_batch.shape)
+    data_batch = torch.sparse_coo_tensor(np.array(data_batch.nonzero()), data_batch.data, data_batch.shape)
 
     targets_batch = torch.stack(targets_batch)
 
@@ -67,7 +68,7 @@ X_test, Y_test = load_dataset(DATASET_NAME, "test", verbose=True)
 if DATASET_NAME == "Wiki10-31K": # Because of this issue https://github.com/mwydmuch/napkinXC/issues/18
     X_train = lil_matrix(X_train[:,:-1])
     
-N_freatures = X_train.shape[1]
+N_features = X_train.shape[1]
 N_classes   = max(max(classes) for classes in Y_train if classes != []) + 1
 
 train_dataset = multilabel_dataset(X_train,Y_train,N_classes)
@@ -77,7 +78,7 @@ test_dataloader = DataLoader(test_dataset,collate_fn=sparse_batch_collate)
 
 
 print("Traning on \033[1m {} \033[0m. It has {} features, and {} classes."
-      .format(DATASET_NAME,N_freatures,N_classes))
+      .format(DATASET_NAME,N_features,N_classes))
 
 
 # Fully Connected model for the baseline comparision 
@@ -168,10 +169,10 @@ class FCHRR(nn.Module):
     
 
 
-hrr_model = FCHRR(N_freatures,N_classes,DIMENSIONS)
+hrr_model = FCHRR(N_features,N_classes,DIMENSIONS)
 hrr_model = hrr_model.to(device)
 
-baseline_model = FC(N_freatures,N_classes)
+baseline_model = FC(N_features,N_classes)
 baseline_model = baseline_model.to(device)
 
 
