@@ -106,7 +106,7 @@ Initial development of Torchhd was performed by [Mike Heddes](https://www.mikehe
 
 ## Contributing
 
-We are always looking for people that want to contribute to the library. If you are considering contributing for the first time we acknowledgde that this can be daunting, but fear not! You can look through the [open issues](https://github.com/hyperdimensional-computing/torchhd/issues) for inspiration on the kind of problems you can work on. If you are a researcher and want to contribute your work to the library, feel free to open a new issue so we can discuss the best strategy for integrating your work.
+We are always looking for people that want to contribute to the library. If you are considering contributing for the first time we acknowledge that this can be daunting, but fear not! You can look through the [open issues](https://github.com/hyperdimensional-computing/torchhd/issues) for inspiration on the kind of problems you can work on. If you are a researcher and want to contribute your work to the library, feel free to open a new issue so we can discuss the best strategy for integrating your work.
 
 ### Documentation
 
