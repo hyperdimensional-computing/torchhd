@@ -364,7 +364,7 @@ def level(
         device=span_hv.device,
     ).as_subclass(vsa_tensor)
 
-    if vsa == "BSBC" or vsa == "MCR":
+    if vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
         hv.block_size = span_hv.block_size
 
     for i in range(num_vectors):
@@ -591,7 +591,7 @@ def circular(
         device=span_hv.device,
     ).as_subclass(vsa_tensor)
 
-    if vsa == "BSBC" or vsa == "MCR":
+    if vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
         hv.block_size = span_hv.block_size
 
     mutation_history = deque()
