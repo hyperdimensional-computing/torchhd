@@ -36,6 +36,7 @@ from torchhd.tensors.fhrr import FHRRTensor
 from torchhd.tensors.bsbc import BSBCTensor
 from torchhd.tensors.vtb import VTBTensor
 from torchhd.tensors.mcr import MCRTensor
+from torchhd.tensors.cgr import CGRTensor
 from torchhd.types import VSAOptions
 
 
@@ -93,6 +94,8 @@ def get_vsa_tensor_class(vsa: VSAOptions) -> Type[VSATensor]:
         return VTBTensor
     elif vsa == "MCR":
         return MCRTensor
+    elif vsa == "CGR":
+        return CGRTensor
 
     raise ValueError(f"Provided VSA model is not supported, specified: {vsa}")
 
