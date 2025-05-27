@@ -359,7 +359,20 @@ class BaseMCRTensor(VSATensor):
         if kwargs is None:
             kwargs = {}
 
-        block_sizes = set(a.block_size for a in args if hasattr(a, "block_size"))
+        def _parse_container_for_attr(container, attr):
+            s = set()
+            for a in container:
+                if type(a) is tuple or type(a) is list:
+                    s |= _parse_container_for_attr(a, attr)
+                else:
+                    if hasattr(a, attr):
+                        s.add(a.block_size)
+            return s
+
+        # Args is a tuple that can contain other tuples or lists. Parse it
+        # reccursively to find any BaseMCRTensor object
+        block_sizes = _parse_container_for_attr(args, "block_size")
+
         if len(block_sizes) != 1:
             raise RuntimeError(
                 f"Call to {func} must contain exactly one block size, got {list(block_sizes)}"
