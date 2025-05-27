@@ -63,13 +63,30 @@ class CGRTensor(BaseMCRTensor):
         """
         assert self.block_size == other.block_size
 
-        t = torch.stack((self, other), dim=-2)
-        val, _ = torch.mode(t, dim=-2)
+        # Ensure hypervectors are in the same shape, i.e., [..., 1, DIM]
+        t1 = self
+        if len(t1.shape) == 1:
+            t1 = t1.unsqueeze(0)
+        t2 = other
+        if len(t2.shape) == 1:
+            t2 = t2.unsqueeze(0)
+
+        t = torch.stack((t1, t2), dim=-2)
+        val = t.multibundle()
+
+        # Convert shape back to [DIM] if inputs are plain hypervectors
+        need_squeeze = len(self.shape) == 1 and len(other.shape) == 1
+        if need_squeeze:
+            return val.squeeze(0)
+
         return val
 
     def multibundle(self) -> "CGRTensor":
         """Bundle multiple hypervectors"""
 
+        # The use of torch.mode() makes untying deterministic as it always
+        # returns the lowest index among the ties. For example, if there is an
+        # equal number amount of 0s and 1s in a bundle, 0 is returned.
         val, _ = torch.mode(self, dim=-2)
         return val
 
