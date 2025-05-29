@@ -87,8 +87,9 @@ VSA Models
     HRRTensor
     FHRRTensor
     BSBCTensor
-    CGRTensor
+    BaseMCRTensor
     MCRTensor
+    CGRTensor
     VTBTensor
 
 
