@@ -10,7 +10,7 @@ This module consists of the basic hypervector generation functions and operation
 Basis-hypervector sets
 ----------------------------------
 
-.. autosummary:: 
+.. autosummary::
     :toctree: generated/
     :template: function.rst
 
@@ -20,7 +20,7 @@ Basis-hypervector sets
     level
     thermometer
     circular
-    
+
 
 Operations
 --------------------
@@ -51,7 +51,7 @@ Similarities
 .. autosummary::
     :toctree: generated/
     :template: function.rst
-    
+
     cosine_similarity
     dot_similarity
     hamming_similarity
@@ -87,6 +87,7 @@ VSA Models
     HRRTensor
     FHRRTensor
     BSBCTensor
+    CGRTensor
     MCRTensor
     VTBTensor
 
@@ -97,7 +98,7 @@ Utilities
 .. autosummary::
     :toctree: generated/
     :template: function.rst
-    
+
     ensure_vsa_tensor
     map_range
     value_to_index
