@@ -62,8 +62,6 @@ class MCRTensor(BaseMCRTensor):
             MCRTensor([32, 26, 39, 54, 27, 60,  2,  4, 40,  5])
 
         """
-        assert self.block_size == other.block_size
-
         self_phasor = self.to_complex_unit()
         other_phasor = other.to_complex_unit()
 

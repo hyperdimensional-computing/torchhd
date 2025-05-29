@@ -61,8 +61,6 @@ class CGRTensor(BaseMCRTensor):
             CGRTensor([32, 26, 39, 22, 27, 60,  2,  4, 40,  5])
 
         """
-        assert self.block_size == other.block_size
-
         # Ensure hypervectors are in the same shape, i.e., [..., 1, DIM]
         t1 = self
         if t1.dim() == 1:
@@ -83,7 +81,6 @@ class CGRTensor(BaseMCRTensor):
 
     def multibundle(self) -> "CGRTensor":
         """Bundle multiple hypervectors"""
-
         # The use of torch.mode() makes untying deterministic as it always
         # returns the lowest index among the ties. For example, if there is an
         # equal number amount of 0s and 1s in a bundle, 0 is returned.

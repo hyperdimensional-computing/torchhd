@@ -255,7 +255,6 @@ class BaseMCRTensor(VSATensor):
             BaseMCRTensor([ 0, 27, 61, 21,  0, 38,  0, 13, 39, 18])
 
         """
-        assert self.block_size == other.block_size
         return torch.remainder(torch.add(self, other), self.block_size)
 
     def multibind(self) -> "BaseMCRTensor":
