@@ -373,8 +373,8 @@ class BaseMCRTensor(VSATensor):
         block_sizes = _parse_container_for_attr(args, "block_size")
 
         if len(block_sizes) != 1:
-            raise RuntimeError(
-                f"Call to {func} must contain exactly one block size, got {list(block_sizes)}"
+            raise ValueError(
+                f"Call to {func} must contain exactly one block size, got {block_sizes}"
             )
 
         # Call with super to avoid infinite recursion
