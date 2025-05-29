@@ -65,17 +65,17 @@ class CGRTensor(BaseMCRTensor):
 
         # Ensure hypervectors are in the same shape, i.e., [..., 1, DIM]
         t1 = self
-        if len(t1.shape) == 1:
+        if t1.dim() == 1:
             t1 = t1.unsqueeze(0)
         t2 = other
-        if len(t2.shape) == 1:
+        if t2.dim() == 1:
             t2 = t2.unsqueeze(0)
 
         t = torch.stack((t1, t2), dim=-2)
         val = t.multibundle()
 
         # Convert shape back to [DIM] if inputs are plain hypervectors
-        need_squeeze = len(self.shape) == 1 and len(other.shape) == 1
+        need_squeeze = self.dim() == 1 and other.dim() == 1
         if need_squeeze:
             return val.squeeze(0)
 
