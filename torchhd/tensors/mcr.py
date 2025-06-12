@@ -36,6 +36,70 @@ class MCRTensor(BaseMCRTensor):
     Proposed in `Modular Composite Representation <https://link.springer.com/article/10.1007/s12559-013-9243-y>`_, this model works with modular integer vectors.
     """
 
+    @classmethod
+    def empty(
+        cls,
+        num_vectors: int,
+        dimensions: int,
+        *,
+        block_size: int,
+        generator=None,
+        dtype=torch.int64,
+        device=None,
+        requires_grad=False,
+    ) -> "MCRTensor":
+        return super().empty(
+            num_vectors,
+            dimensions,
+            block_size=block_size,
+            generator=generator,
+            dtype=dtype,
+            device=device,
+            requires_grad=requires_grad,
+        )
+
+    @classmethod
+    def identity(
+        cls,
+        num_vectors: int,
+        dimensions: int,
+        *,
+        block_size: int,
+        dtype=torch.int64,
+        device=None,
+        requires_grad=False,
+    ) -> "MCRTensor":
+        return super().identity(
+            num_vectors,
+            dimensions,
+            block_size=block_size,
+            dtype=dtype,
+            device=device,
+            requires_grad=requires_grad,
+        )
+
+    @classmethod
+    def random(
+        cls,
+        num_vectors: int,
+        dimensions: int,
+        *,
+        block_size: int,
+        generator=None,
+        dtype=torch.int64,
+        device=None,
+        requires_grad=False,
+    ) -> "MCRTensor":
+        return super().random(
+            num_vectors,
+            dimensions,
+            block_size=block_size,
+            generator=generator,
+            dtype=dtype,
+            device=device,
+            requires_grad=requires_grad,
+        )
+
     def bundle(self, other: "MCRTensor") -> "MCRTensor":
         r"""Bundle the hypervector with normalized complex vector addition.
 
@@ -99,4 +163,26 @@ class MCRTensor(BaseMCRTensor):
         result = torch.where(is_zero, torch.mean(self, dim=-2, dtype=torch.float), result).round()
 
         return torch.remainder(result, self.block_size).type(self.dtype)
+
+    def bind(self, other: "MCRTensor") -> "MCRTensor":
+        return super().bind(other)
+
+    def multibind(self) -> "MCRTensor":
+        """Bind multiple hypervectors"""
+        return super().multibind()
+
+    def inverse(self) -> "MCRTensor":
+        return super().inverse()
+
+    def permute(self, shifts: int = 1) -> "MCRTensor":
+        return super().permute(shifts=shifts)
+
+    def normalize(self) -> "MCRTensor":
+        return super().normalize()
+
+    def dot_similarity(self, others: "MCRTensor", *, dtype=None) -> Tensor:
+        return super().dot_similarity(others, dtype=dtype)
+
+    def cosine_similarity(self, others: "MCRTensor", *, dtype=None) -> Tensor:
+        return super().cosine_similarity(others, dtype=dtype)
 

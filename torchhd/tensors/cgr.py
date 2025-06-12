@@ -35,6 +35,71 @@ class CGRTensor(BaseMCRTensor):
     First introduced in `Modular Composite Representation <https://link.springer.com/article/10.1007/s12559-013-9243-y>`_ and then better elaborated in `Understanding hyperdimensional computing for parallel single-pass learning <https://proceedings.neurips.cc/paper_files/paper/2022/file/080be5eb7e887319ff30c792c2cbc28c-Paper-Conference.pdf>`_, this model works with modular integer vectors. It works similar to the MCR class, but uses a bundling based on element-wise mode instead of addition of complex numbers.
     """
 
+    @classmethod
+    def empty(
+        cls,
+        num_vectors: int,
+        dimensions: int,
+        *,
+        block_size: int,
+        generator=None,
+        dtype=torch.int64,
+        device=None,
+        requires_grad=False,
+    ) -> "CGRTensor":
+        return super().empty(
+            num_vectors,
+            dimensions,
+            block_size=block_size,
+            generator=generator,
+            dtype=dtype,
+            device=device,
+            requires_grad=requires_grad,
+        )
+
+    @classmethod
+    def identity(
+        cls,
+        num_vectors: int,
+        dimensions: int,
+        *,
+        block_size: int,
+        dtype=torch.int64,
+        device=None,
+        requires_grad=False,
+    ) -> "CGRTensor":
+        return super().identity(
+            num_vectors,
+            dimensions,
+            block_size=block_size,
+            dtype=dtype,
+            device=device,
+            requires_grad=requires_grad,
+        )
+
+    @classmethod
+    def random(
+        cls,
+        num_vectors: int,
+        dimensions: int,
+        *,
+        block_size: int,
+        generator=None,
+        dtype=torch.int64,
+        device=None,
+        requires_grad=False,
+    ) -> "CGRTensor":
+        return super().random(
+            num_vectors,
+            dimensions,
+            block_size=block_size,
+            generator=generator,
+            dtype=dtype,
+            device=device,
+            requires_grad=requires_grad,
+        )
+
+
     def bundle(self, other: "CGRTensor") -> "CGRTensor":
         r"""Bundle the hypervector with majority voting. Ties might be broken at random. However, the expected result is that the tie representing the lowest value wins.
 
@@ -83,7 +148,29 @@ class CGRTensor(BaseMCRTensor):
         """Bundle multiple hypervectors"""
         # The use of torch.mode() makes untying deterministic as it always
         # returns the lowest index among the ties. For example, if there is an
-        # equal number amount of 0s and 1s in a bundle, 0 is returned.
+        # equal amount of 0s and 1s in a bundle, 0 is returned.
         val, _ = torch.mode(self, dim=-2)
         return val
+
+    def bind(self, other: "CGRTensor") -> "CGRTensor":
+        return super().bind(other)
+
+    def multibind(self) -> "CGRTensor":
+        """Bind multiple hypervectors"""
+        return super().multibind()
+
+    def inverse(self) -> "CGRTensor":
+        return super().inverse()
+
+    def permute(self, shifts: int = 1) -> "CGRTensor":
+        return super().permute(shifts=shifts)
+
+    def normalize(self) -> "CGRTensor":
+        return super().normalize()
+
+    def dot_similarity(self, others: "CGRTensor", *, dtype=None) -> Tensor:
+        return super().dot_similarity(others, dtype=dtype)
+
+    def cosine_similarity(self, others: "CGRTensor", *, dtype=None) -> Tensor:
+        return super().cosine_similarity(others, dtype=dtype)
 
