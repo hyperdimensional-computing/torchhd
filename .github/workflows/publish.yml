@@ -60,4 +60,4 @@ jobs:
         conda-build -c pytorch --output-folder ./conda-build ./conda
 
         # Upload noarch version of torchhd to anaconda
-        anaconda upload -u torchhd --label main ./conda-build/*/*.tar.bz2
+        anaconda upload -u torchhd --label main ./conda-build/noarch/torchhd-*.conda
