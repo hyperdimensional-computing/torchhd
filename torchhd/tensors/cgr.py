@@ -26,14 +26,13 @@ from torch import Tensor
 import torch.nn.functional as F
 from typing import Set
 
-from torchhd.tensors.base import VSATensor
 from torchhd.tensors.basemcr import BaseMCRTensor
 
 
-class MCRTensor(BaseMCRTensor):
-    r"""Modular Composite Representation (MCR)
+class CGRTensor(BaseMCRTensor):
+    r"""Cyclic Group Representation (CGR)
 
-    Proposed in `Modular Composite Representation <https://link.springer.com/article/10.1007/s12559-013-9243-y>`_, this model works with modular integer vectors.
+    First introduced in `Modular Composite Representation <https://link.springer.com/article/10.1007/s12559-013-9243-y>`_ and then better elaborated in `Understanding hyperdimensional computing for parallel single-pass learning <https://proceedings.neurips.cc/paper_files/paper/2022/file/080be5eb7e887319ff30c792c2cbc28c-Paper-Conference.pdf>`_, this model works with modular integer vectors. It works similar to the MCR class, but uses a bundling based on element-wise mode instead of addition of complex numbers.
     """
 
     @classmethod
@@ -47,7 +46,7 @@ class MCRTensor(BaseMCRTensor):
         dtype=torch.int64,
         device=None,
         requires_grad=False,
-    ) -> "MCRTensor":
+    ) -> "CGRTensor":
         return super().empty(
             num_vectors,
             dimensions,
@@ -68,7 +67,7 @@ class MCRTensor(BaseMCRTensor):
         dtype=torch.int64,
         device=None,
         requires_grad=False,
-    ) -> "MCRTensor":
+    ) -> "CGRTensor":
         return super().identity(
             num_vectors,
             dimensions,
@@ -89,7 +88,7 @@ class MCRTensor(BaseMCRTensor):
         dtype=torch.int64,
         device=None,
         requires_grad=False,
-    ) -> "MCRTensor":
+    ) -> "CGRTensor":
         return super().random(
             num_vectors,
             dimensions,
@@ -100,15 +99,16 @@ class MCRTensor(BaseMCRTensor):
             requires_grad=requires_grad,
         )
 
-    def bundle(self, other: "MCRTensor") -> "MCRTensor":
-        r"""Bundle the hypervector with normalized complex vector addition.
+
+    def bundle(self, other: "CGRTensor") -> "CGRTensor":
+        r"""Bundle the hypervector with majority voting. Ties might be broken at random. However, the expected result is that the tie representing the lowest value wins.
 
         This produces a hypervector maximally similar to both.
 
         The bundling operation is used to aggregate information into a single hypervector.
 
         Args:
-            other (MCR): other input hypervector
+            other (CGR): other input hypervector
 
         Shapes:
             - Self: :math:`(*)`
@@ -117,72 +117,60 @@ class MCRTensor(BaseMCRTensor):
 
         Examples::
 
-            >>> a, b = torchhd.MCRTensor.random(2, 10, block_size=64)
+            >>> a, b = torchhd.CGRTensor.random(2, 10, block_size=64)
             >>> a
-            MCRTensor([32, 26, 22, 22, 34, 30,  2,  2, 40, 43])
+            CGRTensor([32, 26, 22, 22, 34, 30,  2,  4, 40, 43])
             >>> b
-            MCRTensor([33, 27, 39, 54, 27, 60, 60,  4, 24,  5])
+            CGRTensor([32, 26, 39, 54, 27, 60, 60,  4, 40,  5])
             >>> a.bundle(b)
-            MCRTensor([32, 26, 39, 54, 27, 60,  2,  4, 40,  5])
+            CGRTensor([32, 26, 39, 22, 27, 60,  2,  4, 40,  5])
 
         """
-        self_phasor = self.to_complex_unit()
-        other_phasor = other.to_complex_unit()
+        # Ensure hypervectors are in the same shape, i.e., [..., 1, DIM]
+        t1 = self
+        if t1.dim() == 1:
+            t1 = t1.unsqueeze(0)
+        t2 = other
+        if t2.dim() == 1:
+            t2 = t2.unsqueeze(0)
 
-        # Adding the vectors of each element
-        sum_of_phasors = self_phasor + other_phasor
+        t = torch.stack((t1, t2), dim=-2)
+        val = t.multibundle()
 
-        # To define the ultimate number that the summation will land on
-        # we first find the theta of summation then quantize it to block_size
-        angels = torch.angle(sum_of_phasors)
-        result = self.block_size * (angels / (2 * torch.pi))
+        # Convert shape back to [DIM] if inputs are plain hypervectors
+        need_squeeze = self.dim() == 1 and other.dim() == 1
+        if need_squeeze:
+            return val.squeeze(0)
 
-        # In cases where the two elements are inverse of each other
-        # the sum will be 0 + 0j and it makes the final result to be nan.
-        # We return the average of two operands in such a case.
-        is_zero = torch.isclose(sum_of_phasors, torch.zeros_like(sum_of_phasors))
-        result = torch.where(is_zero, (self + other) / 2, result).round()
+        return val
 
-        return torch.remainder(result, self.block_size).type(self.dtype)
-
-    def multibundle(self) -> "MCRTensor":
+    def multibundle(self) -> "CGRTensor":
         """Bundle multiple hypervectors"""
+        # The use of torch.mode() makes untying deterministic as it always
+        # returns the lowest index among the ties. For example, if there is an
+        # equal amount of 0s and 1s in a bundle, 0 is returned.
+        val, _ = torch.mode(self, dim=-2)
+        return val
 
-        self_phasor = self.to_complex_unit()
-        sum_of_phasors = torch.sum(self_phasor, dim=-2)
-
-        # To define the ultimate number that the summation will land on
-        # we first find the theta of summation then quantize it to block_size
-        angels = torch.angle(sum_of_phasors)
-        result = self.block_size * (angels / (2 * torch.pi))
-
-        # In cases where the two elements are inverse of each other
-        # the sum will be 0 + 0j and it makes the final result to be nan.
-        # We return the average of two operands in such a case.
-        is_zero = torch.isclose(sum_of_phasors, torch.zeros_like(sum_of_phasors))
-        result = torch.where(is_zero, torch.mean(self, dim=-2, dtype=torch.float), result).round()
-
-        return torch.remainder(result, self.block_size).type(self.dtype)
-
-    def bind(self, other: "MCRTensor") -> "MCRTensor":
+    def bind(self, other: "CGRTensor") -> "CGRTensor":
         return super().bind(other)
 
-    def multibind(self) -> "MCRTensor":
+    def multibind(self) -> "CGRTensor":
         """Bind multiple hypervectors"""
         return super().multibind()
 
-    def inverse(self) -> "MCRTensor":
+    def inverse(self) -> "CGRTensor":
         return super().inverse()
 
-    def permute(self, shifts: int = 1) -> "MCRTensor":
+    def permute(self, shifts: int = 1) -> "CGRTensor":
         return super().permute(shifts=shifts)
 
-    def normalize(self) -> "MCRTensor":
+    def normalize(self) -> "CGRTensor":
         return super().normalize()
 
-    def dot_similarity(self, others: "MCRTensor", *, dtype=None) -> Tensor:
+    def dot_similarity(self, others: "CGRTensor", *, dtype=None) -> Tensor:
         return super().dot_similarity(others, dtype=dtype)
 
-    def cosine_similarity(self, others: "MCRTensor", *, dtype=None) -> Tensor:
+    def cosine_similarity(self, others: "CGRTensor", *, dtype=None) -> Tensor:
         return super().cosine_similarity(others, dtype=dtype)
 

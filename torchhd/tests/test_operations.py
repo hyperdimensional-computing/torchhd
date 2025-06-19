@@ -41,7 +41,7 @@ class TestBind:
         if not supported_dtype(dtype, vsa):
             return
 
-        if vsa == "BSBC" or vsa == "MCR":
+        if vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             hv = functional.empty(2, 10, vsa, dtype=dtype, block_size=1024)
         else:
             hv = functional.empty(2, 16, vsa, dtype=dtype)
@@ -56,7 +56,7 @@ class TestBind:
             assert torch.all(res == ifft(torch.mul(fft(hv[0]), fft(hv[1])))).item()
         elif vsa == "BSBC":
             assert torch.all(res == ((hv[0] + hv[1]) % 1024))
-        elif vsa == "MCR":
+        elif vsa == "MCR" or vsa == "CGR":
             assert torch.all(res == ((hv[0] + hv[1]) % 1024))
         assert dtype == res.dtype
 
@@ -80,7 +80,7 @@ class TestBundle:
         if not supported_dtype(dtype, vsa):
             return
 
-        if vsa == "BSBC" or vsa == "MCR":
+        if vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             hv = functional.random(2, 10, vsa, dtype=dtype, block_size=1024)
         else:
             hv = functional.random(2, 16, vsa, dtype=dtype)
@@ -112,7 +112,7 @@ class TestBundle:
                 assert (res[i].item() == hv[0][i].item()) or (
                     res[i].item() == hv[1][i].item()
                 )
-                
+
         if vsa == "MCR":
             x = torch.tensor([1, 3, 5, 7, 9, 0, 2, 4, 6, 8], dtype=dtype)
             x = functional.ensure_vsa_tensor(x,'MCR')
@@ -122,10 +122,24 @@ class TestBundle:
             y.block_size = 10
 
             res = functional.bundle(x, y)
-            
+
             possible_values = [[0,1], [1,2], [3,4], [5], [6,7,1,2], [2,3,7,8], [4],[5,6], [7], [8,9]]
             for i in range(10):
-                assert (res[i].item() in possible_values[i]) 
+                assert (res[i].item() in possible_values[i])
+
+        if vsa == "CGR":
+            x = torch.tensor([1, 3, 5, 7, 9, 0, 2, 4, 6, 8], dtype=dtype)
+            x = functional.ensure_vsa_tensor(x,'CGR')
+            x.block_size = 10
+            y = torch.tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=dtype)
+            y = functional.ensure_vsa_tensor(y,'CGR')
+            y.block_size = 10
+
+            res = functional.bundle(x, y)
+
+            possible_values = [[1,0], [3,1], [5,2], [7,3], [9,4], [0,5], [2,6], [4,7], [6,8], [8,9]]
+            for i in range(10):
+                assert (res[i].item() in possible_values[i])
 
         assert res.dtype == dtype
 
@@ -149,7 +163,7 @@ class TestPermute:
         if not supported_dtype(dtype, vsa):
             return
 
-        if vsa == "BSBC" or vsa == "MCR":
+        if vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             hv = functional.random(2, 100, vsa, dtype=dtype, block_size=1024)
         else:
             hv = functional.random(2, 100, vsa, dtype=dtype)
@@ -185,7 +199,7 @@ class TestPermute:
                 0
             ), "all element must not be the same"
 
-        if  vsa == "BSBC" or vsa == "MCR":
+        if  vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             hv = functional.random(1, 10000, vsa, dtype=dtype, block_size=1024)
         else:
             hv = functional.random(1, 10000, vsa, dtype=dtype)
@@ -214,7 +228,7 @@ class TestNormalize:
         if not supported_dtype(dtype, vsa):
             return
 
-        if vsa == "BSBC" or vsa == "MCR":
+        if vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             hv = functional.random(12, 900, vsa, dtype=dtype, block_size=1024)
         else:
             hv = functional.random(12, 900, vsa, dtype=dtype)
@@ -266,13 +280,13 @@ class TestCleanup:
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        if vsa == "BSBC" or vsa == "MCR":
+        if vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             hv = functional.random(
                 5, 100, vsa, dtype=dtype, generator=generator, block_size=1024
             )
         else:
             hv = functional.random(5, 100, vsa, dtype=dtype, generator=generator)
-        if  vsa == "BSBC" or vsa == "MCR":
+        if  vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             noise = functional.random(
                 1, 100, vsa, dtype=dtype, generator=generator, block_size=1024
             )
@@ -290,13 +304,13 @@ class TestCleanup:
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        if  vsa == "BSBC" or vsa == "MCR":
+        if  vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             hv = functional.random(
                 5, 100, vsa, dtype=dtype, generator=generator, block_size=1024
             )
         else:
             hv = functional.random(5, 100, vsa, dtype=dtype, generator=generator)
-        if  vsa == "BSBC" or vsa == "MCR":
+        if  vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             noise = functional.random(
                 1, 100, vsa, dtype=dtype, generator=generator, block_size=1024
             )
@@ -312,7 +326,7 @@ class TestCleanup:
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        if  vsa == "BSBC" or vsa == "MCR":
+        if  vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             hv = functional.random(
                 5, 100, vsa, dtype=dtype, device=device, block_size=1024
             )
@@ -331,7 +345,7 @@ class TestRandsel:
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        if vsa == "BSBC" or vsa == "MCR":
+        if vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             a, b = functional.random(
                 2, 1000, vsa, dtype=dtype, generator=generator, block_size=1024
             )
@@ -340,7 +354,7 @@ class TestRandsel:
         res = functional.randsel(a, b, p=0, generator=generator)
         assert torch.all(b == res)
 
-        if  vsa == "BSBC" or vsa == "MCR":
+        if  vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             a, b = functional.random(
                 2, 1000, vsa, dtype=dtype, generator=generator, block_size=1024
             )
@@ -349,7 +363,7 @@ class TestRandsel:
         res = functional.randsel(a, b, p=1, generator=generator)
         assert torch.all(a == res)
 
-        if  vsa == "BSBC" or vsa == "MCR":
+        if  vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             a, b = functional.random(
                 2, 1000, vsa, dtype=dtype, generator=generator, block_size=1024
             )
@@ -366,7 +380,7 @@ class TestRandsel:
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        if  vsa == "BSBC" or vsa == "MCR":
+        if  vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             a, b = functional.random(
                 2, 100, vsa, dtype=dtype, device=device, block_size=1024
             )
@@ -389,7 +403,7 @@ class TestMultiRandsel:
         generator = torch.Generator()
         generator.manual_seed(2147483644)
 
-        if vsa == "BSBC" or vsa == "MCR":
+        if vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             x = functional.random(4, 1000, vsa, dtype=dtype, block_size=1024)
         else:
             x = functional.random(4, 1024, vsa, dtype=dtype)
@@ -399,7 +413,7 @@ class TestMultiRandsel:
         )
         assert torch.all(x[2] == res)
 
-        if  vsa == "BSBC" or vsa == "MCR":
+        if  vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             x = functional.random(4, 1000, vsa, dtype=dtype, block_size=1024)
         else:
             x = functional.random(4, 1024, vsa, dtype=dtype)
@@ -408,7 +422,7 @@ class TestMultiRandsel:
         )
         assert torch.all((x[0] == res) | (x[2] == res))
 
-        if  vsa == "BSBC" or vsa == "MCR":
+        if  vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             x = functional.random(4, 1000, vsa, dtype=dtype, block_size=1024)
         else:
             x = functional.random(4, 1024, vsa, dtype=dtype)
@@ -435,7 +449,7 @@ class TestRandomPermute:
         if not supported_dtype(dtype, vsa):
             return
 
-        if vsa == "BSBC" or vsa == "MCR":
+        if vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             x = functional.random(4, 100, vsa, block_size=1024)
         else:
             x = functional.random(4, 100, vsa)

@@ -41,7 +41,7 @@ class Testidentity:
     @pytest.mark.parametrize("d", [84, 16])
     @pytest.mark.parametrize("vsa", vsa_tensors)
     def test_shape(self, n, d, vsa):
-        if vsa == "BSBC" or vsa == "MCR":
+        if vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             hv = functional.identity(n, d, vsa, block_size=1042)
         elif vsa == "VTB" and d == 84:
             with pytest.raises(ValueError):
@@ -61,14 +61,14 @@ class Testidentity:
     def test_value(self, dtype, vsa):
         if not supported_dtype(dtype, vsa):
             with pytest.raises(ValueError):
-                if vsa == "BSBC" or vsa == "MCR":
+                if vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
                     functional.identity(3, 26, vsa, dtype=dtype, block_size=1042)
                 else:
                     functional.identity(3, 25, vsa, dtype=dtype)
 
             return
 
-        if vsa == "BSBC" or vsa == "MCR":
+        if vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             hv = functional.identity(8, 25, vsa, dtype=dtype, block_size=1042)
         else:
             hv = functional.identity(8, 25, vsa, dtype=dtype)
@@ -86,7 +86,7 @@ class Testidentity:
             x = torch.fft.fft(hv)
             assert torch.allclose(x, torch.full_like(x, 1.0))
 
-        elif vsa == "BSBC" or vsa == "MCR":
+        elif vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             assert torch.all(hv == 0)
 
         elif vsa == "VTB":
@@ -103,7 +103,7 @@ class Testidentity:
             return
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        if vsa == "BSBC" or vsa == "MCR":
+        if vsa == "BSBC" or vsa == "MCR" or vsa == "CGR":
             hv = functional.identity(
                 3, 52, vsa, device=device, dtype=dtype, block_size=1042
             )

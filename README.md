@@ -95,6 +95,7 @@ Currently, the library supports the following HDC/VSA models:
 - [Holographic Reduced Representations (HRR)](https://torchhd.readthedocs.io/en/stable/generated/torchhd.HRRTensor.html)
 - [Fourier Holographic Reduced Representations (FHRR)](https://torchhd.readthedocs.io/en/stable/generated/torchhd.FHRRTensor.html)
 - [Binary Sparse Block Codes (B-SBC)](https://torchhd.readthedocs.io/en/stable/generated/torchhd.BSBCTensor.html)
+- [Cyclic Group Representation (CGR)](https://torchhd.readthedocs.io/en/stable/generated/torchhd.CGRTensor.html)
 - [Modular Composite Representation (MCR)](https://torchhd.readthedocs.io/en/stable/generated/torchhd.MCRTensor.html)
 - [Vector-Derived Transformation Binding (VTB)](https://torchhd.readthedocs.io/en/stable/generated/torchhd.VTBTensor.html)
 
