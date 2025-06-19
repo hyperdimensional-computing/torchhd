@@ -44,7 +44,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update && sudo apt-get install openssl curl
-        conda install -y anaconda-client conda-build conda-verify
+        conda install -y python=3.12 anaconda-client conda-build conda-verify
         python -m pip install --upgrade pip
         pip install setuptools wheel build
     - name: Publish distribution to Anaconda
